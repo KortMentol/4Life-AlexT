@@ -51,9 +51,12 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Ссылки</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <button 
+                  onClick={() => alert('Страница находится в разработке')} 
+                  className="text-gray-400 hover:text-white transition-colors text-left"
+                >
                   Политика конфиденциальности
-                </a>
+                </button>
               </li>
               <li>
                 <a 
