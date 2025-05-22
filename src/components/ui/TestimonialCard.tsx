@@ -17,7 +17,7 @@ const TestimonialCard = ({ name, location, text }: TestimonialCardProps) => {
       transition={{ duration: 0.4 }}
     >
       <Quote className="h-8 w-8 text-blue-500 mb-4" />
-      <p className="text-gray-600 mb-6 italic">"{text}"</p>
+      <p className="text-gray-600 mb-6 italic">&quot;{text}&quot;</p>
       <div>
         <p className="font-semibold">{name}</p>
         <p className="text-sm text-gray-500">{location}</p>
