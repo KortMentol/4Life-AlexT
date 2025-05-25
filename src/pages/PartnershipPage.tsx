@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Star, PieChart, Clock, Globe, Zap } from 'lucide-react';
+import { Icons } from '../utils/icons';
+const { Star, PieChart, Clock, Globe, Zap } = Icons;
 import SectionHeading from '../components/ui/SectionHeading';
 import FeatureItem from '../components/ui/FeatureItem';
 import CallToAction from '../components/ui/CallToAction';
@@ -152,7 +153,7 @@ const PartnershipPage = () => {
                   <div className="bg-white p-6 rounded-lg shadow-md h-full">
                     <h3 className="text-lg font-semibold mb-3 text-center">Стройте свою команду</h3>
                     <p className="text-gray-600 text-center">
-                      Приглашайте новых партнеров, обучайте их и помогайте им достигать успеха. Вместе с 'Командой Компетентных Лидеров' мы будем расти.
+                      Приглашайте новых партнеров, обучайте их и помогайте им достигать успеха. Вместе с &apos;Командой Компетентных Лидеров&apos; мы будем расти.
                     </p>
                   </div>
                 </motion.div>
@@ -187,7 +188,7 @@ const PartnershipPage = () => {
                 title="Что Вы получаете, присоединяясь к моей команде?"
               />
               <p className="text-lg text-gray-700 mb-6">
-                Как Ваш спонсор и лидер 'Команды Компетентных Лидеров', я обеспечу Вас:
+                Как Ваш спонсор и лидер &apos;Команды Компетентных Лидеров&apos;, я обеспечу Вас:
               </p>
               <ul className="space-y-4 mb-6">
                 <li className="flex items-start">

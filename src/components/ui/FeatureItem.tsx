@@ -1,15 +1,14 @@
-import { motion } from 'framer-motion';
-import { DivideIcon as LucideIcon } from 'lucide-react';
+import { motion } from "framer-motion";
 
 interface FeatureItemProps {
-  icon: LucideIcon;
+  icon: React.ElementType;
   title: string;
   description: string;
 }
 
 const FeatureItem = ({ icon: Icon, title, description }: FeatureItemProps) => {
   return (
-    <motion.div 
+    <motion.div
       className="flex flex-col items-center text-center"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
