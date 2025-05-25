@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Check, ExternalLink } from 'lucide-react';
+import { Icons } from '../utils/icons';
+const { Check, ExternalLink } = Icons;
 import SectionHeading from '../components/ui/SectionHeading';
 import CallToAction from '../components/ui/CallToAction';
 
