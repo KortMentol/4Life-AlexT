@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Quote } from 'lucide-react';
+import { Icons } from '../../utils/icons';
+const { Quote } = Icons;
 
 interface TestimonialCardProps {
   name: string;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Shield, Menu, X } from 'lucide-react';
+import { Icons } from '../../utils/icons';
+const { Shield, Menu, X } = Icons;
 import { motion } from 'framer-motion';
 
 const Header = () => {

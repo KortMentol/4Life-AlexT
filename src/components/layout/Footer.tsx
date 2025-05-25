@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { Shield, Mail, Phone } from 'lucide-react';
+import { Icons } from '../../utils/icons';
+const { Shield, Mail, Phone } = Icons;
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -50,14 +51,6 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Ссылки</h4>
             <ul className="space-y-2">
-              <li>
-                <button 
-                  onClick={() => alert('Страница находится в разработке')} 
-                  className="text-gray-400 hover:text-white transition-colors text-left"
-                >
-                  Политика конфиденциальности
-                </button>
-              </li>
               <li>
                 <a 
                   href="https://russia.4life.com/12299550" 

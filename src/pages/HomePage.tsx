@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Microscope, Award } from 'lucide-react';
+import { Icons } from '../utils/icons';
+const { Shield, Microscope, Award } = Icons;
 import SectionHeading from '../components/ui/SectionHeading';
 import FeatureItem from '../components/ui/FeatureItem';
 import CallToAction from '../components/ui/CallToAction';

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Star, PieChart, Clock, Globe, Zap } from 'lucide-react';
+import { Icons } from '../utils/icons';
+const { Star, PieChart, Clock, Globe, Zap } = Icons;
 import SectionHeading from '../components/ui/SectionHeading';
 import FeatureItem from '../components/ui/FeatureItem';
 import CallToAction from '../components/ui/CallToAction';

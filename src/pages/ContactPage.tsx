@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone } from "lucide-react";
-import ContactForm from "../components/ui/ContactForm";
+import { Icons } from "../utils/icons";
+const { Mail, MapPin, Phone } = Icons;
 import SectionHeading from "../components/ui/SectionHeading";
 
 const ContactPage = () => {
@@ -25,45 +25,91 @@ const ContactPage = () => {
         </div>
       </section>
 
-      {/* Contact Info and Form */}
+      {/* Contact Info Section */}
       <section className="section bg-white">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Contact Information */}
+          <div className="max-w-3xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
               <SectionHeading title="Контактная информация" />
 
-              <div className="flex items-start mb-8">
-                <div className="mr-4">
-                  <img
-                    src="https://images.pexels.com/photos/5081971/pexels-photo-5081971.jpeg"
-                    alt="Александр Тощев"
-                    className="w-32 h-32 rounded-full object-cover shadow-md"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-1">Тощев Александр Геннадьевич</h3>
-                  <p className="text-gray-600 mb-3">Билдер Элит 4Life Research</p>
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <Phone className="h-5 w-5 text-blue-600 mr-3" />
-                      <a href="tel:+79152561177" className="text-gray-700 hover:text-blue-600 transition-colors">
-                        +7 (915) 256-11-77
-                      </a>
+              <div className="bg-gray-50 rounded-lg p-8 shadow-sm">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+                  <div className="shrink-0">
+                    <img
+                      src="https://images.pexels.com/photos/5081971/pexels-photo-5081971.jpeg"
+                      alt="Александр Тощев"
+                      className="w-32 h-32 rounded-full object-cover shadow-md"
+                    />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <h3 className="text-2xl font-bold mb-2">Тощев Александр Геннадьевич</h3>
+                    <p className="text-gray-600 mb-3">Билдер Элит 4Life Research</p>
+                    <div className="space-y-6">
+                      <div className="flex items-start">
+                        <div className="bg-blue-100 p-3 rounded-full mr-4">
+                          <Phone className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800">Телефон</h4>
+                          <a
+                            href="tel:+79152561177"
+                            className="text-blue-600 hover:text-blue-800 transition-colors text-lg font-medium"
+                          >
+                            +7 (915) 256-11-77
+                          </a>
+                          <p className="text-sm text-gray-500 mt-1">Доступен в WhatsApp, Telegram, Viber</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="bg-blue-100 p-3 rounded-full mr-4">
+                          <Mail className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800">Email</h4>
+                          <a
+                            href="mailto:atosotxvnew@gmail.com"
+                            className="text-blue-600 hover:text-blue-800 transition-colors text-lg font-medium"
+                          >
+                            atosotxvnew@gmail.com
+                          </a>
+                          <p className="text-sm text-gray-500 mt-1">Отвечаю в течение 24 часов</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="bg-blue-100 p-3 rounded-full mr-4">
+                          <MapPin className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800">Местоположение</h4>
+                          <p className="text-gray-600">Москва, Россия</p>
+                          <p className="text-sm text-gray-500 mt-1">Доступен для личных встреч по предварительной договоренности</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <Mail className="h-5 w-5 text-blue-600 mr-3" />
-                      <a
-                        href="mailto:atosotxvnew@gmail.com"
-                        className="text-gray-700 hover:text-blue-600 transition-colors"
-                      >
-                        atosotxvnew@gmail.com
-                      </a>
+
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                      <h3 className="text-lg font-semibold mb-4">Часы работы</h3>
+                      <div className="space-y-2 text-gray-700">
+                        <p className="flex justify-between">
+                          <span>Понедельник - Пятница:</span>
+                          <span className="font-medium">9:00 - 20:00</span>
+                        </p>
+                        <p className="flex justify-between">
+                          <span>Суббота:</span>
+                          <span className="font-medium">10:00 - 18:00</span>
+                        </p>
+                        <p className="flex justify-between">
+                          <span>Воскресенье:</span>
+                          <span className="font-medium">Выходной</span>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -132,16 +178,6 @@ const ContactPage = () => {
                   ></iframe>
                 </div>
               </div>
-            </motion.div>
-
-            {/* Contact Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <ContactForm />
             </motion.div>
           </div>
         </div>
