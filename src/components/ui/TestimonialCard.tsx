@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { Icons } from '../../utils/icons';
+import { motion } from "framer-motion";
+import { Icons } from "../../utils/icons";
 const { Quote } = Icons;
 
 interface TestimonialCardProps {
@@ -10,7 +10,7 @@ interface TestimonialCardProps {
 
 const TestimonialCard = ({ name, location, text }: TestimonialCardProps) => {
   return (
-    <motion.div 
+    <motion.div
       className="card p-6"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}

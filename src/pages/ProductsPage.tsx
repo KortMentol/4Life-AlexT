@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import SectionHeading from '../components/ui/SectionHeading';
-import ProductCard from '../components/ui/ProductCard';
-import CallToAction from '../components/ui/CallToAction';
+import { motion } from "framer-motion";
+import CallToAction from "../components/ui/CallToAction";
+import ProductCard from "../components/ui/ProductCard";
+import SectionHeading from "../components/ui/SectionHeading";
 
 const ProductsPage = () => {
   return (
@@ -9,7 +9,7 @@ const ProductsPage = () => {
       {/* Hero Section */}
       <section className="bg-gray-50 py-16 md:py-24">
         <div className="container-custom">
-          <motion.div 
+          <motion.div
             className="max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -25,11 +25,8 @@ const ProductsPage = () => {
       {/* What are Transfer Factors */}
       <section className="section bg-white">
         <div className="container-custom">
-          <SectionHeading 
-            title="Трансфер Факторы: 'Молекулы иммунной памяти' для Вашего организма" 
-          />
-
-          <motion.div 
+          <SectionHeading title="Трансфер Факторы: 'Молекулы иммунной памяти' для Вашего организма" />
+          <motion.div
             className="grid md:grid-cols-2 gap-12 items-center"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -38,10 +35,16 @@ const ProductsPage = () => {
           >
             <div>
               <p className="text-lg text-gray-700 mb-4">
-                Основу многих продуктов 4Life составляют Трансфер Факторы – уникальные пептидные молекулы, которые играют ключевую роль в функционировании иммунной системы. Впервые они были открыты доктором Шервудом Лоуренсом в 1949 году. Он обнаружил, что иммунный &apos;опыт&apos; может передаваться от одного организма к другому через экстракт лейкоцитов.
+                Основу многих продуктов 4Life составляют Трансфер Факторы – уникальные пептидные молекулы, которые
+                играют ключевую роль в функционировании иммунной системы. Впервые они были открыты доктором Шервудом
+                Лоуренсом в 1949 году. Он обнаружил, что иммунный &apos;опыт&apos; может передаваться от одного
+                организма к другому через экстракт лейкоцитов.
               </p>
               <p className="text-lg text-gray-700 mb-4">
-                Компания 4Life Research усовершенствовала эту концепцию, разработав запатентованные технологии получения Трансфер Факторов из молозива коров (UltraFactor XF® и OvoFactor® из желтков куриных яиц). Эти молекулы являются природными компонентами, идентичными тем, что вырабатываются в организме человека, и служат для &apos;обучения&apos; и &apos;настройки&apos; иммунных клеток.
+                Компания 4Life Research усовершенствовала эту концепцию, разработав запатентованные технологии получения
+                Трансфер Факторов из молозива коров (UltraFactor XF® и OvoFactor® из желтков куриных яиц). Эти молекулы
+                являются природными компонентами, идентичными тем, что вырабатываются в организме человека, и служат для
+                &apos;обучения&apos; и &apos;настройки&apos; иммунных клеток.
               </p>
             </div>
             <div>
@@ -53,7 +56,10 @@ const ProductsPage = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Распознавание</h4>
-                    <p className="text-gray-600">Помогают иммунным клеткам быстрее и точнее идентифицировать потенциальные угрозы (вирусы, бактерии, атипичные клетки).</p>
+                    <p className="text-gray-600">
+                      Помогают иммунным клеткам быстрее и точнее идентифицировать потенциальные угрозы (вирусы,
+                      бактерии, атипичные клетки).
+                    </p>
                   </div>
                 </li>
                 <li className="flex">
@@ -62,7 +68,11 @@ const ProductsPage = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Реагирование</h4>
-                    <p className="text-gray-600">Способствуют адекватному иммунному ответу – его активации при необходимости или, наоборот, снижению гиперактивности (например, при аллергических или аутоиммунных реакциях), приводя систему в баланс.</p>
+                    <p className="text-gray-600">
+                      Способствуют адекватному иммунному ответу – его активации при необходимости или, наоборот,
+                      снижению гиперактивности (например, при аллергических или аутоиммунных реакциях), приводя систему
+                      в баланс.
+                    </p>
                   </div>
                 </li>
                 <li className="flex">
@@ -71,12 +81,16 @@ const ProductsPage = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Запоминание</h4>
-                    <p className="text-gray-600">Помогают иммунной системе &apos;запомнить&apos; характеристики угроз, чтобы при повторном столкновении реакция была более быстрой и эффективной.</p>
+                    <p className="text-gray-600">
+                      Помогают иммунной системе &apos;запомнить&apos; характеристики угроз, чтобы при повторном
+                      столкновении реакция была более быстрой и эффективной.
+                    </p>
                   </div>
                 </li>
               </ul>
               <p className="text-sm text-gray-500 mt-4 italic">
-                Продукция 4Life с Трансфер Факторами не является лекарством и не предназначена для лечения заболеваний. Она создана для интеллектуальной поддержки и оптимизации работы Вашей иммунной системы.
+                Продукция 4Life с Трансфер Факторами не является лекарством и не предназначена для лечения заболеваний.
+                Она создана для интеллектуальной поддержки и оптимизации работы Вашей иммунной системы.
               </p>
             </div>
           </motion.div>
@@ -86,32 +100,31 @@ const ProductsPage = () => {
       {/* Key Products */}
       <section className="section bg-gray-50">
         <div className="container-custom">
-          <SectionHeading 
-            title="Ключевые продукты с Трансфер Факторами" 
+          <SectionHeading
+            title="Ключевые продукты с Трансфер Факторами"
             subtitle="Ассортимент 4Life включает разнообразные продукты для поддержки иммунитета и общего оздоровления. Ниже представлены некоторые из флагманских продуктов на основе Трансфер Факторов."
             centered
           />
-
           <div className="grid md:grid-cols-3 gap-8">
-            <ProductCard 
+            <ProductCard
               image="https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg"
               title="4Life Transfer Factor® Classic"
               description="Базовый продукт, содержащий концентрированные трансфер факторы из молозива коров (UltraFactor XF®). Обеспечивает фундаментальную поддержку естественной способности иммунной системы правильно реагировать на вызовы. Отлично подходит для ежедневной поддержки."
             />
-            <ProductCard 
+            <ProductCard
               image="https://images.pexels.com/photos/3683056/pexels-photo-3683056.jpeg"
               title="4Life Transfer Factor® Tri-Factor® Formula"
               description="Усовершенствованная формула, сочетающая трансфер факторы из молозива коров (UltraFactor XF®) и желтков куриных яиц (OvoFactor®), а также низкомолекулярные фракции NanoFactor® для более широкой и сбалансированной иммунной поддержки."
             />
-            <ProductCard 
+            <ProductCard
               image="https://images.pexels.com/photos/3683042/pexels-photo-3683042.jpeg"
               title="4Life Transfer Factor Plus® Tri-Factor® Formula"
               description="Наиболее мощная формула иммунной поддержки от 4Life. Содержит Tri-Factor® Formula, усиленную фирменной смесью растительных компонентов (кордицепс, агарик бразильский, грибы майтаке и шиитаке, цинк и другие), которые синергично повышают активность иммунных клеток."
             />
           </div>
-
           <p className="text-center text-gray-600 mt-8 italic">
-            Это лишь некоторые из продуктов 4Life. Полный каталог, подробные описания, состав и актуальные цены доступны на официальном сайте компании.
+            Это лишь некоторые из продуктов 4Life. Полный каталог, подробные описания, состав и актуальные цены доступны
+            на официальном сайте компании.
           </p>
         </div>
       </section>
@@ -119,12 +132,8 @@ const ProductsPage = () => {
       {/* Product Lines */}
       <section className="section bg-white">
         <div className="container-custom">
-          <SectionHeading 
-            title="Ознакомьтесь со всем ассортиментом продукции 4Life" 
-            centered
-          />
-
-          <motion.div 
+          <SectionHeading title="Ознакомьтесь со всем ассортиментом продукции 4Life" centered />
+          <motion.div
             className="max-w-3xl mx-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -132,82 +141,64 @@ const ProductsPage = () => {
             transition={{ duration: 0.5 }}
           >
             <p className="text-lg text-gray-700 mb-6 text-center">
-              Компания 4Life предлагает широкий спектр продуктов, направленных на поддержку различных систем организма, контроль веса, повышение энергии и общее улучшение самочувствия. Среди основных линеек:
+              Компания 4Life предлагает широкий спектр продуктов, направленных на поддержку различных систем организма,
+              контроль веса, повышение энергии и общее улучшение самочувствия. Среди основных линеек:
             </p>
-
             <div className="bg-gray-50 rounded-lg p-6 shadow-sm mb-8">
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-700">
-                    <strong>Поддержка иммунной системы с Трансфер Фактор</strong>
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-700">
-                    <strong>Целенаправленный Трансфер Фактор</strong> (для конкретных систем: сердечно-сосудистой, нервной, эндокринной и др.)
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-700">
-                    <strong>Digest4Life®</strong> (поддержка пищеварительной системы)
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-700">
-                    <strong>4LifeTransform®</strong> (продукты для трансформации тела и активного образа жизни)
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-700">
-                    <strong>РиоВида®</strong> (антиоксидантная поддержка с суперфруктами и Трансфер Фактором)
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-700">
-                    <strong>Энерджи Гоу Стикс®</strong> (природный заряд бодрости и энергии)
-                  </span>
-                </li>
-              </ul>
+              <table className="w-full text-left">
+                <thead>
+                  <tr>
+                    <th className="py-2">Категория Продукции</th>
+                    <th className="py-2">Краткое Описание/Назначение</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-2">Поддержка иммунной системы</td>
+                    <td className="py-2">Продукты, направленные на обучение и балансировку иммунной системы.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Целенаправленная поддержка</td>
+                    <td className="py-2">
+                      Специализированные продукты для поддержки конкретных систем организма (сердечно-сосудистой,
+                      нервной, эндокринной и др.).
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Поддержка пищеварительной системы</td>
+                    <td className="py-2">Продукты для здоровья кишечника и оптимального пищеварения.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Продукты для трансформации тела</td>
+                    <td className="py-2">Поддержка метаболизма, контроля веса и активного образа жизни.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Антиоксидантная поддержка</td>
+                    <td className="py-2">Продукты, богатые антиоксидантами для защиты клеток и замедления старения.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Энергия</td>
+                    <td className="py-2">Натуральные источники для повышения бодрости и выносливости.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Здоровье кожи и красота</td>
+                    <td className="py-2">Продукты для ухода за кожей, способствующие ее молодости и сиянию.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Контроль веса</td>
+                    <td className="py-2">Комплексные решения для управления весом и поддержания здоровой фигуры.</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-
             <p className="text-center text-gray-700 mb-8">
-              Чтобы ознакомиться с полным каталогом продукции, актуальными ценами и оформить заказ с Вашей скидкой, перейдите в официальный интернет-магазин 4Life, используя мой ID.
+              Чтобы ознакомиться с полным каталогом продукции, актуальными ценами и оформить заказ с Вашей скидкой,
+              перейдите в официальный интернет-магазин 4Life, используя мой ID.
             </p>
-
             <div className="text-center">
-              <a 
-                href="https://russia.4life.com/12299550" 
-                target="_blank" 
+              <a
+                href="https://russia.4life.com/12299550"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary"
               >
@@ -223,7 +214,9 @@ const ProductsPage = () => {
         <div className="container-custom">
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-sm text-gray-500 italic">
-              Продукция, упомянутая на этом сайте, не предназначена для диагностики, лечения или предотвращения каких-либо заболеваний. Перед применением БАД рекомендуется проконсультироваться с врачом. Информация на сайте относится к рынку Евразии.
+              Продукция, упомянутая на этом сайте, не предназначена для диагностики, лечения или предотвращения
+              каких-либо заболеваний. Перед применением БАД рекомендуется проконсультироваться с врачом. Информация на
+              сайте относится к рынку Евразии.
             </p>
           </div>
         </div>

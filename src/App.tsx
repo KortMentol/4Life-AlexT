@@ -1,13 +1,13 @@
-import { Routes, Route } from 'react-router-dom';
-import Layout from './components/layout/Layout';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import ProductsPage from './pages/ProductsPage';
-import PurchasePage from './pages/PurchasePage';
-import PartnershipPage from './pages/PartnershipPage';
-import TestimonialsPage from './pages/TestimonialsPage';
-import ContactPage from './pages/ContactPage';
-import ScrollToTop from './components/utils/ScrollToTop';
+import { Route, Routes } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+import ScrollToTop from "./components/utils/ScrollToTop";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import HomePage from "./pages/HomePage";
+import PartnershipPage from "./pages/PartnershipPage";
+import ProductsPage from "./pages/ProductsPage";
+import PurchasePage from "./pages/PurchasePage";
+import TestimonialsPage from "./pages/TestimonialsPage";
 
 function App() {
   return (

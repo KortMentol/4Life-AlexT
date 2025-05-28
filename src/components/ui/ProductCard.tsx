@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 interface ProductCardProps {
   image: string;
@@ -8,7 +8,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ image, title, description }: ProductCardProps) => {
   return (
-    <motion.div 
+    <motion.div
       className="card h-full flex flex-col"
       whileHover={{ y: -5 }}
       initial={{ opacity: 0, y: 20 }}
@@ -17,11 +17,7 @@ const ProductCard = ({ image, title, description }: ProductCardProps) => {
       transition={{ duration: 0.3 }}
     >
       <div className="h-64 overflow-hidden">
-        <img 
-          src={image} 
-          alt={title} 
-          className="w-full h-full object-cover object-center"
-        />
+        <img src={image} alt={title} className="w-full h-full object-cover object-center" />
       </div>
       <div className="p-6 flex-grow">
         <h3 className="text-xl font-semibold mb-3">{title}</h3>

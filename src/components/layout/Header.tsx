@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Icons } from '../../utils/icons';
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { Icons } from "../../utils/icons";
 const { Shield, Menu, X } = Icons;
-import { motion } from 'framer-motion';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,8 +17,8 @@ const Header = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMenu = () => {
@@ -29,18 +29,16 @@ const Header = () => {
     setIsOpen(false);
   };
 
-  const headerClass = scrolled
-    ? 'bg-white shadow-md'
-    : 'bg-transparent';
+  const headerClass = scrolled ? "bg-white shadow-md" : "bg-transparent";
 
   const navLinks = [
-    { title: 'Главная', path: '/' },
-    { title: 'Обо мне', path: '/about' },
-    { title: 'Продукция 4Life', path: '/products' },
-    { title: 'Как приобрести', path: '/purchase' },
-    { title: 'Партнерство', path: '/partnership' },
-    { title: 'Отзывы', path: '/testimonials' },
-    { title: 'Контакты', path: '/contact' },
+    { title: "Главная", path: "/" },
+    { title: "Обо мне", path: "/about" },
+    { title: "Продукция 4Life", path: "/products" },
+    { title: "Как приобрести", path: "/purchase" },
+    { title: "Партнерство", path: "/partnership" },
+    { title: "Отзывы", path: "/testimonials" },
+    { title: "Контакты", path: "/contact" },
   ];
 
   return (
@@ -48,11 +46,7 @@ const Header = () => {
       <div className="container-custom py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <NavLink 
-            to="/" 
-            className="flex flex-col items-start text-xl font-bold"
-            onClick={closeMenu}
-          >
+          <NavLink to="/" className="flex flex-col items-start text-xl font-bold" onClick={closeMenu}>
             <div className="flex items-center gap-2">
               <Shield className="h-6 w-6 text-blue-600" />
               <span className="text-blue-900">АЛЕКСАНДР ТОЩЕВ</span>
@@ -69,7 +63,7 @@ const Header = () => {
                     to={link.path}
                     className={({ isActive }) =>
                       `text-sm font-medium hover:text-blue-600 transition-colors ${
-                        isActive ? 'text-blue-600' : 'text-gray-700'
+                        isActive ? "text-blue-600" : "text-gray-700"
                       }`
                     }
                   >
@@ -84,7 +78,7 @@ const Header = () => {
           <button
             className="lg:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
             onClick={toggleMenu}
-            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -93,10 +87,10 @@ const Header = () => {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <motion.div 
+        <motion.div
           className="lg:hidden bg-white shadow-lg"
           initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
+          animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
         >
@@ -106,9 +100,7 @@ const Header = () => {
                 <NavLink
                   to={link.path}
                   className={({ isActive }) =>
-                    `block py-3 text-base ${
-                      isActive ? 'text-blue-600 font-medium' : 'text-gray-700'
-                    }`
+                    `block py-3 text-base ${isActive ? "text-blue-600 font-medium" : "text-gray-700"}`
                   }
                   onClick={closeMenu}
                 >

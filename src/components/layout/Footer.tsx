@@ -1,10 +1,10 @@
-import { NavLink } from 'react-router-dom';
-import { Icons } from '../../utils/icons';
+import { NavLink } from "react-router-dom";
+import { Icons } from "../../utils/icons";
 const { Shield, Mail, Phone } = Icons;
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="bg-gray-900 text-white pt-12 pb-6">
       <div className="container-custom">
@@ -16,8 +16,9 @@ const Footer = () => {
               <span className="text-xl font-bold">АЛЕКСАНДР ТОЩЕВ</span>
             </div>
             <p className="text-gray-400 text-sm mb-4">
-              © {currentYear} Александр Геннадьевич Тощев. Все права защищены. 
-              Сайт носит информационный характер и не является публичной офертой.
+              {currentYear} Александр Геннадьевич Тощев. Все права защищены. Сайт носит информационный характер и не
+              является публичной офертой. Информация на сайте не является медицинской консультацией. Перед применением
+              рекомендуется проконсультироваться со специалистом.
             </p>
           </div>
 
@@ -25,8 +26,8 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Важная информация</h4>
             <p className="text-gray-400 text-sm">
-              БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА К ПИЩЕ. НЕ ЯВЛЯЕТСЯ ЛЕКАРСТВЕННЫМ СРЕДСТВОМ. 
-              Перед применением рекомендуется проконсультироваться со специалистом.
+              БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА К ПИЩЕ. НЕ ЯВЛЯЕТСЯ ЛЕКАРСТВЕННЫМ СРЕДСТВОМ. Перед применением рекомендуется
+              проконсультироваться со специалистом.
             </p>
           </div>
 
@@ -52,9 +53,9 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Ссылки</h4>
             <ul className="space-y-2">
               <li>
-                <a 
-                  href="https://russia.4life.com/12299550" 
-                  target="_blank" 
+                <a
+                  href="https://russia.4life.com/12299550"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors"
                 >

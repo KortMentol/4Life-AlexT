@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
+import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
 const { Mail, MapPin, Phone } = Icons;
-import SectionHeading from "../components/ui/SectionHeading";
 
 const ContactPage = () => {
   return (
@@ -89,7 +89,9 @@ const ContactPage = () => {
                         <div>
                           <h4 className="font-medium text-gray-800">Местоположение</h4>
                           <p className="text-gray-600">Москва, Россия</p>
-                          <p className="text-sm text-gray-500 mt-1">Доступен для личных встреч по предварительной договоренности</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Доступен для личных встреч по предварительной договоренности
+                          </p>
                         </div>
                       </div>
                     </div>
