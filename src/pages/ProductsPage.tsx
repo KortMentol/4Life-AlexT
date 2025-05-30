@@ -88,10 +88,15 @@ const ProductsPage = () => {
                   </div>
                 </li>
               </ul>
-              <p className="text-sm text-gray-500 mt-4 italic">
-                Продукция 4Life с Трансфер Факторами не является лекарством и не предназначена для лечения заболеваний.
-                Она создана для интеллектуальной поддержки и оптимизации работы Вашей иммунной системы.
-              </p>
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg mt-6">
+                <p className="text-blue-800 font-medium">
+                  <span className="font-bold">Важно:</span> Продукция 4Life с Трансфер Факторами не является лекарством и не предназначена для лечения заболеваний.
+                  Она создана для интеллектуальной поддержки и оптимизации работы Вашей иммунной системы.
+                </p>
+                <p className="text-blue-700 mt-2">
+                  <span className="font-semibold">Перед применением БАД рекомендуется проконсультироваться с врачом.</span>
+                </p>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -199,10 +204,14 @@ const ProductsPage = () => {
               <a
                 href="https://russia.4life.com/12299550"
                 target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary"
+                rel="noopener noreferrer nofollow"
+                className="btn btn-primary inline-flex items-center justify-center"
+                aria-label="Перейти в официальный магазин 4Life (откроется в новой вкладке)"
               >
-                Перейти в официальный магазин 4Life (ID 12299550)
+                <span>Перейти в официальный магазин 4Life (ID 12299550)</span>
+                <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
               </a>
             </div>
           </motion.div>

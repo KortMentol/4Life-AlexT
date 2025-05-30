@@ -36,14 +36,22 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Контакты</h4>
             <div className="flex items-center gap-2 mb-2">
               <Phone className="h-4 w-4 text-blue-400" />
-              <a href="tel:+79152561177" className="text-gray-400 hover:text-white transition-colors">
-                +7 (915) 256-11-77
+              <a 
+                href="tel:+79152561177" 
+                className="text-gray-400 hover:text-white transition-colors inline-flex items-center"
+                aria-label="Позвонить по номеру +7 (915) 256-11-77"
+              >
+                <span>+7 (915) 256-11-77</span>
               </a>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-blue-400" />
-              <a href="mailto:atosotxvnew@gmail.com" className="text-gray-400 hover:text-white transition-colors">
-                atosotxvnew@gmail.com
+              <a 
+                href="mailto:atosotxvnew@gmail.com" 
+                className="text-gray-400 hover:text-white transition-colors inline-flex items-center"
+                aria-label="Написать письмо на atosotxvnew@gmail.com"
+              >
+                <span>atosotxvnew@gmail.com</span>
               </a>
             </div>
           </div>
@@ -56,10 +64,14 @@ const Footer = () => {
                 <a
                   href="https://russia.4life.com/12299550"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  rel="noopener noreferrer nofollow"
+                  className="text-gray-400 hover:text-white transition-colors inline-flex items-center"
+                  aria-label="Перейти на официальный сайт 4Life Евразия (откроется в новой вкладке)"
                 >
-                  Официальный сайт 4Life Евразия (с моим ID)
+                  <span>Официальный сайт 4Life Евразия (с моим ID)</span>
+                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
                 </a>
               </li>
             </ul>

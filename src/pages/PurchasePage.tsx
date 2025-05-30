@@ -61,11 +61,12 @@ const PurchasePage = () => {
                   <a
                     href="https://russia.4life.com/12299550/signup/PC"
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener noreferrer nofollow"
                     className="btn btn-primary flex items-center justify-center"
+                    aria-label="Зарегистрироваться как Приоритетный клиент или Аффилиат (откроется в новой вкладке)"
                   >
                     <span>Зарегистрироваться как Приоритетный клиент/Аффилиат</span>
-                    <ExternalLink className="h-4 w-4 ml-2" />
+                    <ExternalLink className="h-4 w-4 ml-2 flex-shrink-0" />
                   </a>
                 </motion.div>
 

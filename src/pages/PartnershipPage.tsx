@@ -3,7 +3,7 @@ import CallToAction from "../components/ui/CallToAction";
 import FeatureItem from "../components/ui/FeatureItem";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
-const { Star, PieChart, Clock, Globe, Zap } = Icons;
+const { Star, PieChart, Clock, Globe, Zap, ExternalLink } = Icons;
 
 const PartnershipPage = () => {
   return (
@@ -163,10 +163,12 @@ const PartnershipPage = () => {
                 <a
                   href="https://russia.4life.com/12299550/signup/PC"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary"
+                  rel="noopener noreferrer nofollow"
+                  className="btn btn-primary flex items-center justify-center"
+                  aria-label="Зарегистрироваться как Аффилиат (откроется в новой вкладке)"
                 >
-                  Зарегистрироваться как Аффилиат (ID 12299550)
+                  <span>Зарегистрироваться как Аффилиат</span>
+                  <ExternalLink className="h-4 w-4 ml-2 flex-shrink-0" />
                 </a>
               </div>
             </div>
