@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CallToAction from "../components/ui/CallToAction";
 import FeatureItem from "../components/ui/FeatureItem";
 import SectionHeading from "../components/ui/SectionHeading";
+import TestimonialCard from "../components/ui/TestimonialCard";
 import { Icons } from "../utils/icons";
 const { Shield, Microscope, Award } = Icons;
 
@@ -48,6 +49,49 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Mission Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container-custom">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <SectionHeading
+              title="Моя Миссия: Просвещать и Помогать"
+              subtitle="Как Builder Elite 4Life"
+              description="Я посвятил себя одной цели: помочь вам понять силу вашего иммунитета и построить жизнь, полную здоровья и возможностей. Я здесь, чтобы быть вашим надежным проводником."
+              centered
+            />
+            <div className="mt-8 grid md:grid-cols-3 gap-6">
+              <div className="p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-blue-600 mb-3">
+                  <Shield className="w-10 h-10 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Здоровье</h3>
+                <p className="text-gray-600">Помогаю укрепить иммунную систему с помощью научно обоснованных продуктов 4Life</p>
+              </div>
+              <div className="p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-blue-600 mb-3">
+                  <Microscope className="w-10 h-10 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Знания</h3>
+                <p className="text-gray-600">Делись проверенной информацией о Трансфер Факторах и их роли в организме</p>
+              </div>
+              <div className="p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-blue-600 mb-3">
+                  <Award className="w-10 h-10 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Поддержка</h3>
+                <p className="text-gray-600">Обеспечиваю персональное сопровождение каждому, кто выбирает путь к здоровью с 4Life</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* About Alexander Section */}
       <section className="section bg-white">
         <div className="container-custom">
@@ -90,7 +134,7 @@ const HomePage = () => {
       {/* 4Life Transfer Factor Section */}
       <section className="section bg-gray-50">
         <div className="container-custom">
-          <SectionHeading title="4Life Трансфер Фактор® – Интеллектуальная поддержка Вашей иммунной системы" centered />
+          <SectionHeading title="Трансфер Факторы: Ваш Иммунный Интеллект" centered />
           <motion.div
             className="max-w-3xl mx-auto text-center mb-12"
             initial={{ opacity: 0, y: 30 }}
@@ -99,31 +143,30 @@ const HomePage = () => {
             transition={{ duration: 0.6 }}
           >
             <p className="text-lg text-gray-700 mb-6">
-              Более 25 лет компания 4Life Research является мировым лидером в науке об иммунной системе. Ключевой
-              компонент наших продуктов – Трансфер Факторы. Это не витамины, минералы или травы. Это сигнальные
-              молекулы-посредники, которые передают иммунной системе 'информацию' и 'опыт', помогая ей более эффективно
-              Распознавать потенциальные угрозы, адекватно на них Отвечать и Запоминать их для будущей защиты.
+              Трансфер Факторы – это уникальные сигнальные молекулы, обнаруженные компанией 4Life Research более 25 лет назад. 
+              Они действуют как 'посланники иммунного опыта', обучая иммунную систему распознавать, реагировать и запоминать 
+              потенциальные угрозы, что способствует укреплению естественной защиты организма.
             </p>
             <p className="text-lg text-gray-700 mb-8">
-              Продукция 4Life производится в соответствии с высочайшими стандартами качества и прошла множество
-              исследований, подтверждающих ее профиль безопасности и эффективности.
+              Научные исследования подтверждают безопасность и эффективность Трансфер Факторов в поддержке здорового 
+              функционирования иммунной системы. Продукция производится с соблюдением международных стандартов качества GMP.
             </p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureItem
               icon={Microscope}
-              title="Научно-обосновано"
-              description="В основе продуктов – научные исследования, патенты и разработки, подтвержденные международными экспертами"
+              title="Научное Обоснование"
+              description="Более 25 лет исследований и более 40 патентов, подтверждающих механизм действия Трансфер Факторов"
             />
             <FeatureItem
               icon={Shield}
-              title="Поддержка иммунитета"
-              description="Трансфер Факторы помогают иммунным клеткам эффективнее распознавать угрозы, адекватно реагировать и запоминать опыт"
+              title="Иммунный Интеллект"
+              description="Уникальный механизм обучения иммунной системы распознаванию и запоминанию потенциальных угроз"
             />
             <FeatureItem
               icon={Award}
-              title="Высокое качество"
-              description="Строгий контроль на всех этапах производства в соответствии с международными стандартами GMP"
+              title="Стандарты Качества"
+              description="Производство по международным стандартам GMP с независимым контролем качества и безопасности"
             />
           </div>
           <div className="text-center mt-12">
@@ -138,7 +181,7 @@ const HomePage = () => {
       {/* Call to Action Section */}
       <section className="section bg-white">
         <div className="container-custom">
-          <SectionHeading title="Начните свой путь к здоровью и успеху уже сегодня" centered />
+          <SectionHeading title="Партнерство с 4Life: Рост и Поддержка" centered />
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div
               className="card p-8 h-full flex flex-col"
@@ -147,14 +190,25 @@ const HomePage = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
             >
-              <h3 className="text-xl font-semibold mb-3">Приобретайте продукцию со скидкой</h3>
+              <h3 className="text-xl font-semibold mb-3">Постройте бизнес на основе знаний и этики</h3>
               <p className="text-gray-600 mb-6 flex-grow">
-                Зарегистрируйтесь как Приоритетный клиент с моим ID 12299550 и получайте скидку от 15% на всю продукцию
-                4Life.
+                Присоединяйтесь к сообществу профессионалов, которые ценят научный подход и этичное ведение бизнеса. 
+                Вместе с Александром Тощевым вы получите:
               </p>
-              <Link to="/purchase" className="btn btn-primary">
+              <ul className="list-disc list-inside text-gray-600 mb-6">
+                <li>Персональную поддержку и обучение</li>
+                <li>Доступ к проверенным инструментам и стратегиям</li>
+                <li>Возможность развития собственного дела с 4Life</li>
+              </ul>
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg mb-6">
+                <p className="text-blue-800 font-medium">
+                  <span className="font-bold">Важно:</span> Результаты работы зависят от ваших усилий и подхода. 
+                  Мы предоставляем знания и инструменты, но успех определяете вы.
+                </p>
+              </div>
+              <Link to="/partnership" className="btn btn-primary">
                 {" "}
-                Условия приобретения и регистрации{" "}
+                Узнать больше о партнерстве{" "}
               </Link>
             </motion.div>
             <motion.div
@@ -178,14 +232,55 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="section bg-gray-50">
+        <div className="container-custom">
+          <SectionHeading title="Реальные Истории Успеха" centered />
+          <motion.div
+            className="max-w-4xl mx-auto text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-lg text-gray-700 mb-8">
+              Эти люди нашли поддержку здоровья и новые возможности благодаря продукции 4Life и профессионализму Александра Тощева.
+            </p>
+            <div className="grid md:grid-cols-3 gap-8">
+              <TestimonialCard
+                name="Елена, 48 лет"
+                location="Москва"
+                text="После курса 4Life Transfer Factor Tri-Factor Formula заметила значительное улучшение общего самочувствия. Раньше часто болела простудами, теперь это стало редкостью. Особенно впечатлил эффект после поездки в командировку – обычно возвращалась с простудой, а в этот раз осталась в отличной форме."
+              />
+              <TestimonialCard
+                name="Дмитрий, 35 лет"
+                location="Санкт-Петербург"
+                text="Как спортсмен, я всегда ищу натуральные способы поддержки организма. 4Life Transfer Factor Plus стал для меня настоящим открытием. После интенсивных тренировок восстанавливаюсь быстрее, и энергия держится весь день."
+              />
+              <TestimonialCard
+                name="Анна, 55 лет"
+                location="Новосибирск"
+                text="RioVida Stix – это настоящая находка для моей активной жизни! Удобно брать с собой в командировки, вкус приятный. Особенно заметила улучшение сна и общего самочувствия. Рекомендую всем, кто ведет активный образ жизни!"
+              />
+            </div>
+            <div className="text-center mt-8">
+              <Link to="/testimonials" className="btn btn-outline">
+                {" "}
+                Читать все отзывы{" "}
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <CallToAction
-        title="Готовы сделать первый шаг?"
-        description="Свяжитесь со мной для получения консультации или оставьте сообщение, и я отвечу на все Ваши вопросы о продукции 4Life и возможностях сотрудничества."
-        primaryButtonText="Связаться сейчас"
-        primaryButtonLink="/contact"
-        secondaryButtonText="Узнать о продукции"
-        secondaryButtonLink="/products"
+        title="Начните Ваш Путь к Здоровью и Новым Возможностям с Александром Тощевым"
+        description="Я готов стать вашим надежным проводником в мире 4Life. Узнайте, как получить доступ к уникальным продуктам и строить этичный бизнес."
+        primaryButtonText="Получить ID для Покупки"
+        primaryButtonLink="/purchase"
+        secondaryButtonText="Узнать о Партнерстве"
+        secondaryButtonLink="/partnership"
       />
     </>
   );

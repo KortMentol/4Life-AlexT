@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
@@ -16,8 +17,11 @@ const ProductsPage = () => {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center">
-              Продукция 4Life®: Научный подход к поддержке Вашего иммунитета
+              Продукция 4Life: Развитие Вашего Иммунного Интеллекта
             </h1>
+            <p className="text-lg text-gray-700 mb-8 max-w-3xl mx-auto">
+              Продукты 4Life Research созданы для поддержки и обучения вашей иммунной системы с помощью уникальных молекул Трансфер Факторов. Они помогают организму распознавать угрозы, эффективно реагировать на них и запоминать для будущей защиты.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -102,6 +106,15 @@ const ProductsPage = () => {
         </div>
       </section>
 
+      <div className="py-12 bg-gray-50">
+        <div className="container-custom text-center">
+          <h3 className="text-xl font-semibold mb-4">Готовы обучить свой иммунитет?</h3>
+          <Link to="/purchase" className="btn btn-primary inline-block">
+            Получить Ваш ID для Покупки
+          </Link>
+        </div>
+      </div>
+
       {/* Key Products */}
       <section className="section bg-gray-50">
         <div className="container-custom">
@@ -114,17 +127,17 @@ const ProductsPage = () => {
             <ProductCard
               image="https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg"
               title="4Life Transfer Factor® Classic"
-              description="Базовый продукт, содержащий концентрированные трансфер факторы из молозива коров (UltraFactor XF®). Обеспечивает фундаментальную поддержку естественной способности иммунной системы правильно реагировать на вызовы. Отлично подходит для ежедневной поддержки."
+              description="Базовый продукт, содержащий концентрированные трансфер факторы из молозива коров (UltraFactor XF®). Способствует обучению иммунной системы распознаванию и запоминанию потенциальных угроз, помогая поддерживать её естественную функциональность. Отлично подходит для ежедневного использования."
             />
             <ProductCard
               image="https://images.pexels.com/photos/3683056/pexels-photo-3683056.jpeg"
               title="4Life Transfer Factor® Tri-Factor® Formula"
-              description="Усовершенствованная формула, сочетающая трансфер факторы из молозива коров (UltraFactor XF®) и желтков куриных яиц (OvoFactor®), а также низкомолекулярные фракции NanoFactor® для более широкой и сбалансированной иммунной поддержки."
+              description="Усовершенствованная формула, сочетающая трансфер факторы из молозива коров (UltraFactor XF®) и желтков куриных яиц (OvoFactor®), а также низкомолекулярные фракции NanoFactor®. Способствует более эффективному обучению иммунной системы и поддержанию её баланса."
             />
             <ProductCard
               image="https://images.pexels.com/photos/3683042/pexels-photo-3683042.jpeg"
               title="4Life Transfer Factor Plus® Tri-Factor® Formula"
-              description="Наиболее мощная формула иммунной поддержки от 4Life. Содержит Tri-Factor® Formula, усиленную фирменной смесью растительных компонентов (кордицепс, агарик бразильский, грибы майтаке и шиитаке, цинк и другие), которые синергично повышают активность иммунных клеток."
+              description="Наиболее комплексная формула поддержки иммунной системы от 4Life. Содержит Tri-Factor® Formula с добавлением натуральных растительных компонентов (кордицепс, агарик бразильский, грибы майтаке и шиитаке, цинк и другие), которые работают синергично для укрепления естественной защиты организма."
             />
           </div>
           <p className="text-center text-gray-600 mt-8 italic">

@@ -62,6 +62,21 @@ const AboutPage = () => {
         </div>
       </section>
 
+      {/* Important Notice */}
+      <section className="section bg-white">
+        <div className="container-custom">
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-lg max-w-4xl mx-auto mb-12">
+            <h3 className="text-xl font-semibold text-blue-800 mb-3">Важная информация</h3>
+            <p className="text-blue-700">
+              Я не являюсь врачом, и продукция 4Life не заменяет медикаментозное лечение. 
+              Представленная на сайте информация не является медицинской консультацией. 
+              Перед применением БАД рекомендуется проконсультироваться с врачом. 
+              Результаты индивидуальны и зависят от особенностей организма.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Philosophy and Approach */}
       <section className="section bg-gray-50">
         <div className="container-custom">
