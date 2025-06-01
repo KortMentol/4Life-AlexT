@@ -1,259 +1,185 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
+import { Icons } from "../utils/icons";
+import { fadeIn, fadeInFromBottom } from "../lib/animations";
 
-const ProductsPage = () => {
+const productsData = [
+  {
+    image: "https://i.ibb.co/QcY68f1/transfer-factor.jpg",
+    title: "Transfer Factor Tri-Factor Formula",
+    description: "Основа линейки 4Life, для всесторонней поддержки иммунной системы.",
+    link: "/products/transfer-factor",
+  },
+  {
+    image: "https://i.ibb.co/y4L2W5N/transfer-factor-plus.jpg",
+    title: "Transfer Factor Plus Tri-Factor Formula",
+    description: "Мощная комбинация для максимальной поддержки иммунитета.",
+    link: "/products/transfer-factor-plus",
+  },
+  {
+    image: "https://i.ibb.co/hM9D89g/renuvo.jpg",
+    title: "Renuvo",
+    description: "Адаптогенная формула для молодости, восстановления и жизненной энергии.",
+    link: "/products/renuvo",
+  },
+  {
+    image: "https://i.ibb.co/yQjJ64F/collagen.jpg",
+    title: "Collagen",
+    description: "Поддерживает здоровье кожи, волос, ногтей и суставов.",
+    link: "/products/collagen",
+  },
+  {
+    image: "https://i.ibb.co/k2D8qBq/pro-tf.jpg",
+    title: "Pro-TF",
+    description: "Высококачественный протеин для поддержания мышечной массы и здорового веса.",
+    link: "/products/pro-tf",
+  },
+  {
+    image: "https://i.ibb.co/P44n0m7/ritestart.jpg",
+    title: "RiteStart",
+    description: "Комплексный мультивитаминный и минеральный комплекс для ежедневного здоровья.",
+    link: "/products/ritestart",
+  },
+  {
+    image: "https://i.ibb.co/1K743Lp/bcv.jpg",
+    title: "BCV",
+    description: "Целевая поддержка для здоровья сердца и всей сердечно-сосудистой системы.",
+    link: "/products/bcv",
+  },
+  {
+    image: "https://i.ibb.co/GtnqX9h/riovida.jpg",
+    title: "RioVida",
+    description: "Сокосодержащий напиток с Трансфер Факторами и антиоксидантами.",
+    link: "/products/riovida",
+  },
+];
+
+const ProductsPage: React.FC = () => {
   return (
-    <>
-      {/* Hero Section */}
-      <section className="bg-gray-50 py-16 md:py-24">
-        <div className="container-custom">
-          <motion.div
-            className="max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      {/* Hero Section для Products Page */}
+      <section className="relative py-24 md:py-32 bg-gradient-to-br from-teal-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: 'url(https://i.ibb.co/Yc53L8w/hero-pattern.png)', backgroundRepeat: 'repeat', backgroundSize: 'contain' }}></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.h1
+            className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
+            variants={fadeInFromBottom}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center">
-              Продукция 4Life: Развитие Вашего Иммунного Интеллекта
-            </h1>
-            <p className="text-lg text-gray-700 mb-8 max-w-3xl mx-auto">
-              Продукты 4Life Research созданы для поддержки и обучения вашей иммунной системы с помощью уникальных молекул Трансфер Факторов. Они помогают организму распознавать угрозы, эффективно реагировать на них и запоминать для будущей защиты.
-            </p>
-          </motion.div>
+            Наш Полный Каталог Продукции 4Life
+          </motion.h1>
+          <motion.p
+            className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
+            variants={fadeInFromBottom}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
+          </motion.p>
         </div>
       </section>
 
-      {/* What are Transfer Factors */}
-      <section className="section bg-white">
-        <div className="container-custom">
-          <SectionHeading title="Трансфер Факторы: 'Молекулы иммунной памяти' для Вашего организма" />
-          <motion.div
-            className="grid md:grid-cols-2 gap-12 items-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <div>
-              <p className="text-lg text-gray-700 mb-4">
-                Основу многих продуктов 4Life составляют Трансфер Факторы – уникальные пептидные молекулы, которые
-                играют ключевую роль в функционировании иммунной системы. Впервые они были открыты доктором Шервудом
-                Лоуренсом в 1949 году. Он обнаружил, что иммунный &apos;опыт&apos; может передаваться от одного
-                организма к другому через экстракт лейкоцитов.
-              </p>
-              <p className="text-lg text-gray-700 mb-4">
-                Компания 4Life Research усовершенствовала эту концепцию, разработав запатентованные технологии получения
-                Трансфер Факторов из молозива коров (UltraFactor XF® и OvoFactor® из желтков куриных яиц). Эти молекулы
-                являются природными компонентами, идентичными тем, что вырабатываются в организме человека, и служат для
-                &apos;обучения&apos; и &apos;настройки&apos; иммунных клеток.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-3">Как работают Трансфер Факторы 4Life:</h3>
-              <ul className="space-y-6">
-                <li className="flex">
-                  <div className="bg-blue-100 rounded-full h-10 w-10 flex items-center justify-center mr-4 mt-1 flex-shrink-0">
-                    <span className="text-blue-600 font-semibold">1</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Распознавание</h4>
-                    <p className="text-gray-600">
-                      Помогают иммунным клеткам быстрее и точнее идентифицировать потенциальные угрозы (вирусы,
-                      бактерии, атипичные клетки).
-                    </p>
-                  </div>
-                </li>
-                <li className="flex">
-                  <div className="bg-blue-100 rounded-full h-10 w-10 flex items-center justify-center mr-4 mt-1 flex-shrink-0">
-                    <span className="text-blue-600 font-semibold">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Реагирование</h4>
-                    <p className="text-gray-600">
-                      Способствуют адекватному иммунному ответу – его активации при необходимости или, наоборот,
-                      снижению гиперактивности (например, при аллергических или аутоиммунных реакциях), приводя систему
-                      в баланс.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex">
-                  <div className="bg-blue-100 rounded-full h-10 w-10 flex items-center justify-center mr-4 mt-1 flex-shrink-0">
-                    <span className="text-blue-600 font-semibold">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Запоминание</h4>
-                    <p className="text-gray-600">
-                      Помогают иммунной системе &apos;запомнить&apos; характеристики угроз, чтобы при повторном
-                      столкновении реакция была более быстрой и эффективной.
-                    </p>
-                  </div>
-                </li>
-              </ul>
-              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg mt-6">
-                <p className="text-blue-800 font-medium">
-                  <span className="font-bold">Важно:</span> Продукция 4Life с Трансфер Факторами не является лекарством и не предназначена для лечения заболеваний.
-                  Она создана для интеллектуальной поддержки и оптимизации работы Вашей иммунной системы.
-                </p>
-                <p className="text-blue-700 mt-2">
-                  <span className="font-semibold">Перед применением БАД рекомендуется проконсультироваться с врачом.</span>
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="py-12 bg-gray-50">
-        <div className="container-custom text-center">
-          <h3 className="text-xl font-semibold mb-4">Готовы обучить свой иммунитет?</h3>
-          <Link to="/purchase" className="btn btn-primary inline-block">
-            Получить Ваш ID для Покупки
-          </Link>
-        </div>
-      </div>
-
-      {/* Key Products */}
-      <section className="section bg-gray-50">
-        <div className="container-custom">
+      {/* Секция: Популярные Категории */}
+      <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 text-center">
           <SectionHeading
-            title="Ключевые продукты с Трансфер Факторами"
-            subtitle="Ассортимент 4Life включает разнообразные продукты для поддержки иммунитета и общего оздоровления. Ниже представлены некоторые из флагманских продуктов на основе Трансфер Факторов."
-            centered
+            title="Изучите наши популярные категории"
+            subtitle="Найдите идеальный продукт для своих нужд."
           />
-          <div className="grid md:grid-cols-3 gap-8">
-            <ProductCard
-              image="https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg"
-              title="4Life Transfer Factor® Classic"
-              description="Базовый продукт, содержащий концентрированные трансфер факторы из молозива коров (UltraFactor XF®). Способствует обучению иммунной системы распознаванию и запоминанию потенциальных угроз, помогая поддерживать её естественную функциональность. Отлично подходит для ежедневного использования."
-            />
-            <ProductCard
-              image="https://images.pexels.com/photos/3683056/pexels-photo-3683056.jpeg"
-              title="4Life Transfer Factor® Tri-Factor® Formula"
-              description="Усовершенствованная формула, сочетающая трансфер факторы из молозива коров (UltraFactor XF®) и желтков куриных яиц (OvoFactor®), а также низкомолекулярные фракции NanoFactor®. Способствует более эффективному обучению иммунной системы и поддержанию её баланса."
-            />
-            <ProductCard
-              image="https://images.pexels.com/photos/3683042/pexels-photo-3683042.jpeg"
-              title="4Life Transfer Factor Plus® Tri-Factor® Formula"
-              description="Наиболее комплексная формула поддержки иммунной системы от 4Life. Содержит Tri-Factor® Formula с добавлением натуральных растительных компонентов (кордицепс, агарик бразильский, грибы майтаке и шиитаке, цинк и другие), которые работают синергично для укрепления естественной защиты организма."
-            />
-          </div>
-          <p className="text-center text-gray-600 mt-8 italic">
-            Это лишь некоторые из продуктов 4Life. Полный каталог, подробные описания, состав и актуальные цены доступны
-            на официальном сайте компании.
-          </p>
-        </div>
-      </section>
-
-      {/* Product Lines */}
-      <section className="section bg-white">
-        <div className="container-custom">
-          <SectionHeading title="Ознакомьтесь со всем ассортиментом продукции 4Life" centered />
           <motion.div
-            className="max-w-3xl mx-auto"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
           >
-            <p className="text-lg text-gray-700 mb-6 text-center">
-              Компания 4Life предлагает широкий спектр продуктов, направленных на поддержку различных систем организма,
-              контроль веса, повышение энергии и общее улучшение самочувствия. Среди основных линеек:
-            </p>
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm mb-8">
-              <table className="w-full text-left">
-                <thead>
-                  <tr>
-                    <th className="py-2">Категория Продукции</th>
-                    <th className="py-2">Краткое Описание/Назначение</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="py-2">Поддержка иммунной системы</td>
-                    <td className="py-2">Продукты, направленные на обучение и балансировку иммунной системы.</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Целенаправленная поддержка</td>
-                    <td className="py-2">
-                      Специализированные продукты для поддержки конкретных систем организма (сердечно-сосудистой,
-                      нервной, эндокринной и др.).
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Поддержка пищеварительной системы</td>
-                    <td className="py-2">Продукты для здоровья кишечника и оптимального пищеварения.</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Продукты для трансформации тела</td>
-                    <td className="py-2">Поддержка метаболизма, контроля веса и активного образа жизни.</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Антиоксидантная поддержка</td>
-                    <td className="py-2">Продукты, богатые антиоксидантами для защиты клеток и замедления старения.</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Энергия</td>
-                    <td className="py-2">Натуральные источники для повышения бодрости и выносливости.</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Здоровье кожи и красота</td>
-                    <td className="py-2">Продукты для ухода за кожей, способствующие ее молодости и сиянию.</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2">Контроль веса</td>
-                    <td className="py-2">Комплексные решения для управления весом и поддержания здоровой фигуры.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="text-center text-gray-700 mb-8">
-              Чтобы ознакомиться с полным каталогом продукции, актуальными ценами и оформить заказ с Вашей скидкой,
-              перейдите в официальный интернет-магазин 4Life, используя мой ID.
-            </p>
-            <div className="text-center">
-              <a
-                href="https://russia.4life.com/12299550"
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="btn btn-primary inline-flex items-center justify-center"
-                aria-label="Перейти в официальный магазин 4Life (откроется в новой вкладке)"
-              >
-                <span>Перейти в официальный магазин 4Life (ID 12299550)</span>
-                <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-            </div>
+            {/* Категория 1 */}
+            <motion.div
+              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+              variants={fadeInFromBottom}
+              transition={{ delay: 0.2 }}
+            >
+              <Icons.ShieldCheck className="h-12 w-12 text-blue-500 mb-4" />
+              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Поддержка Иммунитета</h3>
+              <p className="text-gray-600 dark:text-gray-400">Основные продукты с Трансфер Факторами для укрепления защитных сил организма.</p>
+            </motion.div>
+            {/* Категория 2 */}
+            <motion.div
+              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+              variants={fadeInFromBottom}
+              transition={{ delay: 0.4 }}
+            >
+              <Icons.HeartPulse className="h-12 w-12 text-red-500 mb-4" />
+              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Общее Благополучие</h3>
+              <p className="text-gray-600 dark:text-gray-400">Продукты для поддержания жизненной энергии, детоксикации и антиоксидантной защиты.</p>
+            </motion.div>
+            {/* Категория 3 */}
+            <motion.div
+              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+              variants={fadeInFromBottom}
+              transition={{ delay: 0.6 }}
+            >
+              <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
+              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Управление Весом и Форма</h3>
+              <p className="text-gray-600 dark:text-gray-400">Решения для здорового контроля веса и поддержания оптимальной физической формы.</p>
+            </motion.div>
+            {/* Категория 4 */}
+            <motion.div
+              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+              variants={fadeInFromBottom}
+              transition={{ delay: 0.8 }}
+            >
+              <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
+              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Красота и Уход</h3>
+              <p className="text-gray-600 dark:text-gray-400">Продукты для сияющей кожи, волос и ногтей, разработанные с учетом внутренней красоты.</p>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Disclaimer */}
-      <section className="py-8 bg-gray-50">
-        <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center">
-            <p className="text-sm text-gray-500 italic">
-              Продукция, упомянутая на этом сайте, не предназначена для диагностики, лечения или предотвращения
-              каких-либо заболеваний. Перед применением БАД рекомендуется проконсультироваться с врачом. Информация на
-              сайте относится к рынку Евразии.
-            </p>
-          </div>
+      {/* Секция: Все Продукты (Каталог) */}
+      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <SectionHeading
+            title="Все наши продукты"
+            subtitle="Выберите продукты 4Life для своего здоровья и благополучия."
+          />
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            {productsData.map((product, index) => (
+              <ProductCard
+                key={index}
+                image={product.image}
+                title={product.title}
+                description={product.description}
+                link={product.link}
+                delay={0.1 * index} // Динамическая задержка
+              />
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Финальный CTA */}
       <CallToAction
-        title="Хотите узнать, как приобрести продукцию со скидкой?"
-        description="Зарегистрируйтесь как Приоритетный клиент с моим ID 12299550 и получайте скидку до 25% от розничной цены."
-        primaryButtonText="Как приобрести продукцию"
-        primaryButtonLink="/purchase"
-        secondaryButtonText="Получить консультацию"
-        secondaryButtonLink="/contact"
+        title="Есть вопросы о продуктах 4Life?"
+        description="Свяжитесь со мной, и я помогу вам выбрать идеальные решения для ваших нужд."
+        primaryButtonText="Получить консультацию"
+        primaryButtonLink="/contact"
+        secondaryButtonText="Узнать о партнерстве"
+        secondaryButtonLink="/partnership"
       />
-    </>
+    </div>
   );
 };
 

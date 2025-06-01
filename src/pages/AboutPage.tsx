@@ -1,250 +1,200 @@
-import { motion } from "framer-motion";
-import CallToAction from "../components/ui/CallToAction";
-import SectionHeading from "../components/ui/SectionHeading";
+import { motion } from 'framer-motion';
+import SectionHeading from '../components/ui/SectionHeading';
+import { fadeIn, fadeInFromBottom, fadeInFromLeft, fadeInFromRight } from '../lib/animations';
+import { FlaskConical, TrendingUp, Headphones } from 'lucide-react';
+import CallToAction from '../components/ui/CallToAction';
 
-const AboutPage = () => {
+const AboutPage: React.FC = () => {
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       {/* Hero Section */}
-      <section className="bg-gray-50 py-16 md:py-24">
-        <div className="container-custom">
-          <motion.div
-            className="max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+      <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: 'url(https://i.ibb.co/Yc53L8w/hero-pattern.png)', backgroundRepeat: 'repeat', backgroundSize: 'contain' }}></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.h1
+            className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
+            variants={fadeInFromBottom}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center">
-              АЛЕКСАНДР ТОЩЕВ: Ваш Билдер Элит и Наставник в Мире 4Life
-            </h1>
+            О 4Life: Наука, Миссия и Ваше Будущее
+          </motion.h1>
+          <motion.p
+            className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
+            variants={fadeInFromBottom}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            Откройте для себя историю инноваций и стремления к лучшему здоровью для каждого.
+          </motion.p>
+        </div>
+      </section>
+
+      {/* Секция: Наша История и Миссия */}
+      <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <SectionHeading
+            title="Наша История и Миссия: Более 20 лет инноваций в поддержке иммунитета"
+            subtitle="С 1998 года мы меняем жизни к лучшему."
+          />
+          <motion.div
+            className="flex flex-col lg:flex-row items-center gap-12 mt-12"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <motion.div
+              className="lg:w-1/2"
+              variants={fadeInFromLeft}
+              transition={{ delay: 0.2 }}
+            >
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                Впервые услышав о трансфер факторах более двух десятилетий назад, мы начали увлекательное путешествие, которое изменило нашу жизнь и жизни тысяч людей по всему миру. Трансфер факторы — это уникальные молекулы, передающие ценные иммунные знания и память между клетками организма.
+              </p>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                С 1998 года 4Life превратилась в глобальную сеть людей, объединенных миссией 'Вместе Строить Жизнь' посредством науки, успеха и сервиса. Мы заслужили репутацию компании, которая идет по пути новаторства, научных исследований в области иммунной системы и общей поддержки здоровья.
+              </p>
+            </motion.div>
+            <motion.div
+              className="lg:w-1/2"
+              variants={fadeInFromRight}
+              transition={{ delay: 0.4 }}
+            >
+              <img
+                src="https://i.ibb.co/VDy9JgJ/about-us-4life.jpg"
+                alt="История 4Life"
+                className="rounded-xl shadow-2xl w-full h-auto object-cover"
+              />
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Personal Presentation */}
-      <section className="section bg-white">
-        <div className="container-custom">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+      {/* Секция: Наши Ценности и Философия */}
+      <section className="py-16 md:py-24 bg-gray-100 dark:bg-gray-900">
+        <div className="container mx-auto px-4 text-center">
+          <SectionHeading
+            title="Наши Ценности и Философия: Наука. Успех. Сервис."
+            subtitle="Три столпа, на которых строится наш путь."
+          />
+          <motion.div
+            className="flex flex-col lg:flex-row items-center gap-12 mt-12"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              className="lg:w-1/2"
+              variants={fadeInFromLeft}
+              transition={{ delay: 0.2 }}
             >
               <img
-                src="https://images.pexels.com/photos/5081971/pexels-photo-5081971.jpeg"
-                alt="Александр Тощев"
-                className="rounded-lg shadow-xl"
+                src="https://i.ibb.co/L5Q2ZfC/4life-science-values.jpg"
+                alt="Ценности 4Life: Наука"
+                className="rounded-xl shadow-2xl w-full h-auto object-cover"
               />
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              className="lg:w-1/2 grid grid-cols-1 md:grid-cols-2 gap-8 text-left"
+              variants={fadeInFromRight}
+              transition={{ delay: 0.4 }}
             >
-              <p className="text-lg text-gray-700 mb-4">
-                Рад приветствовать Вас на моем персональном сайте! Меня зовут Александр Геннадьевич Тощев. Я являюсь
-                независимым партнером компании 4Life Research в статусе Билдер Элит.
-              </p>
-              <p className="text-lg text-gray-700 mb-4">
-                Мой путь в 4Life начался с личного интереса к продуктам, способным эффективно поддерживать иммунную
-                систему. Глубоко изучив научную базу Трансфер Факторов и философию компании, я осознал, что это не
-                просто качественные БАДы, а целая система знаний и возможностей для улучшения качества жизни.
-              </p>
-              <p className="text-lg text-gray-700 mb-4">
-                Я убежден, что здоровье – это наш самый ценный актив, а информированный подход к его поддержанию – ключ
-                к долголетию и активной жизни. Моя цель – не просто &apos;продать&apos; продукт, а предоставить Вам всю
-                необходимую информацию, чтобы Вы могли сделать осознанный выбор.
-              </p>
+              {/* Ценность 1 */}
+              <motion.div
+                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-start space-x-4"
+                variants={fadeInFromBottom}
+                transition={{ delay: 0.6 }}
+              >
+                <FlaskConical className="h-8 w-8 text-blue-500 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Наука</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Мы инвестируем в передовые исследования для создания самых эффективных продуктов. Наши формулы запатентованы и научно обоснованы.</p>
+                </div>
+              </motion.div>
+              {/* Ценность 2 */}
+              <motion.div
+                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-start space-x-4"
+                variants={fadeInFromBottom}
+                transition={{ delay: 0.8 }}
+              >
+                <TrendingUp className="h-8 w-8 text-green-500 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Успех</h3>
+                  <p className="text-gray-600 dark:text-gray-400">4Life предоставляет не только продукты, но и возможности для финансовой свободы и личного роста через нашу проверенную бизнес-модель.</p>
+                </div>
+              </motion.div>
+              {/* Ценность 3 */}
+              <motion.div
+                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-start space-x-4"
+                variants={fadeInFromBottom}
+                transition={{ delay: 1.0 }}
+              >
+                <Headphones className="h-8 w-8 text-purple-500 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Сервис</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Мы стремимся предоставить лучший сервис и поддержку нашим клиентам и партнерам на каждом этапе их пути.</p>
+                </div>
+              </motion.div>
             </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Important Notice */}
-      <section className="section bg-white">
-        <div className="container-custom">
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-lg max-w-4xl mx-auto mb-12">
-            <h3 className="text-xl font-semibold text-blue-800 mb-3">Важная информация</h3>
-            <p className="text-blue-700">
-              Я не являюсь врачом, и продукция 4Life не заменяет медикаментозное лечение. 
-              Представленная на сайте информация не является медицинской консультацией. 
-              Перед применением БАД рекомендуется проконсультироваться с врачом. 
-              Результаты индивидуальны и зависят от особенностей организма.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Philosophy and Approach */}
-      <section className="section bg-gray-50">
-        <div className="container-custom">
-          <SectionHeading title="Мои принципы в работе и жизни" />
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              className="card p-6 h-full"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-            >
-              <h3 className="text-xl font-semibold mb-3">Экспертность и честность</h3>
-              <p className="text-gray-600">
-                Я постоянно изучаю информацию о продуктах 4Life, данные исследований и делюсь только проверенными
-                сведениями. Я не даю медицинских консультаций, но могу подробно рассказать о составе, механизме действия
-                и особенностях применения продукции 4Life.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="card p-6 h-full"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
-              <h3 className="text-xl font-semibold mb-3">Индивидуальный подход</h3>
-              <p className="text-gray-600">
-                Я понимаю, что у каждого человека свои потребности и цели. Поэтому я всегда готов выслушать Вас и помочь
-                подобрать программу, которая будет оптимальна именно для Вас, исходя из Ваших задач и образа жизни.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="card p-6 h-full"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
-              <h3 className="text-xl font-semibold mb-3">Поддержка и наставничество</h3>
-              <p className="text-gray-600">
-                Для тех, кто заинтересован не только в продуктах, но и в развитии собственного дела с 4Life, я предлагаю
-                свое наставничество. Являясь лидером &apos;Команды Компетентных Лидеров&apos;, я помогаю партнерам
-                освоить все аспекты бизнеса и достичь успеха. Мой девиз: &apos;Со мной способные становятся
-                способнее&apos;.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why 4Life? */}
-      <section className="section bg-white">
-        <div className="container-custom">
-          <SectionHeading title="Мой выбор – компания 4Life Research" />
-
-          <motion.div
-            className="max-w-3xl"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-lg text-gray-700 mb-6">
-              Выбор 4Life Research для меня был не случайным. Эта компания зарекомендовала себя как:
-            </p>
-
-            <ul className="space-y-4 mb-8">
-              <li className="flex items-start">
-                <span className="bg-green-500 rounded-full p-1 mr-3 mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-white"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-                <span className="text-gray-700">
-                  <strong>Лидер в науке об иммунитете:</strong> Собственные патенты, научный совет, постоянные
-                  исследования.
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="bg-green-500 rounded-full p-1 mr-3 mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-white"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-                <span className="text-gray-700">
-                  <strong>Производитель качественной продукции:</strong> Строгий контроль на всех этапах производства
-                  (стандарты GMP).
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="bg-green-500 rounded-full p-1 mr-3 mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-white"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-                <span className="text-gray-700">
-                  <strong>Компания с миссией:</strong> &apos;Вместе Строить Жизнь Людей через Науку, Успех и
-                  Сервис&apos;.
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="bg-green-500 rounded-full p-1 mr-3 mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-white"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-                <span className="text-gray-700">
-                  <strong>Надежный партнер:</strong> Прозрачная и выгодная система вознаграждений для Аффилиатов.
-                </span>
-              </li>
-            </ul>
-
-            <p className="text-lg text-gray-700 italic">
-              Я горжусь тем, что являюсь частью этой глобальной команды и могу предлагать Вам продукты, которым доверяю
-              сам.
-            </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Секция: 4Life в Мире */}
+      <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <SectionHeading
+            title="4Life в Мире: Глобальное Присутствие"
+            subtitle="Присоединяйтесь к международному сообществу здоровья и успеха."
+          />
+          <motion.div
+            className="flex flex-col lg:flex-row-reverse items-center gap-12 mt-12"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <motion.div
+              className="lg:w-1/2"
+              variants={fadeInFromRight}
+              transition={{ delay: 0.2 }}
+            >
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                4Life – это не просто компания, это глобальное сообщество. Мы представлены в десятках стран по всему миру, объединяя миллионы людей, которые стремятся к здоровью и благополучию. Присоединяясь к 4Life, вы становитесь частью международной семьи.
+              </p>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                Наше видение – мир, где каждый может раскрыть свой потенциал здоровья и построить успешную жизнь с поддержкой единомышленников.
+              </p>
+            </motion.div>
+            <motion.div
+              className="lg:w-1/2"
+              variants={fadeInFromLeft}
+              transition={{ delay: 0.4 }}
+            >
+              <img
+                src="https://i.ibb.co/3s8sF5h/4life-global.jpg"
+                alt="4Life Глобальное Присутствие"
+                className="rounded-xl shadow-2xl w-full h-auto object-cover"
+              />
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Финальный CTA */}
       <CallToAction
-        title="Остались вопросы?"
-        description="Если у Вас есть вопросы о продукции, или Вы хотите обсудить возможности сотрудничества, пожалуйста, свяжитесь со мной."
-        primaryButtonText="Перейти к контактной информации"
+        title="Готовы начать свое путешествие с 4Life?"
+        description="Свяжитесь со мной, чтобы узнать больше о продуктах и возможностях партнерства."
+        primaryButtonText="Связаться сейчас"
         primaryButtonLink="/contact"
+        secondaryButtonText="Узнать о партнерстве"
+        secondaryButtonLink="/partnership"
       />
-    </>
+    </div>
   );
 };
 
