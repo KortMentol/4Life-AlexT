@@ -1,0 +1,30 @@
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "4Life с Александром Тощевым",
+    "url": "https://russia.4life.com/12299550",
+    "logo": "https://russia.4life.com/12299550/logo.png",
+    "sameAs": [
+      "https://www.instagram.com/alexandr_toshchev/",
+      "https://t.me/alexandr_toshchev"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Александр Тощев",
+    "url": "https://russia.4life.com/12299550/about",
+    "image": "https://russia.4life.com/12299550/images/alexandr.jpg",
+    "alumniOf": "4Life",
+    "jobTitle": "CEO Групп Компаний, Лидер 4Life",
+    "worksFor": {
+      "@type": "Organization",
+      "name": "4Life"
+    },
+    "sameAs": [
+      "https://www.instagram.com/alexandr_toshchev/",
+      "https://t.me/alexandr_toshchev"
+    ]
+  }
+]
