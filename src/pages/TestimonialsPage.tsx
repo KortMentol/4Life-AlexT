@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
+import { headingVariants, itemVariants, staggerContainer } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
-import { itemVariants, headingVariants, staggerContainer } from "../animations/variants";
 
 const testimonials = [
   {
@@ -74,6 +75,32 @@ const testimonials = [
 const TestimonialsPage = () => {
   return (
     <>
+      <Helmet>
+        <title>Отзывы о продукции 4Life - Реальные истории клиентов Александра Тощева</title>
+        <meta
+          name="description"
+          content="Читайте реальные отзывы о продукции 4Life от довольных клиентов Александра Тощева. Узнайте, как наши продукты помогли улучшить здоровье и качество жизни."
+        />
+        <meta property="og:title" content="Отзывы о продукции 4Life - Реальные истории клиентов Александра Тощева" />
+        <meta
+          property="og:description"
+          content="Читайте реальные отзывы о продукции 4Life от довольных клиентов Александра Тощева. Узнайте, как наши продукты помогли улучшить здоровье и качество жизни."
+        />
+        <meta property="og:image" content="https://ВАШ_ДОМЕН.ru/images/og-testimonials.jpg" />{" "}
+        {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ВАШ_ДОМЕН.ru/testimonials" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Отзывы о продукции 4Life - Реальные истории клиентов Александра Тощева" />
+        <meta
+          name="twitter:description"
+          content="Читайте реальные отзывы о продукции 4Life от довольных клиентов Александра Тощева. Узнайте, как наши продукты помогли улучшить здоровье и качество жизни."
+        />
+        <meta name="twitter:image" content="https://ВАШ_ДОМЕН.ru/images/og-testimonials.jpg" />{" "}
+        {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://ВАШ_ДОМЕН.ru/testimonials" /> {/* ЗАМЕНИТЬ НА РЕАЛЬНЫЙ ДОМЕН */}
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-gray-50 py-16 md:py-24">
         <div className="container-custom">
@@ -348,7 +375,6 @@ const TestimonialsPage = () => {
           </motion.div>
         </div>
       </section>
-
     </>
   );
 };

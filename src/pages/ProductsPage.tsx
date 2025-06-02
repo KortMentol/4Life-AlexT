@@ -1,59 +1,72 @@
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
+import {
+  cardVariants,
+  containerVariants,
+  headingVariants,
+  itemVariants,
+  staggerContainer,
+} from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
-import { containerVariants, itemVariants, headingVariants, staggerContainer, cardVariants } from '../animations/variants';
-import { Helmet } from 'react-helmet-async';
 
 const productsData = [
   {
-    image: "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Transfer Factor Tri-Factor Formula",
     description: "Основа линейки 4Life, для всесторонней поддержки иммунной системы.",
-    link: "/products/transfer-factor",
+    purchaseLink: "/purchase", // Originally: /products/transfer-factor
   },
   {
-    image: "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Transfer Factor Plus Tri-Factor Formula",
     description: "Мощная комбинация для максимальной поддержки иммунитета.",
-    link: "/products/transfer-factor-plus",
+    purchaseLink: "/purchase", // Originally: /products/transfer-factor-plus
   },
   {
-    image: "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Renuvo",
     description: "Адаптогенная формула для молодости, восстановления и жизненной энергии.",
-    link: "/products/renuvo",
+    purchaseLink: "/purchase", // Originally: /products/renuvo
   },
   {
-    image: "https://images.pexels.com/photos/7473853/pexels-photo-7473853.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473853/pexels-photo-7473853.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Collagen",
     description: "Поддерживает здоровье кожи, волос, ногтей и суставов.",
-    link: "/products/collagen",
+    purchaseLink: "/purchase", // Originally: /products/collagen
   },
   {
-    image: "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Pro-TF",
     description: "Высококачественный протеин для поддержания мышечной массы и здорового веса.",
-    link: "/products/pro-tf",
+    purchaseLink: "/purchase", // Originally: /products/pro-tf
   },
   {
-    image: "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "RiteStart",
     description: "Комплексный мультивитаминный и минеральный комплекс для ежедневного здоровья.",
-    link: "/products/ritestart",
+    purchaseLink: "/purchase", // Originally: /products/ritestart
   },
   {
-    image: "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "BCV",
     description: "Целевая поддержка для здоровья сердца и всей сердечно-сосудистой системы.",
-    link: "/products/bcv",
+    purchaseLink: "/purchase", // Originally: /products/bcv
   },
   {
     image: "https://i.ibb.co/GtnqX9h/riovida.jpg",
     title: "RioVida",
     description: "Сокосодержащий напиток с Трансфер Факторами и антиоксидантами.",
-    link: "/products/riovida",
+    purchaseLink: "/purchase", // Originally: /products/riovida
   },
 ];
 
@@ -62,15 +75,24 @@ const ProductsPage: React.FC = () => {
     <>
       <Helmet>
         <title>Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым</title>
-        <meta name="description" content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев." />
+        <meta
+          name="description"
+          content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
+        />
         <meta property="og:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
-        <meta property="og:description" content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев." />
+        <meta
+          property="og:description"
+          content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
+        />
         <meta property="og:image" content="/images/og-products.jpg" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/products" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
-        <meta name="twitter:description" content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев." />
+        <meta
+          name="twitter:description"
+          content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
+        />
         <meta name="twitter:image" content="/images/og-products.jpg" />
       </Helmet>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -170,7 +192,7 @@ const ProductsPage: React.FC = () => {
                   image={product.image}
                   title={product.title}
                   description={product.description}
-                  link={product.link}
+                  purchaseLink={product.purchaseLink}
                   delay={0.1 * index} // Динамическая задержка
                 />
               ))}

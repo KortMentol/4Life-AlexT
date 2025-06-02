@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ParallaxBanner } from 'react-scroll-parallax';
 import {
   ArrowRight,
   Briefcase,
@@ -14,20 +13,22 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { ParallaxBanner } from "react-scroll-parallax";
 import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
-import { Helmet } from 'react-helmet-async';
 
 // Импорт анимационных вариантов
-import { containerVariants, itemVariants, headingVariants, buttonVariants, cardVariants } from '../animations/variants';
+import { buttonVariants, cardVariants, containerVariants, headingVariants, itemVariants } from "../animations/variants";
 
 // Удаляем дублирующий импорт motion, так как он уже импортирован выше
 
 const testimonials = [
   {
     id: "testimonial-home-elena",
-    image: "https://images.pexels.com/photos/1036620/pexels-photo-1036620.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/1036620/pexels-photo-1036620.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     name: "Елена",
     title: "Пенсионерка, 48 лет",
     quote:
@@ -36,7 +37,8 @@ const testimonials = [
   },
   {
     id: "testimonial-home-dmitry",
-    image: "https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     name: "Дмитрий",
     title: "Спортсмен, 35 лет",
     quote:
@@ -45,7 +47,8 @@ const testimonials = [
   },
   {
     id: "testimonial-home-anna",
-    image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image:
+      "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     name: "Анна",
     title: "Мама, 38 лет",
     quote:
@@ -59,15 +62,24 @@ const HomePage: React.FC = () => {
     <>
       <Helmet>
         <title>4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес</title>
-        <meta name="description" content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы." />
+        <meta
+          name="description"
+          content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
+        />
         <meta property="og:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
-        <meta property="og:description" content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы." />
+        <meta
+          property="og:description"
+          content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
+        />
         <meta property="og:image" content="/images/og-home.jpg" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
-        <meta name="twitter:description" content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы." />
+        <meta
+          name="twitter:description"
+          content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
+        />
         <meta name="twitter:image" content="/images/og-home.jpg" />
       </Helmet>
       {/* Hero Section */}
@@ -76,14 +88,16 @@ const HomePage: React.FC = () => {
         <ParallaxBanner
           layers={[
             {
-              image: 'https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+              image:
+                "https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
               speed: -20,
               opacity: [0.4, 0.6],
               scale: [1, 1.1],
               shouldAlwaysCompleteAnimation: true,
             },
             {
-              image: 'https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+              image:
+                "https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
               speed: -10,
               opacity: [0.2, 0.3],
               scale: [1.05, 1.15],

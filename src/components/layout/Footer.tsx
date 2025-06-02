@@ -15,7 +15,10 @@ const Footer: React.FC = () => {
         <meta name="robots" content="index, follow" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="4Life с Александром Тощевым - Контакты и Информация" />
-        <meta name="twitter:description" content="Контактная информация и социальные сети 4Life с Александром Тощевым. Свяжитесь с нами для консультаций и заказа продукции." />
+        <meta
+          name="twitter:description"
+          content="Контактная информация и социальные сети 4Life с Александром Тощевым. Свяжитесь с нами для консультаций и заказа продукции."
+        />
         <meta name="twitter:image" content="/images/og-contact.jpg" />
         <link rel="canonical" href="https://alexander-toshchev-4life.ru/contact" />
       </Helmet>

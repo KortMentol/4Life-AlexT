@@ -36,11 +36,7 @@ const CallToAction = ({
     }
 
     return (
-      <Link
-        to={primaryButtonLink}
-        className="btn btn-primary"
-        aria-label={`Перейти к ${primaryButtonText}`}
-      >
+      <Link to={primaryButtonLink} className="btn btn-primary" aria-label={`Перейти к ${primaryButtonText}`}>
         {primaryButtonText}
       </Link>
     );
@@ -86,8 +82,12 @@ const CallToAction = ({
     >
       <div className="container-custom py-16 md:py-20">
         <div className="text-center max-w-3xl mx-auto">
-          <h3 id="cta-title" className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{title}</h3>
-          <p className="text-gray-600 mb-8" aria-describedby="cta-title">{description}</p>
+          <h3 id="cta-title" className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            {title}
+          </h3>
+          <p className="text-gray-600 mb-8" aria-describedby="cta-title">
+            {description}
+          </p>
           <div className="flex flex-col sm:flex-row justify-center">
             {renderPrimaryButton()}
             {renderSecondaryButton()}

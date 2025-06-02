@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Menu, X, Sun, Moon } from 'lucide-react';
-import { siteConfig, mainNav } from '../../config/site';
-import { useTheme } from '../../context/ThemeContext';
+import { motion } from "framer-motion";
+import { Menu, Moon, Sun, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { mainNav, siteConfig } from "../../config/site";
+import { useTheme } from "../../context/ThemeContext";
 
 const Header = () => {
   const [scrolled, setIsScrolled] = useState(false);
@@ -15,8 +15,8 @@ const Header = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMobileMenu = () => {
@@ -27,7 +27,7 @@ const Header = () => {
     <header
       role="banner"
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/90 dark:bg-gray-900/90 shadow-lg' : 'bg-transparent'
+        scrolled ? "bg-white/90 dark:bg-gray-900/90 shadow-lg" : "bg-transparent"
       }`}
     >
       <motion.div
@@ -43,9 +43,7 @@ const Header = () => {
               alt="4Life Logo"
               className="h-8"
             />
-            <span className="font-bold text-xl text-primary">
-              {siteConfig.distributor.name}
-            </span>
+            <span className="font-bold text-xl text-primary">{siteConfig.distributor.name}</span>
           </NavLink>
 
           <nav role="navigation" className="hidden md:flex items-center space-x-8">
@@ -56,8 +54,8 @@ const Header = () => {
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md text-sm font-medium ${
                     isActive
-                      ? 'bg-primary text-white'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? "bg-primary text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`
                 }
                 aria-label={item.title}
@@ -71,7 +69,7 @@ const Header = () => {
               className="p-2 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
               aria-label="Переключить тему"
             >
-              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+              {theme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
             </button>
           </nav>
 
@@ -105,11 +103,7 @@ const Header = () => {
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         {isMobileMenuOpen && (
-          <div
-            id="mobile-menu"
-            className="md:hidden mt-4 space-y-2"
-            role="menu"
-          >
+          <div id="mobile-menu" className="md:hidden mt-4 space-y-2" role="menu">
             {mainNav.map((item) => (
               <NavLink
                 key={item.href}

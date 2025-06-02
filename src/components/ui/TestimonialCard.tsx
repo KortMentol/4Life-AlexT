@@ -17,9 +17,9 @@ const TestimonialCard = ({ image, name, title, quote, delay = 0 }: TestimonialCa
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.4, delay: delay }}
-      whileHover={{ 
+      whileHover={{
         y: -5,
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       }}
     >
       <motion.img
@@ -33,12 +33,8 @@ const TestimonialCard = ({ image, name, title, quote, delay = 0 }: TestimonialCa
         transition={{ duration: 0.4, delay: delay + 0.1 }}
         whileHover={{ scale: 1.05 }}
       />
-      <p className="text-gray-700 dark:text-gray-300 italic text-lg mb-4 leading-relaxed">
-        "{quote}"
-      </p>
-      <h4 className="font-bold text-lg text-gray-800 dark:text-white mb-1">
-        {name}
-      </h4>
+      <p className="text-gray-700 dark:text-gray-300 italic text-lg mb-4 leading-relaxed">"{quote}"</p>
+      <h4 className="font-bold text-lg text-gray-800 dark:text-white mb-1">{name}</h4>
       <p className="text-gray-500 dark:text-gray-400 text-sm">{title}</p>
     </motion.div>
   );

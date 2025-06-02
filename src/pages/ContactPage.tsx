@@ -1,31 +1,31 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Helmet } from 'react-helmet-async';
-import { FaWhatsapp, FaTelegram, FaEnvelope } from 'react-icons/fa';
-import { headingVariants, fadeIn, itemVariants } from '../animations/variants';
+import { motion } from "framer-motion";
+import React from "react";
+import { Helmet } from "react-helmet-async";
+import { FaEnvelope, FaTelegram, FaWhatsapp } from "react-icons/fa";
+import { fadeIn, headingVariants, itemVariants } from "../animations/variants";
 
 const ContactPage: React.FC = () => {
   const contactMethods = [
     {
-      name: 'WhatsApp',
+      name: "WhatsApp",
       icon: FaWhatsapp,
-      link: 'https://wa.me/79152561177',
-      colorClass: 'bg-green-500 hover:bg-green-600',
-      description: 'Мгновенная связь для быстрых вопросов и консультаций.',
+      link: "https://wa.me/79152561177",
+      colorClass: "bg-green-500 hover:bg-green-600",
+      description: "Мгновенная связь для быстрых вопросов и консультаций.",
     },
     {
-      name: 'Telegram',
+      name: "Telegram",
       icon: FaTelegram,
-      link: 'https://t.me/+79152561177',
-      colorClass: 'bg-blue-500 hover:bg-blue-600',
-      description: 'Для развернутых обсуждений и получения подробной информации.',
+      link: "https://t.me/+79152561177",
+      colorClass: "bg-blue-500 hover:bg-blue-600",
+      description: "Для развернутых обсуждений и получения подробной информации.",
     },
     {
-      name: 'Email',
+      name: "Email",
       icon: FaEnvelope,
-      link: 'mailto:atosotxvnew@gmail.com',
-      colorClass: 'bg-red-500 hover:bg-red-600',
-      description: 'Отправьте мне письмо с любыми вопросами или предложениями.',
+      link: "mailto:atosotxvnew@gmail.com",
+      colorClass: "bg-red-500 hover:bg-red-600",
+      description: "Отправьте мне письмо с любыми вопросами или предложениями.",
     },
   ];
 
@@ -33,9 +33,15 @@ const ContactPage: React.FC = () => {
     <>
       <Helmet>
         <title>Свяжитесь с Александром Тощевым - 4Life | Контакты</title>
-        <meta name="description" content="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. Прямые ссылки на WhatsApp, Telegram, Email." />
+        <meta
+          name="description"
+          content="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. Прямые ссылки на WhatsApp, Telegram, Email."
+        />
         <meta property="og:title" content="Свяжитесь с Александром Тощевым - 4Life | Контакты" />
-        <meta property="og:description" content="Прямые контакты для связи с Александром Тощевым по вопросам 4Life: WhatsApp, Telegram, Email." />
+        <meta
+          property="og:description"
+          content="Прямые контакты для связи с Александром Тощевым по вопросам 4Life: WhatsApp, Telegram, Email."
+        />
         <meta property="og:image" content="/images/og-contact.jpg" />
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/contact" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -53,16 +59,17 @@ const ContactPage: React.FC = () => {
           </motion.h1>
           <motion.p
             className="text-lg md:text-xl max-w-3xl mx-auto mb-12"
-            variants={fadeIn('up', 'tween', 0.2, 0.6)}
+            variants={fadeIn("up", "tween", 0.2, 0.6)}
             initial="hidden"
             animate="show"
           >
-            Готовы начать свой путь к здоровью и благополучию? У меня есть ответы на ваши вопросы и я готов помочь на каждом этапе.
+            Готовы начать свой путь к здоровью и благополучию? У меня есть ответы на ваши вопросы и я готов помочь на
+            каждом этапе.
           </motion.p>
 
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
-            variants={fadeIn('up', 'spring', 0.4, 0.8)}
+            variants={fadeIn("up", "spring", 0.4, 0.8)}
             initial="hidden"
             animate="show"
           >
@@ -70,8 +77,8 @@ const ContactPage: React.FC = () => {
               <motion.a
                 key={index}
                 href={method.link}
-                target={method.link.startsWith('mailto:') ? '_self' : '_blank'}
-                rel={method.link.startsWith('mailto:') ? '' : 'noopener noreferrer'}
+                target={method.link.startsWith("mailto:") ? "_self" : "_blank"}
+                rel={method.link.startsWith("mailto:") ? "" : "noopener noreferrer"}
                 className={`flex flex-col items-center p-8 rounded-lg shadow-xl ${method.colorClass} text-white font-bold transition-all duration-300 transform hover:scale-105`}
                 variants={itemVariants}
               >
@@ -84,11 +91,12 @@ const ContactPage: React.FC = () => {
 
           <motion.p
             className="text-md mt-16 max-w-3xl mx-auto text-gray-600 dark:text-gray-400"
-            variants={fadeIn('up', 'tween', 0.6, 0.8)}
+            variants={fadeIn("up", "tween", 0.6, 0.8)}
             initial="hidden"
             animate="show"
           >
-            Я стремлюсь к оперативному общению. Выберите наиболее удобный для вас способ связи, и я отвечу в ближайшее время!
+            Я стремлюсь к оперативному общению. Выберите наиболее удобный для вас способ связи, и я отвечу в ближайшее
+            время!
           </motion.p>
         </div>
       </section>

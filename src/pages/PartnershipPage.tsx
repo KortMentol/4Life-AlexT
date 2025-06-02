@@ -1,25 +1,34 @@
-import { motion } from 'framer-motion';
-import SectionHeading from '../components/ui/SectionHeading';
-import CallToAction from '../components/ui/CallToAction';
-import { DollarSign, Clock, Award, Lightbulb, ArrowRight } from 'lucide-react';
-import { itemVariants, headingVariants, staggerContainer } from '../animations/variants';
-import { Helmet } from 'react-helmet-async';
-import { FC } from 'react';
+import { motion } from "framer-motion";
+import { ArrowRight, Award, Clock, DollarSign, Lightbulb } from "lucide-react";
+import { FC } from "react";
+import { Helmet } from "react-helmet-async";
+import { headingVariants, itemVariants, staggerContainer } from "../animations/variants";
+import CallToAction from "../components/ui/CallToAction";
+import SectionHeading from "../components/ui/SectionHeading";
 
 const PartnershipPage: FC = () => {
   return (
     <>
       <Helmet>
         <title>Партнерство 4Life - Стать частью команды Александра Тощева</title>
-        <meta name="description" content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера." />
+        <meta
+          name="description"
+          content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
+        />
         <meta property="og:title" content="Партнерство 4Life - Стать частью команды Александра Тощева" />
-        <meta property="og:description" content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера." />
+        <meta
+          property="og:description"
+          content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
+        />
         <meta property="og:image" content="/images/og-partnership.jpg" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/partnership" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Партнерство 4Life - Стать частью команды Александра Тощева" />
-        <meta name="twitter:description" content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера." />
+        <meta
+          name="twitter:description"
+          content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
+        />
         <meta name="twitter:image" content="/images/og-partnership.jpg" />
       </Helmet>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -58,10 +67,7 @@ const PartnershipPage: FC = () => {
         {/* Секция: Преимущества Партнерства */}
         <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
           <div className="container mx-auto px-4">
-            <SectionHeading
-              title="Преимущества Партнерства"
-              subtitle="Почему стоит присоединиться к нашей команде"
-            />
+            <SectionHeading title="Преимущества Партнерства" subtitle="Почему стоит присоединиться к нашей команде" />
             <motion.div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
               variants={staggerContainer}
