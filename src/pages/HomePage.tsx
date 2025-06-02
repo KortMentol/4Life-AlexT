@@ -19,7 +19,9 @@ import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
 
 // Импорт анимационных вариантов
-import { containerVariants, itemVariants, buttonVariants } from '../animations/variants';
+import { containerVariants, itemVariants, headingVariants, buttonVariants, cardVariants } from '../animations/variants';
+
+// Удаляем дублирующий импорт motion, так как он уже импортирован выше
 
 const testimonials = [
   {
@@ -82,9 +84,10 @@ const HomePage = () => {
         <div className="relative z-10 px-4 max-w-4xl mx-auto">
           <motion.h1
             className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6 drop-shadow-lg"
-            variants={itemVariants}
+            variants={headingVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Проснись <span className="text-primary block md:inline">полным энергии, ясности ума</span> и желания творить
             великие дела с <span className="text-4life-blue">4Life</span>
@@ -94,7 +97,8 @@ const HomePage = () => {
             className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto"
             variants={itemVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Инвестируй в свое здоровье сегодня, чтобы наслаждаться каждым днем полноценно и счастливо. Мы поможем тебе
             раскрыть жизненную силу и обрести новые возможности.
@@ -288,9 +292,21 @@ const HomePage = () => {
               Эти люди нашли поддержку здоровья и новые возможности благодаря продукции 4Life и профессионализму
               Александра Тощева.
             </p>
-            <div className="grid md:grid-cols-3 gap-8">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="grid md:grid-cols-3 gap-8"
+            >
               {testimonials.map((testimonial) => (
-                <motion.div key={testimonial.id} variants={itemVariants} initial="hidden" animate="visible">
+                <motion.div
+                  key={testimonial.id}
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                >
                   <TestimonialCard
                     name={testimonial.name}
                     image={testimonial.image}
@@ -299,7 +315,7 @@ const HomePage = () => {
                   />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

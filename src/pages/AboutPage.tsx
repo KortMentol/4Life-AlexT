@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { FlaskConical, Headphones, TrendingUp } from "lucide-react";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
-import { itemVariants } from '../animations/variants';
+import { itemVariants, headingVariants } from '../animations/variants';
 
 const AboutPage: React.FC = () => {
   return (
@@ -20,9 +20,10 @@ const AboutPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1
             className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-            variants={itemVariants}
+            variants={headingVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             О 4Life: Наука, Миссия и Ваше Будущее
           </motion.h1>
@@ -30,7 +31,8 @@ const AboutPage: React.FC = () => {
             className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
             variants={itemVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Откройте для себя историю инноваций и стремления к лучшему здоровью для каждого.
           </motion.p>

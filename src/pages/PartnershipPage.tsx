@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import SectionHeading from '../components/ui/SectionHeading';
 import CallToAction from '../components/ui/CallToAction';
 import { DollarSign, Clock, Award, Lightbulb, ArrowRight } from 'lucide-react';
-import { itemVariants } from '../animations/variants';
+import { itemVariants, headingVariants, staggerContainer } from '../animations/variants';
 
 const PartnershipPage: React.FC = () => {
   return (
@@ -20,9 +20,10 @@ const PartnershipPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1
             className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-            variants={itemVariants}
+            variants={headingVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Партнерство с 4Life: Ваши Возможности Роста
           </motion.h1>
@@ -30,7 +31,8 @@ const PartnershipPage: React.FC = () => {
             className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
             variants={itemVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Откройте для себя путь к финансовой свободе и личному развитию.
           </motion.p>
@@ -45,13 +47,19 @@ const PartnershipPage: React.FC = () => {
             subtitle="Гибкий путь к финансовой независимости и личному росту."
           />
           <motion.div
-            className="flex flex-col lg:flex-row items-center gap-12 mt-12"
-            variants={itemVariants}
+            variants={staggerContainer}
             initial="hidden"
-            whileInView="visible"
+            whileInView="show"
             viewport={{ once: true, amount: 0.3 }}
+            className="flex flex-col lg:flex-row items-center gap-12 mt-12"
           >
-            <motion.div className="lg:w-1/2" variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div
+              className="lg:w-1/2"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+            >
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
                 4Life предлагает уникальную возможность не только улучшить свое здоровье, но и построить прибыльный,
                 устойчивый бизнес. Наша бизнес-модель основана на сетевом маркетинге, который позволяет вам получать
@@ -62,7 +70,13 @@ const PartnershipPage: React.FC = () => {
                 получать поддержку на каждом этапе, развивать лидерские качества и влиять на жизни других людей.
               </p>
             </motion.div>
-            <motion.div className="lg:w-1/2" variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div
+              className="lg:w-1/2"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+            >
               <img
                 src="https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
                 alt="Сотрудничество и партнерство"

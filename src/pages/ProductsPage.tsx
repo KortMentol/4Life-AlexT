@@ -3,7 +3,7 @@ import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
-import { containerVariants, itemVariants, cardVariants } from '../animations/variants';
+import { containerVariants, itemVariants, headingVariants, staggerContainer, cardVariants } from '../animations/variants';
 
 const productsData = [
   {
@@ -72,9 +72,10 @@ const ProductsPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1
             className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-            variants={itemVariants}
+            variants={headingVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Наш Полный Каталог Продукции 4Life
           </motion.h1>
@@ -82,7 +83,8 @@ const ProductsPage: React.FC = () => {
             className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
             variants={itemVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
           >
             Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
           </motion.p>
@@ -97,17 +99,19 @@ const ProductsPage: React.FC = () => {
             subtitle="Найдите идеальный продукт для своих нужд."
           />
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
-            variants={containerVariants}
+            variants={staggerContainer}
             initial="hidden"
-            whileInView="visible"
+            whileInView="show"
             viewport={{ once: true, amount: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
           >
             {/* Категория 1 */}
             <motion.div
               className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
               variants={cardVariants}
-              transition={{ delay: 0.2 }}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
             >
               <Icons.ShieldCheck className="h-12 w-12 text-blue-500 mb-4" />
               <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Поддержка Иммунитета</h3>

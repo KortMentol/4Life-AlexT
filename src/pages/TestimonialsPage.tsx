@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
-import { itemVariants } from "../animations/variants";
+import { itemVariants, headingVariants, staggerContainer } from "../animations/variants";
 
 const testimonials = [
   {
@@ -78,13 +78,28 @@ const TestimonialsPage = () => {
       <section className="bg-gray-50 py-16 md:py-24">
         <div className="container-custom">
           <motion.div
-            variants={itemVariants}
+            variants={staggerContainer}
             initial="hidden"
-            animate="visible"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
             className="max-w-4xl mx-auto text-center"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-8">Реальные истории успеха с 4Life®</h1>
-            <div className="space-y-4">
+            <motion.h1
+              variants={headingVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="text-4xl md:text-5xl font-bold mb-8"
+            >
+              Реальные истории успеха с 4Life®
+            </motion.h1>
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="space-y-4"
+            >
               <p className="text-xl text-gray-600">
                 Представленные отзывы – это истории реальных людей, которые нашли поддержку здоровья и новые возможности
                 благодаря продукции 4Life и профессионализму Александра Тощева.
@@ -96,7 +111,31 @@ const TestimonialsPage = () => {
                   заболеваний. Перед применением рекомендуется проконсультироваться с врачом.
                 </p>
               </div>
-            </div>
+            </motion.div>
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
+            >
+              {testimonials.map((testimonial) => (
+                <motion.div
+                  key={testimonial.id}
+                  variants={itemVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  <TestimonialCard
+                    image={testimonial.image}
+                    name={testimonial.name}
+                    title={testimonial.title}
+                    quote={testimonial.quote}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -104,88 +143,212 @@ const TestimonialsPage = () => {
       {/* Product Testimonials */}
       <section className="section bg-white">
         <div className="container-custom">
-          <SectionHeading title="Отзывы о продукции 4Life" centered />
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={testimonial.id}
-                image={testimonial.image}
-                name={testimonial.name}
-                title={testimonial.title}
-                quote={testimonial.quote}
-                delay={index * 0.1}
-              />
-            ))}
-          </div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <SectionHeading title="Отзывы о продукции 4Life" centered />
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {testimonials.map((testimonial) => (
+                <motion.div
+                  key={testimonial.id}
+                  variants={itemVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  <TestimonialCard
+                    image={testimonial.image}
+                    name={testimonial.name}
+                    title={testimonial.title}
+                    quote={testimonial.quote}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Partnership Testimonials */}
       <section className="section bg-gray-50">
         <div className="container-custom">
-          <SectionHeading title="Отзывы о партнерстве с Александром Тощевым" centered />
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <TestimonialCard
-              image="https://i.ibb.co/C07Bf5R/testimonial-anna.jpg"
-              name="Наталья В."
-              title="Предприниматель, 45 лет"
-              quote="Сотрудничество с Александром Геннадьевичем – это большая удача. Он не только прекрасный знаток продукции, но и мудрый наставник. Благодаря его поддержке и обучению в 'Команде Компетентных Лидеров', я смогла быстро стартовать в бизнесе и уже вижу первые результаты. Рекомендую Александра как надежного спонсора!"
-            />
-            <TestimonialCard
-              image="https://i.ibb.co/3pYv26G/testimonial-dmitry.jpg"
-              name="Сергей Д."
-              title="Специалист IT, 38 лет"
-              quote="Когда я решил начать бизнес с 4Life, у меня было много вопросов и сомнений. Александр всегда находил время для подробных консультаций, делился рабочими инструментами и стратегиями. Его подход к бизнесу - профессиональный и системный, без пустых обещаний и давления. Благодарен за поддержку и знания!"
-            />
-            <TestimonialCard
-              image="https://i.ibb.co/VMy1L3D/testimonial-elena.jpg"
-              name="Марина Л."
-              title="Менеджер, 42 года"
-              quote="Самое ценное для меня в наставничестве Александра - его способность объяснять сложные вещи простым языком и выстраивать индивидуальную стратегию развития. За полгода сотрудничества мне удалось не только улучшить собственное здоровье, но и создать стабильный дополнительный доход. Спасибо за вдохновение и поддержку!"
-            />
-          </div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <SectionHeading title="Отзывы о партнерстве с Александром Тощевым" centered />
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto"
+            >
+              <motion.div
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <TestimonialCard
+                  image="https://i.ibb.co/C07Bf5R/testimonial-anna.jpg"
+                  name="Наталья В."
+                  title="Предприниматель, 45 лет"
+                  quote="Сотрудничество с Александром Геннадьевичем – это большая удача. Он не только прекрасный знаток продукции, но и мудрый наставник. Благодаря его поддержке и обучению в 'Команде Компетентных Лидеров', я смогла быстро стартовать в бизнесе и уже вижу первые результаты. Рекомендую Александра как надежного спонсора!"
+                />
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <TestimonialCard
+                  image="https://i.ibb.co/3pYv26G/testimonial-dmitry.jpg"
+                  name="Сергей Д."
+                  title="Специалист IT, 38 лет"
+                  quote="Когда я решил начать бизнес с 4Life, у меня было много вопросов и сомнений. Александр всегда находил время для подробных консультаций, делился рабочими инструментами и стратегиями. Его подход к бизнесу - профессиональный и системный, без пустых обещаний и давления. Благодарен за поддержку и знания!"
+                />
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <TestimonialCard
+                  image="https://i.ibb.co/VMy1L3D/testimonial-elena.jpg"
+                  name="Марина Л."
+                  title="Менеджер, 42 года"
+                  quote="Самое ценное для меня в наставничестве Александра - его способность объяснять сложные вещи простым языком и выстраивать индивидуальную стратегию развития. За полгода сотрудничества мне удалось не только улучшить собственное здоровье, но и создать стабильный дополнительный доход. Спасибо за вдохновение и поддержку!"
+                />
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Disclaimer and Share Experience */}
       <section className="section bg-white">
         <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="bg-yellow-50 p-6 rounded-lg mb-8">
-              <h4 className="text-red-600 font-semibold mb-2">Важно знать</h4>
-              <p className="text-sm text-gray-600">
-                Представленные отзывы отражают личный опыт конкретных людей. Результаты от применения продукции 4Life
-                могут быть индивидуальны и зависят от множества факторов. Продукция 4Life не предназначена для
-                диагностики, лечения или предотвращения заболеваний. БАД. Перед применением проконсультируйтесь со
-                специалистом.
-              </p>
-            </div>
-            <div className="bg-blue-50 p-8 rounded-lg border border-blue-100">
-              <h3 className="text-xl font-semibold mb-4">Поделитесь своей историей успеха</h3>
-              <p className="text-gray-700 mb-6">
-                Если Вы уже используете продукцию 4Life или являетесь партнером, и хотите поделиться своей историей,
-                пожалуйста, свяжитесь со мной. Ваши отзывы помогают другим людям сделать правильный выбор!
-              </p>
-              <a href="/contact" className="btn btn-primary inline-block">
-                {" "}
-                Рассказать свою историю{" "}
-              </a>
-            </div>
-          </div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="max-w-3xl mx-auto text-center"
+            >
+              <motion.div
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+                className="bg-yellow-50 p-6 rounded-lg mb-8"
+              >
+                <motion.h4
+                  variants={headingVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="text-red-600 font-semibold mb-2"
+                >
+                  Важно знать
+                </motion.h4>
+                <motion.p
+                  variants={itemVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="text-sm text-gray-600"
+                >
+                  Представленные отзывы отражают личный опыт конкретных людей. Результаты от применения продукции 4Life
+                  могут быть индивидуальны и зависят от множества факторов. Продукция 4Life не предназначена для
+                  диагностики, лечения или предотвращения заболеваний. БАД. Перед применением проконсультируйтесь со
+                  специалистом.
+                </motion.p>
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+                className="bg-blue-50 p-8 rounded-lg border border-blue-100"
+              >
+                <motion.h3
+                  variants={headingVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="text-xl font-semibold mb-4"
+                >
+                  Поделитесь своей историей успеха
+                </motion.h3>
+                <motion.p
+                  variants={itemVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="text-gray-700 mb-6"
+                >
+                  Если Вы уже используете продукцию 4Life или являетесь партнером, и хотите поделиться своей историей,
+                  пожалуйста, свяжитесь со мной. Ваши отзывы помогают другим людям сделать правильный выбор!
+                </motion.p>
+                <a href="/contact" className="btn btn-primary inline-block">
+                  Рассказать свою историю
+                </a>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <CallToAction
-        title="Присоединяйтесь к тысячам довольных клиентов 4Life"
-        description="Начните свой путь к здоровью, благополучию и новым возможностям уже сегодня! Я готов помочь Вам на каждом этапе."
-        primaryButtonText="Приобрести продукцию со скидкой"
-        primaryButtonLink="/purchase"
-        secondaryButtonText="Узнать о партнерстве"
-        secondaryButtonLink="/partnership"
-      />
+      <section className="section bg-gray-50">
+        <div className="container-custom">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="max-w-4xl mx-auto"
+            >
+              <CallToAction
+                title="Начните свой путь к здоровью с 4Life"
+                description="Присоединяйтесь к тысячам людей, которые уже улучшили свое здоровье и жизнь благодаря продукции 4Life"
+                primaryButtonText="Выбрать продукт"
+                primaryButtonLink="https://russia.4life.com/12299550"
+                secondaryButtonText="Стать партнером"
+                secondaryButtonLink="/partnership"
+                isExternal
+              />
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
     </>
   );
 };
