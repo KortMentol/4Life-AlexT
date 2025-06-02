@@ -182,6 +182,7 @@ const AboutPage: React.FC = () => {
                 src="https://i.ibb.co/3s8sF5h/4life-global.jpg"
                 alt="4Life Глобальное Присутствие"
                 className="rounded-xl shadow-2xl w-full h-auto object-cover"
+                loading="lazy"
               />
             </motion.div>
           </motion.div>

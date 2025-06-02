@@ -187,6 +187,7 @@ const PartnershipPage: React.FC = () => {
                 src="https://i.ibb.co/jGGmH1Q/4life-partnership-benefits.jpg"
                 alt="Начните свой путь с 4Life"
                 className="rounded-xl shadow-2xl w-full h-auto object-cover"
+                loading="lazy"
               />
             </motion.div>
           </motion.div>
