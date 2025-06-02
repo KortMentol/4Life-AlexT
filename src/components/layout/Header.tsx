@@ -25,6 +25,7 @@ const Header = () => {
 
   return (
     <header
+      role="banner"
       className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled ? 'bg-white/90 dark:bg-gray-900/90 shadow-lg' : 'bg-transparent'
       }`}
@@ -36,7 +37,7 @@ const Header = () => {
         transition={{ duration: 0.3 }}
       >
         <div className="flex items-center justify-between h-16">
-          <NavLink to="/" className="flex items-center space-x-2">
+          <NavLink to="/" className="flex items-center space-x-2" aria-label="Главная страница">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/e/ea/4Life_Research_logo.svg"
               alt="4Life Logo"
@@ -47,7 +48,7 @@ const Header = () => {
             </span>
           </NavLink>
 
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav role="navigation" className="hidden md:flex items-center space-x-8">
             {mainNav.map((item) => (
               <NavLink
                 key={item.href}
@@ -59,11 +60,13 @@ const Header = () => {
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`
                 }
+                aria-label={item.title}
               >
                 {item.title}
               </NavLink>
             ))}
             <button
+              type="button"
               onClick={toggleTheme}
               className="p-2 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
               aria-label="Переключить тему"
@@ -72,7 +75,7 @@ const Header = () => {
             </button>
           </nav>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4" role="region" aria-label="Основные действия">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -92,14 +95,21 @@ const Header = () => {
           </div>
         </div>
         <button
+          type="button"
           onClick={toggleMobileMenu}
           className="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-          aria-label="Открыть меню"
+          aria-label="Переключить мобильное меню"
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-menu"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 space-y-2">
+          <div
+            id="mobile-menu"
+            className="md:hidden mt-4 space-y-2"
+            role="menu"
+          >
             {mainNav.map((item) => (
               <NavLink
                 key={item.href}
