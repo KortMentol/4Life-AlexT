@@ -4,12 +4,15 @@ import { BrowserRouter } from "react-router-dom";
 import { ParallaxProvider } from 'react-scroll-parallax';
 import App from "./App.tsx";
 import "./index.css";
+import { ThemeProvider } from './context/ThemeContext';
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ParallaxProvider>
       <BrowserRouter>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </BrowserRouter>
     </ParallaxProvider>
   </StrictMode>

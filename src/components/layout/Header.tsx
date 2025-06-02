@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { siteConfig, mainNav } from '../../config/site';
+import { useTheme } from '../../context/ThemeContext';
 
 const Header = () => {
   const [scrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,7 +26,7 @@ const Header = () => {
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white shadow-lg' : 'bg-transparent'
+        scrolled ? 'bg-white/90 dark:bg-gray-900/90 shadow-lg' : 'bg-transparent'
       }`}
     >
       <motion.div
@@ -51,16 +53,23 @@ const Header = () => {
                 key={item.href}
                 to={item.href}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-md text-sm font-medium ${
                     isActive
-                      ? 'text-primary'
-                      : 'text-gray-700 hover:text-primary'
+                      ? 'bg-primary text-white'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`
                 }
               >
                 {item.title}
               </NavLink>
             ))}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
+              aria-label="Переключить тему"
+            >
+              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -77,42 +86,32 @@ const Header = () => {
               whileTap={{ scale: 0.95 }}
               className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary-dark transition-colors flex items-center space-x-2"
             >
-              <X size={20} />
+              <Menu size={20} />
               <span>Партнерство</span>
             </motion.button>
           </div>
-
-          <button
-            className="md:hidden text-gray-600 hover:text-gray-800"
-            onClick={toggleMobileMenu}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: isMobileMenuOpen ? 1 : 0, height: isMobileMenuOpen ? 'auto' : 0 }}
-          transition={{ duration: 0.3 }}
-          className="md:hidden bg-white shadow-lg"
+        <button
+          onClick={toggleMobileMenu}
+          className="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          aria-label="Открыть меню"
         >
-          <nav className="px-4 py-4">
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 space-y-2">
             {mainNav.map((item) => (
               <NavLink
                 key={item.href}
                 to={item.href}
-                className={({ isActive }) =>
-                  `block py-2 px-3 text-gray-700 hover:text-primary ${
-                    isActive ? 'text-primary font-medium' : ''
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={toggleMobileMenu}
               >
                 {item.title}
               </NavLink>
             ))}
-          </nav>
-        </motion.div>
+          </div>
+        )}
       </motion.div>
     </header>
   );

@@ -28,6 +28,8 @@ import {
   X,
   Zap,
   ArrowRight,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 export const Icons = {
@@ -59,6 +61,8 @@ export const Icons = {
   CheckCircle,
   DollarSign,
   FlaskConical,
+  Sun,
+  Moon,
 };
 
 export type IconName = keyof typeof Icons;
