@@ -14,7 +14,7 @@ const PurchasePage = lazy(() => import('./pages/PurchasePage'));
 
 function App() {
   return (
-    <Layout>
+    <>
       <ScrollToTop />
       <Suspense fallback={
         <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 text-xl animate-pulse">
@@ -22,14 +22,27 @@ function App() {
         </div>
       }>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/partnership" element={<PartnershipPage />} />
-          <Route path="/testimonials" element={<TestimonialsPage />} />
-          <Route path="/purchase" element={<PurchasePage />} />
-          {/* Маршрут для 404 страницы */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+          </Route>
+          <Route path="/products" element={<Layout />}>
+            <Route index element={<ProductsPage />} />
+          </Route>
+          <Route path="/about" element={<Layout />}>
+            <Route index element={<AboutPage />} />
+          </Route>
+          <Route path="/contact" element={<Layout />}>
+            <Route index element={<ContactPage />} />
+          </Route>
+          <Route path="/partnership" element={<Layout />}>
+            <Route index element={<PartnershipPage />} />
+          </Route>
+          <Route path="/testimonials" element={<Layout />}>
+            <Route index element={<TestimonialsPage />} />
+          </Route>
+          <Route path="/purchase" element={<Layout />}>
+            <Route index element={<PurchasePage />} />
+          </Route>
           <Route path="*" element={
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
               <h1 className="text-6xl font-bold mb-4">404</h1>
@@ -39,7 +52,7 @@ function App() {
           } />
         </Routes>
       </Suspense>
-    </Layout>
+    </>
   );
 }
 

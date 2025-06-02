@@ -17,6 +17,7 @@ import {
 import { Link } from "react-router-dom";
 import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
+import { Helmet } from 'react-helmet-async';
 
 // Импорт анимационных вариантов
 import { containerVariants, itemVariants, headingVariants, buttonVariants, cardVariants } from '../animations/variants';
@@ -53,9 +54,22 @@ const testimonials = [
   },
 ];
 
-const HomePage = () => {
+const HomePage: React.FC = () => {
   return (
     <>
+      <Helmet>
+        <title>4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес</title>
+        <meta name="description" content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы." />
+        <meta property="og:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
+        <meta property="og:description" content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы." />
+        <meta property="og:image" content="/images/og-home.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
+        <meta name="twitter:description" content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы." />
+        <meta name="twitter:image" content="/images/og-home.jpg" />
+      </Helmet>
       {/* Hero Section */}
       <section className="min-h-screen flex items-center relative overflow-hidden">
         {/* Parallax Background */}

@@ -4,6 +4,7 @@ import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
 import { containerVariants, itemVariants, headingVariants, staggerContainer, cardVariants } from '../animations/variants';
+import { Helmet } from 'react-helmet-async';
 
 const productsData = [
   {
@@ -58,145 +59,136 @@ const productsData = [
 
 const ProductsPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-      {/* Hero Section для Products Page */}
-      <section className="relative py-24 md:py-32 bg-gradient-to-br from-teal-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
-        <div
-          className="absolute inset-0 z-0 opacity-30"
-          style={{
-            backgroundImage: "url(https://i.ibb.co/Yc53L8w/hero-pattern.png)",
-            backgroundRepeat: "repeat",
-            backgroundSize: "contain",
-          }}
-        ></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.h1
-            className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-            variants={headingVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            Наш Полный Каталог Продукции 4Life
-          </motion.h1>
-          <motion.p
-            className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
-          </motion.p>
-        </div>
-      </section>
-
-      {/* Секция: Популярные Категории */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
-        <div className="container mx-auto px-4 text-center">
-          <SectionHeading
-            title="Изучите наши популярные категории"
-            subtitle="Найдите идеальный продукт для своих нужд."
-          />
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
-          >
-            {/* Категория 1 */}
-            <motion.div
-              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-              variants={cardVariants}
+    <>
+      <Helmet>
+        <title>Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым</title>
+        <meta name="description" content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев." />
+        <meta property="og:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
+        <meta property="og:description" content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев." />
+        <meta property="og:image" content="/images/og-products.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/products" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
+        <meta name="twitter:description" content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев." />
+        <meta name="twitter:image" content="/images/og-products.jpg" />
+      </Helmet>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+        {/* Hero Section для Products Page */}
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-teal-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+          <div
+            className="absolute inset-0 z-0 opacity-30"
+            style={{
+              backgroundImage: "url(https://i.ibb.co/Yc53L8w/hero-pattern.png)",
+              backgroundRepeat: "repeat",
+              backgroundSize: "contain",
+            }}
+          ></div>
+          <div className="container mx-auto px-4 relative z-10">
+            <motion.h1
+              className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
+              variants={headingVariants}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
             >
-              <Icons.ShieldCheck className="h-12 w-12 text-blue-500 mb-4" />
-              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Поддержка Иммунитета</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Основные продукты с Трансфер Факторами для укрепления защитных сил организма.
-              </p>
-            </motion.div>
-            {/* Категория 2 */}
-            <motion.div
-              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-              variants={cardVariants}
-              transition={{ delay: 0.4 }}
+              Наш Полный Каталог Продукции 4Life
+            </motion.h1>
+            <motion.p
+              className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
             >
-              <Icons.HeartPulse className="h-12 w-12 text-red-500 mb-4" />
-              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Общее Благополучие</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Продукты для поддержания жизненной энергии, детоксикации и антиоксидантной защиты.
-              </p>
-            </motion.div>
-            {/* Категория 3 */}
-            <motion.div
-              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-              variants={cardVariants}
-              transition={{ delay: 0.6 }}
-            >
-              <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
-              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Управление Весом и Форма</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Решения для здорового контроля веса и поддержания оптимальной физической формы.
-              </p>
-            </motion.div>
-            {/* Категория 4 */}
-            <motion.div
-              className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-              variants={cardVariants}
-              transition={{ delay: 0.8 }}
-            >
-              <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
-              <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Красота и Уход</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Продукты для сияющей кожи, волос и ногтей, разработанные с учетом внутренней красоты.
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+              Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
+            </motion.p>
+          </div>
+        </section>
 
-      {/* Секция: Все Продукты (Каталог) */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-        <div className="container mx-auto px-4">
-          <SectionHeading
-            title="Все наши продукты"
-            subtitle="Выберите продукты 4Life для своего здоровья и благополучия."
-          />
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            {productsData.map((product, index) => (
-              <ProductCard
-                key={index}
-                image={product.image}
-                title={product.title}
-                description={product.description}
-                link={product.link}
-                delay={0.1 * index} // Динамическая задержка
-              />
-            ))}
-          </motion.div>
-        </div>
-      </section>
+        {/* Секция: Популярные Категории */}
+        <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+          <div className="container mx-auto px-4 text-center">
+            <SectionHeading
+              title="Изучите наши популярные категории"
+              subtitle="Найдите идеальный продукт для своих нужд."
+            />
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
+            >
+              {/* Категория 1 */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Управление Весом и Форма</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Решения для здорового контроля веса и поддержания оптимальной физической формы.
+                </p>
+              </motion.div>
+              {/* Категория 4 */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.8 }}
+              >
+                <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Красота и Уход</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Продукты для сияющей кожи, волос и ногтей, разработанные с учетом внутренней красоты.
+                </p>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
 
-      {/* Финальный CTA */}
-      <CallToAction
-        title="Есть вопросы о продуктах 4Life?"
-        description="Свяжитесь со мной, и я помогу вам выбрать идеальные решения для ваших нужд."
-        primaryButtonText="Получить консультацию"
-        primaryButtonLink="/contact"
-        secondaryButtonText="Узнать о партнерстве"
-        secondaryButtonLink="/partnership"
-      />
-    </div>
+        {/* Секция: Все Продукты (Каталог) */}
+        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
+          <div className="container mx-auto px-4">
+            <SectionHeading
+              title="Все наши продукты"
+              subtitle="Выберите продукты 4Life для своего здоровья и благополучия."
+            />
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              {productsData.map((product, index) => (
+                <ProductCard
+                  key={index}
+                  image={product.image}
+                  title={product.title}
+                  description={product.description}
+                  link={product.link}
+                  delay={0.1 * index} // Динамическая задержка
+                />
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Финальный CTA */}
+        <CallToAction
+          title="Есть вопросы о продуктах 4Life?"
+          description="Свяжитесь со мной, и я помогу вам выбрать идеальные решения для ваших нужд."
+          primaryButtonText="Получить консультацию"
+          primaryButtonLink="/contact"
+          secondaryButtonText="Узнать о партнерстве"
+          secondaryButtonLink="/partnership"
+        />
+      </div>
+    </>
   );
 };
 

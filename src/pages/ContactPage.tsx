@@ -2,10 +2,24 @@ import { motion } from "framer-motion";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
 const { Mail, MapPin, Phone } = Icons;
+import { Helmet } from 'react-helmet-async';
 
 const ContactPage = () => {
   return (
     <>
+      <Helmet>
+        <title>Контакты - Связь с Александром Тощевым и 4Life</title>
+        <meta name="description" content="Свяжитесь со мной для консультации по продукции 4Life, оформления заказа или обсуждения партнерства. Узнайте больше о возможностях сотрудничества." />
+        <meta property="og:title" content="Контакты - Связь с Александром Тощевым и 4Life" />
+        <meta property="og:description" content="Свяжитесь со мной для консультации по продукции 4Life, оформления заказа или обсуждения партнерства. Узнайте больше о возможностях сотрудничества." />
+        <meta property="og:image" content="/images/og-contact.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/contact" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Контакты - Связь с Александром Тощевым и 4Life" />
+        <meta name="twitter:description" content="Свяжитесь со мной для консультации по продукции 4Life, оформления заказа или обсуждения партнерства. Узнайте больше о возможностях сотрудничества." />
+        <meta name="twitter:image" content="/images/og-contact.jpg" />
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-gray-50 py-16 md:py-24">
         <div className="container-custom">
