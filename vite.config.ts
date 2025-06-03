@@ -4,43 +4,39 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': '/src'
-    }
-  },
-  optimizeDeps: {
-    include: ["lucide-react", "react-tilt"],
-    esbuildOptions: {
-      target: "es2020",
-    },
-  },
-  build: {
-    target: "es2020",
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "lucide-react": ["lucide-react"],
-          "react-tilt": ["react-tilt"]
-        },
-      },
-    },
-  },
   server: {
-    host: true,
-    port: 3000,
+    host: '0.0.0.0',
+    port: 6554,
+    strictPort: true,
     hmr: {
+      clientPort: 6554,
       host: 'localhost',
-      port: 3000,
+      protocol: 'ws',
       overlay: false
     },
     watch: {
       usePolling: true
     },
+    cors: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache'
+    },
+    fs: {
+      allow: ['..']
+    }
   },
   preview: {
-    host: true,
-    port: 3000,
-    strictPort: true
+    host: '0.0.0.0',
+    port: 6554,
+    strictPort: true,
+    cors: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache'
+    }
   },
+  define: {
+    'process.env.NODE_ENV': '"development"'
+  }
 });

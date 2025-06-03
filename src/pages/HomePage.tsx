@@ -216,12 +216,9 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col lg:flex-row items-center gap-12 mt-12">
             {/* Image / Visual */}
             <motion.div className="lg:w-1/2" variants={itemVariants} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <img
-                src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                alt="Александр Тощев - Лидер 4Life"
-                className="rounded-xl shadow-2xl w-full h-auto object-cover transform hover:scale-102 transition-transform duration-500"
-                loading="lazy"
-              />
+              <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-xl shadow-2xl flex items-center justify-center">
+                <span className="text-gray-500 dark:text-gray-400">Изображение не найдено</span>
+              </div>
             </motion.div>
 
             {/* Content */}

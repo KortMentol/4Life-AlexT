@@ -49,7 +49,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <NavLink to="/" className="flex items-center space-x-2" aria-label="Главная страница">
             <img
-              src="/4life-logo.svg"
+              src="/assets/images/brand/4life-logo.svg"
               alt="4Life Logo"
               className="h-8 w-auto mr-2"
             />
