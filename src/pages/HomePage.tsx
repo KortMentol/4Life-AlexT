@@ -81,82 +81,77 @@ const HomePage: React.FC = () => {
         <meta name="twitter:image" content="/images/og-home.jpg" />
       </Helmet>
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBanner
           layers={[
             {
-              image:
-                "https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+              image: "/images/hero-bg.jpg",
               speed: -20,
-              opacity: [0.4, 0.6],
-              scale: [1, 1.1],
-              shouldAlwaysCompleteAnimation: true,
-            },
-            {
-              image:
-                "https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-              speed: -10,
-              opacity: [0.2, 0.3],
+              opacity: [0.8, 1],
               scale: [1.05, 1.15],
               shouldAlwaysCompleteAnimation: true,
             },
           ]}
           className="absolute inset-0 z-0"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/80 to-purple-600/80 dark:from-gray-900/90 dark:to-gray-800/90" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/70 to-purple-600/70 dark:from-gray-900/70 dark:to-gray-800/70" />
         </ParallaxBanner>
 
-        <div className="relative z-10 px-4 max-w-4xl mx-auto">
-          <motion.h1
-            className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6 drop-shadow-lg"
-            variants={headingVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            Проснись <span className="text-primary block md:inline">полным энергии, ясности ума</span> и желания творить
-            великие дела с <span className="text-4life-blue">4Life</span>
-          </motion.h1>
+        <div className="relative z-10 w-full max-w-5xl mx-auto text-center flex justify-center">
+          <div className="flex flex-col items-center text-center space-y-8 px-4 w-full">
+            <motion.h1
+              className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg"
+              variants={headingVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              Проснись <span className="text-primary block md:inline">полным энергии, ясности ума</span> и желания творить
+              великие дела с <span className="text-4life-blue">4Life</span>
+            </motion.h1>
 
-          <motion.p
-            className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto"
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            Инвестируй в свое здоровье сегодня, чтобы наслаждаться каждым днем полноценно и счастливо. Мы поможем тебе
-            раскрыть жизненную силу и обрести новые возможности.
-          </motion.p>
+            <motion.p
+              className="text-lg md:text-xl text-gray-100 dark:text-gray-200 max-w-2xl leading-relaxed"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              Инвестируй в свое здоровье сегодня, чтобы наслаждаться каждым днем полноценно и счастливо. Мы поможем тебе
+              раскрыть жизненную силу и обрести новые возможности.
+            </motion.p>
 
-          {/* CTA Buttons */}
-          <motion.div
-            className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-12"
-            variants={itemVariants}
-            initial="hidden"
-            animate="show"
-          >
-            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-              <Link to="/purchase" className="btn btn-primary text-lg px-8 py-4 flex items-center space-x-3 group">
-                <span>Приобрести продукцию 4Life</span>
-                <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
+            {/* CTA Buttons */}
+            <motion.div
+              className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full max-w-2xl mx-auto"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap" className="w-full sm:w-auto">
+                <Link to="/purchase" className="btn btn-primary text-lg px-8 py-4 flex items-center justify-center sm:justify-start space-x-3 group w-full">
+                  <span>Приобрести продукцию 4Life</span>
+                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </motion.div>
+              <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap" className="w-full sm:w-auto">
+                <Link to="/partnership" className="btn btn-outline text-lg px-8 py-4 flex items-center justify-center sm:justify-start space-x-3 group w-full">
+                  <span>Узнать о партнерстве</span>
+                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </motion.div>
             </motion.div>
-            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-              <Link to="/partnership" className="btn btn-outline text-lg px-8 py-4 flex items-center space-x-3 group">
-                <span>Узнать о партнерстве</span>
-                <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            </motion.div>
-          </motion.div>
+          </div>
 
           {/* Key Benefits / Value Proposition */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 max-w-5xl mx-auto px-4 w-full"
             variants={containerVariants}
             initial="hidden"
-            animate="show"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
           >
             <motion.div
               className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"

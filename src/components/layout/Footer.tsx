@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
-import { FaTelegram, FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import { FaTelegram, FaWhatsapp, FaEnvelope, FaPhone } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { mainNav } from "../../config/site";
 
 const Footer: React.FC = () => {
   return (
@@ -41,94 +42,66 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="text-white font-semibold mb-4">Быстрые ссылки</h3>
             <ul className="space-y-3">
-              <li>
-                <Link 
-                  to="/" 
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  Главная
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/about" 
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  О нас
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/products" 
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  Продукты
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/partnership" 
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  Партнерство
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/testimonials" 
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  Отзывы
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/contact" 
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  Контакты
-                </Link>
-              </li>
+              {mainNav.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    to={item.href}
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Каналы связи */}
           <div className="space-y-4">
-            <h3 className="text-white font-semibold mb-4">Каналы связи</h3>
-            <div className="flex space-x-6">
+            <h3 className="text-white font-semibold mb-4">Контакты</h3>
+            <div className="space-y-4">
+              <a
+                href="tel:+79267728717"
+                className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors group"
+                aria-label="Позвонить по телефону"
+              >
+                <div className="bg-purple-600 p-2 rounded-full group-hover:bg-purple-700 transition-colors">
+                  <FaPhone className="h-5 w-5" />
+                </div>
+                <span className="text-lg font-medium">+7 926 772 8717</span>
+              </a>
+              <a
+                href="mailto:atosotxvnew@gmail.com"
+                className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors group"
+                aria-label="Отправить Email"
+              >
+                <div className="bg-blue-500 p-2 rounded-full group-hover:bg-blue-600 transition-colors">
+                  <FaEnvelope className="h-5 w-5" />
+                </div>
+                <span className="text-lg">atosotxvnew@gmail.com</span>
+              </a>
               <a
                 href="https://wa.me/79152561177"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors group"
+                className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors group"
                 aria-label="Связаться через WhatsApp"
               >
-                <div className="flex flex-col items-center group-hover:scale-110 transition-transform duration-300">
-                  <FaWhatsapp className="h-8 w-8 text-gray-300 group-hover:text-white" aria-hidden="true" />
-                  <span className="text-sm text-gray-300 group-hover:text-white">WhatsApp</span>
+                <div className="bg-green-500 p-2 rounded-full group-hover:bg-green-600 transition-colors">
+                  <FaWhatsapp className="h-5 w-5" />
                 </div>
+                <span className="text-lg">WhatsApp</span>
               </a>
               <a
                 href="https://t.me/+79152561177"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors group"
+                className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors group"
                 aria-label="Связаться через Telegram"
               >
-                <div className="flex flex-col items-center group-hover:scale-110 transition-transform duration-300">
-                  <FaTelegram className="h-8 w-8 text-gray-300 group-hover:text-white" aria-hidden="true" />
-                  <span className="text-sm text-gray-300 group-hover:text-white">Telegram</span>
+                <div className="bg-blue-400 p-2 rounded-full group-hover:bg-blue-500 transition-colors">
+                  <FaTelegram className="h-5 w-5" />
                 </div>
-              </a>
-              <a
-                href="mailto:atosotxvnew@gmail.com"
-                className="text-gray-300 hover:text-white transition-colors group"
-                aria-label="Отправить Email"
-              >
-                <div className="flex flex-col items-center group-hover:scale-110 transition-transform duration-300">
-                  <FaEnvelope className="h-8 w-8 text-gray-300 group-hover:text-white" aria-hidden="true" />
-                  <span className="text-sm text-gray-300 group-hover:text-white">Email</span>
-                </div>
+                <span className="text-lg">Telegram</span>
               </a>
             </div>
           </div>

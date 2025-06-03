@@ -7,10 +7,10 @@ import ScrollToTop from './components/utils/ScrollToTop';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const AboutMePage = lazy(() => import('./pages/AboutMePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const PartnershipPage = lazy(() => import('./pages/PartnershipPage'));
-const TestimonialsPage = lazy(() => import('./pages/TestimonialsPage'));
-const PurchasePage = lazy(() => import('./pages/PurchasePage'));
+const HowToBuyPage = lazy(() => import('./pages/HowToBuyPage'));
 
 function App() {
   return (
@@ -24,24 +24,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
-          </Route>
-          <Route path="/products" element={<Layout />}>
-            <Route index element={<ProductsPage />} />
-          </Route>
-          <Route path="/about" element={<Layout />}>
-            <Route index element={<AboutPage />} />
-          </Route>
-          <Route path="/contact" element={<Layout />}>
-            <Route index element={<ContactPage />} />
-          </Route>
-          <Route path="/partnership" element={<Layout />}>
-            <Route index element={<PartnershipPage />} />
-          </Route>
-          <Route path="/testimonials" element={<Layout />}>
-            <Route index element={<TestimonialsPage />} />
-          </Route>
-          <Route path="/purchase" element={<Layout />}>
-            <Route index element={<PurchasePage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="about-me" element={<AboutMePage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="partnership" element={<PartnershipPage />} />
+            <Route path="how-to-buy" element={<HowToBuyPage />} />
           </Route>
           <Route path="*" element={
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">

@@ -105,11 +105,6 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
                     </p>
                   </div>
                 </Tilt>
-                <DollarSign className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Стабильный Доход</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Возможность создать пассивный доход через систему многоуровневого маркетинга.
-                </p>
               </motion.div>
               {/* Преимущество 2 */}
               <motion.div
@@ -136,11 +131,6 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
                     </p>
                   </div>
                 </Tilt>
-                <Clock className="h-12 w-12 text-blue-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Гибкий График</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Работайте когда удобно, без жесткого графика и привязки к офису.
-                </p>
               </motion.div>
               {/* Преимущество 3 */}
               <motion.div
@@ -167,11 +157,6 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
                     </p>
                   </div>
                 </Tilt>
-                <Award className="h-12 w-12 text-purple-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Профессиональный Рост</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Обучение и развитие навыков лидерства, продаж и управления командой.
-                </p>
               </motion.div>
               {/* Преимущество 4 */}
               <motion.div
@@ -198,11 +183,6 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
                     </p>
                   </div>
                 </Tilt>
-                <Lightbulb className="h-12 w-12 text-yellow-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Инновации</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Работайте с передовыми продуктами и технологиями 4Life.
-                </p>
               </motion.div>
             </motion.div>
           </div>

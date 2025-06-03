@@ -5,44 +5,50 @@ export const siteConfig = {
   ogImage: "https://[ДОМЕН_САЙТА]/og-image.jpg",
   links: {
     telegram: "https://t.me/[ВАШ_ТЕЛЕГРАМ]",
-    whatsapp: "https://wa.me/[НОМЕР_ТЕЛЕФОНА]",
-    phone: "+[КОД_СТРАНЫ][НОМЕР_ТЕЛЕФОНА]",
-    email: "mailto:[EMAIL_ОТЦА]",
+    whatsapp: "https://wa.me/79031234567",
+    phone: "+7 (903) 123-45-67",
+    email: "mailto:your.father.email@example.com",
   },
   distributor: {
     name: "Александр Тощев",
     title: "Независимый Дистрибьютор 4Life & Наставник по саморазвитию",
+  },
+  contact: {
+    fourLifeId: "12299550",
+    whatsapp: "https://wa.me/79031234567",
+    email: "your.father.email@example.com",
+    phone: "+7 (903) 123-45-67",
   },
 };
 
 export const mainNav = [
   {
     title: "Главная",
-    href: "/",
-  },
-  {
-    title: "О нас",
-    href: "/about",
+    href: "/"
   },
   {
     title: "Продукты",
-    href: "/products",
+    href: "/products"
+  },
+  {
+    title: "Как приобрести?",
+    href: "/how-to-buy"
+  },
+  {
+    title: "О 4Life",
+    href: "/about"
+  },
+  {
+    title: "Обо Мне",
+    href: "/about-me"
   },
   {
     title: "Партнерство",
-    href: "/partnership",
-  },
-  {
-    title: "Отзывы",
-    href: "/testimonials",
-  },
-  {
-    title: "Купить",
-    href: "/purchase",
+    href: "/partnership"
   },
   {
     title: "Контакты",
-    href: "/contact",
+    href: "/contact"
   },
 ];
 

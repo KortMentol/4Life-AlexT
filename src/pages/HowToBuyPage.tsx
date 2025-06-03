@@ -4,8 +4,8 @@ import { Helmet } from "react-helmet-async";
 
 import SectionHeading from "../components/ui/SectionHeading";
 
-// 2. Определение функционального компонента PurchasePage
-const PurchasePage = () => {
+// 2. Определение функционального компонента HowToBuyPage
+const HowToBuyPage = () => {
   // 3. Определение вариантов анимаций для Framer Motion
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -147,4 +147,4 @@ const PurchasePage = () => {
   );
 };
 
-export default PurchasePage;
+export default HowToBuyPage;

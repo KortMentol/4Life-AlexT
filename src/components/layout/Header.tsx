@@ -47,13 +47,18 @@ const Header = () => {
         transition={{ duration: 0.3 }}
       >
         <div className="flex items-center justify-between h-16">
-          <NavLink to="/" className="flex items-center space-x-2" aria-label="Главная страница">
+          <NavLink to="/" className="flex items-center space-x-2 group" aria-label="Главная страница">
             <img
               src="/assets/images/brand/4life-logo.svg"
               alt="4Life Logo"
               className="h-8 w-auto mr-2"
             />
-            <span className="font-bold text-xl text-primary">{siteConfig.distributor.name}</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-xl text-primary leading-tight">{siteConfig.distributor.name}</span>
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-400 opacity-90 group-hover:opacity-100 transition-opacity">
+                Builder Elite
+              </span>
+            </div>
           </NavLink>
 
           <nav role="navigation" className="hidden md:flex items-center space-x-8">

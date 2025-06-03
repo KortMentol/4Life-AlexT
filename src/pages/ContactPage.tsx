@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import { FaEnvelope, FaTelegram, FaWhatsapp } from "react-icons/fa";
+import { FaPhone, FaTelegram, FaWhatsapp } from "react-icons/fa";
 import { fadeIn, headingVariants, itemVariants } from "../animations/variants";
 
 const ContactPage: React.FC = () => {
@@ -11,21 +11,18 @@ const ContactPage: React.FC = () => {
       icon: FaWhatsapp,
       link: "https://wa.me/79152561177",
       colorClass: "bg-green-500 hover:bg-green-600",
-      description: "Мгновенная связь для быстрых вопросов и консультаций.",
     },
     {
       name: "Telegram",
       icon: FaTelegram,
       link: "https://t.me/+79152561177",
       colorClass: "bg-blue-500 hover:bg-blue-600",
-      description: "Для развернутых обсуждений и получения подробной информации.",
     },
     {
-      name: "Email",
-      icon: FaEnvelope,
-      link: "mailto:atosotxvnew@gmail.com",
-      colorClass: "bg-red-500 hover:bg-red-600",
-      description: "Отправьте мне письмо с любыми вопросами или предложениями.",
+      name: "Позвонить",
+      icon: FaPhone,
+      link: "tel:+79152561177",
+      colorClass: "bg-purple-600 hover:bg-purple-700",
     },
   ];
 
@@ -83,8 +80,7 @@ const ContactPage: React.FC = () => {
                 variants={itemVariants}
               >
                 <method.icon size={48} className="mb-4" />
-                <span className="text-3xl mb-2">{method.name}</span>
-                <p className="text-sm opacity-90">{method.description}</p>
+                <span className="text-3xl">{method.name}</span>
               </motion.a>
             ))}
           </motion.div>

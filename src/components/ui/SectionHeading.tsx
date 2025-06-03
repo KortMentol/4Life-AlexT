@@ -6,12 +6,13 @@ interface SectionHeadingProps {
   description?: string;
   centered?: boolean;
   light?: boolean;
+  className?: string;
 }
 
-const SectionHeading = ({ title, subtitle, description, centered = false, light = false }: SectionHeadingProps) => {
+const SectionHeading = ({ title, subtitle, description, centered = false, light = false, className = '' }: SectionHeadingProps) => {
   return (
     <motion.div
-      className={`mb-12 ${centered ? "text-center" : ""} relative z-10`}
+      className={`mb-12 ${centered ? "text-center" : ""} ${className} relative z-10`}
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, amount: 0.3 }}

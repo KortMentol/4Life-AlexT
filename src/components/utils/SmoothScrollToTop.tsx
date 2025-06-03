@@ -33,15 +33,19 @@ const SmoothScrollToTop = () => {
 
         requestAnimationFrame(animateScroll);
       };
-
-      // Небольшая задержка для начала анимации
-      const timer = setTimeout(scrollToTop, 10);
       
       // Обновляем предыдущий путь
       prevPathname.current = pathname;
       
+      // Небольшая задержка для начала анимации
+      const timer = setTimeout(scrollToTop, 10);
+      
+      // Очистка таймера при размонтировании
       return () => clearTimeout(timer);
     }
+    
+    // Возвращаем функцию очистки, если условие не выполнилось
+    return () => {};
   }, [pathname]);
 
   return null;
