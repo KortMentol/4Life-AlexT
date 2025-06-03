@@ -5,70 +5,35 @@ import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
 
-const testimonials = [
+interface Testimonial {
+  id: string;
+  name: string;
+  title: string;
+  quote: string;
+  image: string;
+}
+
+const testimonials: Testimonial[] = [
   {
-    id: "testimonial-sarah-m",
-    image: "/images/avatar-sarah.webp",
-    name: "Sarah M.",
-    title: "Предприниматель, 35 лет",
-    quote:
-      "Я начала принимать 4Life Transfer Factor Tri-Factor Formula несколько месяцев назад по рекомендации подруги. Раньше я часто чувствовала себя уставшей и подверженной сезонным простудам. Сейчас я полна энергии, и мой иммунитет стал заметно крепче! Я очень довольна результатами и рекомендую этот продукт всем, кто хочет поддержать свое здоровье естественным путем.",
+    id: "testimonial-anna",
+    name: "Анна К.",
+    title: "Мама, 35 лет",
+    quote: "Благодаря продуктам 4Life и поддержке Александра, я чувствую себя моложе и энергичнее! Мой иммунитет стал значительно крепче.",
+    image: "/placeholder-avatar-anna.jpg",
   },
   {
-    id: "testimonial-david-k",
-    image: "/images/avatar-david.webp",
-    name: "David K.",
-    title: "Спортсмен, 42 года",
-    quote:
-      "Как человек, ведущий активный образ жизни и занимающийся спортом, я искал качественную поддержку для своего организма. 4Life Transfer Factor Plus стал для меня настоящим открытием. Он помогает мне быстрее восстанавливаться после тренировок и поддерживать высокий уровень работоспособности. Отличный продукт!",
+    id: "testimonial-ivan",
+    name: "Иван С.",
+    title: "Бизнесмен, 42 года",
+    quote: "Я долго искал надежного партнера в MLM-бизнесе. Александр не просто дистрибьютор, а настоящий наставник. Мой доход растет!",
+    image: "/placeholder-avatar-ivan.jpg",
   },
   {
-    id: "testimonial-irina-p",
-    image: "/images/avatar-irina.webp",
-    name: "Ирина П.",
-    title: "Мама, 38 лет",
-    quote:
-      "Я принимаю Трансфер Фактор Плюс уже больше года. За это время я заметила значительное улучшение общего самочувствия и стрессоустойчивости. Особенно заметна разница в осенне-зимний период - в то время как коллеги часто болеют, я продолжаю активно работать. Очень благодарна Александру за подробную консультацию по продукту.",
-  },
-  {
-    id: "testimonial-mikhail-s",
-    image: "/images/avatar-mikhail.webp",
-    name: "Михаил С.",
-    title: "Бизнесмен, 29 лет",
-    quote:
-      "Для меня как для человека, часто контактирующего с большим количеством людей, поддержка иммунитета крайне важна. Начал принимать 4Life Transfer Factor Tri-Factor Formula по совету Александра и отметил, что стал намного реже подхватывать сезонные вирусы. Буду продолжать прием и дальше!",
-  },
-  {
-    id: "testimonial-elena-48",
-    image: "/images/avatar-elena.webp",
-    name: "Елена",
-    title: "Пенсионерка, 48 лет",
-    quote:
-      "После курса 4Life Transfer Factor Tri-Factor Formula заметила значительное улучшение общего самочувствия. Раньше часто болела простудами, теперь это стало редкостью. Особенно впечатлил эффект после поездки в командировку – обычно возвращалась с простудой, а в этот раз осталась в отличной форме.",
-  },
-  {
-    id: "testimonial-dmitry-35",
-    image: "/images/avatar-dmitry.webp",
-    name: "Дмитрий",
-    title: "Спортсмен, 35 лет",
-    quote:
-      "Как спортсмен, я всегда ищу натуральные способы поддержки организма. 4Life Transfer Factor Plus стал отличным дополнением к моему режиму. После интенсивных тренировок восстанавливаюсь быстрее, и энергия держится весь день.",
-  },
-  {
-    id: "testimonial-anna-55",
-    image: "/images/avatar-anna.webp",
-    name: "Анна",
-    title: "Путешественница, 55 лет",
-    quote:
-      "RioVida Stix – это настоящая находка для моей активной жизни! Удобно брать с собой в командировки, вкус приятный. Особенно заметила улучшение сна и общего самочувствия. Рекомендую всем, кто ведет активный образ жизни!",
-  },
-  {
-    id: "testimonial-sergey-40",
-    image: "/images/avatar-sergey.webp",
-    name: "Сергей",
-    title: "Специалист IT, 40 лет",
-    quote:
-      "Благодарю Александра за рекомендацию 4Life Transfer Factor Classic. После месяца приема почувствовал значительное улучшение общего самочувствия. Особенно рад, что продукт помогает поддерживать здоровье без искусственных стимуляторов.",
+    id: "testimonial-elena",
+    name: "Елена В.",
+    title: "Пенсионерка, 55 лет",
+    quote: "Проблемы со здоровьем преследовали меня годами. Комплексный подход, рекомендованный Александром, изменил мою жизнь к лучшему.",
+    image: "/placeholder-avatar-elena.jpg",
   },
 ];
 
@@ -79,25 +44,23 @@ const TestimonialsPage = () => {
         <title>Отзывы о продукции 4Life - Реальные истории клиентов Александра Тощева</title>
         <meta
           name="description"
-          content="Читайте реальные отзывы о продукции 4Life от довольных клиентов Александра Тощева. Узнайте, как наши продукты помогли улучшить здоровье и качество жизни."
+          content="Читайте реальные отзывы о продукции 4Life и опыте работы с Александром Тощевым. Узнайте, как наши продукты помогли улучшить здоровье и бизнес наших клиентов."
         />
         <meta property="og:title" content="Отзывы о продукции 4Life - Реальные истории клиентов Александра Тощева" />
         <meta
           property="og:description"
-          content="Читайте реальные отзывы о продукции 4Life от довольных клиентов Александра Тощева. Узнайте, как наши продукты помогли улучшить здоровье и качество жизни."
+          content="Читайте реальные отзывы о продукции 4Life и опыте работы с Александром Тощевым. Узнайте, как наши продукты помогли улучшить здоровье и бизнес наших клиентов."
         />
-        <meta property="og:image" content="https://ВАШ_ДОМЕН.ru/images/og-testimonials.jpg" />{" "}
-        {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
+        <meta property="og:image" content="/images/og-testimonials.jpg" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ВАШ_ДОМЕН.ru/testimonials" />
+        <meta property="og:url" content="/testimonials" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Отзывы о продукции 4Life - Реальные истории клиентов Александра Тощева" />
         <meta
           name="twitter:description"
-          content="Читайте реальные отзывы о продукции 4Life от довольных клиентов Александра Тощева. Узнайте, как наши продукты помогли улучшить здоровье и качество жизни."
+          content="Читайте реальные отзывы о продукции 4Life и опыте работы с Александром Тощевым. Узнайте, как наши продукты помогли улучшить здоровье и бизнес наших клиентов."
         />
-        <meta name="twitter:image" content="https://ВАШ_ДОМЕН.ru/images/og-testimonials.jpg" />{" "}
-        {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
+        <meta name="twitter:image" content="/images/og-testimonials.jpg" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://ВАШ_ДОМЕН.ru/testimonials" /> {/* ЗАМЕНИТЬ НА РЕАЛЬНЫЙ ДОМЕН */}
       </Helmet>
@@ -168,39 +131,30 @@ const TestimonialsPage = () => {
       </section>
 
       {/* Product Testimonials */}
-      <section className="section bg-white">
-        <div className="container-custom">
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <SectionHeading
+            title="Истории Успеха"
+            description="Реальные истории людей, которые достигли успеха с помощью продукции 4Life и поддержки Александра Тощева"
+            centered={true}
+          />
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            <SectionHeading title="Отзывы о продукции 4Life" centered />
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {testimonials.map((testimonial) => (
-                <motion.div
-                  key={testimonial.id}
-                  variants={itemVariants}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.3 }}
-                >
-                  <TestimonialCard
-                    image={testimonial.image}
-                    name={testimonial.name}
-                    title={testimonial.title}
-                    quote={testimonial.quote}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
+            {testimonials.map((testimonial, index) => (
+              <motion.div key={index} variants={itemVariants}>
+                <TestimonialCard
+                  image={testimonial.image}
+                  name={testimonial.name}
+                  title={testimonial.title}
+                  quote={testimonial.quote}
+                />
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>

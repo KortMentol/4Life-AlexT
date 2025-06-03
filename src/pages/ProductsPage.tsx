@@ -18,55 +18,55 @@ const productsData = [
       "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Transfer Factor Tri-Factor Formula",
     description: "Основа линейки 4Life, для всесторонней поддержки иммунной системы.",
-    purchaseLink: "/purchase", // Originally: /products/transfer-factor
+    link: "https://russia.4life.com/products/4life-transfer-factor-tri-factor-formula", // Оригинальная ссылка на продукт
   },
   {
     image:
       "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Transfer Factor Plus Tri-Factor Formula",
     description: "Мощная комбинация для максимальной поддержки иммунитета.",
-    purchaseLink: "/purchase", // Originally: /products/transfer-factor-plus
+    link: "https://russia.4life.com/products/4life-transfer-factor-plus-tri-factor-formula", // Оригинальная ссылка на продукт
   },
   {
     image:
       "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Renuvo",
     description: "Адаптогенная формула для молодости, восстановления и жизненной энергии.",
-    purchaseLink: "/purchase", // Originally: /products/renuvo
+    link: "https://russia.4life.com/products/4life-renuvo", // Оригинальная ссылка на продукт
   },
   {
     image:
       "https://images.pexels.com/photos/7473853/pexels-photo-7473853.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Collagen",
     description: "Поддерживает здоровье кожи, волос, ногтей и суставов.",
-    purchaseLink: "/purchase", // Originally: /products/collagen
+    link: "https://russia.4life.com/products/4life-collagen", // Оригинальная ссылка на продукт
   },
   {
     image:
       "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Pro-TF",
     description: "Высококачественный протеин для поддержания мышечной массы и здорового веса.",
-    purchaseLink: "/purchase", // Originally: /products/pro-tf
+    link: "https://russia.4life.com/products/4life-pro-tf", // Оригинальная ссылка на продукт
   },
   {
     image:
       "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "RiteStart",
     description: "Комплексный мультивитаминный и минеральный комплекс для ежедневного здоровья.",
-    purchaseLink: "/purchase", // Originally: /products/ritestart
+    link: "/purchase",
   },
   {
     image:
       "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "BCV",
     description: "Целевая поддержка для здоровья сердца и всей сердечно-сосудистой системы.",
-    purchaseLink: "/purchase", // Originally: /products/bcv
+    link: "/purchase",
   },
   {
     image: "https://i.ibb.co/GtnqX9h/riovida.jpg",
     title: "RioVida",
     description: "Сокосодержащий напиток с Трансфер Факторами и антиоксидантами.",
-    purchaseLink: "/purchase", // Originally: /products/riovida
+    link: "/purchase",
   },
 ];
 
@@ -192,7 +192,7 @@ const ProductsPage: React.FC = () => {
                   image={product.image}
                   title={product.title}
                   description={product.description}
-                  purchaseLink={product.purchaseLink}
+                  link={product.link}
                   delay={0.1 * index} // Динамическая задержка
                 />
               ))}

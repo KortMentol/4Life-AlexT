@@ -39,9 +39,9 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <NavLink to="/" className="flex items-center space-x-2" aria-label="Главная страница">
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/e/ea/4Life_Research_logo.svg"
+              src="/4life-logo.svg"
               alt="4Life Logo"
-              className="h-8"
+              className="h-8 w-auto mr-2"
             />
             <span className="font-bold text-xl text-primary">{siteConfig.distributor.name}</span>
           </NavLink>
@@ -74,22 +74,26 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center space-x-4" role="region" aria-label="Основные действия">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary-dark transition-colors flex items-center space-x-2"
+            <NavLink
+              to="/purchase"
+              className={({ isActive }) =>
+                `px-3 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors flex items-center space-x-2 ${isActive ? 'bg-primary-dark' : ''}`
+              }
+              aria-label="Перейти к покупкам"
             >
               <Menu size={20} />
               <span>Купить</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary-dark transition-colors flex items-center space-x-2"
+            </NavLink>
+            <NavLink
+              to="/partnership"
+              className={({ isActive }) =>
+                `px-3 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors flex items-center space-x-2 ${isActive ? 'bg-primary-dark' : ''}`
+              }
+              aria-label="Перейти к партнерству"
             >
               <Menu size={20} />
               <span>Партнерство</span>
-            </motion.button>
+            </NavLink>
           </div>
         </div>
         <button

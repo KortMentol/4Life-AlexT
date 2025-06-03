@@ -3,10 +3,8 @@ import {
   ArrowRight,
   Briefcase,
   DollarSign,
-  FlaskConical,
   Globe,
   HeartHandshake,
-  Handshake as LucideHandshake,
   Mail,
   Microscope,
   Phone,
@@ -208,8 +206,8 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* About Us Section */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4">
+      <section className="py-16 md:py-24 bg-white dark:bg-gray-900 relative">
+        <div className="container mx-auto px-4 relative z-10">
           <SectionHeading
             title="О нас: Ваше путешествие к здоровью с 4Life"
             subtitle="Наука, успех, сервис — вместе строим жизнь"
@@ -217,7 +215,7 @@ const HomePage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row items-center gap-12 mt-12">
             {/* Image / Visual */}
-            <motion.div className="lg:w-1/2" variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div className="lg:w-1/2" variants={itemVariants} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <img
                 src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
                 alt="Александр Тощев - Лидер 4Life"
@@ -227,7 +225,7 @@ const HomePage: React.FC = () => {
             </motion.div>
 
             {/* Content */}
-            <motion.div className="lg:w-1/2 text-left" variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div className="lg:w-1/2 text-left" variants={itemVariants} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-6">
                 Впервые услышав о трансфер факторах более двадцати лет назад, мы пустились в увлекательное путешествие,
                 которое изменило нашу жизнь и жизни тысяч людей по всему миру. Трансфер факторы — это уникальные
@@ -395,73 +393,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">4Life с Александром Тощевым</h3>
-              <p className="text-gray-400">
-                Помогаем людям улучшить здоровье и построить успешный бизнес с помощью продукции 4Life.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-4">Навигация</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/" className="text-gray-400 hover:text-white">
-                    Главная
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/products" className="text-gray-400 hover:text-white">
-                    Продукты
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/partnership" className="text-gray-400 hover:text-white">
-                    Партнерство
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/testimonials" className="text-gray-400 hover:text-white">
-                    Отзывы
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="text-gray-400 hover:text-white">
-                    Контакты
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-4">Социальные сети</h3>
-              <div className="flex space-x-4">
-                <a
-                  href="https://t.me/alexander_toschev"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <LucideHandshake className="h-6 w-6" />
-                </a>
-                <a
-                  href="https://instagram.com/alexander_toschev"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <FlaskConical className="h-6 w-6" />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} 4Life с Александром Тощевым. Все права защищены.</p>
-          </div>
-        </div>
-      </footer>
     </>
   );
 };
