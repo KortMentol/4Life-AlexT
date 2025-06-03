@@ -23,6 +23,16 @@ const Header = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Функция для обработки клика по навигации
+  const handleNavClick = () => {
+    // Принудительно скроллим вверх
+    window.scrollTo(0, 0);
+    // Закрываем мобильное меню, если оно открыто
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   return (
     <header
       role="banner"
@@ -51,6 +61,7 @@ const Header = () => {
               <NavLink
                 key={item.href}
                 to={item.href}
+                onClick={handleNavClick}
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md text-sm font-medium ${
                     isActive
@@ -73,28 +84,7 @@ const Header = () => {
             </button>
           </nav>
 
-          <div className="hidden md:flex items-center space-x-4" role="region" aria-label="Основные действия">
-            <NavLink
-              to="/purchase"
-              className={({ isActive }) =>
-                `px-3 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors flex items-center space-x-2 ${isActive ? 'bg-primary-dark' : ''}`
-              }
-              aria-label="Перейти к покупкам"
-            >
-              <Menu size={20} />
-              <span>Купить</span>
-            </NavLink>
-            <NavLink
-              to="/partnership"
-              className={({ isActive }) =>
-                `px-3 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors flex items-center space-x-2 ${isActive ? 'bg-primary-dark' : ''}`
-              }
-              aria-label="Перейти к партнерству"
-            >
-              <Menu size={20} />
-              <span>Партнерство</span>
-            </NavLink>
-          </div>
+          {/* Кнопки 'Купить' и 'Партнерство' удалены по запросу */}
         </div>
         <button
           type="button"
@@ -107,17 +97,48 @@ const Header = () => {
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         {isMobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden mt-4 space-y-2" role="menu">
+          <div id="mobile-menu" className="md:hidden mt-4 space-y-2 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg" role="menu">
             {mainNav.map((item) => (
               <NavLink
                 key={item.href}
                 to={item.href}
-                className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                onClick={toggleMobileMenu}
+                onClick={() => {
+                  handleNavClick();
+                  toggleMobileMenu();
+                }}
+                className={({ isActive }) =>
+                  `block px-4 py-2 text-base rounded-md ${
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`
+                }
+                role="menuitem"
               >
                 {item.title}
               </NavLink>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                toggleTheme();
+                toggleMobileMenu();
+              }}
+              className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
+              aria-label="Переключить тему"
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun size={18} />
+                  <span>Светлая тема</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={18} />
+                  <span>Темная тема</span>
+                </>
+              )}
+            </button>
           </div>
         )}
       </motion.div>

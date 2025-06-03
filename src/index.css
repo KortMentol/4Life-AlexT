@@ -11,10 +11,16 @@
   }
 }
 
+/* Reset scroll behavior for all elements */
+html {
+  scroll-behavior: auto;
+}
+
 @layer base {
   html {
     font-family: "Inter", system-ui, sans-serif;
-    scroll-behavior: smooth;
+    /* Disable smooth scrolling by default */
+    scroll-behavior: auto;
   }
 
   body {

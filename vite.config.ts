@@ -27,14 +27,20 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
+    port: 3000,
     hmr: {
-      protocol: "ws",
-      host: "localhost",
-      port: 5174, // Используем тот же порт что и сервер
-      clientPort: 5174
+      host: 'localhost',
+      port: 3000,
+      overlay: false
     },
     watch: {
-      usePolling: true, // Может помочь при проблемах с файловой системой
+      usePolling: true
     },
+  },
+  preview: {
+    host: true,
+    port: 3000,
+    strictPort: true
   },
 });
