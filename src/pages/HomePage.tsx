@@ -1,59 +1,88 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import {
-  ArrowRight,
-  Briefcase,
-  Globe,
-  Mail,
-  Microscope,
-  Phone,
-  Shield,
-} from "lucide-react";
+import React from 'react';
+import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import SectionHeading from "../components/ui/SectionHeading";
-import TestimonialCard from "../components/ui/TestimonialCard";
-import CallToAction from "../components/ui/CallToAction";
+import ParallaxSection from "../components/ui/ParallaxSection";
 import { Icons } from "../utils/icons";
+import SectionHeading from "../components/ui/SectionHeading";
+import CallToAction from "../components/ui/CallToAction";
+import ProductCard from "../components/ui/ProductCard";
 
-// Импорт анимационных вариантов
-import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
+// Анимационные варианты для элементов
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" }
+  }
+};
 
-// Удаляем дублирующий импорт motion, так как он уже импортирован выше
-
-const testimonials = [
-  {
-    id: "testimonial-home-elena",
-    image:
-      "https://images.pexels.com/photos/1036620/pexels-photo-1036620.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    name: "Елена",
-    title: "Пенсионерка, 48 лет",
-    quote:
-      "После курса 4Life Transfer Factor Tri-Factor Formula заметила значительное улучшение общего самочувствия. Раньше часто болела простудами, теперь это стало редкостью. Особенно впечатлил эффект после поездки в командировку – обычно возвращалась с простудой, а в этот раз осталась в отличной форме.",
-    delay: 0.2,
-  },
-  {
-    id: "testimonial-home-dmitry",
-    image:
-      "https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    name: "Дмитрий",
-    title: "Спортсмен, 35 лет",
-    quote:
-      "Как спортсмен, я всегда ищу натуральные способы поддержки организма. 4Life Transfer Factor Plus стал для меня настоящим открытием. После интенсивных тренировок восстанавливаюсь быстрее, и энергия держится весь день.",
-    delay: 0.4,
-  },
-  {
-    id: "testimonial-home-anna",
-    image:
-      "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    name: "Анна",
-    title: "Мама, 38 лет",
-    quote:
-      "Я принимаю Трансфер Фактор Плюс уже больше года. За это время я заметила значительное улучшение общего самочувствия и стрессоустойчивости. Особенно заметна разница в осенне-зимний период - в то время как коллеги часто болеют, я продолжаю активно работать. Очень благодарна Александру за подробную консультацию по продукту.",
-    delay: 0.6,
-  },
-];
-
+// Определяем компонент HomePage
 const HomePage: React.FC = () => {
+  // Данные для секции преимуществ
+  const features = [
+    {
+      icon: Icons.ShieldCheck,
+      title: "Натуральный состав",
+      description: "Продукты 4Life созданы из полностью натуральных компонентов и не содержат химических добавок"
+    },
+    {
+      icon: Icons.HeartPulse,
+      title: "Укрепление иммунитета",
+      description: "Наши продукты научно доказано повышают активность клеток иммунной системы до 437%"
+    },
+    {
+      icon: Icons.PieChart,
+      title: "Проверенные результаты",
+      description: "Более 25 лет исследований и тысячи довольных клиентов по всему миру"
+    },
+  ];
+  
+  // Данные для секции преимуществ бизнеса
+  const benefits = [
+    {
+      icon: Icons.DollarSign,
+      title: "Гибкий доход",
+      description: "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени"
+    },
+    {
+      icon: Icons.Users,
+      title: "Обучение и поддержка",
+      description: "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса"
+    },
+    {
+      icon: Icons.Globe,
+      title: "Глобальные возможности",
+      description: "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний"
+    },
+  ];
+  
+  // Популярные продукты
+  const popularProducts = [
+    {
+      id: 1,
+      title: "Трансфер Фактор Плюс",
+      description: "Усиленная формула для поддержки иммунной системы. Содержит эксклюзивную смесь Трансфер Факторов и нутриентов для усиления иммунного ответа.",
+      image: "/assets/images/products/tf-plus.png",
+      link: "/products/transfer-factor-plus"
+    },
+    {
+      id: 2,
+      title: "Трансфер Фактор Трай-Фактор",
+      description: "Классическая формула для ежедневной поддержки иммунитета. Оптимальное сочетание эффективности и доступности.",
+      image: "/assets/images/products/tf-tri-factor.png",
+      link: "/products/transfer-factor-tri-factor"
+    },
+    {
+      id: 3,
+      title: "Белл Ви",
+      description: "Комплексная поддержка женского здоровья. Специально разработанная формула для красоты и благополучия женщины.",
+      image: "/assets/images/products/belle-vie.png",
+      link: "/products/belle-vie"
+    }
+  ];
+  
   return (
     <>
       <Helmet>
@@ -67,337 +96,252 @@ const HomePage: React.FC = () => {
           property="og:description"
           content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
         />
-        <meta property="og:image" content="/images/og-home.jpg" />
+        <meta property="og:image" content="/assets/images/og-home.jpg" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="relative w-full h-screen flex items-center justify-center text-white overflow-hidden"
+
+      {/* Главная секция с параллаксом */}
+      <ParallaxSection
+        backgroundImage="/assets/images/backgrounds/1.jpg"
+        altText="Здоровье и благополучие с 4Life"
+        height="h-screen"
+        parallaxSpeed={0.15}
+        contentClasses="flex flex-col items-center justify-center text-center"
       >
-        {/* Фон с параллаксом */}
         <motion.div
-          style={{ y: useTransform(useScroll().scrollY, [0, 800], ["0%", "20%"]) }}
-          className="absolute inset-0 z-0"
-        >
-          <img
-            src="/assets/images/backgrounds/woods_hero_section.jpg"
-            alt="4Life Science and Wellness"
-            className="w-full h-full object-cover brightness-[.6] dark:brightness-[.4] transition-all duration-700 ease-in-out"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 dark:to-black/70" />
-        </motion.div>
-
-        {/* Глассморфический блок контента */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          className="max-w-4xl px-6"
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-          style={{ opacity: useTransform(useScroll().scrollY, [0, 400], [1, 0]) }}
-          className="relative z-10 p-8 md:p-12 lg:p-16 bg-white/10 dark:bg-black/10 backdrop-blur-xl rounded-3xl shadow-glass border border-white/20 dark:border-white/10 text-center max-w-4xl mx-auto transform hover:shadow-glass-lg transition-all duration-500 ease-in-out"
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.7, ease: "easeOut" }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tighter shadow-text-lg"
-          >
-            Раскройте Потенциал <span className="text-blue-300 dark:text-blue-400">Вашего Иммунитета</span> с 4Life
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.7, ease: "easeOut" }}
-            className="mt-6 text-lg md:text-xl text-gray-100 dark:text-gray-200 leading-relaxed max-w-3xl mx-auto shadow-text-md"
-          >
-            Инвестируйте в качество жизни, ясность ума и энергию каждого дня.
-            Начните свое преображение с передовыми Трансфер Факторами и научным подходом к здоровью.
-          </motion.p>
-
-          <div className="mt-10 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <CallToAction
-              primaryButtonText="Узнать, как приобрести продукцию"
-              primaryButtonLink="/how-to-buy"
-              primaryButtonIcon={Icons.ShoppingCart}
-              secondaryButtonText="Исследовать продукты"
-              secondaryButtonLink="/products"
-              secondaryButtonIcon={Icons.FlaskConical}
-              isExternal={false}
-              className="mt-0"
-            />
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Ваш путь к здоровью и финансовой свободе
+          </h1>
+          <p className="text-xl md:text-2xl text-white/90 mb-8">
+            Инновационные продукты для иммунитета и возможности бизнеса с мировым брендом 4Life
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/products" className="px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors duration-300">
+              Наши продукты
+            </Link>
+            <Link to="/partnership" className="px-8 py-3 rounded-lg bg-transparent border-2 border-white hover:bg-white/10 text-white font-medium transition-colors duration-300">
+              Бизнес с 4Life
+            </Link>
           </div>
         </motion.div>
-      </motion.section>
+      </ParallaxSection>
 
-      {/* About Us Section */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-900 relative">
-        <div className="container mx-auto px-4 relative z-10">
-          <SectionHeading
-            title="О нас: Ваше путешествие к здоровью с 4Life"
-            subtitle="Наука, успех, сервис — вместе строим жизнь"
+      {/* Секция о нас */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-7xl mx-auto px-6">
+          <SectionHeading 
+            title="О нашей компании"
+            subtitle="Иммунная наука, подтвержденная исследованиями"
+            description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
           />
-
-          <div className="flex flex-col lg:flex-row items-center gap-12 mt-12">
-            {/* Image / Visual */}
-            <motion.div
-              className="lg:w-1/2"
-              variants={itemVariants}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-xl shadow-2xl flex items-center justify-center">
-                <span className="text-gray-500 dark:text-gray-400">Изображение не найдено</span>
-              </div>
-            </motion.div>
-
-            {/* Content */}
-            <motion.div
-              className="lg:w-1/2 text-left"
-              variants={itemVariants}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                Впервые услышав о трансфер факторах более двадцати лет назад, мы пустились в увлекательное путешествие,
-                которое изменило нашу жизнь и жизни тысяч людей по всему миру. Трансфер факторы — это уникальные
-                молекулы, передающие ценные иммунные знания и память между клетками организма, что является революцией в
-                области иммунной системы.
-              </p>
-              <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-8">
-                С 1998 года 4Life выросла в активно развивающуюся сеть людей, объединенных миссией 'Вместе Строить
-                Жизнь' посредством науки, успеха и сервиса. Мы заслужили репутацию компании, которая идет по пути
-                новаторства, научных исследований в области иммунологии, и общей поддержки здоровья.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <motion.div
-                  className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="show"
-                >
-                  <Microscope className="text-primary h-6 w-6 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-white text-md">
-                      Научные исследования и патенты
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      В основе всех продуктов 4Life лежит глубокая научная база.
-                    </p>
-                  </div>
-                </motion.div>
-                <motion.div
-                  className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="show"
-                >
-                  <Globe className="text-blue-500 h-6 w-6 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-white text-md">Мировая компания с миссией</h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Объединяем людей по всему миру для лучшей жизни.
-                    </p>
-                  </div>
-                </motion.div>
-                <motion.div
-                  className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="show"
-                >
-                  <Shield className="text-green-500 h-6 w-6 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-white text-md">
-                      Гарантия качества и безопасности
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Все продукты проходят строгий контроль качества.
-                    </p>
-                  </div>
-                </motion.div>
-                <motion.div
-                  className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="show"
-                >
-                  <Briefcase className="text-purple-500 h-6 w-6 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-white text-md">Бизнес и развитие</h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Возможности для построения успешного бизнеса.
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
+          
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                className="bg-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+              >
+                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mb-5">
+                  <feature.icon className="w-7 h-7 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+          
+          <div className="mt-12 text-center">
+            <Link to="/about" className="inline-block px-8 py-3 rounded-lg border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors duration-300 font-medium">
+              Узнать больше о компании
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="section bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-950 relative py-20 md:py-28 overflow-hidden">
-        <div className="container-custom relative z-10">
-          <SectionHeading title="О нас: Ваше путешествие к здоровью и процветанию" centered />
+      {/* Секция продуктов с параллаксом */}
+      <ParallaxSection
+        backgroundImage="/assets/images/backgrounds/2.jpg"
+        altText="Продукты 4Life для укрепления иммунитета"
+        height="auto"
+        parallaxSpeed={0.1}
+        contentClasses="py-20"
+      >
+        <div className="container max-w-7xl mx-auto px-6">
+          <SectionHeading 
+            title="Наши продукты"
+            subtitle="Научный подход к иммунитету"
+            description="Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы."
+            className="text-white"
+          />
+          
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {popularProducts.map((product) => (
+              <ProductCard 
+                key={product.id}
+                title={product.title}
+                description={product.description}
+                image={product.image}
+                link={product.link}
+              />
+            ))}
+          </div>
+          
+          <div className="mt-12 text-center">
+            <Link to="/products" className="inline-block px-8 py-3 rounded-lg bg-white text-blue-600 hover:bg-blue-50 transition-colors duration-300 font-medium">
+              Посмотреть все продукты
+            </Link>
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-white/80 text-sm italic">
+              * Я не являюсь врачом, и продукция 4Life не заменяет медикаментозное лечение
+            </p>
+          </div>
+        </div>
+      </ParallaxSection>
+
+      {/* Секция бизнес-возможностей */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-7xl mx-auto px-6">
+          <SectionHeading 
+            title="Бизнес с 4Life"
+            subtitle="Партнерство для финансовой свободы"
+            description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
+          />
+          
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={index}
+                className="bg-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+              >
+                <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-5">
+                  <benefit.icon className="w-7 h-7 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{benefit.title}</h3>
+                <p className="text-gray-600">{benefit.description}</p>
+              </motion.div>
+            ))}
+          </div>
+          
+          <div className="mt-12 text-center">
+            <Link to="/partnership" className="inline-block px-8 py-3 rounded-lg border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors duration-300 font-medium">
+              Узнать о возможностях партнерства
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Секция призыва к действию с параллаксом */}
+      <ParallaxSection
+        backgroundImage="/assets/images/backgrounds/5.jpg"
+        altText="Присоединяйтесь к команде 4Life"
+        height="auto"
+        parallaxSpeed={0.12}
+        contentClasses="py-24"
+      >
+        <div className="container max-w-7xl mx-auto px-6 text-center">
           <motion.div
-            className="max-w-4xl mx-auto text-center relative z-10"
+            className="max-w-3xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
           >
-            <p className="text-lg text-gray-700 mb-8">
-              Уже более 10 лет я помогаю людям улучшать качество жизни с помощью инновационных продуктов 4Life и
-              создавать стабильный доход через партнерскую программу.
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Готовы начать свой путь к здоровью и благополучию?
+            </h2>
+            <p className="text-xl text-white/90 mb-10">
+              Присоединяйтесь к нашей команде сегодня и получите персональную консультацию по продуктам и бизнес-возможностям 4Life
             </p>
+            
+            <CallToAction 
+              primaryButtonText="Купить продукты"
+              secondaryButtonText="Стать партнером"
+              primaryButtonLink="https://russia.4life.com/12299550"
+              secondaryButtonLink="https://russia.4life.com/12299550/signup/PC"
+              className="justify-center"
+            />
+          </motion.div>
+        </div>
+      </ParallaxSection>
 
+      {/* Контактная секция */}
+      <section className="py-16 bg-gray-50">
+        <div className="container max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <motion.div
-              className="grid md:grid-cols-2 gap-8 mt-12 relative z-10"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              <motion.div className="bg-gray-50 rounded-lg p-8 shadow-md text-left" variants={itemVariants}>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Наша миссия</h3>
-                <p className="text-gray-700 mb-4">
-                  Мы стремимся помочь каждому человеку достичь оптимального здоровья и благополучия через научно
-                  обоснованные продукты и создание возможностей для финансовой независимости.
-                </p>
-                <p className="text-gray-700">
-                  Наш подход основан на сочетании инновационных разработок в области трансфер-факторов и личной
-                  поддержки каждого клиента и партнера.
-                </p>
-              </motion.div>
-
-              <motion.div className="bg-gray-50 rounded-lg p-8 shadow-md text-left" variants={itemVariants}>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">О Александре Тощеве</h3>
-                <p className="text-gray-700 mb-4">
-                  Сертифицированный консультант по продуктам 4Life с более чем 10-летним опытом работы. Достиг статуса
-                  Gold Leader и создал успешную команду партнеров по всей России.
-                </p>
-                <p className="text-gray-700">
-                  Моя цель — помочь каждому клиенту найти оптимальное решение для укрепления здоровья, а каждому
-                  партнеру — раскрыть свой потенциал и достичь финансовых целей.
-                </p>
-              </motion.div>
-            </motion.div>
-
-            <motion.div
-              className="mt-12 relative z-10"
-              variants={itemVariants}
-              initial="hidden"
-              whileInView="show"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.6 }}
             >
-              <Link to="/about" className="btn btn-primary inline-flex items-center">
-                Узнать больше о нас
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              <h2 className="text-3xl font-bold mb-4">Остались вопросы?</h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Я всегда готов ответить на ваши вопросы о продуктах 4Life и бизнес-возможностях. Свяжитесь со мной удобным для вас способом.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                    <Icons.Phone className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <span>+7 (XXX) XXX-XX-XX</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                    <Icons.Mail className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <span>contact@alexander-toshchev-4life.ru</span>
+                </div>
+              </div>
             </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="section bg-gray-50 dark:bg-gray-900 relative py-20 md:py-28 overflow-hidden">
-        <div className="container-custom relative z-10">
-          <SectionHeading title="Реальные Истории Успеха" centered />
-          <motion.div
-            className="max-w-7xl mx-auto relative z-10"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px 0px" }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-lg text-gray-700 mb-8">
-              Эти люди нашли поддержку здоровья и новые возможности благодаря продукции 4Life и профессионализму
-              Александра Тощева.
-            </p>
+            
             <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.2, margin: "-50px 0px" }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              className="bg-white p-8 rounded-xl shadow-sm"
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
             >
-              {testimonials.map((testimonial) => (
-                <motion.div
-                  key={testimonial.id}
-                  variants={cardVariants}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.3 }}
-                  className="relative z-10 h-full"
-                >
-                  <TestimonialCard
-                    name={testimonial.name}
-                    image={testimonial.image}
-                    title={testimonial.title}
-                    quote={testimonial.quote}
-                  />
-                </motion.div>
-              ))}
+              <h3 className="text-2xl font-bold mb-6 text-center">Запросить консультацию</h3>
+              <form className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Ваше имя</label>
+                  <input type="text" id="name" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input type="email" id="email" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Ваш вопрос</label>
+                  <textarea id="message" rows={4} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"></textarea>
+                </div>
+                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300">
+                  Отправить запрос
+                </button>
+              </form>
             </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="section bg-white relative">
-        <div className="container-custom relative z-10">
-          <SectionHeading title="Свяжитесь со мной" centered />
-          <motion.div
-            className="max-w-4xl mx-auto text-center relative z-10"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-lg text-gray-700 mb-8">
-              Готов ответить на все ваши вопросы и помочь подобрать оптимальное решение для вашего здоровья.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">Контакты</h3>
-                <ul className="space-y-4">
-                  <li>
-                    <div className="btn-primary flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 space-x-3">
-                      <Phone className="w-6 h-6 text-primary" />
-                      <a href="tel:+79276245790" className="text-gray-800 hover:text-primary">
-                        +7 (927) 624-57-90
-                      </a>
-                    </div>
-                  </li>
-                  <li>
-                    <div className="btn-primary flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 space-x-3">
-                      <Mail className="w-6 h-6 text-primary" />
-                      <a href="mailto:alexander.toschev@gmail.com" className="text-gray-800 hover:text-primary">
-                        alexander.toschev@gmail.com
-                      </a>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-4">Адрес</h3>
-                <p className="text-gray-700 mb-4">г. Уфа, ул. З. Валиди, д. 10/1</p>
-                <p className="text-gray-700 mb-4">Район: Центральный</p>
-                <p className="text-gray-700">Метро: Салават Куждабаев</p>
-              </div>
-            </div>
-          </motion.div>
+          </div>
         </div>
       </section>
     </>
   );
 };
 
-// Экспортируем компонент по умолчанию
 export default HomePage;
