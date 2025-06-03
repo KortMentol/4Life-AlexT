@@ -14,10 +14,10 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ image, title, description, link, delay = 0 }) => {
   return (
     <motion.div
-      className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70"
+      className="relative z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70"
       variants={fadeInFromBottom}
       initial="hidden"
-      whileInView="visible"
+      whileInView="show"
       viewport={{ once: true, amount: 0.3 }}
       transition={{ delay: delay, duration: 0.6 }}
       whileHover={{

@@ -64,31 +64,23 @@ const TestimonialsPage = () => {
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://ВАШ_ДОМЕН.ru/testimonials" /> {/* ЗАМЕНИТЬ НА РЕАЛЬНЫЙ ДОМЕН */}
       </Helmet>
-      {/* Hero Section */}
-      <section className="bg-gray-50 py-16 md:py-24">
+      {/* Main Content */}
+      <section className="py-16 md:py-24 bg-white relative">
         <div className="container-custom">
+          <SectionHeading title="Реальные истории успеха" centered />
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.3 }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl mx-auto text-center relative z-10"
           >
-            <motion.h1
-              variants={headingVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-              className="text-4xl md:text-5xl font-bold mb-8"
-            >
-              Реальные истории успеха с 4Life®
-            </motion.h1>
             <motion.div
               variants={itemVariants}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
-              className="space-y-4"
+              className="text-lg text-gray-700 mb-12 space-y-4"
             >
               <p className="text-xl text-gray-600">
                 Представленные отзывы – это истории реальных людей, которые нашли поддержку здоровья и новые возможности
@@ -109,22 +101,29 @@ const TestimonialsPage = () => {
               viewport={{ once: true, amount: 0.3 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
             >
-              {testimonials.map((testimonial) => (
-                <motion.div
-                  key={testimonial.id}
-                  variants={itemVariants}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.3 }}
-                >
+              {testimonials.length > 0 ? (
+                testimonials.map((testimonial) => (
+                  <motion.div
+                    key={testimonial.id}
+                    variants={itemVariants}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.3 }}
+                    className="relative z-10 h-full"
+                  >
                   <TestimonialCard
                     image={testimonial.image}
                     name={testimonial.name}
                     title={testimonial.title}
                     quote={testimonial.quote}
                   />
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500">Отзывы временно отсутствуют</p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         </div>
@@ -270,7 +269,7 @@ const TestimonialsPage = () => {
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
-                className="bg-blue-50 p-8 rounded-lg border border-blue-100"
+                className="bg-blue-50 p-8 rounded-lg border border-blue-100 relative z-10"
               >
                 <motion.h3
                   variants={headingVariants}
@@ -301,8 +300,8 @@ const TestimonialsPage = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="section bg-gray-50">
-        <div className="container-custom">
+      <section className="section bg-gray-50 relative">
+        <div className="container-custom relative z-10">
           <motion.div
             variants={staggerContainer}
             initial="hidden"

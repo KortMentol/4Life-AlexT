@@ -69,7 +69,7 @@ export const buttonVariants: Variants = {
 // Варианты для карточек
 export const cardVariants: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
-  visible: {
+  show: {
     opacity: 1,
     scale: 1,
     transition: {

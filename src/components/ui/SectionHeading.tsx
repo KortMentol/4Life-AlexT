@@ -11,11 +11,20 @@ interface SectionHeadingProps {
 const SectionHeading = ({ title, subtitle, description, centered = false, light = false }: SectionHeadingProps) => {
   return (
     <motion.div
-      className={`mb-12 ${centered ? "text-center" : ""}`}
-      initial={{ opacity: 0, y: 20, height: 0 }}
-      whileInView={{ opacity: 1, y: 0, height: 'auto' }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
+      className={`mb-12 ${centered ? "text-center" : ""} relative z-10`}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.3 }}
+      animate={{
+        opacity: 1, 
+        y: 0,
+        height: 'auto',
+        transition: { duration: 0.5 }
+      }}
+      variants={{
+        hidden: { opacity: 0, y: 20, height: 0 },
+        show: { opacity: 1, y: 0, height: 'auto', transition: { duration: 0.5 } }
+      }}
     >
       <h2 className={`mb-4 ${light ? "text-white" : "text-gray-900"}`}>{title}</h2>
       {subtitle && (

@@ -5,8 +5,13 @@ import { Helmet } from "react-helmet-async";
 import { headingVariants, itemVariants, staggerContainer } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
+import { Tilt } from 'react-tilt';
 
-const PartnershipPage: FC = () => {
+interface PartnershipPageProps {
+  // Add any props if needed
+}
+
+const PartnershipPage: FC<PartnershipPageProps> = () => {
   return (
     <>
       <Helmet>
@@ -65,23 +70,41 @@ const PartnershipPage: FC = () => {
         </section>
 
         {/* Секция: Преимущества Партнерства */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
-          <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 bg-white dark:bg-gray-800 relative">
+          <div className="container mx-auto px-4 relative z-10">
             <SectionHeading title="Преимущества Партнерства" subtitle="Почему стоит присоединиться к нашей команде" />
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12"
               variants={staggerContainer}
               initial="hidden"
-              whileInView="visible"
+              whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
             >
               {/* Преимущество 1 */}
               <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                className="relative z-10"
                 variants={itemVariants}
-                animate="visible"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: 1.0 }}
               >
+                <Tilt options={{
+                  max: 15,
+                  perspective: 1000,
+                  scale: 1.05,
+                  speed: 400,
+                  transition: true,
+                  reset: true
+                }}>
+                  <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                    <DollarSign className="h-12 w-12 text-green-500 mb-4" />
+                    <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Стабильный Доход</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Возможность создать пассивный доход через систему многоуровневого маркетинга.
+                    </p>
+                  </div>
+                </Tilt>
                 <DollarSign className="h-12 w-12 text-green-500 mb-4" />
                 <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Стабильный Доход</h3>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -90,11 +113,29 @@ const PartnershipPage: FC = () => {
               </motion.div>
               {/* Преимущество 2 */}
               <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                className="relative z-10"
                 variants={itemVariants}
-                animate="visible"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: 1.2 }}
               >
+                <Tilt options={{
+                  max: 15,
+                  perspective: 1000,
+                  scale: 1.05,
+                  speed: 400,
+                  transition: true,
+                  reset: true
+                }}>
+                  <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                    <Clock className="h-12 w-12 text-blue-500 mb-4" />
+                    <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Гибкий График</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Работайте когда удобно, без жесткого графика и привязки к офису.
+                    </p>
+                  </div>
+                </Tilt>
                 <Clock className="h-12 w-12 text-blue-500 mb-4" />
                 <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Гибкий График</h3>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -103,11 +144,29 @@ const PartnershipPage: FC = () => {
               </motion.div>
               {/* Преимущество 3 */}
               <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                className="relative z-10"
                 variants={itemVariants}
-                animate="visible"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: 1.4 }}
               >
+                <Tilt options={{
+                  max: 15,
+                  perspective: 1000,
+                  scale: 1.05,
+                  speed: 400,
+                  transition: true,
+                  reset: true
+                }}>
+                  <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                    <Award className="h-12 w-12 text-purple-500 mb-4" />
+                    <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Профессиональный Рост</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Обучение и развитие навыков лидерства, продаж и управления командой.
+                    </p>
+                  </div>
+                </Tilt>
                 <Award className="h-12 w-12 text-purple-500 mb-4" />
                 <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Профессиональный Рост</h3>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -116,11 +175,29 @@ const PartnershipPage: FC = () => {
               </motion.div>
               {/* Преимущество 4 */}
               <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                className="relative z-10"
                 variants={itemVariants}
-                animate="visible"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: 1.6 }}
               >
+                <Tilt options={{
+                  max: 15,
+                  perspective: 1000,
+                  scale: 1.05,
+                  speed: 400,
+                  transition: true,
+                  reset: true
+                }}>
+                  <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                    <Lightbulb className="h-12 w-12 text-yellow-500 mb-4" />
+                    <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Инновации</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Работайте с передовыми продуктами и технологиями 4Life.
+                    </p>
+                  </div>
+                </Tilt>
                 <Lightbulb className="h-12 w-12 text-yellow-500 mb-4" />
                 <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Инновации</h3>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -142,10 +219,10 @@ const PartnershipPage: FC = () => {
               className="flex flex-col lg:flex-row-reverse items-center gap-12 mt-12"
               variants={itemVariants}
               initial="hidden"
-              whileInView="visible"
+              whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
             >
-              <motion.div className="lg:w-1/2" variants={itemVariants} transition={{ delay: 0.2 }}>
+              <motion.div className="lg:w-1/2 relative z-10" variants={itemVariants} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} transition={{ delay: 0.2 }}>
                 <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
                   Стать партнером 4Life легко. Свяжитесь со мной, и я расскажу вам о первых шагах, помогу
                   зарегистрироваться и начать обучение. Не упустите свой шанс построить успешную карьеру в индустрии
@@ -156,14 +233,14 @@ const PartnershipPage: FC = () => {
                   className="btn btn-primary text-lg px-8 py-4 inline-flex items-center space-x-2 group"
                   variants={itemVariants}
                   initial="hidden"
-                  animate="visible"
+                  animate="show"
                   transition={{ delay: 1.0 }}
                 >
                   <span>Связаться и начать</span>
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </motion.a>
               </motion.div>
-              <motion.div className="lg:w-1/2" variants={itemVariants} transition={{ delay: 0.4 }}>
+              <motion.div className="lg:w-1/2 relative z-10" variants={itemVariants} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} transition={{ delay: 0.4 }}>
                 <img
                   src="https://i.ibb.co/jGGmH1Q/4life-partnership-benefits.jpg"
                   alt="Начните свой путь с 4Life"

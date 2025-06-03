@@ -9,7 +9,7 @@ const PurchasePage = () => {
   // 3. Определение вариантов анимаций для Framer Motion
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
+    show: {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
@@ -19,7 +19,7 @@ const PurchasePage = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
   };
 
   const buttonVariants = {
@@ -66,7 +66,7 @@ const PurchasePage = () => {
           <motion.div
             variants={containerVariants}
             initial="hidden"
-            animate="visible"
+            animate="show"
             className="bg-white dark:bg-gray-700 rounded-lg shadow-2xl p-8 md:p-12 border border-gray-200 dark:border-gray-600 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 text-center"
           >
             {/* Заголовок секции с описанием */}
@@ -78,7 +78,7 @@ const PurchasePage = () => {
 
             {/* Блок с инструкциями и ID */}
             <div className="flex flex-col items-center space-y-8">
-              <motion.div variants={itemVariants} className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl">
+              <motion.div variants={itemVariants} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl relative z-10">
                 <p className="mb-4">
                   Для максимально выгодного приобретения продукции 4Life и получения доступа к специальным ценам, я
                   рекомендую зарегистрироваться в статусе **Приоритетного Клиента**. Это бесплатная регистрация, которая
@@ -123,7 +123,7 @@ const PurchasePage = () => {
               </div>
 
               {/* Блок для консультации */}
-              <motion.div variants={itemVariants} className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mt-8">
+              <motion.div variants={itemVariants} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mt-8 relative z-10">
                 <p className="mb-4">
                   Если у вас возникнут вопросы по выбору продукции, процессу регистрации или вы захотите обсудить
                   преимущества продуктов более подробно, не стесняйтесь связаться со мной.

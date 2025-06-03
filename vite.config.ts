@@ -1,14 +1,17 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { optimizeCssModules } from "vite-plugin-optimize-css-modules";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), optimizeCssModules()],
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  },
   optimizeDeps: {
-    include: ["lucide-react"],
+    include: ["lucide-react", "react-tilt"],
     esbuildOptions: {
-      // Увеличиваем лимит для обработки всех иконок
       target: "es2020",
     },
   },
@@ -17,8 +20,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Выносим lucide-react в отдельный чанк
           "lucide-react": ["lucide-react"],
+          "react-tilt": ["react-tilt"]
         },
       },
     },
@@ -27,8 +30,8 @@ export default defineConfig({
     hmr: {
       protocol: "ws",
       host: "localhost",
-      port: 24678, // Фиксированный порт для HMR
-      clientPort: 24678, // Явно указываем порт для клиента
+      port: 5174, // Используем тот же порт что и сервер
+      clientPort: 5174
     },
     watch: {
       usePolling: true, // Может помочь при проблемах с файловой системой

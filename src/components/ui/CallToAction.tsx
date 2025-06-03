@@ -74,24 +74,49 @@ const CallToAction = ({
     <motion.div
       role="region"
       aria-label="Призыв к действию"
-      className="bg-gray-50 border-t border-gray-100"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
+      className="relative py-16 md:py-24 bg-gradient-to-r from-blue-600 to-blue-800 text-white overflow-hidden"
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-50px 0px", amount: 0.3 }}
+      variants={{
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { duration: 0.6, staggerChildren: 0.2 } }
+      }}
     >
-      <div className="container-custom py-16 md:py-20">
+      <div className="absolute inset-0 bg-[url('https://i.ibb.co/0jX7M3Y/pattern.png')] opacity-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent dark:from-black/10"></div>
+      <div className="container-custom relative z-10">
         <div className="text-center max-w-3xl mx-auto">
-          <h3 id="cta-title" className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+          <motion.h3 
+            id="cta-title" 
+            className="text-2xl md:text-4xl font-bold text-white mb-6 relative z-10"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.1 } }
+            }}
+          >
             {title}
-          </h3>
-          <p className="text-gray-600 mb-8" aria-describedby="cta-title">
+          </motion.h3>
+          <motion.p 
+            className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto relative z-10" 
+            aria-describedby="cta-title"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.2 } }
+            }}
+          >
             {description}
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center">
+          </motion.p>
+          <motion.div 
+            className="flex flex-col sm:flex-row justify-center gap-4 relative z-10"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.3, staggerChildren: 0.1 } }
+            }}
+          >
             {renderPrimaryButton()}
             {renderSecondaryButton()}
-          </div>
+          </motion.div>
         </div>
       </div>
     </motion.div>

@@ -3,9 +3,7 @@ import { Helmet } from "react-helmet-async";
 import {
   cardVariants,
   containerVariants,
-  headingVariants,
   itemVariants,
-  staggerContainer,
 } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
@@ -96,8 +94,9 @@ const ProductsPage: React.FC = () => {
         <meta name="twitter:image" content="/images/og-products.jpg" />
       </Helmet>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-        {/* Hero Section для Products Page */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-teal-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+        {/* Hero Section */}
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100 to-teal-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
             style={{
@@ -107,40 +106,58 @@ const ProductsPage: React.FC = () => {
             }}
           ></div>
           <div className="container mx-auto px-4 relative z-10">
-            <motion.h1
-              className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-              variants={headingVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px 0px" }}
+              transition={{ duration: 0.6 }}
+              className="relative z-10"
             >
-              Наш Полный Каталог Продукции 4Life
-            </motion.h1>
-            <motion.p
-              className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
-              variants={itemVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
-            </motion.p>
+              <motion.h1
+                className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                Наш Полный Каталог Продукции 4Life
+              </motion.h1>
+              <motion.p
+                className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
+              </motion.p>
+            </motion.div>
           </div>
         </section>
 
-        {/* Секция: Популярные Категории */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
-          <div className="container mx-auto px-4 text-center">
-            <SectionHeading
-              title="Изучите наши популярные категории"
-              subtitle="Найдите идеальный продукт для своих нужд."
-            />
+        {/* Categories Section */}
+        <section className="py-16 md:py-24 bg-white dark:bg-gray-800 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
+          <div className="container mx-auto px-4 relative z-10">
             <motion.div
-              variants={staggerContainer}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px 0px" }}
+              transition={{ duration: 0.5 }}
+              className="relative z-10"
+            >
+              <SectionHeading
+                title="Категории продуктов"
+                subtitle="Выберите категорию, которая вас интересует"
+                centered
+              />
+            </motion.div>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 relative z-10"
+              variants={containerVariants}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
+              viewport={{ once: true, margin: "-50px 0px" }}
             >
               {/* Категория 1 */}
               <motion.div
@@ -172,29 +189,46 @@ const ProductsPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Секция: Все Продукты (Каталог) */}
-        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-          <div className="container mx-auto px-4">
-            <SectionHeading
-              title="Все наши продукты"
-              subtitle="Выберите продукты 4Life для своего здоровья и благополучия."
-            />
+        {/* Products Section */}
+        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
+          <div className="container mx-auto px-4 relative z-10">
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px 0px" }}
+              transition={{ duration: 0.5 }}
+              className="relative z-10"
+            >
+              <SectionHeading
+                title="Продукция 4Life"
+                subtitle="Выберите продукты 4Life для своего здоровья и благополучия."
+              />
+            </motion.div>
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12 relative z-10"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px 0px" }}
             >
               {productsData.map((product, index) => (
-                <ProductCard
+                <motion.div
                   key={index}
-                  image={product.image}
-                  title={product.title}
-                  description={product.description}
-                  link={product.link}
-                  delay={0.1 * index} // Динамическая задержка
-                />
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="relative z-10 h-full"
+                >
+                    <ProductCard
+                      image={product.image}
+                      title={product.title}
+                      description={product.description}
+                      link={product.link}
+                      delay={0.1 * index} // Динамическая задержка
+                    />
+                  </motion.div>
               ))}
             </motion.div>
           </div>

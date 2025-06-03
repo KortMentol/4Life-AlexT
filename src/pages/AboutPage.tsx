@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { FlaskConical, Headphones, TrendingUp } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import { containerVariants, headingVariants, itemVariants } from "../animations/variants";
+import { containerVariants, itemVariants } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
 
@@ -30,9 +30,10 @@ const AboutPage: React.FC = () => {
         />
         <meta name="twitter:image" content="/images/og-about.jpg" />
       </Helmet>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 relative">
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/30 dark:to-transparent z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
             style={{
@@ -41,16 +42,18 @@ const AboutPage: React.FC = () => {
               backgroundSize: "contain",
             }}
           ></div>
-          <div className="container mx-auto px-4 relative z-10">
-            <motion.h1
-              className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-              variants={headingVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
+          <div className="container mx-auto px-4 relative z-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px 0px" }}
+              transition={{ duration: 0.6 }}
+              className="relative z-10"
             >
+            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg">
               О 4Life: Наука, Миссия и Ваше Будущее
-            </motion.h1>
+            </h1>
+            </motion.div>
             <motion.p
               className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
               variants={itemVariants}
@@ -64,16 +67,28 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Секция: Научный подход */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
-          <div className="container mx-auto px-4">
-            <SectionHeading title="Научный подход 4Life" subtitle="Инновации на основе научных исследований" />
+        {/* Science Section */}
+        <section className="py-16 md:py-24 bg-white dark:bg-gray-800 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 dark:to-transparent z-0"></div>
+          <div className="container mx-auto px-4 relative z-10">
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px 0px" }}
+              transition={{ duration: 0.5 }}
+              className="relative z-10"
+            >
+              <SectionHeading
+                title="Научный подход 4Life"
+                subtitle="Инновации на основе научных исследований"
+              />
+            </motion.div>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px 0px" }}
             >
               {/* Элемент 1 */}
               <motion.div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md" variants={itemVariants}>

@@ -135,7 +135,7 @@ const HomePage: React.FC = () => {
             className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-12"
             variants={itemVariants}
             initial="hidden"
-            animate="visible"
+            animate="show"
           >
             <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
               <Link to="/purchase" className="btn btn-primary text-lg px-8 py-4 flex items-center space-x-3 group">
@@ -156,13 +156,13 @@ const HomePage: React.FC = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8"
             variants={containerVariants}
             initial="hidden"
-            animate="visible"
+            animate="show"
           >
             <motion.div
               className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
               variants={itemVariants}
               initial="hidden"
-              animate="visible"
+              animate="show"
             >
               <Shield className="h-10 w-10 text-primary mb-3" />
               <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Крепкий Иммунитет</h3>
@@ -173,7 +173,7 @@ const HomePage: React.FC = () => {
               className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
               variants={itemVariants}
               initial="hidden"
-              animate="visible"
+              animate="show"
             >
               <Zap className="h-10 w-10 text-yellow-500 mb-3" />
               <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Поток Энергии</h3>
@@ -184,7 +184,7 @@ const HomePage: React.FC = () => {
               className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
               variants={itemVariants}
               initial="hidden"
-              animate="visible"
+              animate="show"
             >
               <HeartHandshake className="h-10 w-10 text-red-500 mb-3" />
               <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Помощь и Развитие</h3>
@@ -195,7 +195,7 @@ const HomePage: React.FC = () => {
               className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
               variants={itemVariants}
               initial="hidden"
-              animate="visible"
+              animate="show"
             >
               <DollarSign className="h-10 w-10 text-green-500 mb-3" />
               <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Финансовые Возможности</h3>
@@ -243,7 +243,7 @@ const HomePage: React.FC = () => {
                   className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
                   variants={itemVariants}
                   initial="hidden"
-                  animate="visible"
+                  animate="show"
                 >
                   <Microscope className="text-primary h-6 w-6 flex-shrink-0 mt-1" />
                   <div>
@@ -259,7 +259,7 @@ const HomePage: React.FC = () => {
                   className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
                   variants={itemVariants}
                   initial="hidden"
-                  animate="visible"
+                  animate="show"
                 >
                   <Globe className="text-blue-500 h-6 w-6 flex-shrink-0 mt-1" />
                   <div>
@@ -273,7 +273,7 @@ const HomePage: React.FC = () => {
                   className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
                   variants={itemVariants}
                   initial="hidden"
-                  animate="visible"
+                  animate="show"
                 >
                   <Shield className="text-green-500 h-6 w-6 flex-shrink-0 mt-1" />
                   <div>
@@ -289,7 +289,7 @@ const HomePage: React.FC = () => {
                   className="flex items-start space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
                   variants={itemVariants}
                   initial="hidden"
-                  animate="visible"
+                  animate="show"
                 >
                   <Briefcase className="text-purple-500 h-6 w-6 flex-shrink-0 mt-1" />
                   <div>
@@ -303,15 +303,86 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="section bg-gray-50">
-        <div className="container-custom">
-          <SectionHeading title="Реальные Истории Успеха" centered />
+      {/* About Section */}
+      <section className="section bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-950 relative py-20 md:py-28 overflow-hidden">
+        <div className="container-custom relative z-10">
+          <SectionHeading title="О нас: Ваше путешествие к здоровью и процветанию" centered />
           <motion.div
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl mx-auto text-center relative z-10"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-lg text-gray-700 mb-8">
+              Уже более 10 лет я помогаю людям улучшать качество жизни с помощью инновационных продуктов 4Life и
+              создавать стабильный доход через партнерскую программу.
+            </p>
+            
+            <motion.div 
+              className="grid md:grid-cols-2 gap-8 mt-12 relative z-10"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <motion.div 
+                className="bg-gray-50 rounded-lg p-8 shadow-md text-left"
+                variants={itemVariants}
+              >
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Наша миссия</h3>
+                <p className="text-gray-700 mb-4">
+                  Мы стремимся помочь каждому человеку достичь оптимального здоровья и благополучия через 
+                  научно обоснованные продукты и создание возможностей для финансовой независимости.
+                </p>
+                <p className="text-gray-700">
+                  Наш подход основан на сочетании инновационных разработок в области трансфер-факторов 
+                  и личной поддержки каждого клиента и партнера.
+                </p>
+              </motion.div>
+              
+              <motion.div 
+                className="bg-gray-50 rounded-lg p-8 shadow-md text-left"
+                variants={itemVariants}
+              >
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">О Александре Тощеве</h3>
+                <p className="text-gray-700 mb-4">
+                  Сертифицированный консультант по продуктам 4Life с более чем 10-летним опытом работы. 
+                  Достиг статуса Gold Leader и создал успешную команду партнеров по всей России.
+                </p>
+                <p className="text-gray-700">
+                  Моя цель — помочь каждому клиенту найти оптимальное решение для укрепления здоровья, 
+                  а каждому партнеру — раскрыть свой потенциал и достичь финансовых целей.
+                </p>
+              </motion.div>
+            </motion.div>
+            
+            <motion.div 
+              className="mt-12 relative z-10"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+            >
+              <Link to="/about" className="btn btn-primary inline-flex items-center">
+                Узнать больше о нас
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="section bg-gray-50 dark:bg-gray-900 relative py-20 md:py-28 overflow-hidden">
+        <div className="container-custom relative z-10">
+          <SectionHeading title="Реальные Истории Успеха" centered />
+          <motion.div
+            className="max-w-7xl mx-auto relative z-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px 0px" }}
             transition={{ duration: 0.5 }}
           >
             <p className="text-lg text-gray-700 mb-8">
@@ -322,8 +393,8 @@ const HomePage: React.FC = () => {
               variants={containerVariants}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-              className="grid md:grid-cols-3 gap-8"
+              viewport={{ once: true, amount: 0.2, margin: "-50px 0px" }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {testimonials.map((testimonial) => (
                 <motion.div
@@ -332,6 +403,7 @@ const HomePage: React.FC = () => {
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true, amount: 0.3 }}
+                  className="relative z-10 h-full"
                 >
                   <TestimonialCard
                     name={testimonial.name}
@@ -347,11 +419,11 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="section bg-white">
-        <div className="container-custom">
+      <section className="section bg-white relative">
+        <div className="container-custom relative z-10">
           <SectionHeading title="Свяжитесь со мной" centered />
           <motion.div
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl mx-auto text-center relative z-10"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
