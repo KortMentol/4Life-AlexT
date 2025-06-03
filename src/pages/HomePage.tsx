@@ -1,24 +1,22 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight,
   Briefcase,
-  DollarSign,
   Globe,
-  HeartHandshake,
   Mail,
   Microscope,
   Phone,
   Shield,
-  Zap,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { ParallaxBanner } from "react-scroll-parallax";
 import SectionHeading from "../components/ui/SectionHeading";
 import TestimonialCard from "../components/ui/TestimonialCard";
+import CallToAction from "../components/ui/CallToAction";
+import { Icons } from "../utils/icons";
 
 // Импорт анимационных вариантов
-import { buttonVariants, cardVariants, containerVariants, headingVariants, itemVariants } from "../animations/variants";
+import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
 
 // Удаляем дублирующий импорт motion, так как он уже импортирован выше
 
@@ -73,132 +71,67 @@ const HomePage: React.FC = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
-        <meta
-          name="twitter:description"
-          content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
-        />
-        <meta name="twitter:image" content="/images/og-home.jpg" />
       </Helmet>
-      {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Parallax Background */}
-        <ParallaxBanner
-          layers={[
-            {
-              image: "/images/hero-bg.jpg",
-              speed: -20,
-              opacity: [0.8, 1],
-              scale: [1.05, 1.15],
-              shouldAlwaysCompleteAnimation: true,
-            },
-          ]}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="relative w-full h-screen flex items-center justify-center text-white overflow-hidden"
+      >
+        {/* Фон с параллаксом */}
+        <motion.div
+          style={{ y: useTransform(useScroll().scrollY, [0, 800], ["0%", "20%"]) }}
           className="absolute inset-0 z-0"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/70 to-purple-600/70 dark:from-gray-900/70 dark:to-gray-800/70" />
-        </ParallaxBanner>
+          <img
+            src="/assets/images/backgrounds/woods_hero_section.jpg"
+            alt="4Life Science and Wellness"
+            className="w-full h-full object-cover brightness-[.6] dark:brightness-[.4] transition-all duration-700 ease-in-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 dark:to-black/70" />
+        </motion.div>
 
-        <div className="relative z-10 w-full max-w-5xl mx-auto text-center flex justify-center">
-          <div className="flex flex-col items-center text-center space-y-8 px-4 w-full">
-            <motion.h1
-              className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg"
-              variants={headingVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              Проснись <span className="text-primary block md:inline">полным энергии, ясности ума</span> и желания творить
-              великие дела с <span className="text-4life-blue">4Life</span>
-            </motion.h1>
-
-            <motion.p
-              className="text-lg md:text-xl text-gray-100 dark:text-gray-200 max-w-2xl leading-relaxed"
-              variants={itemVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              Инвестируй в свое здоровье сегодня, чтобы наслаждаться каждым днем полноценно и счастливо. Мы поможем тебе
-              раскрыть жизненную силу и обрести новые возможности.
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div
-              className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full max-w-2xl mx-auto"
-              variants={itemVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap" className="w-full sm:w-auto">
-                <Link to="/purchase" className="btn btn-primary text-lg px-8 py-4 flex items-center justify-center sm:justify-start space-x-3 group w-full">
-                  <span>Приобрести продукцию 4Life</span>
-                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </motion.div>
-              <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap" className="w-full sm:w-auto">
-                <Link to="/partnership" className="btn btn-outline text-lg px-8 py-4 flex items-center justify-center sm:justify-start space-x-3 group w-full">
-                  <span>Узнать о партнерстве</span>
-                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </motion.div>
-            </motion.div>
-          </div>
-
-          {/* Key Benefits / Value Proposition */}
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 max-w-5xl mx-auto px-4 w-full"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.1 }}
+        {/* Глассморфический блок контента */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+          style={{ opacity: useTransform(useScroll().scrollY, [0, 400], [1, 0]) }}
+          className="relative z-10 p-8 md:p-12 lg:p-16 bg-white/10 dark:bg-black/10 backdrop-blur-xl rounded-3xl shadow-glass border border-white/20 dark:border-white/10 text-center max-w-4xl mx-auto transform hover:shadow-glass-lg transition-all duration-500 ease-in-out"
+        >
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.7, ease: "easeOut" }}
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tighter shadow-text-lg"
           >
-            <motion.div
-              className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
-              variants={itemVariants}
-              initial="hidden"
-              animate="show"
-            >
-              <Shield className="h-10 w-10 text-primary mb-3" />
-              <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Крепкий Иммунитет</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Научная поддержка вашей защиты.</p>
-            </motion.div>
+            Раскройте Потенциал <span className="text-blue-300 dark:text-blue-400">Вашего Иммунитета</span> с 4Life
+          </motion.h1>
 
-            <motion.div
-              className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
-              variants={itemVariants}
-              initial="hidden"
-              animate="show"
-            >
-              <Zap className="h-10 w-10 text-yellow-500 mb-3" />
-              <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Поток Энергии</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Каждый день полон новых возможностей.</p>
-            </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.7, ease: "easeOut" }}
+            className="mt-6 text-lg md:text-xl text-gray-100 dark:text-gray-200 leading-relaxed max-w-3xl mx-auto shadow-text-md"
+          >
+            Инвестируйте в качество жизни, ясность ума и энергию каждого дня.
+            Начните свое преображение с передовыми Трансфер Факторами и научным подходом к здоровью.
+          </motion.p>
 
-            <motion.div
-              className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
-              variants={itemVariants}
-              initial="hidden"
-              animate="show"
-            >
-              <HeartHandshake className="h-10 w-10 text-red-500 mb-3" />
-              <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Помощь и Развитие</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Наставничество на пути к успеху.</p>
-            </motion.div>
-
-            <motion.div
-              className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-xl shadow-lg flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
-              variants={itemVariants}
-              initial="hidden"
-              animate="show"
-            >
-              <DollarSign className="h-10 w-10 text-green-500 mb-3" />
-              <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Финансовые Возможности</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Стройте большой бизнес с 4Life.</p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+          <div className="mt-10 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <CallToAction
+              primaryButtonText="Узнать, как приобрести продукцию"
+              primaryButtonLink="/how-to-buy"
+              primaryButtonIcon={Icons.ShoppingCart}
+              secondaryButtonText="Исследовать продукты"
+              secondaryButtonLink="/products"
+              secondaryButtonIcon={Icons.FlaskConical}
+              isExternal={false}
+              className="mt-0"
+            />
+          </div>
+        </motion.div>
+      </motion.section>
 
       {/* About Us Section */}
       <section className="py-16 md:py-24 bg-white dark:bg-gray-900 relative">
@@ -210,14 +143,24 @@ const HomePage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row items-center gap-12 mt-12">
             {/* Image / Visual */}
-            <motion.div className="lg:w-1/2" variants={itemVariants} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div
+              className="lg:w-1/2"
+              variants={itemVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-xl shadow-2xl flex items-center justify-center">
                 <span className="text-gray-500 dark:text-gray-400">Изображение не найдено</span>
               </div>
             </motion.div>
 
             {/* Content */}
-            <motion.div className="lg:w-1/2 text-left" variants={itemVariants} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div
+              className="lg:w-1/2 text-left"
+              variants={itemVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-6">
                 Впервые услышав о трансфер факторах более двадцати лет назад, мы пустились в увлекательное путешествие,
                 которое изменило нашу жизнь и жизни тысяч людей по всему миру. Трансфер факторы — это уникальные
@@ -285,8 +228,10 @@ const HomePage: React.FC = () => {
                 >
                   <Briefcase className="text-purple-500 h-6 w-6 flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-white text-md">Бизнес возможности</h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Стройте успешный бизнес с 4Life.</p>
+                    <h4 className="font-semibold text-gray-800 dark:text-white text-md">Бизнес и развитие</h4>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      Возможности для построения успешного бизнеса.
+                    </p>
                   </div>
                 </motion.div>
               </div>
@@ -310,46 +255,40 @@ const HomePage: React.FC = () => {
               Уже более 10 лет я помогаю людям улучшать качество жизни с помощью инновационных продуктов 4Life и
               создавать стабильный доход через партнерскую программу.
             </p>
-            
-            <motion.div 
+
+            <motion.div
               className="grid md:grid-cols-2 gap-8 mt-12 relative z-10"
               variants={containerVariants}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
             >
-              <motion.div 
-                className="bg-gray-50 rounded-lg p-8 shadow-md text-left"
-                variants={itemVariants}
-              >
+              <motion.div className="bg-gray-50 rounded-lg p-8 shadow-md text-left" variants={itemVariants}>
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Наша миссия</h3>
                 <p className="text-gray-700 mb-4">
-                  Мы стремимся помочь каждому человеку достичь оптимального здоровья и благополучия через 
-                  научно обоснованные продукты и создание возможностей для финансовой независимости.
+                  Мы стремимся помочь каждому человеку достичь оптимального здоровья и благополучия через научно
+                  обоснованные продукты и создание возможностей для финансовой независимости.
                 </p>
                 <p className="text-gray-700">
-                  Наш подход основан на сочетании инновационных разработок в области трансфер-факторов 
-                  и личной поддержки каждого клиента и партнера.
+                  Наш подход основан на сочетании инновационных разработок в области трансфер-факторов и личной
+                  поддержки каждого клиента и партнера.
                 </p>
               </motion.div>
-              
-              <motion.div 
-                className="bg-gray-50 rounded-lg p-8 shadow-md text-left"
-                variants={itemVariants}
-              >
+
+              <motion.div className="bg-gray-50 rounded-lg p-8 shadow-md text-left" variants={itemVariants}>
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">О Александре Тощеве</h3>
                 <p className="text-gray-700 mb-4">
-                  Сертифицированный консультант по продуктам 4Life с более чем 10-летним опытом работы. 
-                  Достиг статуса Gold Leader и создал успешную команду партнеров по всей России.
+                  Сертифицированный консультант по продуктам 4Life с более чем 10-летним опытом работы. Достиг статуса
+                  Gold Leader и создал успешную команду партнеров по всей России.
                 </p>
                 <p className="text-gray-700">
-                  Моя цель — помочь каждому клиенту найти оптимальное решение для укрепления здоровья, 
-                  а каждому партнеру — раскрыть свой потенциал и достичь финансовых целей.
+                  Моя цель — помочь каждому клиенту найти оптимальное решение для укрепления здоровья, а каждому
+                  партнеру — раскрыть свой потенциал и достичь финансовых целей.
                 </p>
               </motion.div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="mt-12 relative z-10"
               variants={itemVariants}
               initial="hidden"
@@ -424,12 +363,12 @@ const HomePage: React.FC = () => {
             <p className="text-lg text-gray-700 mb-8">
               Готов ответить на все ваши вопросы и помочь подобрать оптимальное решение для вашего здоровья.
             </p>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
               <div>
                 <h3 className="text-2xl font-bold mb-4">Контакты</h3>
                 <ul className="space-y-4">
                   <li>
-                    <div className="flex items-center space-x-3">
+                    <div className="btn-primary flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 space-x-3">
                       <Phone className="w-6 h-6 text-primary" />
                       <a href="tel:+79276245790" className="text-gray-800 hover:text-primary">
                         +7 (927) 624-57-90
@@ -437,7 +376,7 @@ const HomePage: React.FC = () => {
                     </div>
                   </li>
                   <li>
-                    <div className="flex items-center space-x-3">
+                    <div className="btn-primary flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 space-x-3">
                       <Mail className="w-6 h-6 text-primary" />
                       <a href="mailto:alexander.toschev@gmail.com" className="text-gray-800 hover:text-primary">
                         alexander.toschev@gmail.com
@@ -456,9 +395,9 @@ const HomePage: React.FC = () => {
           </motion.div>
         </div>
       </section>
-
     </>
   );
 };
 
+// Экспортируем компонент по умолчанию
 export default HomePage;

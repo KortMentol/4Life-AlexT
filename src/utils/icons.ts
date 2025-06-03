@@ -31,6 +31,7 @@ import {
   TrendingUp,
   Users,
   UserPlus,
+  User,
   // Whatsapp (будем использовать Phone)
   X,
   Zap,
@@ -65,6 +66,7 @@ export const Icons = {
   TrendingUp,
   Users,
   UserPlus,
+  User,
   Whatsapp: Phone, // Используем Phone как замену Whatsapp, который не доступен в lucide-react
   X,
   Zap,
