@@ -172,7 +172,7 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция о нас */}
-      <section className="py-24 bg-gradient-to-b from-white to-blue-50">
+      <section className="py-24 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <div className="container max-w-7xl mx-auto px-6">
           <SectionHeading 
             title="О нашей компании"
@@ -184,7 +184,7 @@ const HomePage: React.FC = () => {
             {features.map((feature, index) => (
               <motion.div
                 key={index}
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-xl border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-500 relative overflow-hidden group"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border border-blue-100 dark:border-blue-900/50 shadow-lg hover:shadow-xl transition-all duration-500 relative overflow-hidden group"
                 variants={itemVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -192,15 +192,15 @@ const HomePage: React.FC = () => {
                 whileHover={{ y: -5 }}
               >
                 {/* Декоративный элемент */}
-                <div className="absolute -right-12 -top-12 w-24 h-24 bg-blue-100 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                <div className="absolute -right-12 -top-12 w-24 h-24 bg-blue-100 dark:bg-blue-900 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
                 
                 <div className="relative z-10">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 shadow-md transform -rotate-6 group-hover:rotate-0 transition-transform duration-300">
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
                   
-                  <h3 className="text-xl font-bold mb-4 text-gray-800">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">{feature.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{feature.description}</p>
                 </div>
                 
                 {/* Нижняя декоративная линия */}
@@ -316,11 +316,11 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция бизнес-возможностей */}
-      <section className="py-24 bg-gradient-to-b from-white to-green-50 relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-b from-white to-green-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
         {/* Декоративные элементы */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10">
-          <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-green-300 mix-blend-multiply filter blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-300 mix-blend-multiply filter blur-3xl"></div>
+          <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-green-300 dark:bg-green-700 mix-blend-multiply filter blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-300 dark:bg-blue-700 mix-blend-multiply filter blur-3xl"></div>
         </div>
         
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
@@ -342,7 +342,7 @@ const HomePage: React.FC = () => {
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-xl border border-green-100 shadow-lg hover:shadow-xl transition-all duration-500 group"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg hover:shadow-xl transition-all duration-500 group"
                 variants={itemVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -353,8 +353,8 @@ const HomePage: React.FC = () => {
                   <benefit.icon className="w-8 h-8 text-white" />
                 </div>
                 
-                <h3 className="text-xl font-bold mb-4 text-gray-800 group-hover:text-green-600 transition-colors duration-300">{benefit.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
+                <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">{benefit.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{benefit.description}</p>
                 
                 {/* Индикатор при наведении */}
                 <div className="w-0 h-1 bg-gradient-to-r from-green-400 to-green-600 mt-6 group-hover:w-full transition-all duration-500"></div>
@@ -373,10 +373,10 @@ const HomePage: React.FC = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   to="/partnership" 
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white hover:bg-opacity-80 transition-all duration-300 font-medium"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-opacity-80 transition-all duration-300 font-medium"
                 >
                   <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Узнать о возможностях партнерства</span>
-                  <Icons.ArrowRight className="w-5 h-5 text-blue-600" />
+                  <Icons.ArrowRight className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </Link>
               </motion.div>
             </div>
@@ -384,19 +384,19 @@ const HomePage: React.FC = () => {
           
           {/* Цитата */}
           <motion.div 
-            className="mt-16 max-w-3xl mx-auto bg-white/60 backdrop-blur-md p-8 rounded-xl border border-green-100 shadow-lg"
+            className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 backdrop-blur-md p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
             viewport={{ once: true }}
           >
             <div className="flex items-start">
-              <Icons.Quote className="w-10 h-10 text-green-400 mr-4 flex-shrink-0" />
+              <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
-                <p className="text-gray-700 italic mb-4">
+                <p className="text-gray-700 dark:text-gray-300 italic mb-4">
                   "В наши дни люди всему знают цену, но ничего не умеют ценить. Инвестируйте в своё здоровье сегодня, чтобы наслаждаться каждым днём полноценно и счастливо!"
                 </p>
-                <p className="text-right text-gray-500 font-medium">— Оскар Уайльд</p>
+                <p className="text-right text-gray-500 dark:text-gray-400 font-medium">— Оскар Уайльд</p>
               </div>
             </div>
           </motion.div>
@@ -487,10 +487,10 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Контактная секция */}
-      <section className="py-24 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
         {/* Декоративные элементы */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50 opacity-50 clip-path-contact z-0"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-blue-100 opacity-30 z-0"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50 dark:bg-blue-900/30 opacity-50 clip-path-contact z-0"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-blue-100 dark:bg-blue-800 opacity-30 z-0"></div>
         
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -501,14 +501,14 @@ const HomePage: React.FC = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="absolute -top-10 -left-10 w-20 h-20 border-t-4 border-l-4 border-blue-400 opacity-30"></div>
+              <div className="absolute -top-10 -left-10 w-20 h-20 border-t-4 border-l-4 border-blue-400 dark:border-blue-600 opacity-30"></div>
               
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800 dark:text-white">
                 <span className="block">Остались вопросы?</span>
-                <span className="text-blue-600">Я всегда на связи</span>
+                <span className="text-blue-600 dark:text-blue-400">Я всегда на связи</span>
               </h2>
               
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                 Готов ответить на ваши вопросы о продуктах 4Life, бизнес-возможностях 
                 и помочь сделать первый шаг к улучшению вашего здоровья и благополучия.
               </p>
@@ -518,12 +518,12 @@ const HomePage: React.FC = () => {
                   className="flex items-center group"
                   whileHover={{ x: 5 }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-5 shadow-md group-hover:shadow-blue-300/50 transition-shadow duration-300">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-5 shadow-md group-hover:shadow-blue-300/50 dark:group-hover:shadow-blue-500/50 transition-shadow duration-300">
                     <Icons.Phone className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Телефон для связи</p>
-                    <p className="text-lg font-medium text-gray-800 group-hover:text-blue-600 transition-colors">+7 (XXX) XXX-XX-XX</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Телефон для связи</p>
+                    <p className="text-lg font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">+7 (XXX) XXX-XX-XX</p>
                   </div>
                 </motion.div>
                 
@@ -531,12 +531,12 @@ const HomePage: React.FC = () => {
                   className="flex items-center group"
                   whileHover={{ x: 5 }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-5 shadow-md group-hover:shadow-blue-300/50 transition-shadow duration-300">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-5 shadow-md group-hover:shadow-blue-300/50 dark:group-hover:shadow-blue-500/50 transition-shadow duration-300">
                     <Icons.Mail className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Электронная почта</p>
-                    <p className="text-lg font-medium text-gray-800 group-hover:text-blue-600 transition-colors">contact@alexander-toshchev-4life.ru</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Электронная почта</p>
+                    <p className="text-lg font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">contact@alexander-toshchev-4life.ru</p>
                   </div>
                 </motion.div>
                 
@@ -544,70 +544,70 @@ const HomePage: React.FC = () => {
                   className="flex items-center group"
                   whileHover={{ x: 5 }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mr-5 shadow-md group-hover:shadow-green-300/50 transition-shadow duration-300">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mr-5 shadow-md group-hover:shadow-green-300/50 dark:group-hover:shadow-green-500/50 transition-shadow duration-300">
                     <Icons.Whatsapp className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">WhatsApp</p>
-                    <p className="text-lg font-medium text-gray-800 group-hover:text-green-600 transition-colors">Написать в WhatsApp</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">WhatsApp</p>
+                    <p className="text-lg font-medium text-gray-800 dark:text-gray-200 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Написать в WhatsApp</p>
                   </div>
                 </motion.div>
               </div>
             </motion.div>
             
             <motion.div
-              className="bg-white p-10 rounded-2xl shadow-xl border border-gray-100"
+              className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <div className="absolute -bottom-10 -right-10 w-20 h-20 border-b-4 border-r-4 border-blue-400 opacity-30"></div>
+              <div className="absolute -bottom-10 -right-10 w-20 h-20 border-b-4 border-r-4 border-blue-400 dark:border-blue-600 opacity-30"></div>
               
-              <h3 className="text-2xl font-bold mb-8 text-center text-gray-800">Запросить консультацию</h3>
+              <h3 className="text-2xl font-bold mb-8 text-center text-gray-800 dark:text-white">Запросить консультацию</h3>
               
               <form className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Ваше имя</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ваше имя</label>
                   <div className="relative">
                     <input 
                       type="text" 
                       id="name" 
-                      className="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 focus:bg-white" 
+                      className="w-full p-4 pl-12 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600" 
                       placeholder="Иван Иванов"
                     />
                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                      <Icons.User className="w-5 h-5 text-gray-400" />
+                      <Icons.User className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                   <div className="relative">
                     <input 
                       type="email" 
                       id="email" 
-                      className="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 focus:bg-white" 
+                      className="w-full p-4 pl-12 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600" 
                       placeholder="example@mail.ru"
                     />
                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                      <Icons.Mail className="w-5 h-5 text-gray-400" />
+                      <Icons.Mail className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">Ваш вопрос</label>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ваш вопрос</label>
                   <div className="relative">
                     <textarea 
                       id="message" 
                       rows={4} 
-                      className="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 focus:bg-white" 
+                      className="w-full p-4 pl-12 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600" 
                       placeholder="Опишите ваш вопрос или запрос..."
                     ></textarea>
                     <div className="absolute left-4 top-6">
-                      <Icons.Send className="w-5 h-5 text-gray-400" />
+                      <Icons.Send className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                     </div>
                   </div>
                 </div>
@@ -622,7 +622,7 @@ const HomePage: React.FC = () => {
                   <Icons.Send className="w-5 h-5" />
                 </motion.button>
                 
-                <p className="text-center text-sm text-gray-500 mt-4">
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                   Ваши данные защищены и не будут переданы третьим лицам
                 </p>
               </form>
