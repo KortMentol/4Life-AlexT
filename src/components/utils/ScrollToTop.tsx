@@ -18,19 +18,23 @@ export default function ScrollToTop() {
       // Save the current pathname for the next comparison
       prevPathnameRef.current = pathname;
       
-      // Force scroll to top with smooth behavior
+      // Use Lenis to scroll to top if available, otherwise fallback to native
       const scrollToTop = () => {
-        // Try different methods to ensure cross-browser compatibility
-        if ('scrollBehavior' in document.documentElement.style) {
-          // For modern browsers
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
+        const lenisInstance = (window as any).lenis;
+        if (lenisInstance) {
+          // Use Lenis for smooth scrolling
+          lenisInstance.scrollTo(0, { immediate: false });
         } else {
-          // For older browsers
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
+          // Fallback for browsers without Lenis
+          if ('scrollBehavior' in document.documentElement.style) {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          } else {
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+          }
         }
       };
 
