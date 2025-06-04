@@ -107,7 +107,7 @@ const HomePage: React.FC = () => {
         backgroundImage="/assets/images/backgrounds/1.jpg"
         altText="Здоровье и благополучие с 4Life"
         height="h-screen"
-        parallaxSpeed={0.15}
+        parallaxSpeed={0.2}
         contentClasses="flex flex-col items-center justify-center text-center"
       >
         <motion.div
@@ -174,7 +174,7 @@ const HomePage: React.FC = () => {
         backgroundImage="/assets/images/backgrounds/2.jpg"
         altText="Продукты 4Life для укрепления иммунитета"
         height="auto"
-        parallaxSpeed={0.1}
+        parallaxSpeed={0.15}
         contentClasses="py-20"
       >
         <div className="container max-w-7xl mx-auto px-6">
@@ -252,7 +252,7 @@ const HomePage: React.FC = () => {
         backgroundImage="/assets/images/backgrounds/5.jpg"
         altText="Присоединяйтесь к команде 4Life"
         height="auto"
-        parallaxSpeed={0.12}
+        parallaxSpeed={0.2}
         contentClasses="py-24"
       >
         <div className="container max-w-7xl mx-auto px-6 text-center">
