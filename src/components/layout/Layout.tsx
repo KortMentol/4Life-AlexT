@@ -5,17 +5,10 @@ import Footer from './Footer';
 import ScrollToTopButton from '../utils/ScrollToTopButton';
 
 const Layout: React.FC = () => {
-  // Обработка клика вне мобильного меню для закрытия
+  // Прокрутка вверх при изменении маршрута
   useEffect(() => {
     const handleRouteChange = () => {
-      // Прокрутка вверх при изменении маршрута
       window.scrollTo(0, 0);
-      
-      // Закрытие мобильного меню при навигации
-      const mobileMenu = document.getElementById('mobile-menu');
-      if (mobileMenu) {
-        mobileMenu.classList.add('hidden');
-      }
     };
 
     // Очистка при размонтировании

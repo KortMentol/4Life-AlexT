@@ -11,10 +11,7 @@
   }
 }
 
-/* Стили для мобильного меню */
-.mobile-menu-overlay {
-  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
-}
+
 
 /* Reset scroll behavior for all elements */
 html {
