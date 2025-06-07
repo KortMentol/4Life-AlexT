@@ -6,21 +6,24 @@ import { HelmetProvider } from 'react-helmet-async';
 import Lenis from 'lenis';
 import App from "./App.tsx";
 import "./index.css";
+import "./fixes.css";
+import "./styles/animations.css";
+import "./styles/modern-design.css";
 import { ThemeProvider } from './context/ThemeContext';
 
-// Initialize Lenis for smooth scrolling
-const initLenis = () => {
+// Инициализация плавного скролла
+const initSmoothScroll = () => {
   const lenis = new Lenis({
     duration: 1.2,
-    easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    direction: 'vertical',
+    gestureDirection: 'vertical',
     smooth: true,
     mouseMultiplier: 1,
     smoothTouch: false,
     touchMultiplier: 2,
+    infinite: false,
   });
-
-  // Make lenis available globally for other components
-  (window as any).lenis = lenis;
 
   function raf(time: number) {
     lenis.raf(time);
@@ -28,14 +31,13 @@ const initLenis = () => {
   }
 
   requestAnimationFrame(raf);
+
+  // Делаем lenis доступным глобально для других компонентов
+  (window as any).lenis = lenis;
 };
 
-// Initialize Lenis after the app is mounted
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => {
-    initLenis();
-  });
-}
+// Инициализируем плавный скролл
+initSmoothScroll();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -1,0 +1,36 @@
+/* Предзагрузка анимаций для предотвращения моргания */
+.motion-safe {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Предотвращение моргания при первой загрузке */
+.no-flicker {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Плавное появление для элементов */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Предзагрузка для карточек */
+.card-preload {
+  opacity: 1;
+  transform: translateY(0);
+  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Предзагрузка для контейнеров */
+.container-preload {
+  opacity: 1;
+  transform: translateY(0);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}

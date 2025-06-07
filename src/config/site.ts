@@ -18,6 +18,14 @@ export const siteConfig = {
     whatsapp: "https://wa.me/79031234567",
     email: "your.father.email@example.com",
     phone: "+7 (903) 123-45-67",
+    address: "Москва, Россия", // Добавляем адрес
+  },
+  // Добавляем социальные сети
+  socialLinks: {
+    facebook: "https://facebook.com/",
+    instagram: "https://instagram.com/",
+    twitter: "https://twitter.com/",
+    youtube: "https://youtube.com/",
   },
 };
 

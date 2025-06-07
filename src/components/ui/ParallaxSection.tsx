@@ -1,20 +1,22 @@
-import React, { useRef, ReactNode } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from "framer-motion";
+import React, { ReactNode, useRef } from "react";
 
-interface ParallaxSectionProps {
-  backgroundImage: string; // Путь к фоновому изображению
-  altText: string;         // Альтернативный текст для изображения
-  children?: ReactNode;    // Контент, который будет наложен поверх фона
-  height?: string;         // Высота секции (например, "h-screen", "h-[70vh]")
+export interface ParallaxSectionProps {
+  backgroundImage?: string; // Путь к фоновому изображению
+  backgroundVideo?: string; // Путь к фоновому видео
+  altText: string; // Альтернативный текст для фона
+  children?: ReactNode; // Контент, который будет наложен поверх фона
+  height?: string; // Высота секции (например, "h-screen", "h-[70vh]")
   contentClasses?: string; // Дополнительные классы для контейнера контента
-  parallaxSpeed?: number;  // Скорость параллакса (0.1 - 0.5, по умолчанию 0.2)
+  parallaxSpeed?: number; // Скорость параллакса (0.1 - 0.5, по умолчанию 0.2)
   imageBrightness?: string; // Яркость изображения ('brightness-[.6]' для светлого фона, 'brightness-[.4]' для темного)
-  blendMode?: string;      // Режим смешивания для текста (например, 'mix-blend-difference' для инверсии цвета)
-  clipPath?: string;       // Кастомный clipPath для обрезки секции
+  blendMode?: string; // Режим смешивания для текста (например, 'mix-blend-difference' для инверсии цвета)
+  clipPath?: string; // Кастомный clipPath для обрезки секции
 }
 
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
+  backgroundVideo,
   altText,
   children,
   height = "h-screen", // Дефолтная высота
@@ -22,12 +24,12 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   parallaxSpeed = 0.2, // Дефолтная скорость параллакса
   imageBrightness = "brightness-[.6] dark:brightness-[.4]",
   blendMode = "", // По умолчанию без blend-mode
-  clipPath = "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" // Дефолтный clipPath
+  clipPath = "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)", // Дефолтный clipPath
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
 
   // Используем более простую трансформацию, как в примере
@@ -43,18 +45,30 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       style={{ clipPath: clipPath }}
     >
       {/* Контент секции с z-index выше фона */}
-      <div className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}>
-        {children}
-      </div>
+      <div className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}>{children}</div>
 
       {/* Фиксированный фоновый контейнер */}
       <div className="fixed top-[-10vh] left-0 h-[120vh] w-full">
         <motion.div style={{ y }} className="relative w-full h-full">
-          <img 
-            src={backgroundImage} 
-            alt={altText} 
-            className={`w-full h-full object-cover ${imageBrightness}`}
-          />
+          {backgroundVideo ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              disablePictureInPicture
+              className={`w-full h-full object-cover ${imageBrightness}`}
+              aria-label={altText}
+            >
+              <source src={backgroundVideo} type="video/webm" />
+              {/* Запасной вариант, если видео не поддерживается */}
+              {backgroundImage && (
+                <img src={backgroundImage} alt={altText} className={`w-full h-full object-cover ${imageBrightness}`} />
+              )}
+            </video>
+          ) : backgroundImage ? (
+            <img src={backgroundImage} alt={altText} className={`w-full h-full object-cover ${imageBrightness}`} />
+          ) : null}
           {/* Слой для затемнения или наложения */}
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         </motion.div>

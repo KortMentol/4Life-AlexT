@@ -87,5 +87,23 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.pt-safe': {
+          paddingTop: 'env(safe-area-inset-top)'
+        },
+        '.pb-safe': {
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        },
+        '.pl-safe': {
+          paddingLeft: 'env(safe-area-inset-left)'
+        },
+        '.pr-safe': {
+          paddingRight: 'env(safe-area-inset-right)'
+        }
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 };

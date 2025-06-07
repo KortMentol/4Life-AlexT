@@ -61,7 +61,7 @@ const HowToBuyPage = () => {
 
       {/* Основная секция страницы */}
       <section className="py-16 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white min-h-[calc(100vh-var(--header-height)-var(--footer-height))] flex items-center justify-center">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-4xl mt-16 md:mt-20">
           {/* Анимированный контейнер для всего содержимого страницы */}
           <motion.div
             variants={containerVariants}

@@ -1,24 +1,44 @@
-import React from 'react';
-import { motion } from "framer-motion";
+import React, { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import ParallaxSection from "../components/ui/ParallaxSection";
 import { Icons } from "../utils/icons";
 import SectionHeading from "../components/ui/SectionHeading";
-import ProductCard from "../components/ui/ProductCard";
+import StaticCard from "../components/ui/StaticCard";
+import StaticFeature from "../components/ui/StaticFeature";
 
-// Анимационные варианты для элементов
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" }
-  }
+// Кастомный хук для копирования в буфер обмена
+const useCopyToClipboard = (text: string) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const copyToClipboard = useCallback(async (): Promise<(() => void) | void> => {
+    // Не показываем уведомление, если уже показано
+    if (isCopied) return;
+    
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      
+      // Сбрасываем состояние через 2 секунды
+      const timer = setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    } catch (err) {
+      console.error('Ошибка при копировании: ', err);
+      return undefined;
+    }
+  }, [text, isCopied]);
+
+  return { isCopied, copyToClipboard };
 };
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
+  const { isCopied, copyToClipboard } = useCopyToClipboard('12299550');
+  
   // Данные для секции преимуществ
   const features = [
     {
@@ -101,16 +121,17 @@ const HomePage: React.FC = () => {
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
-      {/* Главная секция с параллаксом */}
+      {/* Главная секция с параллаксом и видео фоном */}
       <ParallaxSection
+        backgroundVideo="/assets/videos/backgrounds/Why 4Life Transfer Factor®_.webm"
         backgroundImage="/assets/images/backgrounds/1.jpg"
         altText="Здоровье и благополучие с 4Life"
-        height="h-screen"
+        height="min-h-screen h-[110vh] md:h-screen"
         parallaxSpeed={0.2}
-        contentClasses="flex flex-col items-center justify-center text-center"
+        contentClasses="flex flex-col items-center justify-center text-center py-8"
       >
         <motion.div
-          className="max-w-4xl px-6"
+          className="max-w-4xl px-4 md:px-6 flex flex-col justify-between"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -119,54 +140,54 @@ const HomePage: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mb-4"
+            className="mb-2 md:mb-4"
           >
-            <span className="px-4 py-1 bg-blue-600/30 backdrop-blur-sm text-blue-100 rounded-full text-sm font-medium border border-blue-400/30">
+            <span className="px-3 py-1 md:px-4 md:py-1 bg-blue-600/30 backdrop-blur-sm text-blue-100 rounded-full text-xs md:text-sm font-medium border border-blue-400/30">
               Компания иммунной системы
             </span>
           </motion.div>
           
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-            <span className="block mb-2">Инвестируйте в своё здоровье</span>
-            <span className="text-blue-300">с научным подходом 4Life</span>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0">
+            <span className="block mb-1 md:mb-2">Инвестируйте в своё здоровье</span>
+            <span className="block mb-1 md:mb-2 text-blue-300">с научным подходом</span>
+            <span className="text-blue-300">4Life</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed">
+          <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed">
             Откройте для себя силу Трансфер Факторов — молекул, 
-            которые передают иммунологическую память и поддерживают 
-            здоровую работу вашей иммунной системы
+            которые поддерживают здоровую работу вашей иммунной системы
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-5 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 to="/products" 
-                className="px-8 py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/30 flex items-center gap-2"
+                className="px-6 py-3 md:px-8 md:py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/30 flex items-center gap-2"
               >
                 <span>Исследовать продукты</span>
-                <Icons.ArrowRight className="w-5 h-5" />
+                <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </motion.div>
             
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 to="/how-to-buy" 
-                className="px-8 py-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white font-medium transition-all duration-300 flex items-center gap-2"
+                className="px-6 py-3 md:px-8 md:py-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white font-medium transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <span>Как приобрести</span>
-                <Icons.ShoppingCart className="w-5 h-5" />
+                <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </motion.div>
           </div>
           
           <motion.div 
-            className="mt-12 flex items-center justify-center gap-2 text-white/70"
+            className="mt-10 md:mt-12 flex items-start justify-center text-white/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.8 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <Icons.Shield className="w-5 h-5 text-blue-300" />
-            <span className="text-sm">Научно доказанная эффективность с 1998 года</span>
+            <Icons.Shield className="w-4 h-4 md:w-5 md:h-5 text-blue-300 mt+0.5 mr-0.5 md:mr-1" />
+            <span className="text-xs md:text-sm">Научно доказанная эффективность с 1998 года</span>
           </motion.div>
         </motion.div>
       </ParallaxSection>
@@ -182,30 +203,14 @@ const HomePage: React.FC = () => {
           
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
             {features.map((feature, index) => (
-              <motion.div
+              <StaticFeature
                 key={index}
-                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border border-blue-100 dark:border-blue-900/50 shadow-lg hover:shadow-xl transition-all duration-500 relative overflow-hidden group"
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -5 }}
-              >
-                {/* Декоративный элемент */}
-                <div className="absolute -right-12 -top-12 w-24 h-24 bg-blue-100 dark:bg-blue-900 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-                
-                <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 shadow-md transform -rotate-6 group-hover:rotate-0 transition-transform duration-300">
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">{feature.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{feature.description}</p>
-                </div>
-                
-                {/* Нижняя декоративная линия */}
-                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600 w-0 group-hover:w-full transition-all duration-700"></div>
-              </motion.div>
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                color="from-blue-500 to-blue-600"
+                className="border-blue-100 dark:border-blue-900/50"
+              />
             ))}
           </div>
           
@@ -234,12 +239,7 @@ const HomePage: React.FC = () => {
         contentClasses="py-24"
       >
         <div className="container max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
+          <div className="opacity-100">
             <SectionHeading 
               title="Инновационные продукты для иммунитета"
               subtitle="Научный подход к здоровью"
@@ -247,45 +247,28 @@ const HomePage: React.FC = () => {
               className="text-white"
               centered={true}
             />
-          </motion.div>
+          </div>
           
           {/* Декоративный элемент */}
-          <motion.div 
-            className="flex justify-center mb-12"
-            initial={{ opacity: 0, scale: 0 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-          >
+          <div className="flex justify-center mb-12">
             <div className="w-20 h-1 bg-gradient-to-r from-blue-300 to-blue-100"></div>
-          </motion.div>
+          </div>
           
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {popularProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-                viewport={{ once: true }}
-              >
-                <ProductCard 
+            {popularProducts.map((product) => (
+              <div key={product.id}>
+                <StaticCard 
                   title={product.title}
                   description={product.description}
                   image={product.image}
                   link={product.link}
-                  delay={index * 0.1}
                 />
-              </motion.div>
+              </div>
             ))}
           </div>
           
           <motion.div 
             className="mt-16 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            viewport={{ once: true }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -298,20 +281,14 @@ const HomePage: React.FC = () => {
             </Link>
           </motion.div>
           
-          <motion.div 
-            className="mt-10 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            viewport={{ once: true }}
-          >
+          <div className="mt-10 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
               <Icons.ShieldCheck className="w-4 h-4 text-blue-300" />
               <p className="text-white/90 text-sm">
                 Продукция 4Life не заменяет медикаментозное лечение
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </ParallaxSection>
 
@@ -324,51 +301,28 @@ const HomePage: React.FC = () => {
         </div>
         
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
+          <div className="opacity-100">
             <SectionHeading 
               title="Бизнес с 4Life"
               subtitle="Партнерство для финансовой свободы"
               description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
               centered={true}
             />
-          </motion.div>
+          </div>
           
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
             {benefits.map((benefit, index) => (
-              <motion.div
+              <StaticFeature
                 key={index}
-                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg hover:shadow-xl transition-all duration-500 group"
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -8, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
-              >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300">
-                  <benefit.icon className="w-8 h-8 text-white" />
-                </div>
-                
-                <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">{benefit.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{benefit.description}</p>
-                
-                {/* Индикатор при наведении */}
-                <div className="w-0 h-1 bg-gradient-to-r from-green-400 to-green-600 mt-6 group-hover:w-full transition-all duration-500"></div>
-              </motion.div>
+                icon={benefit.icon}
+                title={benefit.title}
+                description={benefit.description}
+                color="from-green-500 to-green-600"
+              />
             ))}
           </div>
           
-          <motion.div 
-            className="mt-16 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            viewport={{ once: true }}
-          >
+          <div className="mt-16 text-center">
             <div className="inline-block p-[2px] rounded-lg bg-gradient-to-r from-green-500 to-blue-500">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
@@ -380,16 +334,10 @@ const HomePage: React.FC = () => {
                 </Link>
               </motion.div>
             </div>
-          </motion.div>
+          </div>
           
           {/* Цитата */}
-          <motion.div 
-            className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 backdrop-blur-md p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            viewport={{ once: true }}
-          >
+          <div className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 backdrop-blur-md p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg">
             <div className="flex items-start">
               <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
@@ -399,7 +347,7 @@ const HomePage: React.FC = () => {
                 <p className="text-right text-gray-500 dark:text-gray-400 font-medium">— Оскар Уайльд</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -413,23 +361,11 @@ const HomePage: React.FC = () => {
         imageBrightness="brightness-[.5]"
       >
         <div className="container max-w-7xl mx-auto px-6 text-center">
-          <motion.div
-            className="max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
+          <div className="max-w-3xl mx-auto">
             {/* Декоративный элемент */}
-            <motion.div 
-              className="flex justify-center mb-8"
-              initial={{ width: 0 }}
-              whileInView={{ width: "100px" }}
-              transition={{ duration: 1 }}
-              viewport={{ once: true }}
-            >
-              <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-300"></div>
-            </motion.div>
+            <div className="flex justify-center mb-8">
+              <div className="h-1 w-[100px] bg-gradient-to-r from-blue-400 to-blue-300"></div>
+            </div>
             
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               <span className="block mb-2">Готовы инвестировать</span>
@@ -468,21 +404,85 @@ const HomePage: React.FC = () => {
             </div>
             
             {/* Дополнительная информация */}
-            <motion.div 
-              className="mt-12 flex justify-center"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-                <Icons.Shield className="w-4 h-4 text-blue-300" />
-                <p className="text-white/80 text-sm">
-                  Используйте ID 12299550 для получения скидки
-                </p>
+            <div className="mt-12 flex justify-center">
+              <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                <Icons.Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
+                <div className="relative ml-2 sm:ml-3">
+                  <div className="flex flex-wrap items-baseline justify-center gap-x-1.5">
+                    <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">Используйте ID</span>
+                    
+                    <div className="relative inline-flex flex-col">
+                      <button 
+                        type="button"
+                        onClick={() => copyToClipboard()}
+                        className="relative text-blue-300 hover:text-blue-200 font-medium transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-opacity-50"
+                        aria-label="Скопировать ID"
+                      >
+                        <span className="relative inline-block transition-all duration-200 text-blue-300 group-hover:text-blue-200">
+                          <span className="relative z-10">
+                            {' '}12299550{' '}
+                          </span>
+                          <span className="absolute inset-0 w-full h-full border-b border-solid border-blue-300 group-hover:border-blue-200 transition-colors duration-200"></span>
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {isCopied && (
+                          <motion.div 
+                            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-4 py-1.5 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-md shadow-lg z-50 whitespace-nowrap min-w-[110px] text-center"
+                            initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                            animate={{ 
+                              opacity: 1, 
+                              y: 8,
+                              scale: 1,
+                              transition: { 
+                                type: 'spring', 
+                                damping: 25, 
+                                stiffness: 400,
+                                duration: 0.2
+                              } 
+                            }}
+                            exit={{ 
+                              opacity: 0, 
+                              y: 0, 
+                              scale: 0.95,
+                              transition: { 
+                                duration: 0.15 
+                              } 
+                            }}
+                          >
+                            <div className="relative flex items-center justify-center gap-2">
+                              <svg 
+                                className="w-3.5 h-3.5 text-green-400 flex-shrink-0" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                              >
+                                <motion.path 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  strokeWidth={2.5} 
+                                  d="M5 13l4 4L19 7"
+                                  initial={{ pathLength: 0, pathOffset: 1 }}
+                                  animate={{ pathLength: 1, pathOffset: 0 }}
+                                  transition={{ duration: 0.2, ease: "easeOut" }}
+                                />
+                              </svg>
+                              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Скопировано</span>
+                            </div>
+                            {/* Стрелка указывающая на кнопку */}
+                            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/95 dark:bg-gray-800/95 rotate-45 transform origin-center -z-10"></div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    
+                    <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">для получения скидки</span>
+                  </div>
+                </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </ParallaxSection>
 
@@ -495,7 +495,6 @@ const HomePage: React.FC = () => {
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Содержимое секции удалено */}
-
           </div>
         </div>
       </section>

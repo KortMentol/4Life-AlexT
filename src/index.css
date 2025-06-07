@@ -11,9 +11,19 @@
   }
 }
 
+/* Стили для мобильного меню */
+.mobile-menu-overlay {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
+}
+
 /* Reset scroll behavior for all elements */
 html {
   scroll-behavior: auto;
+}
+
+/* Стили для фиксированного навбара */
+body {
+  padding-top: env(safe-area-inset-top);
 }
 
 @layer base {
