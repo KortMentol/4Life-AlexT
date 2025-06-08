@@ -47,6 +47,9 @@ const SmoothScrollToTop = () => {
       // Очистка таймера при размонтировании
       return () => clearTimeout(timer);
     }
+    
+    // Добавляем пустой return для случая, когда путь не изменился
+    return undefined;
   }, [pathname]);
 
   return null;

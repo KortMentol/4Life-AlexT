@@ -10,6 +10,7 @@ import './styles/fixes.css';
 import './styles/animations.css';
 import './styles/modern-design.css';
 import './styles/menu-animations.css';
+import './styles/menu-dividers.css';
 
 // Функция для инициализации приложения
 const initApp = () => {

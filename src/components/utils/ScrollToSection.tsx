@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+// Добавляем импорт для доступа к process.env
+declare const process: {
+  env: {
+    NODE_ENV: string;
+  };
+};
+
 /**
  * Компонент для прокрутки к секции по хэшу в URL
  */

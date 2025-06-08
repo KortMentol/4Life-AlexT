@@ -13,7 +13,7 @@ export default function ScrollToTop() {
     // Skip scroll on initial mount
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      return;
+      return undefined;
     }
 
     // Only scroll if the pathname has changed
@@ -49,6 +49,9 @@ export default function ScrollToTop() {
       // Cleanup function
       return () => clearTimeout(timer);
     }
+    
+    // Return undefined for the case when pathname hasn't changed
+    return undefined;
   }, [pathname]);
 
   return null;

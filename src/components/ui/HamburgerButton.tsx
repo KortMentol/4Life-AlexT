@@ -38,25 +38,19 @@ const HamburgerButton: React.FC<HamburgerButtonProps> = ({ isOpen, toggle, scrol
     >
       <div className="w-6 h-5 flex flex-col justify-between">
         <motion.span
-          className={`w-full h-0.5 rounded-full transform origin-left ${
-            scrolled ? 'bg-gray-700 dark:bg-gray-300' : 'bg-gray-300'
-          }`}
+          className="w-full h-0.5 rounded-full transform origin-left bg-gray-900 dark:bg-gray-300"
           variants={topLineVariants}
           animate={isOpen ? 'open' : 'closed'}
           transition={{ duration: 0.3 }}
         />
         <motion.span
-          className={`w-full h-0.5 rounded-full ${
-            scrolled ? 'bg-gray-700 dark:bg-gray-300' : 'bg-gray-300'
-          }`}
+          className="w-full h-0.5 rounded-full bg-gray-900 dark:bg-gray-300"
           variants={middleLineVariants}
           animate={isOpen ? 'open' : 'closed'}
           transition={{ duration: 0.3 }}
         />
         <motion.span
-          className={`w-full h-0.5 rounded-full transform origin-left ${
-            scrolled ? 'bg-gray-700 dark:bg-gray-300' : 'bg-gray-300'
-          }`}
+          className="w-full h-0.5 rounded-full transform origin-left bg-gray-900 dark:bg-gray-300"
           variants={bottomLineVariants}
           animate={isOpen ? 'open' : 'closed'}
           transition={{ duration: 0.3 }}

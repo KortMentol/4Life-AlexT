@@ -283,7 +283,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                 <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400">
                   {hasContent?.title}
                 </h3>
-                <p className="text-sm text-white dark:text-gray-300">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   {hasContent?.description}
                 </p>
               </div>

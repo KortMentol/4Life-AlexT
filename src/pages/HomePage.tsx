@@ -159,10 +159,10 @@ const HomePage: React.FC = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link 
                 to="/products" 
-                className="group relative inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg"
+                className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg w-full sm:w-auto"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 <span className="relative z-10">Исследовать продукты</span>
@@ -170,10 +170,10 @@ const HomePage: React.FC = () => {
               </Link>
             </motion.div>
             
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link 
                 to="/how-to-buy" 
-                className="group relative inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300"
+                className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300 w-full sm:w-auto"
               >
                 <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 <span className="relative z-10">Как приобрести</span>
@@ -204,6 +204,8 @@ const HomePage: React.FC = () => {
             description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
             centered={true}
             className="max-w-3xl mx-auto"
+            subtitleClassName="text-gray-700 dark:text-blue-400"
+            titleClassName="text-gray-800 dark:text-white"
             descriptionClassName="mx-auto max-w-2xl text-center"
           />
           
@@ -227,12 +229,11 @@ const HomePage: React.FC = () => {
           >
             <Link 
               to="/about" 
-              className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-blue-600 text-white font-medium shadow-lg"
+              className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               <span className="relative z-10">Узнать больше о компании</span>
               <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
-              <span className="absolute bottom-0 right-0 h-full w-0 bg-blue-700/20 group-hover:w-full transition-all duration-500 ease-out"></span>
             </Link>
           </motion.div>
         </div>
@@ -321,8 +322,8 @@ const HomePage: React.FC = () => {
               description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
               centered={true}
               className="max-w-3xl mx-auto"
-              subtitleClassName="text-primary-blue dark:text-blue-400 font-semibold tracking-wide"
-              titleClassName="font-extrabold tracking-tight"
+              subtitleClassName="text-primary-blue dark:text-blue-400 font-semibold tracking-wide text-gray-700"
+              titleClassName="font-extrabold tracking-tight text-gray-800 dark:text-white"
             />
           </div>
           
