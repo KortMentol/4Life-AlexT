@@ -193,7 +193,7 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция о нас */}
-      <section className="py-24 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <section id="about" className="py-24 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <div className="container max-w-7xl mx-auto px-6">
           <SectionHeading 
             title="О нашей компании"
@@ -231,69 +231,71 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Секция продуктов с параллаксом */}
-      <ParallaxSection
-        backgroundImage="/assets/images/backgrounds/2.jpg"
-        altText="Продукты 4Life для укрепления иммунитета"
-        height="auto"
-        parallaxSpeed={0.15}
-        contentClasses="py-24"
-      >
-        <div className="container max-w-7xl mx-auto px-6">
-          <div className="opacity-100">
-            <SectionHeading 
-              title="Инновационные продукты для иммунитета"
-              subtitle="Научный подход к здоровью"
-              description="Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы."
-              className="text-white"
-              centered={true}
-            />
-          </div>
-          
-          {/* Декоративный элемент */}
-          <div className="flex justify-center mb-12">
-            <div className="w-20 h-1 bg-gradient-to-r from-blue-300 to-blue-100"></div>
-          </div>
-          
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {popularProducts.map((product) => (
-              <div key={product.id}>
-                <StaticCard 
-                  title={product.title}
-                  description={product.description}
-                  image={product.image}
-                  link={product.link}
-                />
-              </div>
-            ))}
-          </div>
-          
-          <motion.div 
-            className="mt-16 text-center"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link 
-              to="/products" 
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white transition-all duration-300 font-medium shadow-lg"
+      <section id="products">
+        <ParallaxSection
+          backgroundImage="/assets/images/backgrounds/2.jpg"
+          altText="Продукты 4Life для укрепления иммунитета"
+          height="auto"
+          parallaxSpeed={0.15}
+          contentClasses="py-24"
+        >
+          <div className="container max-w-7xl mx-auto px-6">
+            <div className="opacity-100">
+              <SectionHeading 
+                title="Инновационные продукты для иммунитета"
+                subtitle="Научный подход к здоровью"
+                description="Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы."
+                className="text-white"
+                centered={true}
+              />
+            </div>
+            
+            {/* Декоративный элемент */}
+            <div className="flex justify-center mb-12">
+              <div className="w-20 h-1 bg-gradient-to-r from-blue-300 to-blue-100"></div>
+            </div>
+            
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+              {popularProducts.map((product) => (
+                <div key={product.id}>
+                  <StaticCard 
+                    title={product.title}
+                    description={product.description}
+                    image={product.image}
+                    link={product.link}
+                  />
+                </div>
+              ))}
+            </div>
+            
+            <motion.div 
+              className="mt-16 text-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <span>Исследовать все продукты</span>
-              <Icons.ArrowRight className="w-5 h-5" />
-            </Link>
-          </motion.div>
-          
-          <div className="mt-10 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-              <Icons.ShieldCheck className="w-4 h-4 text-blue-300" />
-              <p className="text-white/90 text-sm">
-                Продукция 4Life не заменяет медикаментозное лечение
-              </p>
+              <Link 
+                to="/products" 
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white transition-all duration-300 font-medium shadow-lg"
+              >
+                <span>Исследовать все продукты</span>
+                <Icons.ArrowRight className="w-5 h-5" />
+              </Link>
+            </motion.div>
+            
+            <div className="mt-10 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                <Icons.ShieldCheck className="w-4 h-4 text-blue-300" />
+                <p className="text-white/90 text-sm">
+                  Продукция 4Life не заменяет медикаментозное лечение
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </ParallaxSection>
+        </ParallaxSection>
+      </section>
 
       {/* Секция бизнес-возможностей */}
-      <section className="py-24 bg-gradient-to-b from-white to-green-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+      <section id="business" className="py-24 bg-gradient-to-b from-white to-green-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
         {/* Декоративные элементы */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-green-300 dark:bg-green-700 mix-blend-multiply filter blur-3xl"></div>
@@ -487,7 +489,7 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Контактная секция */}
-      <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+      <section id="contact" className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
         {/* Декоративные элементы */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50 dark:bg-blue-900/30 opacity-50 clip-path-contact z-0"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-blue-100 dark:bg-blue-800 opacity-30 z-0"></div>

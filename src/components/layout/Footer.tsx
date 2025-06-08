@@ -195,46 +195,7 @@ const Footer: React.FC = () => {
             </motion.ul>
           </motion.div>
           
-          {/* Подписка */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-          >
-            <motion.h3 
-              variants={itemVariants}
-              className="text-lg font-bold mb-6 text-gray-900 dark:text-white"
-            >
-              Подписаться на новости
-            </motion.h3>
-            <motion.p 
-              variants={itemVariants}
-              className="text-gray-600 dark:text-gray-400 mb-4"
-            >
-              Получайте последние новости и обновления о продуктах 4Life.
-            </motion.p>
-            <motion.form 
-              variants={itemVariants}
-              className="flex flex-col space-y-3"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <div className="relative">
-                <input 
-                  type="email" 
-                  placeholder="Ваш email" 
-                  className="input-modern w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <button 
-                type="submit" 
-                className="btn-modern btn-primary-modern px-4 py-3 rounded-lg text-white font-medium transition-all duration-300"
-              >
-                Подписаться
-              </button>
-            </motion.form>
-          </motion.div>
+
         </div>
         
         {/* Нижняя часть футера */}
@@ -243,20 +204,15 @@ const Footer: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
               © {currentYear} {siteConfig.distributor.name}. Все права защищены.
             </p>
-            <div className="flex space-x-6">
-              <Link 
-                to="/privacy-policy" 
-                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
-              >
-                Политика конфиденциальности
-              </Link>
-              <Link 
-                to="/terms" 
-                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
-              >
-                Условия использования
-              </Link>
-            </div>
+          </div>
+          
+          {/* Дополнительная информация */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
+              <br />
+              <span className="font-medium mt-2 inline-block">БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.</span>
+            </p>
           </div>
         </div>
       </div>

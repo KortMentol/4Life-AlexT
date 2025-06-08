@@ -1,16 +1,18 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useCallback } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import ScrollToTop from './components/utils/ScrollToTop';
+import RouteChangeHandler from './components/utils/RouteChangeHandler';
+import ScrollToSection from './components/utils/ScrollToSection';
 
 // Ленивая загрузка страниц
-const HomePage = lazy(() => import('./pages/HomePage'));
-const ProductsPage = lazy(() => import('./pages/ProductsPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const AboutMePage = lazy(() => import('./pages/AboutMePage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const PartnershipPage = lazy(() => import('./pages/PartnershipPage'));
-const HowToBuyPage = lazy(() => import('./pages/HowToBuyPage'));
+const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.default })));
+const ProductsPage = lazy(() => import('./pages/ProductsPage').then(module => ({ default: module.default })));
+const AboutPage = lazy(() => import('./pages/AboutPage').then(module => ({ default: module.default })));
+const AboutMePage = lazy(() => import('./pages/AboutMePage').then(module => ({ default: module.default })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then(module => ({ default: module.default })));
+const PartnershipPage = lazy(() => import('./pages/PartnershipPage').then(module => ({ default: module.default })));
+const HowToBuyPage = lazy(() => import('./pages/HowToBuyPage').then(module => ({ default: module.default })));
 
 // Компонент загрузки
 const LoadingScreen = () => (
@@ -29,10 +31,25 @@ const LoadingScreen = () => (
   </div>
 );
 
+// Глобальное состояние для мобильного меню
+export const useMobileMenuState = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+  
+  return { mobileMenuOpen, setMobileMenuOpen, closeMobileMenu };
+};
+
 function App() {
+  const { closeMobileMenu } = useMobileMenuState();
+  
   return (
     <>
       <ScrollToTop />
+      <ScrollToSection />
+      <RouteChangeHandler onRouteChange={closeMobileMenu} />
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<Layout />}>
