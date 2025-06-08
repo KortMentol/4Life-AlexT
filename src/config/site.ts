@@ -1,31 +1,33 @@
+/**
+ * Конфигурация сайта с использованием переменных окружения для чувствительных данных
+ */
 export const siteConfig = {
   name: "4Life: Здоровье, Энергия, Возможности",
   description: "Официальный представитель 4Life. Инвестируйте в свое здоровье и будущее с продукцией для иммунной системы, энергией и возможностями партнерства.",
-  url: "https://[ДОМЕН_САЙТА]",
-  ogImage: "https://[ДОМЕН_САЙТА]/og-image.jpg",
+  url: import.meta.env.VITE_SITE_URL || "https://example.com",
+  ogImage: import.meta.env.VITE_OG_IMAGE || "/assets/images/og-image.jpg",
   links: {
-    telegram: "https://t.me/[ВАШ_ТЕЛЕГРАМ]",
-    whatsapp: "https://wa.me/79031234567",
-    phone: "+7 (903) 123-45-67",
-    email: "mailto:your.father.email@example.com",
+    telegram: import.meta.env.VITE_TELEGRAM_URL || "https://t.me/username",
+    whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",
+    phone: import.meta.env.VITE_CONTACT_PHONE || "+7 (XXX) XXX-XX-XX",
+    email: import.meta.env.VITE_CONTACT_EMAIL || "mailto:contact@example.com",
   },
   distributor: {
     name: "Александр Тощев",
     title: "Независимый Дистрибьютор 4Life & Наставник по саморазвитию",
   },
   contact: {
-    fourLifeId: "12299550",
-    whatsapp: "https://wa.me/79031234567",
-    email: "your.father.email@example.com",
-    phone: "+7 (903) 123-45-67",
-    address: "Москва, Россия", // Добавляем адрес
+    fourLifeId: import.meta.env.VITE_4LIFE_ID || "00000000",
+    whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",
+    email: import.meta.env.VITE_CONTACT_EMAIL || "contact@example.com",
+    phone: import.meta.env.VITE_CONTACT_PHONE || "+7 (XXX) XXX-XX-XX",
+    address: "Москва, Россия",
   },
-  // Добавляем социальные сети
   socialLinks: {
-    facebook: "https://facebook.com/",
-    instagram: "https://instagram.com/",
-    twitter: "https://twitter.com/",
-    youtube: "https://youtube.com/",
+    facebook: import.meta.env.VITE_FACEBOOK_URL || "https://facebook.com/",
+    instagram: import.meta.env.VITE_INSTAGRAM_URL || "https://instagram.com/",
+    twitter: import.meta.env.VITE_TWITTER_URL || "https://twitter.com/",
+    youtube: import.meta.env.VITE_YOUTUBE_URL || "https://youtube.com/",
   },
 };
 

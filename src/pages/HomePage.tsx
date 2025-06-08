@@ -142,40 +142,43 @@ const HomePage: React.FC = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="mb-2 md:mb-4"
           >
-            <span className="px-3 py-1 md:px-4 md:py-1 bg-blue-600/30 backdrop-blur-sm text-blue-100 rounded-full text-xs md:text-sm font-medium border border-blue-400/30">
+            <span className="px-3 py-1 md:px-4 md:py-1 bg-blue-600/30 text-blue-100 rounded-full text-xs md:text-sm font-medium border border-blue-400/30">
               Компания иммунной системы
             </span>
           </motion.div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0">
             <span className="block mb-1 md:mb-2">Инвестируйте в своё здоровье</span>
-            <span className="block mb-1 md:mb-2 text-blue-300">с научным подходом</span>
-            <span className="text-blue-300">4Life</span>
+            <span className="block mb-1 md:mb-2 bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent">с научным подходом</span>
+            <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">4Life</span>
           </h1>
           
-          <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed">
+          <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto">
             Откройте для себя силу Трансфер Факторов — молекул, 
             которые поддерживают здоровую работу вашей иммунной системы
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link 
                 to="/products" 
-                className="px-6 py-3 md:px-8 md:py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/30 flex items-center gap-2"
+                className="group relative inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg"
               >
-                <span>Исследовать продукты</span>
-                <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative z-10">Исследовать продукты</span>
+                <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </motion.div>
             
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link 
                 to="/how-to-buy" 
-                className="px-6 py-3 md:px-8 md:py-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                className="group relative inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300"
               >
-                <span>Как приобрести</span>
-                <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative z-10">Как приобрести</span>
+                <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5 relative z-10 transition-all duration-300 group-hover:rotate-12" />
+                <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
               </Link>
             </motion.div>
           </div>
@@ -199,6 +202,9 @@ const HomePage: React.FC = () => {
             title="О нашей компании"
             subtitle="Иммунная наука, подтвержденная исследованиями"
             description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
+            centered={true}
+            className="max-w-3xl mx-auto"
+            descriptionClassName="mx-auto max-w-2xl text-center"
           />
           
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -216,15 +222,17 @@ const HomePage: React.FC = () => {
           
           <motion.div 
             className="mt-16 text-center"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <Link 
               to="/about" 
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 font-medium shadow-lg hover:shadow-blue-500/30"
+              className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-blue-600 text-white font-medium shadow-lg"
             >
-              <span>Узнать больше о компании</span>
-              <Icons.ArrowRight className="w-5 h-5" />
+              <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative z-10">Узнать больше о компании</span>
+              <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+              <span className="absolute bottom-0 right-0 h-full w-0 bg-blue-700/20 group-hover:w-full transition-all duration-500 ease-out"></span>
             </Link>
           </motion.div>
         </div>
@@ -243,17 +251,18 @@ const HomePage: React.FC = () => {
             <div className="opacity-100">
               <SectionHeading 
                 title="Инновационные продукты для иммунитета"
-                subtitle="Научный подход к здоровью"
+                subtitle={<span className="bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent">Научный подход к здоровью</span>}
                 description="Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы."
-                className="text-white"
+                className="text-white max-w-3xl mx-auto"
                 centered={true}
+                titleGradient={true}
+                withLine={false}
+                titleClassName="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent font-extrabold tracking-tight"
+                descriptionClassName="text-white/90 leading-relaxed"
               />
             </div>
             
-            {/* Декоративный элемент */}
-            <div className="flex justify-center mb-12">
-              <div className="w-20 h-1 bg-gradient-to-r from-blue-300 to-blue-100"></div>
-            </div>
+
             
             <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
               {popularProducts.map((product) => (
@@ -270,20 +279,22 @@ const HomePage: React.FC = () => {
             
             <motion.div 
               className="mt-16 text-center"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Link 
                 to="/products" 
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white transition-all duration-300 font-medium shadow-lg"
+                className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
               >
-                <span>Исследовать все продукты</span>
-                <Icons.ArrowRight className="w-5 h-5" />
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">Посмотреть все</span>
+                <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+                <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
               </Link>
             </motion.div>
             
             <div className="mt-10 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20">
                 <Icons.ShieldCheck className="w-4 h-4 text-blue-300" />
                 <p className="text-white/90 text-sm">
                   Продукция 4Life не заменяет медикаментозное лечение
@@ -309,6 +320,9 @@ const HomePage: React.FC = () => {
               subtitle="Партнерство для финансовой свободы"
               description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
               centered={true}
+              className="max-w-3xl mx-auto"
+              subtitleClassName="text-primary-blue dark:text-blue-400 font-semibold tracking-wide"
+              titleClassName="font-extrabold tracking-tight"
             />
           </div>
           
@@ -325,21 +339,24 @@ const HomePage: React.FC = () => {
           </div>
           
           <div className="mt-16 text-center">
-            <div className="inline-block p-[2px] rounded-lg bg-gradient-to-r from-green-500 to-blue-500">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link 
-                  to="/partnership" 
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-opacity-80 transition-all duration-300 font-medium"
-                >
-                  <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Узнать о возможностях партнерства</span>
-                  <Icons.ArrowRight className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                </Link>
-              </motion.div>
-            </div>
+            <motion.div 
+              className="inline-block p-[2px] rounded-lg bg-gradient-to-r from-green-500 to-blue-500"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Link 
+                to="/partnership" 
+                className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 font-medium"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent relative z-10">Узнать о возможностях партнерства</span>
+                <Icons.ArrowRight className="w-5 h-5 text-blue-600 dark:text-blue-400 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
           </div>
           
           {/* Цитата */}
-          <div className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 backdrop-blur-md p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg">
+          <div className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg">
             <div className="flex items-start">
               <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
@@ -366,48 +383,52 @@ const HomePage: React.FC = () => {
           <div className="max-w-3xl mx-auto">
             {/* Декоративный элемент */}
             <div className="flex justify-center mb-8">
-              <div className="h-1 w-[100px] bg-gradient-to-r from-blue-400 to-blue-300"></div>
+              <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
             </div>
             
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               <span className="block mb-2">Готовы инвестировать</span>
-              <span className="text-blue-300">в своё здоровье и будущее?</span>
+              <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">в своё здоровье и будущее?</span>
             </h2>
             
-            <p className="text-xl text-white/90 mb-12 leading-relaxed">
+            <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto">
               Присоединяйтесь к нашей команде сегодня и получите персональную консультацию 
               по продуктам и бизнес-возможностям 4Life. Сделайте первый шаг к здоровью и финансовой независимости.
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <a 
                   href="https://russia.4life.com/12299550" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/30"
+                  className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
                 >
-                  <Icons.ShoppingCart className="w-5 h-5" />
-                  <span>Купить продукты</span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <Icons.ShoppingCart className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:rotate-12" />
+                  <span className="relative z-10">Купить продукты</span>
+                  <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-white/30 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                 </a>
               </motion.div>
               
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <a 
                   href="https://russia.4life.com/12299550/signup/PC" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white font-medium transition-all duration-300"
+                  className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300"
                 >
-                  <Icons.UserPlus className="w-5 h-5" />
-                  <span>Стать партнером</span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <Icons.UserPlus className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:scale-110" />
+                  <span className="relative z-10">Стать партнером</span>
+                  <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
                 </a>
               </motion.div>
             </div>
             
             {/* Дополнительная информация */}
             <div className="mt-12 flex justify-center">
-              <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+              <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
                 <Icons.Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
                 <div className="relative ml-2 sm:ml-3">
                   <div className="flex flex-wrap items-baseline justify-center gap-x-1.5">
@@ -431,7 +452,7 @@ const HomePage: React.FC = () => {
                       <AnimatePresence>
                         {isCopied && (
                           <motion.div 
-                            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-4 py-1.5 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-md shadow-lg z-50 whitespace-nowrap min-w-[110px] text-center"
+                            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-4 py-1.5 bg-white/95 dark:bg-gray-800/95 rounded-md shadow-lg z-50 whitespace-nowrap min-w-[110px] text-center"
                             initial={{ opacity: 0, y: -5, scale: 0.95 }}
                             animate={{ 
                               opacity: 1, 

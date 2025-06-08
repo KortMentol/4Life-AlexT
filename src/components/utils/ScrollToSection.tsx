@@ -8,33 +8,44 @@ const ScrollToSection: React.FC = () => {
   const { hash, pathname } = useLocation();
 
   useEffect(() => {
-    // Проверяем, есть ли сохраненный элемент для прокрутки
-    const scrollToElement = sessionStorage.getItem('scrollToElement');
-    
-    if (scrollToElement) {
-      console.log(`Found saved element to scroll to: ${scrollToElement}`);
-      sessionStorage.removeItem('scrollToElement');
-      
-      // Небольшая задержка для уверенности, что DOM полностью загружен
+    // Функция для логирования только в режиме разработки
+    const logDebug = (message: string, ...args: any[]) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(message, ...args);
+      }
+    };
+
+    // Функция для прокрутки к элементу
+    const scrollToElementById = (elementId: string, delay = 300) => {
       setTimeout(() => {
-        const element = document.getElementById(scrollToElement);
+        const element = document.getElementById(elementId);
         if (element) {
-          console.log(`Element found: `, element);
-          const lenisInstance = (window as any).lenis;
-          if (lenisInstance) {
-            console.log(`Using Lenis to scroll`);
-            lenisInstance.scrollTo(element, { offset: -100 });
+          logDebug(`Element found: `, element);
+          
+          if (window.lenis) {
+            logDebug(`Using Lenis to scroll`);
+            window.lenis.scrollTo(element, { offset: -100 });
           } else {
-            console.log(`Using native scrollIntoView`);
+            logDebug(`Using native scrollIntoView`);
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             // Дополнительный отступ сверху
             window.scrollBy(0, -100);
           }
         } else {
-          console.log(`Element with id ${scrollToElement} not found`);
+          logDebug(`Element with id ${elementId} not found`);
         }
-      }, 500);
+      }, delay);
+    };
+
+    // Проверяем, есть ли сохраненный элемент для прокрутки
+    const scrollToElement = sessionStorage.getItem('scrollToElement');
+    
+    if (scrollToElement) {
+      logDebug(`Found saved element to scroll to: ${scrollToElement}`);
+      sessionStorage.removeItem('scrollToElement');
       
+      // Прокручиваем к сохраненному элементу
+      scrollToElementById(scrollToElement, 500);
       return;
     }
     
@@ -43,14 +54,11 @@ const ScrollToSection: React.FC = () => {
       // Удаляем # из хэша
       const id = hash.replace('#', '');
       
-      // Добавляем логирование для отладки
-      console.log(`Trying to scroll to element with id: ${id}`);
+      logDebug(`Trying to scroll to element with id: ${id}`);
       
       const element = document.getElementById(id);
       
       if (element) {
-        console.log(`Element found: `, element);
-        
         // Проверяем, находится ли элемент уже в видимой области
         const rect = element.getBoundingClientRect();
         const isInView = (
@@ -60,28 +68,17 @@ const ScrollToSection: React.FC = () => {
           rect.right <= (window.innerWidth || document.documentElement.clientWidth)
         );
         
-        console.log(`Is element in view: ${isInView}, rect:`, rect);
+        logDebug(`Is element in view: ${isInView}, rect:`, rect);
         
         // Если элемент уже в видимой области, не прокручиваем
         if (isInView) {
           return;
         }
         
-        // Небольшая задержка для уверенности, что DOM полностью загружен
-        setTimeout(() => {
-          const lenisInstance = (window as any).lenis;
-          if (lenisInstance) {
-            console.log(`Using Lenis to scroll`);
-            lenisInstance.scrollTo(element, { offset: -100 });
-          } else {
-            console.log(`Using native scrollIntoView`);
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Дополнительный отступ сверху
-            window.scrollBy(0, -100);
-          }
-        }, 300);
+        // Прокручиваем к элементу
+        scrollToElementById(id, 300);
       } else {
-        console.log(`Element with id ${id} not found`);
+        logDebug(`Element with id ${id} not found`);
       }
     } else if (pathname === '/' && window.location.hash === '') {
       // Если нет хэша и мы на главной странице, прокручиваем в начало

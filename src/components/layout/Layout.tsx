@@ -4,6 +4,14 @@ import Header from './Header';
 import Footer from './Footer';
 import ScrollToTopButton from '../utils/ScrollToTopButton';
 import SVGFilters from './SVGFilters';
+import type Lenis from 'lenis';
+
+// Расширяем глобальный интерфейс Window для типизации lenis
+declare global {
+  interface Window {
+    lenis: Lenis | null;
+  }
+}
 
 const Layout: React.FC = () => {
   // Инициализация плавной прокрутки Lenis
@@ -25,7 +33,7 @@ const Layout: React.FC = () => {
         });
         
         // Сохраняем экземпляр Lenis в window для доступа из других компонентов
-        (window as any).lenis = lenis;
+        window.lenis = lenis;
         
         // Функция для обновления Lenis на каждом кадре анимации
         function raf(time: number) {
@@ -39,8 +47,7 @@ const Layout: React.FC = () => {
         // Обработчик изменения размера окна
         const handleResize = () => {
           if (lenis) {
-            // Используем метод из экземпляра lenis
-            (lenis as any).resize();
+            lenis.resize();
           }
         };
         
@@ -49,11 +56,21 @@ const Layout: React.FC = () => {
         return () => {
           window.removeEventListener('resize', handleResize);
           lenis.destroy();
-          (window as any).lenis = null;
+          window.lenis = null;
         };
       } catch (error) {
         console.error('Failed to initialize Lenis:', error);
-        return undefined;
+        // Показываем уведомление пользователю о проблеме с плавной прокруткой
+        const notifyUser = () => {
+          const notification = document.createElement('div');
+          notification.className = 'fixed bottom-4 left-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-4 py-2 rounded-lg shadow-lg';
+          notification.textContent = 'Не удалось инициализировать плавную прокрутку. Используется стандартная прокрутка.';
+          document.body.appendChild(notification);
+          setTimeout(() => notification.remove(), 5000);
+        };
+        
+        // Выполняем в следующем цикле, чтобы DOM был готов
+        setTimeout(notifyUser, 1000);
       }
     };
     

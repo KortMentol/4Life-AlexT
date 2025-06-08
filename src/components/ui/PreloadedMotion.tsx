@@ -1,22 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion, MotionProps } from 'framer-motion';
 
-// Компонент, который предотвращает моргание при первой загрузке
+/**
+ * Свойства компонента PreloadedMotion
+ */
 interface PreloadedMotionProps extends MotionProps {
+  /** Дочерние элементы */
   children: React.ReactNode;
+  /** Дополнительные CSS классы */
   className?: string;
 }
 
+/**
+ * Компонент, который предотвращает моргание при первой загрузке
+ * Использует предзагруженные варианты анимации для плавного отображения
+ */
 const PreloadedMotion: React.FC<PreloadedMotionProps> = ({ 
   children, 
   className = "", 
   ...props 
 }) => {
-  // Эффект для предотвращения моргания при первой загрузке
-  useEffect(() => {
-    // Компонент загружен
-  }, []);
-
   // Предзагруженные варианты без анимации
   const preloadedVariants = {
     visible: {

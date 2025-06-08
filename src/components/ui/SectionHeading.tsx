@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export interface SectionHeadingProps {
   title: string;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   description?: string;
   align?: 'left' | 'center' | 'right';
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -137,7 +137,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
       </motion.h2>
       
       {withLine && (
-        <div className="relative h-1 mt-4 mb-6 w-24">
+        <div className={`relative h-1 mt-4 mb-6 ${align === 'center' ? 'mx-auto' : ''} w-24`}>
           <motion.div 
             className={`absolute h-full ${lineColors[lineColor as keyof typeof lineColors] || lineColors.blue}`}
             {...lineAnimation}

@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
+/**
+ * Компонент для плавной прокрутки страницы вверх при изменении маршрута
+ * Использует нативную анимацию вместо Lenis для совместимости
+ */
 const SmoothScrollToTop = () => {
   const { pathname } = useLocation();
   const prevPathname = useRef(pathname);
@@ -43,9 +47,6 @@ const SmoothScrollToTop = () => {
       // Очистка таймера при размонтировании
       return () => clearTimeout(timer);
     }
-    
-    // Возвращаем функцию очистки, если условие не выполнилось
-    return () => {};
   }, [pathname]);
 
   return null;

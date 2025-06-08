@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ const megaMenuContent: Record<string, {
   title: string;
   description: string;
   links: { title: string; href: string; icon?: string }[];
-}> = {
+} | null> = {
   '/': {
     title: 'Главная страница',
     description: 'Основные разделы сайта',
@@ -72,36 +72,101 @@ const megaMenuContent: Record<string, {
     title: 'Партнерство с 4Life',
     description: 'Возможности для бизнеса и личностного роста',
     links: [
-      { title: 'Преимущества партнерства', href: '/partnership#benefits' },
+      { title: 'Преимущества', href: '/partnership#benefits' },
       { title: 'Маркетинговый план', href: '/partnership#marketing-plan' },
       { title: 'Истории успеха', href: '/partnership#success-stories' },
       { title: 'Обучение и поддержка', href: '/partnership#training' },
       { title: 'Стать партнером', href: '/partnership#join' }
     ]
   },
-  '/contact': {
-    title: 'Контакты',
-    description: 'Свяжитесь с нами для получения консультации',
-    links: [
-      { title: 'Задать вопрос', href: '/contact#question' },
-      { title: 'Заказать обратный звонок', href: '/contact#callback' },
-      { title: 'Написать в WhatsApp', href: '/contact#whatsapp' },
-      { title: 'Наши контакты', href: '/contact#info' }
-    ]
-  }
+  '/contact': null
 };
 
 const MegaMenu: React.FC<MegaMenuProps> = ({
   activeItem,
   onMouseEnter,
   onMouseLeave,
-  scrolled
+  // scrolled не используется
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   
   // Проверяем, есть ли контент для активного элемента
   const hasContent = activeItem && megaMenuContent[activeItem];
+
+  // Функция для определения активного раздела на основе скролла
+  useEffect(() => {
+    if (location.pathname !== '/') return;
+
+    const checkScroll = () => {
+      // Проверяем только для главной страницы
+      const sections = [
+        { id: 'about', offset: 0 },
+        { id: 'products', offset: 0 },
+        { id: 'business', offset: 0 },
+        { id: 'contact', offset: 0 }
+      ];
+
+      // Находим все секции на странице
+      sections.forEach(section => {
+        const element = document.getElementById(section.id);
+        if (element) {
+          section.offset = element.offsetTop - 150; // Учитываем отступ для шапки
+        }
+      });
+
+      // Сортируем секции по их положению на странице
+      sections.sort((a, b) => a.offset - b.offset);
+
+      // Определяем текущую активную секцию
+      const scrollPosition = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const windowHeight = window.innerHeight;
+      let currentSection = null;
+      
+      // Проверяем, находимся ли мы в нижней части страницы
+      const isNearBottom = scrollPosition + windowHeight >= scrollHeight - 100;
+      
+      if (isNearBottom) {
+        // Если мы близко к низу страницы, активируем последнюю секцию
+        currentSection = 'contact';
+      } else {
+        // Иначе определяем секцию по скроллу
+        for (let i = 0; i < sections.length; i++) {
+          const section = sections[i];
+          if (section && scrollPosition >= section.offset) {
+            currentSection = section.id;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Обновляем URL с хешем при изменении активной секции
+      if (currentSection && currentSection !== activeSection) {
+        // Используем history.replaceState для обновления URL без перезагрузки страницы
+        const newUrl = `/#${currentSection}`;
+        window.history.replaceState(null, '', newUrl);
+      } else if (!currentSection && location.hash) {
+        // Если нет активной секции, но есть хеш в URL, удаляем его
+        window.history.replaceState(null, '', '/');
+      }
+
+      setActiveSection(currentSection);
+    };
+
+    // Добавляем слушатель события скролла
+    window.addEventListener('scroll', checkScroll);
+    
+    // Проверяем при монтировании компонента
+    checkScroll();
+
+    // Удаляем слушатель при размонтировании
+    return () => {
+      window.removeEventListener('scroll', checkScroll);
+    };
+  }, [location.pathname, activeSection]);
   
   // Обработчик клика по ссылке в мега-меню
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -165,12 +230,29 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
 
   // Функция для определения активного класса
   const isLinkActive = (linkHref: string): boolean => {
+    // Для главной страницы используем активную секцию
+    if (location.pathname === '/' && linkHref.includes('#')) {
+      const hash = linkHref.split('#')[1];
+      return hash === activeSection;
+    }
+    
+    // Для других страниц используем стандартную логику
     if (linkHref.includes('#')) {
       const parts = linkHref.split('#');
       const path = parts[0];
       const hash = parts.length > 1 ? parts[1] : '';
       
-      return location.pathname === path && location.hash === (hash ? '#' + hash : '');
+      // Проверяем URL и хэш
+      const urlMatch = location.pathname === path;
+      const hashMatch = location.hash === (hash ? '#' + hash : '');
+      
+      // Если есть хэш в URL, проверяем его соответствие
+      if (location.hash) {
+        return urlMatch && hashMatch;
+      }
+      
+      // Если хэша нет, проверяем только URL и активную секцию
+      return urlMatch && (hash === activeSection || !hash);
     } else {
       return location.pathname === linkHref;
     }
@@ -199,10 +281,10 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
               {/* Заголовок и описание */}
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {hasContent.title}
+                  {hasContent?.title}
                 </h3>
-                <p className={`text-sm ${scrolled ? 'text-gray-600 dark:text-gray-300' : 'text-gray-300'}`}>
-                  {hasContent.description}
+                <p className="text-sm text-white dark:text-gray-300">
+                  {hasContent?.description}
                 </p>
               </div>
               
@@ -216,8 +298,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                     <div className="w-full max-w-7xl relative">
                       {/* Главная */}
                       {activeItem === '/' && (
-                        <div className="absolute left-[38%] transform -translate-x-1/4">
-                          <ul className="space-y-2 min-w-[180px]">
+                        <div className="absolute left-[39.2%] transform -translate-x-1/4">
+                          <ul className="space-y-1 min-w-[180px]">
                             {hasContent.links.map((link) => (
                               <li key={link.href}>
                                 <a
@@ -226,7 +308,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                                   className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
                                     isLinkActive(link.href)
                                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                                   }`}
                                 >
                                   {link.title}
@@ -239,8 +321,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                       
                       {/* Продукты */}
                       {activeItem === '/products' && (
-                        <div className="absolute left-[14.28%] transform -translate-x-1/2">
-                          <ul className="space-y-2 min-w-[180px]">
+                        <div className="absolute left-[50%] transform -translate-x-1/2">
+                          <ul className="space-y-1 min-w-[180px]">
                             {hasContent.links.map((link) => (
                               <li key={link.href}>
                                 <a
@@ -249,7 +331,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                                   className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
                                     isLinkActive(link.href)
                                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                                   }`}
                                 >
                                   {link.title}
@@ -262,8 +344,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                       
                       {/* Как приобрести */}
                       {activeItem === '/how-to-buy' && (
-                        <div className="absolute left-[28.57%] transform -translate-x-1/2">
-                          <ul className="space-y-2 min-w-[180px]">
+                        <div className="absolute left-[59.55%] transform -translate-x-1/2">
+                          <ul className="space-y-1 min-w-[180px]">
                             {hasContent.links.map((link) => (
                               <li key={link.href}>
                                 <a
@@ -272,7 +354,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                                   className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
                                     isLinkActive(link.href)
                                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                                   }`}
                                 >
                                   {link.title}
@@ -285,8 +367,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                       
                       {/* О 4Life */}
                       {activeItem === '/about' && (
-                        <div className="absolute left-[42.85%] transform -translate-x-1/2">
-                          <ul className="space-y-2 min-w-[180px]">
+                        <div className="absolute left-[72.5%] transform -translate-x-1/2">
+                          <ul className="space-y-1 min-w-[180px]">
                             {hasContent.links.map((link) => (
                               <li key={link.href}>
                                 <a
@@ -295,7 +377,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                                   className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
                                     isLinkActive(link.href)
                                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                                   }`}
                                 >
                                   {link.title}
@@ -308,8 +390,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                       
                       {/* Обо Мне */}
                       {activeItem === '/about-me' && (
-                        <div className="absolute left-[57.14%] transform -translate-x-1/2">
-                          <ul className="space-y-2 min-w-[180px]">
+                        <div className="absolute left-[77.3%] transform -translate-x-1/2">
+                          <ul className="space-y-1 min-w-[180px]">
                             {hasContent.links.map((link) => (
                               <li key={link.href}>
                                 <a
@@ -318,7 +400,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                                   className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
                                     isLinkActive(link.href)
                                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                                   }`}
                                 >
                                   {link.title}
@@ -331,8 +413,8 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                       
                       {/* Партнерство */}
                       {activeItem === '/partnership' && (
-                        <div className="absolute left-[71.42%] transform -translate-x-1/2">
-                          <ul className="space-y-2 min-w-[180px]">
+                        <div className="absolute left-[85.3%] transform -translate-x-1/2">
+                          <ul className="space-y-1 min-w-[180px]">
                             {hasContent.links.map((link) => (
                               <li key={link.href}>
                                 <a
@@ -341,30 +423,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
                                   className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
                                     isLinkActive(link.href)
                                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
-                                  }`}
-                                >
-                                  {link.title}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {/* Контакты */}
-                      {activeItem === '/contact' && (
-                        <div className="absolute left-[85.71%] transform -translate-x-1/2">
-                          <ul className="space-y-2 min-w-[180px]">
-                            {hasContent.links.map((link) => (
-                              <li key={link.href}>
-                                <a
-                                  href={link.href}
-                                  onClick={(e) => handleLinkClick(e, link.href)}
-                                  className={`block px-3 py-2 rounded-md text-sm transition-colors duration-300 ${
-                                    isLinkActive(link.href)
-                                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                      : `${scrolled ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50' : 'text-gray-300 hover:bg-gray-800/50'} hover:text-blue-600 dark:hover:text-blue-400`
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                                   }`}
                                 >
                                   {link.title}

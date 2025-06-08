@@ -1,0 +1,48 @@
+/* Исправления для различных браузеров и устройств */
+
+/* Исправление для iOS Safari - предотвращение масштабирования при фокусе на инпутах */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Исправление для Firefox - скрытие скроллбара при сохранении функциональности */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+/* Исправление для Chrome/Edge/Safari - стилизация скроллбара */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(155, 155, 155, 0.7);
+}
+
+/* Исправление для мобильных устройств - предотвращение горизонтального скролла */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Исправление для Safari - предотвращение проблем с фиксированным позиционированием */
+.fixed {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}

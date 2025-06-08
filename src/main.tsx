@@ -5,22 +5,35 @@ import { ParallaxProvider } from 'react-scroll-parallax';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
-import './index.css';
-import './fixes.css';
+import './styles/index.css';
+import './styles/fixes.css';
 import './styles/animations.css';
 import './styles/modern-design.css';
-import './styles/menu-animations.css'; // Добавляем стили для меню
+import './styles/menu-animations.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <HelmetProvider>
-        <ThemeProvider>
-          <ParallaxProvider>
-            <App />
-          </ParallaxProvider>
-        </ThemeProvider>
-      </HelmetProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
-);
+// Функция для инициализации приложения
+const initApp = () => {
+  const rootElement = document.getElementById('root');
+  
+  if (!rootElement) {
+    console.error('Root element not found');
+    return;
+  }
+  
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <HelmetProvider>
+          <ThemeProvider>
+            <ParallaxProvider>
+              <App />
+            </ParallaxProvider>
+          </ThemeProvider>
+        </HelmetProvider>
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+};
+
+// Запускаем приложение
+initApp();

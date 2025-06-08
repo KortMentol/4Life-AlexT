@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
+/**
+ * Компонент для автоматической прокрутки страницы вверх при изменении маршрута
+ */
 export default function ScrollToTop() {
   const { pathname } = useLocation();
   const prevPathnameRef = useRef(pathname);
@@ -10,7 +13,7 @@ export default function ScrollToTop() {
     // Skip scroll on initial mount
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      return undefined;
+      return;
     }
 
     // Only scroll if the pathname has changed
@@ -20,10 +23,9 @@ export default function ScrollToTop() {
       
       // Use Lenis to scroll to top if available, otherwise fallback to native
       const scrollToTop = () => {
-        const lenisInstance = (window as any).lenis;
-        if (lenisInstance) {
+        if (window.lenis) {
           // Use Lenis for smooth scrolling
-          lenisInstance.scrollTo(0, { immediate: false });
+          window.lenis.scrollTo(0, { immediate: false });
         } else {
           // Fallback for browsers without Lenis
           if ('scrollBehavior' in document.documentElement.style) {
@@ -47,9 +49,6 @@ export default function ScrollToTop() {
       // Cleanup function
       return () => clearTimeout(timer);
     }
-    
-    // Return undefined explicitly when no cleanup is needed
-    return undefined;
   }, [pathname]);
 
   return null;

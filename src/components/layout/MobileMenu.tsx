@@ -4,13 +4,23 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { mainNav } from '../../config/site';
 
+/**
+ * Свойства компонента MobileMenu
+ */
 interface MobileMenuProps {
+  /** Флаг открытия меню */
   isOpen: boolean;
+  /** Функция закрытия меню */
   onClose: () => void;
-  scrolled: boolean; // Оставляем для совместимости с Header
+  /** Флаг прокрутки страницы (для совместимости с Header) */
+  scrolled: boolean;
+  /** Функция для обработки клика по навигации */
   handleNavClick: () => void;
 }
 
+/**
+ * Компонент мобильного меню с анимацией
+ */
 const MobileMenu: React.FC<MobileMenuProps> = ({ 
   isOpen, 
   onClose, 
@@ -31,16 +41,20 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     };
   }, [isOpen]);
 
-  // Обработчик клика по ссылке
+  // Обработчик клика по ссылке с использованием AnimatePresence
   const handleLinkClick = (href: string) => {
+    // Сохраняем целевой маршрут для использования после анимации
+    const targetHref = href;
     // Закрываем меню
     onClose();
     
-    // Используем setTimeout для задержки перехода, чтобы анимация закрытия успела отработать
+    // Используем setTimeout с минимальной задержкой для корректной работы анимации
+    // Это безопаснее, чем полагаться на onExitComplete, который может не сработать
+    // если компонент размонтируется раньше
     setTimeout(() => {
-      navigate(href);
+      navigate(targetHref);
       handleNavClick();
-    }, 300);
+    }, 100);
   };
 
   return (

@@ -1,31 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
+import { throttle } from '../../utils/throttle';
 
+/**
+ * Кнопка для прокрутки страницы вверх, появляющаяся при скролле
+ */
 const ScrollToTopButton: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Отслеживаем скролл страницы
-  useEffect(() => {
-    const toggleVisibility = () => {
-      // Показываем кнопку, когда пользователь прокрутил страницу на 300px вниз
-      if (window.scrollY > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+  // Оптимизированная функция для отслеживания скролла
+  const handleScroll = useCallback(() => {
+    // Показываем кнопку, когда пользователь прокрутил страницу на 300px вниз
+    setIsVisible(window.scrollY > 300);
   }, []);
+
+  // Создаем throttled-версию обработчика скролла
+  const throttledScrollHandler = useCallback(
+    throttle(handleScroll, 200),
+    [handleScroll]
+  );
+
+  // Отслеживаем скролл страницы с throttle
+  useEffect(() => {
+    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
+    return () => window.removeEventListener('scroll', throttledScrollHandler);
+  }, [throttledScrollHandler]);
 
   // Функция для плавной прокрутки вверх
   const scrollToTop = () => {
     // Используем Lenis для плавной прокрутки, если он доступен
-    const lenisInstance = (window as any).lenis;
-    if (lenisInstance) {
-      lenisInstance.scrollTo(0, { duration: 1.2 });
+    if (window.lenis) {
+      window.lenis.scrollTo(0, { duration: 1.2 });
     } else {
       // Запасной вариант с нативной прокруткой
       window.scrollTo({

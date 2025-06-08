@@ -1,45 +1,39 @@
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react()
+  ],
   css: {
-    devSourcemap: true,
+    // Настройки для CSS
+    devSourcemap: true
+  },
+  build: {
+    // Оптимизация сборки
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          motion: ['framer-motion'],
+          vendors: ['react-helmet-async', 'react-scroll-parallax']
+        }
+      }
+    }
   },
   server: {
-    host: '0.0.0.0',
-    port: 6554,
-    strictPort: true,
-    hmr: {
-      clientPort: 6554,
-      host: 'localhost',
-      protocol: 'ws',
-      overlay: false
-    },
-    watch: {
-      usePolling: true
-    },
-    cors: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache'
-    },
-    fs: {
-      allow: ['..']
-    }
-  },
-  preview: {
-    host: '0.0.0.0',
-    port: 6554,
-    strictPort: true,
-    cors: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache'
-    }
-  },
-  define: {
-    'process.env.NODE_ENV': '"development"'
+    // Настройки сервера разработки
+    port: 3000,
+    strictPort: false,
+    open: true
   }
 });

@@ -200,18 +200,16 @@ const Footer: React.FC = () => {
         
         {/* Нижняя часть футера */}
         <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
-              © {currentYear} {siteConfig.distributor.name}. Все права защищены.
+          <div className="text-center">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              © {currentYear} Александр Тощев. Все права защищены.
             </p>
-          </div>
-          
-          {/* Дополнительная информация */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
               Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
-              <br />
-              <span className="font-medium mt-2 inline-block">БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.</span>
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-2">
+              БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.
             </p>
           </div>
         </div>
