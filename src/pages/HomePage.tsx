@@ -1,12 +1,12 @@
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useCallback, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import ParallaxSection from "../components/ui/ParallaxSection";
-import { Icons } from "../utils/icons";
 import SectionHeading from "../components/ui/SectionHeading";
 import StaticCard from "../components/ui/StaticCard";
 import StaticFeature from "../components/ui/StaticFeature";
+import { Icons } from "../utils/icons";
 
 // Кастомный хук для копирования в буфер обмена
 const useCopyToClipboard = (text: string) => {
@@ -15,19 +15,19 @@ const useCopyToClipboard = (text: string) => {
   const copyToClipboard = useCallback(async (): Promise<(() => void) | void> => {
     // Не показываем уведомление, если уже показано
     if (isCopied) return;
-    
+
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
-      
+
       // Сбрасываем состояние через 2 секунды
       const timer = setTimeout(() => {
         setIsCopied(false);
       }, 2000);
-      
+
       return () => clearTimeout(timer);
     } catch (err) {
-      console.error('Ошибка при копировании: ', err);
+      console.error("Ошибка при копировании: ", err);
       return undefined;
     }
   }, [text, isCopied]);
@@ -37,71 +37,74 @@ const useCopyToClipboard = (text: string) => {
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
-  const { isCopied, copyToClipboard } = useCopyToClipboard('12299550');
-  
+  const { isCopied, copyToClipboard } = useCopyToClipboard("12299550");
+
   // Данные для секции преимуществ
   const features = [
     {
       icon: Icons.ShieldCheck,
       title: "Натуральный состав",
-      description: "Продукты 4Life созданы из полностью натуральных компонентов и не содержат химических добавок"
+      description: "Продукты 4Life созданы из полностью натуральных компонентов и не содержат химических добавок",
     },
     {
       icon: Icons.HeartPulse,
       title: "Укрепление иммунитета",
-      description: "Наши продукты научно доказано повышают активность клеток иммунной системы до 437%"
+      description: "Наши продукты научно доказано повышают активность клеток иммунной системы до 437%",
     },
     {
       icon: Icons.PieChart,
       title: "Проверенные результаты",
-      description: "Более 25 лет исследований и тысячи довольных клиентов по всему миру"
+      description: "Более 25 лет исследований и тысячи довольных клиентов по всему миру",
     },
   ];
-  
+
   // Данные для секции преимуществ бизнеса
   const benefits = [
     {
       icon: Icons.DollarSign,
       title: "Гибкий доход",
-      description: "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени"
+      description: "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени",
     },
     {
       icon: Icons.Users,
       title: "Обучение и поддержка",
-      description: "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса"
+      description: "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса",
     },
     {
       icon: Icons.Globe,
       title: "Глобальные возможности",
-      description: "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний"
+      description: "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний",
     },
   ];
-  
+
   // Популярные продукты
   const popularProducts = [
     {
       id: 1,
       title: "Трансфер Фактор Плюс",
-      description: "Усиленная формула для поддержки иммунной системы. Содержит эксклюзивную смесь Трансфер Факторов и нутриентов для усиления иммунного ответа.",
+      description:
+        "Усиленная формула для поддержки иммунной системы. Содержит эксклюзивную смесь Трансфер Факторов и нутриентов для усиления иммунного ответа.",
       image: "/assets/images/products/tf-plus.png",
-      link: "/products/transfer-factor-plus"
+      link: "/products/transfer-factor-plus",
     },
     {
       id: 2,
       title: "Трансфер Фактор Трай-Фактор",
-      description: "Классическая формула для ежедневной поддержки иммунитета. Оптимальное сочетание эффективности и доступности.",
+      description:
+        "Классическая формула для ежедневной поддержки иммунитета. Оптимальное сочетание эффективности и доступности.",
       image: "/assets/images/products/tf-tri-factor.png",
-      link: "/products/transfer-factor-tri-factor"
+      link: "/products/transfer-factor-tri-factor",
     },
     {
       id: 3,
       title: "Белл Ви",
-      description: "Комплексная поддержка женского здоровья. Специально разработанная формула для красоты и благополучия женщины.",
+      description:
+        "Комплексная поддержка женского здоровья. Специально разработанная формула для красоты и благополучия женщины.",
       image: "/assets/images/products/belle-vie.png",
-      link: "/products/belle-vie"
-    }
+      link: "/products/belle-vie",
+    },
   ];
-  
+
   return (
     <>
       <Helmet>
@@ -136,7 +139,7 @@ const HomePage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -146,22 +149,24 @@ const HomePage: React.FC = () => {
               Компания иммунной системы
             </span>
           </motion.div>
-          
+
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0">
             <span className="block mb-1 md:mb-2">Инвестируйте в своё здоровье</span>
-            <span className="block mb-1 md:mb-2 bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent">с научным подходом</span>
+            <span className="block mb-1 md:mb-2 bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent">
+              с научным подходом
+            </span>
             <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">4Life</span>
           </h1>
-          
+
           <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto">
-            Откройте для себя силу Трансфер Факторов — молекул, 
-            которые поддерживают здоровую работу вашей иммунной системы
+            Откройте для себя силу Трансфер Факторов — молекул, которые поддерживают здоровую работу вашей иммунной
+            системы
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center">
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
-              <Link 
-                to="/products" 
+              <Link
+                to="/products"
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg w-full sm:w-auto"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -169,10 +174,10 @@ const HomePage: React.FC = () => {
                 <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </motion.div>
-            
+
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
-              <Link 
-                to="/how-to-buy" 
+              <Link
+                to="/how-to-buy"
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300 w-full sm:w-auto"
               >
                 <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -182,8 +187,8 @@ const HomePage: React.FC = () => {
               </Link>
             </motion.div>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             className="mt-10 md:mt-12 flex items-start justify-center text-white/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -196,9 +201,12 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция о нас */}
-      <section id="about" className="py-24 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <section
+        id="about"
+        className="py-24 bg-gradient-to-b from-white/80 to-blue-50/80 dark:from-gray-900/80 dark:to-gray-800/80"
+      >
         <div className="container max-w-7xl mx-auto px-6">
-          <SectionHeading 
+          <SectionHeading
             title="О нашей компании"
             subtitle="Иммунная наука, подтвержденная исследованиями"
             description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
@@ -208,7 +216,7 @@ const HomePage: React.FC = () => {
             titleClassName="text-gray-800 dark:text-white"
             descriptionClassName="mx-auto max-w-2xl text-center"
           />
-          
+
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
             {features.map((feature, index) => (
               <StaticFeature
@@ -221,14 +229,10 @@ const HomePage: React.FC = () => {
               />
             ))}
           </div>
-          
-          <motion.div 
-            className="mt-16 text-center"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Link 
-              to="/about" 
+
+          <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              to="/about"
               className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -250,9 +254,13 @@ const HomePage: React.FC = () => {
         >
           <div className="container max-w-7xl mx-auto px-6">
             <div className="opacity-100">
-              <SectionHeading 
+              <SectionHeading
                 title="Инновационные продукты для иммунитета"
-                subtitle={<span className="bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent">Научный подход к здоровью</span>}
+                subtitle={
+                  <span className="bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent">
+                    Научный подход к здоровью
+                  </span>
+                }
                 description="Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы."
                 className="text-white max-w-3xl mx-auto"
                 centered={true}
@@ -262,13 +270,11 @@ const HomePage: React.FC = () => {
                 descriptionClassName="text-white/90 leading-relaxed"
               />
             </div>
-            
 
-            
             <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
               {popularProducts.map((product) => (
                 <div key={product.id}>
-                  <StaticCard 
+                  <StaticCard
                     title={product.title}
                     description={product.description}
                     image={product.image}
@@ -277,29 +283,25 @@ const HomePage: React.FC = () => {
                 </div>
               ))}
             </div>
-            
-            <motion.div 
-              className="mt-16 text-center"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link 
-                to="/products" 
+
+            <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                to="/products"
                 className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">Посмотреть все</span>
+                <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
+                  Посмотреть все
+                </span>
                 <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
                 <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
               </Link>
             </motion.div>
-            
+
             <div className="mt-10 text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20">
                 <Icons.ShieldCheck className="w-4 h-4 text-blue-300" />
-                <p className="text-white/90 text-sm">
-                  Продукция 4Life не заменяет медикаментозное лечение
-                </p>
+                <p className="text-white/90 text-sm">Продукция 4Life не заменяет медикаментозное лечение</p>
               </div>
             </div>
           </div>
@@ -307,16 +309,19 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Секция бизнес-возможностей */}
-      <section id="business" className="py-24 bg-gradient-to-b from-white to-green-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+      <section
+        id="business"
+        className="py-24 bg-gradient-to-b from-white/80 to-green-50/80 dark:from-gray-900/80 dark:to-gray-800/80 relative overflow-hidden"
+      >
         {/* Декоративные элементы */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-green-300 dark:bg-green-700 mix-blend-multiply filter blur-3xl"></div>
           <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-300 dark:bg-blue-700 mix-blend-multiply filter blur-3xl"></div>
         </div>
-        
+
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
           <div className="opacity-100">
-            <SectionHeading 
+            <SectionHeading
               title="Бизнес с 4Life"
               subtitle="Партнерство для финансовой свободы"
               description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
@@ -326,7 +331,7 @@ const HomePage: React.FC = () => {
               titleClassName="font-extrabold tracking-tight text-gray-800 dark:text-white"
             />
           </div>
-          
+
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
             {benefits.map((benefit, index) => (
               <StaticFeature
@@ -338,31 +343,34 @@ const HomePage: React.FC = () => {
               />
             ))}
           </div>
-          
+
           <div className="mt-16 text-center">
-            <motion.div 
+            <motion.div
               className="inline-block p-[2px] rounded-lg bg-gradient-to-r from-green-500 to-blue-500"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Link 
-                to="/partnership" 
+              <Link
+                to="/partnership"
                 className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 font-medium"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent relative z-10">Узнать о возможностях партнерства</span>
+                <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent relative z-10">
+                  Узнать о возможностях партнерства
+                </span>
                 <Icons.ArrowRight className="w-5 h-5 text-blue-600 dark:text-blue-400 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
               </Link>
             </motion.div>
           </div>
-          
+
           {/* Цитата */}
           <div className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg">
             <div className="flex items-start">
               <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
                 <p className="text-gray-700 dark:text-gray-300 italic mb-4">
-                  "В наши дни люди всему знают цену, но ничего не умеют ценить. Инвестируйте в своё здоровье сегодня, чтобы наслаждаться каждым днём полноценно и счастливо!"
+                  "В наши дни люди всему знают цену, но ничего не умеют ценить. Инвестируйте в своё здоровье сегодня,
+                  чтобы наслаждаться каждым днём полноценно и счастливо!"
                 </p>
                 <p className="text-right text-gray-500 dark:text-gray-400 font-medium">— Оскар Уайльд</p>
               </div>
@@ -386,22 +394,24 @@ const HomePage: React.FC = () => {
             <div className="flex justify-center mb-8">
               <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
             </div>
-            
+
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               <span className="block mb-2">Готовы инвестировать</span>
-              <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">в своё здоровье и будущее?</span>
+              <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
+                в своё здоровье и будущее?
+              </span>
             </h2>
-            
+
             <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto">
-              Присоединяйтесь к нашей команде сегодня и получите персональную консультацию 
-              по продуктам и бизнес-возможностям 4Life. Сделайте первый шаг к здоровью и финансовой независимости.
+              Присоединяйтесь к нашей команде сегодня и получите персональную консультацию по продуктам и
+              бизнес-возможностям 4Life. Сделайте первый шаг к здоровью и финансовой независимости.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row justify-center gap-6">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <a 
-                  href="https://russia.4life.com/12299550" 
-                  target="_blank" 
+                <a
+                  href="https://russia.4life.com/12299550"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
                 >
@@ -411,11 +421,11 @@ const HomePage: React.FC = () => {
                   <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-white/30 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                 </a>
               </motion.div>
-              
+
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <a 
-                  href="https://russia.4life.com/12299550/signup/PC" 
-                  target="_blank" 
+                <a
+                  href="https://russia.4life.com/12299550/signup/PC"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300"
                 >
@@ -426,7 +436,7 @@ const HomePage: React.FC = () => {
                 </a>
               </motion.div>
             </div>
-            
+
             {/* Дополнительная информация */}
             <div className="mt-12 flex justify-center">
               <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
@@ -434,58 +444,56 @@ const HomePage: React.FC = () => {
                 <div className="relative ml-2 sm:ml-3">
                   <div className="flex flex-wrap items-baseline justify-center gap-x-1.5">
                     <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">Используйте ID</span>
-                    
+
                     <div className="relative inline-flex flex-col">
-                      <button 
+                      <button
                         type="button"
                         onClick={() => copyToClipboard()}
                         className="relative text-blue-300 hover:text-blue-200 font-medium transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-opacity-50"
                         aria-label="Скопировать ID"
                       >
                         <span className="relative inline-block transition-all duration-200 text-blue-300 group-hover:text-blue-200">
-                          <span className="relative z-10">
-                            {' '}12299550{' '}
-                          </span>
+                          <span className="relative z-10"> 12299550 </span>
                           <span className="absolute inset-0 w-full h-full border-b border-solid border-blue-300 group-hover:border-blue-200 transition-colors duration-200"></span>
                         </span>
                       </button>
-                      
+
                       <AnimatePresence>
                         {isCopied && (
-                          <motion.div 
+                          <motion.div
                             className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-4 py-1.5 bg-white/95 dark:bg-gray-800/95 rounded-md shadow-lg z-50 whitespace-nowrap min-w-[110px] text-center"
                             initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                            animate={{ 
-                              opacity: 1, 
+                            animate={{
+                              opacity: 1,
                               y: 8,
                               scale: 1,
-                              transition: { 
-                                type: 'spring', 
-                                damping: 25, 
+                              transition: {
+                                type: "spring",
+                                damping: 25,
                                 stiffness: 400,
-                                duration: 0.2
-                              } 
+                                duration: 0.2,
+                              },
                             }}
-                            exit={{ 
-                              opacity: 0, 
-                              y: 0, 
+                            exit={{
+                              opacity: 0,
+                              y: 0,
                               scale: 0.95,
-                              transition: { 
-                                duration: 0.15 
-                              } 
+                              transition: {
+                                duration: 0.15,
+                              },
                             }}
                           >
                             <div className="relative flex items-center justify-center gap-2">
-                              <svg 
-                                className="w-3.5 h-3.5 text-green-400 flex-shrink-0" 
-                                fill="none" 
-                                viewBox="0 0 24 24" 
+                              <svg
+                                className="w-3.5 h-3.5 text-green-400 flex-shrink-0"
+                                fill="none"
+                                viewBox="0 0 24 24"
                                 stroke="currentColor"
                               >
-                                <motion.path 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round" 
-                                  strokeWidth={2.5} 
+                                <motion.path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2.5}
                                   d="M5 13l4 4L19 7"
                                   initial={{ pathLength: 0, pathOffset: 1 }}
                                   animate={{ pathLength: 1, pathOffset: 0 }}
@@ -500,7 +508,7 @@ const HomePage: React.FC = () => {
                         )}
                       </AnimatePresence>
                     </div>
-                    
+
                     <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">для получения скидки</span>
                   </div>
                 </div>
@@ -511,18 +519,19 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Контактная секция */}
-      <section id="contact" className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+      <section
+        id="contact"
+        className="py-24 bg-gradient-to-b from-gray-50/80 to-white/80 dark:from-gray-900/80 dark:to-gray-800/80 relative overflow-hidden"
+      >
         {/* Декоративные элементы */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50 dark:bg-blue-900/30 opacity-50 clip-path-contact z-0"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-blue-100 dark:bg-blue-800 opacity-30 z-0"></div>
-        
+
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            {/* Содержимое секции удалено */}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">{/* Содержимое секции удалено */}</div>
         </div>
       </section>
-      
+
       {/* Добавляем стиль для clip-path */}
       <style>{`
         .clip-path-contact {

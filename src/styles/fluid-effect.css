@@ -5,20 +5,35 @@ canvas {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 5;
+  pointer-events: none;
 }
 
 /* Стили для секций, чтобы они были поверх эффекта */
 section {
   position: relative;
-  z-index: 1;
-  background-color: transparent !important;
+  z-index: 10;
+}
+
+/* Стили для основного контента */
+main {
+  position: relative;
+  z-index: 10;
+}
+
+/* Стили для header и footer */
+header {
+  position: relative;
+  z-index: 50;
+}
+
+footer {
+  position: relative;
+  z-index: 10;
 }
 
 /* Стили для карточек */
 .card-above-fluid {
   position: relative;
-  z-index: 10;
   background-color: rgba(255, 255, 255, 0.9) !important;
 }
 

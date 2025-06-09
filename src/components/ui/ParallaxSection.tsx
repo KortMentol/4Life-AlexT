@@ -48,7 +48,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       <div className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}>{children}</div>
 
       {/* Фиксированный фоновый контейнер */}
-      <div className="fixed top-[-10vh] left-0 h-[120vh] w-full">
+      <div className="fixed top-[-10vh] left-0 h-[120vh] w-full" style={{ zIndex: 1 }}>
         <motion.div style={{ y }} className="relative w-full h-full">
           {backgroundVideo ? (
             <video
