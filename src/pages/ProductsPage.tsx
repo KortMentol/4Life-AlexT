@@ -1,10 +1,6 @@
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import {
-  cardVariants,
-  containerVariants,
-  itemVariants,
-} from "../animations/variants";
+import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
@@ -93,9 +89,9 @@ const ProductsPage: React.FC = () => {
         />
         <meta name="twitter:image" content="/images/og-products.jpg" />
       </Helmet>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      <div className="min-h-screen text-gray-800 dark:text-gray-200">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100 to-teal-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100/70 to-teal-200/70 dark:from-gray-800/70 dark:to-gray-900/70 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
@@ -136,7 +132,7 @@ const ProductsPage: React.FC = () => {
         </section>
 
         {/* Categories Section */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800 relative overflow-hidden">
+        <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
@@ -190,7 +186,7 @@ const ProductsPage: React.FC = () => {
         </section>
 
         {/* Products Section */}
-        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+        <section className="py-16 md:py-24 bg-gray-50/70 dark:bg-gray-800/70 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
@@ -221,14 +217,14 @@ const ProductsPage: React.FC = () => {
                   viewport={{ once: true, amount: 0.3 }}
                   className="relative z-10 h-full"
                 >
-                    <ProductCard
-                      image={product.image}
-                      title={product.title}
-                      description={product.description}
-                      link={product.link}
-                      delay={0.1 * index} // Динамическая задержка
-                    />
-                  </motion.div>
+                  <ProductCard
+                    image={product.image}
+                    title={product.title}
+                    description={product.description}
+                    link={product.link}
+                    delay={0.1 * index} // Динамическая задержка
+                  />
+                </motion.div>
               ))}
             </motion.div>
           </div>

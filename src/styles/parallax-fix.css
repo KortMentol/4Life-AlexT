@@ -1,0 +1,40 @@
+/* Стили для исправления параллакс эффекта */
+
+/* Общие стили для всех параллакс секций */
+.parallax-section, 
+[class*="parallax"],
+section[id*="parallax"],
+.cta-section,
+.partnership-section,
+.products-section {
+  background-attachment: fixed !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* Специальные стили для конкретных секций */
+#partnership-parallax, 
+.partnership-section,
+.products-section {
+  background-attachment: fixed !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  min-height: 600px !important;
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 767px) {
+  .parallax-section, 
+  [class*="parallax"],
+  section[id*="parallax"],
+  .cta-section,
+  .partnership-section,
+  .products-section {
+    background-attachment: scroll !important;
+    background-position: center center !important;
+    background-size: cover !important;
+  }
+}

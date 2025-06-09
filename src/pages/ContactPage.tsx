@@ -44,7 +44,7 @@ const ContactPage: React.FC = () => {
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
-      <section className="min-h-screen py-16 md:py-24 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 flex items-center">
+      <section className="min-h-screen py-16 md:py-24 bg-gradient-to-br from-blue-50/30 to-indigo-100/30 dark:from-gray-900/30 dark:to-gray-800/30 text-gray-800 dark:text-gray-200 flex items-center">
         <div className="container mx-auto px-4 text-center">
           <motion.h1
             className="text-5xl md:text-6xl font-extrabold mb-8 text-blue-800 dark:text-blue-400"

@@ -203,7 +203,7 @@ const HomePage: React.FC = () => {
       {/* Секция о нас */}
       <section
         id="about"
-        className="py-24 bg-gradient-to-b from-white/80 to-blue-50/80 dark:from-gray-900/80 dark:to-gray-800/80"
+        className="py-24 bg-gradient-to-b from-white/70 to-blue-50/70 dark:from-gray-900/70 dark:to-gray-800/70"
       >
         <div className="container max-w-7xl mx-auto px-6">
           <SectionHeading
@@ -311,7 +311,7 @@ const HomePage: React.FC = () => {
       {/* Секция бизнес-возможностей */}
       <section
         id="business"
-        className="py-24 bg-gradient-to-b from-white/80 to-green-50/80 dark:from-gray-900/80 dark:to-gray-800/80 relative overflow-hidden"
+        className="py-24 bg-gradient-to-b from-white/70 to-green-50/70 dark:from-gray-900/70 dark:to-gray-800/70 relative overflow-hidden"
       >
         {/* Декоративные элементы */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10">
@@ -383,9 +383,9 @@ const HomePage: React.FC = () => {
       <ParallaxSection
         backgroundImage="/assets/images/backgrounds/5.jpg"
         altText="Присоединяйтесь к команде 4Life"
-        height="auto"
+        height="100vh"
         parallaxSpeed={0.2}
-        contentClasses="py-32"
+        contentClasses="py-32 pb-16 min-h-screen flex items-center"
         imageBrightness="brightness-[.5]"
       >
         <div className="container max-w-7xl mx-auto px-6 text-center">
@@ -517,27 +517,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </ParallaxSection>
-
-      {/* Контактная секция */}
-      <section
-        id="contact"
-        className="py-24 bg-gradient-to-b from-gray-50/80 to-white/80 dark:from-gray-900/80 dark:to-gray-800/80 relative overflow-hidden"
-      >
-        {/* Декоративные элементы */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50 dark:bg-blue-900/30 opacity-50 clip-path-contact z-0"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-blue-100 dark:bg-blue-800 opacity-30 z-0"></div>
-
-        <div className="container max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">{/* Содержимое секции удалено */}</div>
-        </div>
-      </section>
-
-      {/* Добавляем стиль для clip-path */}
-      <style>{`
-        .clip-path-contact {
-          clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
-        }
-      `}</style>
     </>
   );
 };

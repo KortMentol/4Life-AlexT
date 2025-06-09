@@ -55,5 +55,35 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script src="/src/styles/inline-fix.js"></script>
+    <script src="/src/styles/inline-icon-fix.js"></script>
+    <style>
+      /* Критические стили для иконок */
+      .scientific-proof, .scientific-container, [class*="scientific"] {
+        display: flex !important;
+        align-items: flex-end !important; /* Выравнивание по нижней линии */
+        flex-wrap: nowrap !important;
+      }
+      
+      .disclaimer, .disclaimer-container, [class*="disclaimer"] {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+      }
+      
+      .scientific-proof svg, .scientific-container svg, [class*="scientific"] svg,
+      .scientific-proof img, .scientific-container img, [class*="scientific"] img,
+      .disclaimer svg, .disclaimer-container svg, [class*="disclaimer"] svg,
+      .disclaimer img, .disclaimer-container img, [class*="disclaimer"] img,
+      .shield-icon, [class*="shield"] svg, [class*="shield"] img {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
+        margin-bottom: 0 !important;
+      }
+    </style>
   </body>
 </html>

@@ -1,0 +1,81 @@
+/* Прямые селекторы для исправления конкретных элементов */
+
+/* Научно доказанная эффективность с 1998 года */
+.scientific-proof,
+.scientific-container,
+[class*="scientific"] {
+  display: flex !important;
+  align-items: flex-end !important; /* Выравнивание по нижней линии */
+  flex-wrap: nowrap !important;
+  margin: 16px 0 !important;
+}
+
+.scientific-proof svg,
+.scientific-container svg,
+[class*="scientific"] svg,
+.scientific-proof img,
+.scientific-container img,
+[class*="scientific"] img {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  margin-right: 12px !important;
+  flex-shrink: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Продукция 4Life не заменяет медикаментозное лечение */
+.disclaimer,
+.disclaimer-container,
+[class*="disclaimer"] {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  margin: 16px 0 !important;
+}
+
+.disclaimer svg,
+.disclaimer-container svg,
+[class*="disclaimer"] svg,
+.disclaimer img,
+.disclaimer-container img,
+[class*="disclaimer"] img {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  margin-right: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Общие стили для всех иконок щита */
+.shield-icon, 
+[class*="shield"] svg, 
+[class*="shield"] img {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  margin-right: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Общие стили для текста рядом с иконками */
+.scientific-proof span,
+.scientific-container span,
+[class*="scientific"] span,
+.scientific-proof p,
+.scientific-container p,
+[class*="scientific"] p,
+.disclaimer span,
+.disclaimer-container span,
+[class*="disclaimer"] span,
+.disclaimer p,
+.disclaimer-container p,
+[class*="disclaimer"] p {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}

@@ -30,9 +30,9 @@ const AboutPage: React.FC = () => {
         />
         <meta name="twitter:image" content="/images/og-about.jpg" />
       </Helmet>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 relative">
+      <div className="min-h-screen text-gray-800 dark:text-gray-200 relative">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100/70 to-indigo-200/70 dark:from-gray-800/70 dark:to-gray-900/70 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/30 dark:to-transparent z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
@@ -50,9 +50,9 @@ const AboutPage: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="relative z-10"
             >
-            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg">
-              О 4Life: Наука, Миссия и Ваше Будущее
-            </h1>
+              <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg">
+                О 4Life: Наука, Миссия и Ваше Будущее
+              </h1>
             </motion.div>
             <motion.p
               className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
@@ -68,7 +68,7 @@ const AboutPage: React.FC = () => {
         </section>
 
         {/* Science Section */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800 relative overflow-hidden">
+        <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 dark:to-transparent z-0"></div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
@@ -78,10 +78,7 @@ const AboutPage: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="relative z-10"
             >
-              <SectionHeading
-                title="Научный подход 4Life"
-                subtitle="Инновации на основе научных исследований"
-              />
+              <SectionHeading title="Научный подход 4Life" subtitle="Инновации на основе научных исследований" />
             </motion.div>
             <motion.div
               className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10"

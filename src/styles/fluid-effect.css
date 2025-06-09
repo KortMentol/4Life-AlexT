@@ -41,9 +41,9 @@ footer {
   background-color: rgba(31, 41, 55, 0.9) !important;
 }
 
-/* Улучшение производительности на мобильных устройствах */
+/* Одинаковая видимость эффекта на всех устройствах */
 @media (max-width: 768px) {
   canvas {
-    opacity: 0.9;
+    opacity: 1;
   }
 }

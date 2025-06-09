@@ -1,0 +1,96 @@
+/* Стили для исправления размера иконок на мобильных устройствах */
+
+/* Общие стили для иконок */
+.disclaimer-icon, 
+.shield-icon, 
+[class*="disclaimer"] svg, 
+[class*="disclaimer"] img,
+[class*="shield"] svg,
+[class*="shield"] img,
+.scientific-proof-icon,
+.scientific-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  font-size: 40px !important;
+  margin-right: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Контейнеры с иконками */
+.disclaimer-container,
+[class*="disclaimer"],
+.shield-container,
+[class*="shield"] {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+/* Научно доказанная эффективность */
+.scientific-proof,
+.scientific-container,
+[class*="scientific"] {
+  display: flex !important;
+  align-items: flex-end !important; /* Выравнивание по нижней линии */
+  flex-wrap: nowrap !important;
+}
+
+/* Специальные стили для мобильных устройств */
+@media (max-width: 767px) {
+  /* Исправление выравнивания */
+  .disclaimer-container,
+  [class*="disclaimer"],
+  .shield-container,
+  [class*="shield"] {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    margin: 16px 0 !important;
+  }
+  
+  .scientific-proof,
+  .scientific-container,
+  [class*="scientific"] {
+    display: flex !important;
+    align-items: flex-end !important; /* Выравнивание по нижней линии */
+    flex-wrap: nowrap !important;
+    margin: 16px 0 !important;
+  }
+  
+  /* Исправление размера иконок */
+  .disclaimer-icon, 
+  .shield-icon, 
+  [class*="disclaimer"] svg, 
+  [class*="disclaimer"] img,
+  [class*="shield"] svg,
+  [class*="shield"] img,
+  .scientific-proof-icon,
+  .scientific-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    font-size: 40px !important;
+    margin-right: 12px !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Текст рядом с иконкой */
+  .disclaimer-text,
+  [class*="disclaimer"] span,
+  [class*="disclaimer"] p,
+  .shield-text,
+  [class*="shield"] span,
+  [class*="shield"] p,
+  .scientific-text,
+  [class*="scientific"] span,
+  [class*="scientific"] p {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
