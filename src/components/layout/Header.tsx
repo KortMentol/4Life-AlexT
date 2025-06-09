@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import HamburgerButton from '../ui/HamburgerButton';
 import MobileMenu from './MobileMenu';
 import MegaMenu from './MegaMenu';
+import TextShineEffect from './TextShineEffect';
 
 const Header: React.FC = () => {
   const [scrolled, setIsScrolled] = useState(false);
@@ -116,8 +117,11 @@ const Header: React.FC = () => {
               </div>
               
               <div className="flex flex-col">
-                <span className={`font-bold text-xl leading-tight ${scrolled || theme === 'light' ? 'dark:text-white text-blue-800' : 'text-white'} transition-colors duration-300 whitespace-nowrap`}>
-                  {siteConfig.distributor.name}
+                <span className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap`}>
+                  <TextShineEffect 
+                    text={siteConfig.distributor.name}
+                    duration={10}
+                  />
                 </span>
                 <span className={`text-xs font-medium ${scrolled || theme === 'light' ? 'dark:text-amber-300 text-amber-600' : 'text-amber-300'} whitespace-nowrap`}>
                   Builder Elite
