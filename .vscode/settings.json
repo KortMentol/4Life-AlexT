@@ -1,5 +1,0 @@
-{
-  "eslint.format.enable": false,
-  "eslint.ignoreUntitled": false,
-  "eslint.run": "onSave"
-}
