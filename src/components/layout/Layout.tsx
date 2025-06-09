@@ -85,7 +85,7 @@ const Layout: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <FluidEffect />
       <Header />
-      <main className="flex-grow pt-24 md:pt-20">
+      <main className="flex-grow">
         <Outlet />
       </main>
       <Footer />

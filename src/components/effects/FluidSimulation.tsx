@@ -29,14 +29,14 @@ const FluidSimulation: React.FC<FluidSimulationProps> = ({
     simulationRef.current.setConfig({
       colorPalette,
       transparent,
-      brightness,
+      brightness: 0.7,
       densityDissipation: 1,
       velocityDissipation: 0.2,
       pressure: 0.8,
       pressureIterations: 20,
       curl: 30,
-      splatRadius: 0.25,
-      splatForce: 6000,
+      splatRadius: 0.15,
+      splatForce: 4000,
       shading: true,
       colorful: true,
       colorUpdateSpeed: 10,
@@ -44,12 +44,12 @@ const FluidSimulation: React.FC<FluidSimulationProps> = ({
       bloom: true,
       bloomIterations: 8,
       bloomResolution: 256,
-      bloomIntensity: 0.8,
-      bloomThreshold: 0.6,
+      bloomIntensity: 0.4,
+      bloomThreshold: 0.8,
       bloomSoftKnee: 0.7,
       sunrays: true,
       sunraysResolution: 196,
-      sunraysWeight: 1,
+      sunraysWeight: 0.6,
     });
     
     // Запуск симуляции
