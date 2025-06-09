@@ -24,10 +24,12 @@ const AboutMePage: React.FC = () => {
         <meta property="og:url" content="https://alexander-toshchev-4life.ru/about-me" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+      
+
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 relative">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-900 text-center overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100/80 to-indigo-200/80 dark:from-gray-800/80 dark:to-gray-900/80 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/30 dark:to-transparent z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
@@ -56,7 +58,7 @@ const AboutMePage: React.FC = () => {
         </section>
 
         {/* My Story Section */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <section className="py-16 md:py-24 bg-white/80 dark:bg-gray-800/80">
           <div className="container mx-auto px-4">
             <SectionHeading
               title="Моя история"
@@ -87,7 +89,7 @@ const AboutMePage: React.FC = () => {
         </section>
 
         {/* My Values Section */}
-        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
+        <section className="py-16 md:py-24 bg-gray-50/80 dark:bg-gray-900/80">
           <div className="container mx-auto px-4">
             <SectionHeading
               title="Мои ценности"
@@ -126,7 +128,7 @@ const AboutMePage: React.FC = () => {
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg text-center"
+                  className="card-above-fluid p-6 rounded-xl shadow-lg text-center"
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
                   <div className="mb-4">{item.icon}</div>
@@ -139,7 +141,7 @@ const AboutMePage: React.FC = () => {
         </section>
 
         {/* Why I Do This Section */}
-        <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <section className="py-16 md:py-24 bg-white/80 dark:bg-gray-800/80">
           <div className="container mx-auto px-4">
             <SectionHeading
               title="Почему я это делаю"
@@ -172,7 +174,7 @@ const AboutMePage: React.FC = () => {
           title="Готовы начать свой путь к здоровью?"
           buttonText="Связаться со мной"
           buttonLink="/contact"
-          className="bg-gradient-to-r from-blue-600 to-indigo-700"
+          className="bg-gradient-to-r from-blue-600/90 to-indigo-700/90 relative z-10"
         />
       </div>
     </>

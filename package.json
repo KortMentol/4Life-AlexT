@@ -25,7 +25,8 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.23.0",
     "react-scroll-parallax": "^3.4.5",
-    "react-tilt": "^1.0.0"
+    "react-tilt": "^1.0.0",
+    "webgl-fluid-enhanced": "^0.8.0"
   },
   "devDependencies": {
     "@emotion/babel-plugin": "^11.13.5",

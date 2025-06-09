@@ -5,6 +5,7 @@ import Footer from './Footer';
 import ScrollToTopButton from '../utils/ScrollToTopButton';
 import SVGFilters from './SVGFilters';
 import type Lenis from 'lenis';
+import FluidEffect from '../effects/FluidEffect';
 
 // Расширяем глобальный интерфейс Window для типизации lenis
 declare global {
@@ -82,6 +83,7 @@ const Layout: React.FC = () => {
   
   return (
     <div className="flex flex-col min-h-screen">
+      <FluidEffect />
       <Header />
       <main className="flex-grow pt-24 md:pt-20">
         <Outlet />

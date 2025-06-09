@@ -11,6 +11,7 @@ import './styles/animations.css';
 import './styles/modern-design.css';
 import './styles/menu-animations.css';
 import './styles/menu-dividers.css';
+import './styles/fluid-effect.css';
 
 // Функция для инициализации приложения
 const initApp = () => {
