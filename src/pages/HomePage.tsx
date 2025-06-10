@@ -254,59 +254,61 @@ const HomePage: React.FC = () => {
         >
           <div className="container max-w-7xl mx-auto px-6">
             <div className="opacity-100">
-              <SectionHeading
-                title="Инновационные продукты для иммунитета"
-                subtitle={
-                  <span className="bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent">
-                    Научный подход к здоровью
-                  </span>
-                }
-                description="Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы."
-                className="text-white max-w-3xl mx-auto"
-                centered={true}
-                titleGradient={true}
-                withLine={false}
-                titleClassName="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent font-extrabold tracking-tight"
-                descriptionClassName="text-white/90 leading-relaxed"
-              />
-            </div>
-
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-              {popularProducts.map((product) => (
-                <div key={product.id}>
-                  <StaticCard
-                    title={product.title}
-                    description={product.description}
-                    image={product.image}
-                    link={product.link}
-                  />
-                </div>
-              ))}
-            </div>
-
-            <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                to="/products"
-                className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
-                  Посмотреть все
+              {/* Декоративный элемент - полоска */}
+              <div className="flex justify-center mb-8">
+                <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 text-center">
+                <span className="block mb-2 text-lg md:text-xl font-medium text-white">Научный подход к здоровью</span>
+                <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
+                  Инновационные продукты для иммунитета
                 </span>
-                <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
-                <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
-              </Link>
-            </motion.div>
+              </h2>
+              
+              <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto text-center">
+                Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих иммунологическую память и поддерживающих здоровую работу иммунной системы.
+              </p>
+            </div>
+            </div>
 
-            <div className="mt-10 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20">
-                <Icons.ShieldCheck className="w-4 h-4 text-blue-300" />
-                <p className="text-white/90 text-sm">Продукция 4Life не заменяет медикаментозное лечение</p>
+            <div className="container max-w-7xl mx-auto px-6">
+              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+                {popularProducts.map((product) => (
+                  <div key={product.id}>
+                    <StaticCard
+                      title={product.title}
+                      description={product.description}
+                      image={product.image}
+                      link={product.link}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link
+                  to="/products"
+                  className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
+                    Посмотреть все
+                  </span>
+                  <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+                  <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
+                </Link>
+              </motion.div>
+
+              <div className="mt-10 text-center">
+                <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
+                  <Icons.ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
+                  <span className="text-white/80 text-sm sm:text-base ml-2 sm:ml-3">Продукция 4Life не заменяет медикаментозное лечение</span>
+                </div>
               </div>
             </div>
-          </div>
-        </ParallaxSection>
-      </section>
+          </ParallaxSection>
+        </section>
 
       {/* Секция бизнес-возможностей */}
       <section
