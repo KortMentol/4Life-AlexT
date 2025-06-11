@@ -1,7 +1,11 @@
-// Тип для темы
+/**
+ * Доступные темы приложения
+ */
 export type Theme = "light" | "dark";
 
-// Интерфейс контекста темы
+/**
+ * Тип контекста темы
+ */
 export interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;

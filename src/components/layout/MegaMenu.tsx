@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Lenis } from "../../lib/lenis.types";
 
 interface MegaMenuProps {
   activeItem: string | null;
@@ -211,7 +212,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
             // Обновляем URL с хэшем без перезагрузки страницы
             navigate(`${path}#${hash}`, { replace: false });
 
-            const lenisInstance = (window as any).lenis;
+            const lenisInstance = (window as Window & { lenis?: Lenis }).lenis;
             if (lenisInstance) {
               lenisInstance.scrollTo(element, { offset: -100 });
             } else {

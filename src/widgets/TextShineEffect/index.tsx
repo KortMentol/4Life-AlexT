@@ -1,6 +1,6 @@
-import { keyframes } from "@emotion/react";
-import styled from "@emotion/styled";
 import React from "react";
+import styled from "@emotion/styled";
+import { keyframes } from "@emotion/react";
 import { useTheme } from "../../context/useTheme";
 
 // Простая анимация блеска - один проход слева направо
@@ -19,7 +19,12 @@ interface ShineTextProps {
   duration?: number;
 }
 
-const ShineTextContainer = styled.span<{ isDark: boolean; duration: number }>`
+interface ShineTextContainerProps {
+  isDark: boolean;
+  duration: number;
+}
+
+const ShineTextContainer = styled.span<ShineTextContainerProps>`
   position: relative;
   color: var(--text-color);
 
@@ -59,14 +64,14 @@ const TextShineEffect: React.FC<ShineTextProps> = ({
     <ShineTextContainer
       isDark={isDark}
       duration={duration}
-      className={className}
       data-text={text}
-      style={
-        {
-          "--text-color": textColor,
-          "--shine-color": shineColor,
-        } as React.CSSProperties
-      }
+      className={className}
+      style={{
+        color: textColor,
+        // @ts-expect-error CSS переменные не типизированы в React
+        "--shine-color": shineColor,
+        "--text-color": textColor,
+      }}
     >
       {text}
     </ShineTextContainer>

@@ -1,67 +1,56 @@
+import DynamicLogo from "@/shared/ui/DynamicLogo";
+import HamburgerButton from "@/shared/ui/HamburgerButton";
+import MegaMenu from "@/widgets/MegaMenu";
+import MobileMenu from "@/widgets/MobileMenu";
+import TextShineEffect from "@/widgets/TextShineEffect";
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { lenis } from "@/lib/lenis";
+
 import { mainNav, siteConfig } from "../../config/site";
-import { useTheme } from "../../context/ThemeContext";
-import DynamicLogo from "../ui/DynamicLogo";
-import HamburgerButton from "../ui/HamburgerButton";
-import MegaMenu from "./MegaMenu";
-import MobileMenu from "./MobileMenu";
-import TextShineEffect from "./TextShineEffect";
+import { useTheme } from "../../context/useTheme";
 
 const Header: React.FC = () => {
-  const [scrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string | null>(null);
   const { theme, toggleTheme } = useTheme();
-  const headerRef = useRef<HTMLDivElement>(null);
-  const isScrollingRef = useRef(false);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Отслеживание скролла
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-      // Отмечаем, что происходит скролл
-      isScrollingRef.current = true;
+  const handleLogoClick = () => {
+    if (location.pathname !== "/") {
+      // Если не на главной странице, переходим на главную
+      lenis.stop();
+      lenis.velocity = 0; // Сбрасываем инерцию
+      navigate("/");
 
-      // Сбрасываем предыдущий таймер, если он был
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+      // Принудительно скроллим вверх
+      window.scrollTo(0, 0);
 
-      // Устанавливаем новый таймер для определения окончания скролла
-      scrollTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 100);
-    };
+      // Используем requestAnimationFrame для гарантии выполнения после рендеринга
+      requestAnimationFrame(() => {
+        lenis.scrollTo(0, { immediate: true });
 
-    // Проверяем начальное положение скролла
-    handleScroll();
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Обработчик клика по навигации
-  const handleNavClick = () => {
-    // Плавная прокрутка вверх
-    const lenisInstance = (window as { lenis?: { scrollTo: (target: number, options?: object) => void } }).lenis;
-    if (lenisInstance) {
-      lenisInstance.scrollTo(0, { duration: 1.2 });
+        // Запускаем Lenis с небольшой задержкой
+        setTimeout(() => {
+          lenis.start();
+        }, 50);
+      });
     } else {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
+      // Если уже на главной странице, просто скроллим вверх
+      lenis.scrollTo(0, {
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       });
     }
+  };
+
+  // Обработчик для гамбургера
+  const handleHamburgerClick = () => {
+    setMobileMenuOpen((prev) => !prev);
   };
 
   // Обработчики для мега-меню
@@ -76,16 +65,11 @@ const Header: React.FC = () => {
   return (
     <>
       <header
-        ref={headerRef}
         role="banner"
-        className={`fixed w-full z-40 transition-all duration-300 top-0 ${
-          scrolled
-            ? "py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg"
-            : "py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md"
-        }`}
+        className="fixed w-full z-40 transition-all duration-300 top-0 py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg"
         style={{
-          WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
-          backdropFilter: scrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: "blur(8px)",
+          backdropFilter: "blur(8px)",
           top: "env(safe-area-inset-top)",
         }}
         onMouseLeave={handleMenuMouseLeave}
@@ -93,50 +77,33 @@ const Header: React.FC = () => {
         <div className="container max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Логотип и название */}
-            <NavLink
-              to="/"
+            <button
+              onClick={handleLogoClick}
               className="flex items-center space-x-3 group"
               aria-label="Главная страница"
-              onClick={(e) => {
-                const currentPath = window.location.pathname;
-                if (currentPath === "/") {
-                  e.preventDefault();
-                  // Очищаем хэш из URL при клике на логотип
-                  if (window.location.hash) {
-                    window.history.pushState(
-                      "",
-                      document.title,
-                      window.location.pathname,
-                    );
-                  }
-                  handleNavClick();
-                }
-              }}
             >
               <div className="relative z-10 transition-transform duration-300 group-hover:scale-105">
                 <DynamicLogo alt="4Life Logo" className="" size="md" />
               </div>
 
               <div className="flex flex-col">
-                <span
-                  className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap`}
+                <button
+                  onClick={handleLogoClick}
+                  className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap cursor-pointer bg-transparent border-0 p-0 text-left`}
                 >
                   <TextShineEffect
                     text={siteConfig.distributor.name}
                     duration={10}
                   />
-                </span>
-                <span
-                  className={`text-xs font-medium ${
-                    scrolled || theme === "light"
-                      ? "dark:text-amber-300 text-amber-600"
-                      : "text-amber-300"
-                  } whitespace-nowrap`}
+                </button>
+                <button
+                  onClick={handleLogoClick}
+                  className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"} whitespace-nowrap cursor-pointer bg-transparent border-0 p-0 text-left`}
                 >
                   Builder Elite
-                </span>
+                </button>
               </div>
-            </NavLink>
+            </button>
 
             {/* Десктопная навигация */}
             <nav
@@ -151,13 +118,24 @@ const Header: React.FC = () => {
                 >
                   <NavLink
                     to={item.href}
-                    onClick={handleNavClick}
+                    onClick={(e) => {
+                      const { pathname } = location;
+                      // Если кликнули на текущую страницу, скроллим вверх
+                      if (pathname === item.href) {
+                        e.preventDefault();
+                        lenis.scrollTo(0, {
+                          duration: 1.2,
+                          easing: (t) =>
+                            Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                        });
+                      }
+                    }}
                     className={({ isActive }) =>
                       `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative overflow-hidden ${
                         isActive
                           ? "text-blue-600 dark:text-blue-400"
-                          : scrolled || theme === "light"
-                            ? "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          : theme === "light"
+                            ? "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                             : "text-gray-300 hover:text-blue-400 hover:bg-gray-800/50"
                       }`
                     }
@@ -187,8 +165,8 @@ const Header: React.FC = () => {
                 type="button"
                 onClick={toggleTheme}
                 className={`ml-2 p-2 rounded-full ${
-                  scrolled || theme === "light"
-                    ? "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  theme === "light"
+                    ? "text-gray-600 hover:bg-gray-100"
                     : "text-gray-400 hover:bg-gray-700"
                 } transition-colors duration-300`}
                 aria-label="Переключить тему"
@@ -204,8 +182,8 @@ const Header: React.FC = () => {
                 type="button"
                 onClick={toggleTheme}
                 className={`mr-2 p-2 rounded-full ${
-                  scrolled || theme === "light"
-                    ? "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  theme === "light"
+                    ? "text-gray-600 hover:bg-gray-100"
                     : "text-gray-400 hover:bg-gray-700"
                 } transition-colors duration-300`}
                 aria-label="Переключить тему"
@@ -216,29 +194,20 @@ const Header: React.FC = () => {
               {/* Кнопка гамбургер */}
               <HamburgerButton
                 isOpen={mobileMenuOpen}
-                toggle={() => setMobileMenuOpen(!mobileMenuOpen)}
-                scrolled={scrolled}
+                toggle={handleHamburgerClick}
               />
             </div>
           </div>
         </div>
 
         {/* Мега-меню для десктопа */}
-        <MegaMenu
-          activeItem={activeMenuItem}
-          onMouseEnter={handleMenuMouseEnter}
-          onMouseLeave={handleMenuMouseLeave}
-          scrolled={scrolled}
-          handleNavClick={handleNavClick}
-        />
+        <MegaMenu />
       </header>
 
       {/* Мобильное меню */}
       <MobileMenu
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
-        scrolled={scrolled}
-        handleNavClick={handleNavClick}
       />
     </>
   );

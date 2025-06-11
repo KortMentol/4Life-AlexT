@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
+import { resolve } from "path";
+
 export default defineConfig({
   plugins: [react()],
   css: {
@@ -33,5 +35,10 @@ export default defineConfig({
     port: 3000,
     strictPort: false,
     open: true,
+  },
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
   },
 });

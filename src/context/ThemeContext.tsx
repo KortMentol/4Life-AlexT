@@ -1,24 +1,11 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-} from "react";
-
-/**
- * Доступные темы приложения
- */
-import { Theme, ThemeContextType } from "./ThemeContext.types";
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+import React, { useCallback, useEffect, useState } from "react";
+import { ThemeContext, ThemeProviderProps } from "./ThemeContext.helpers";
+import { Theme } from "./ThemeContext.types";
 
 /**
  * Провайдер темы для приложения
  */
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Инициализация темы из localStorage с проверкой валидности
   const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
     const storedTheme = localStorage.getItem("theme");
@@ -91,17 +78,4 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </ThemeContext.Provider>
   );
-};
-
-/**
- * Хук для доступа к контексту темы
- * @returns Объект с текущей темой и функциями для её изменения
- * @throws Ошибку, если используется вне ThemeProvider
- */
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
 };

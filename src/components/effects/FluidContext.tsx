@@ -1,37 +1,14 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
-
+import React, { useState, useEffect } from "react";
 import { FluidInstance } from "./FluidContext.types";
+import { FluidContext, FluidProviderProps } from "./FluidContext.helpers";
 
-interface FluidContextType {
-  multipleSplats: (amount: number) => void;
-  setFluidBrightness: (brightness: number) => void;
-  fluidInstance: FluidInstance | null;
-  setFluidInstance: (instance: FluidInstance | null) => void;
-  isMobile: boolean;
-}
-
-const FluidContext = createContext<FluidContextType | null>(null);
-
-export const useFluid = () => {
-  const context = useContext(FluidContext);
-  if (!context) {
-    throw new Error("useFluid must be used within a FluidProvider");
-  }
-  return context;
-};
-
-interface FluidProviderProps {
-  children: ReactNode;
-}
-
+/**
+ * Провайдер FluidContext
+ */
 export const FluidProvider: React.FC<FluidProviderProps> = ({ children }) => {
-  const [fluidInstance, setFluidInstance] = useState<FluidInstance | null>(null);
+  const [fluidInstance, setFluidInstance] = useState<FluidInstance | null>(
+    null,
+  );
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Определяем, является ли устройство мобильным
@@ -79,5 +56,3 @@ export const FluidProvider: React.FC<FluidProviderProps> = ({ children }) => {
     </FluidContext.Provider>
   );
 };
-
-export default FluidContext;

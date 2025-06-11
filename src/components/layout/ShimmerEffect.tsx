@@ -1,7 +1,7 @@
-import React from "react";
-import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
-import { useTheme } from "../../context/ThemeContext";
+import styled from "@emotion/styled";
+import React from "react";
+import { useTheme } from "../../context/useTheme";
 
 // Продвинутая анимация блеска для SVG элементов
 const shimmerEffect = keyframes`

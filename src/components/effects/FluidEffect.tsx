@@ -1,7 +1,8 @@
+import { useTheme } from "@/context/useTheme";
 import React, { useEffect, useRef } from "react";
 import WebGLFluidEnhanced from "webgl-fluid-enhanced";
-import { useTheme } from "../../context/ThemeContext";
-import { useFluid } from "./FluidContext";
+import { FluidInstance } from "./FluidContext.types";
+import { useFluid } from "./useFluid";
 
 /**
  * Компонент FluidEffect - создает эффект жидкости на фоне сайта
@@ -144,7 +145,7 @@ const FluidEffect: React.FC = () => {
     }
 
     // Сохраняем экземпляр в контексте для доступа из других компонентов
-    setFluidInstance(simulationRef.current);
+    setFluidInstance(simulationRef.current as unknown as FluidInstance);
 
     return () => {
       if (simulationRef.current) {

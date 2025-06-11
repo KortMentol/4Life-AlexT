@@ -1,10 +1,12 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Route, Routes, Link } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import ScrollToTop from "./components/utils/ScrollToTop";
+import { ScrollToTopOnRouteChange } from "./components/ScrollToTopOnRouteChange";
 import RouteChangeHandler from "./components/utils/RouteChangeHandler";
-import ScrollToSection from "./components/utils/ScrollToSection";
 import { useMobileMenuState } from "./hooks/useMobileMenuState";
+import useScrollRestoration from "./hooks/useScrollRestoration";
+import useResetScrollOnNavigation from "./hooks/useResetScrollOnNavigation";
+import { updateScroll } from "./lib/lenis";
 
 // Ленивая загрузка страниц с оптимизированным синтаксисом
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -37,10 +39,32 @@ const LoadingScreen = () => (
 function App() {
   const { closeMobileMenu } = useMobileMenuState();
 
+  // Используем хук для восстановления позиции скролла
+  useScrollRestoration();
+
+  // Используем хук для принудительного сброса скролла при навигации
+  useResetScrollOnNavigation();
+
+  // Обновляем Lenis при монтировании компонента и при изменении размера окна
+  useEffect(() => {
+    // Обновляем Lenis после полной загрузки страницы
+    window.addEventListener("load", updateScroll);
+
+    // Обновляем Lenis при изменении размера окна
+    window.addEventListener("resize", updateScroll);
+
+    // Обновляем Lenis сразу после монтирования
+    updateScroll();
+
+    return () => {
+      window.removeEventListener("load", updateScroll);
+      window.removeEventListener("resize", updateScroll);
+    };
+  }, []);
+
   return (
     <>
-      <ScrollToTop />
-      <ScrollToSection />
+      <ScrollToTopOnRouteChange />
       <RouteChangeHandler onRouteChange={closeMobileMenu} />
       <Suspense fallback={<LoadingScreen />}>
         <Routes>

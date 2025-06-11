@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { mainNav } from "../../config/site";
+import { lenis } from "@/lib/lenis";
 
 /**
  * Свойства компонента MobileMenu
@@ -53,6 +54,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     // если компонент размонтируется раньше
     setTimeout(() => {
       navigate(targetHref);
+      lenis.scrollTo(0, { immediate: true });
+      // Добавляем небольшую задержку, чтобы дать Lenis время на выполнение скролла
+      setTimeout(() => {
+        lenis.start();
+      }, 100); // Увеличена задержка до 100ms для надежности
       handleNavClick();
     }, 100);
   };
