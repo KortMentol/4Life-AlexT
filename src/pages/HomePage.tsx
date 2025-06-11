@@ -415,9 +415,9 @@ const HomePage: React.FC = () => {
               <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
                 <p className="text-gray-700 dark:text-gray-300 italic mb-4">
-                  "В наши дни люди всему знают цену, но ничего не умеют ценить.
-                  Инвестируйте в своё здоровье сегодня, чтобы наслаждаться
-                  каждым днём полноценно и счастливо!"
+                  &quot;В наши дни люди всему знают цену, но ничего не умеют
+                  ценить. Инвестируйте в своё здоровье сегодня, чтобы
+                  наслаждаться каждым днём полноценно и счастливо!&quot;
                 </p>
                 <p className="text-right text-gray-500 dark:text-gray-400 font-medium">
                   — Оскар Уайльд

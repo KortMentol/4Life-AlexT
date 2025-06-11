@@ -41,7 +41,7 @@ const TestimonialCard = ({
         whileHover={{ scale: 1.05 }}
       />
       <p className="text-gray-700 dark:text-gray-300 italic text-lg mb-4 leading-relaxed">
-        "{quote}"
+        &quot;{quote}&quot;
       </p>
       <h4 className="font-bold text-lg text-gray-800 dark:text-white mb-1">
         {name}

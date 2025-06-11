@@ -37,10 +37,10 @@ const Layout: React.FC = () => {
         window.lenis = lenis;
 
         // Функция для обновления Lenis на каждом кадре анимации
-        function raf(time: number) {
+        const raf = (time: number) => {
           lenis.raf(time);
           requestAnimationFrame(raf);
-        }
+        };
 
         // Запускаем цикл анимации
         requestAnimationFrame(raf);

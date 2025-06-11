@@ -16,9 +16,7 @@ const ScrollToTopButton: React.FC = () => {
   }, []);
 
   // Создаем throttled-версию обработчика скролла
-  const throttledScrollHandler = useCallback(throttle(handleScroll, 200), [
-    handleScroll,
-  ]);
+  const throttledScrollHandler = useCallback(throttle(handleScroll, 200), [handleScroll]);
 
   // Отслеживаем скролл страницы с throttle
   useEffect(() => {

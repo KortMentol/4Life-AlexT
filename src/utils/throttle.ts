@@ -4,7 +4,7 @@
  * @param delay Задержка в миллисекундах
  * @returns Функция с ограниченной частотой вызовов
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number,
 ): (...args: Parameters<T>) => void {
@@ -41,7 +41,7 @@ export function throttle<T extends (...args: any[]) => any>(
  * @param delay Задержка в миллисекундах
  * @returns Функция с отложенным вызовом
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number,
 ): (...args: Parameters<T>) => void {

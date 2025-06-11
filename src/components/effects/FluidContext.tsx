@@ -6,11 +6,13 @@ import React, {
   useEffect,
 } from "react";
 
+import { FluidInstance } from "./FluidContext.types";
+
 interface FluidContextType {
   multipleSplats: (amount: number) => void;
   setFluidBrightness: (brightness: number) => void;
-  fluidInstance: any | null;
-  setFluidInstance: (instance: any) => void;
+  fluidInstance: FluidInstance | null;
+  setFluidInstance: (instance: FluidInstance | null) => void;
   isMobile: boolean;
 }
 
@@ -29,7 +31,7 @@ interface FluidProviderProps {
 }
 
 export const FluidProvider: React.FC<FluidProviderProps> = ({ children }) => {
-  const [fluidInstance, setFluidInstance] = useState<any | null>(null);
+  const [fluidInstance, setFluidInstance] = useState<FluidInstance | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Определяем, является ли устройство мобильным
@@ -52,16 +54,14 @@ export const FluidProvider: React.FC<FluidProviderProps> = ({ children }) => {
   }, []);
 
   const multipleSplats = (amount: number) => {
-    if (fluidInstance) {
+    if (fluidInstance && typeof fluidInstance.multipleSplats === "function") {
       fluidInstance.multipleSplats(amount);
     }
   };
 
   const setFluidBrightness = (brightness: number) => {
-    if (fluidInstance) {
-      fluidInstance.setConfig({
-        brightness,
-      });
+    if (fluidInstance && typeof fluidInstance.setConfig === "function") {
+      fluidInstance.setConfig({ brightness });
     }
   };
 

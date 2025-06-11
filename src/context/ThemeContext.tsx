@@ -9,19 +9,7 @@ import React, {
 /**
  * Доступные темы приложения
  */
-export type Theme = "light" | "dark";
-
-/**
- * Интерфейс контекста темы
- */
-interface ThemeContextType {
-  /** Текущая тема */
-  theme: Theme;
-  /** Функция для переключения темы */
-  toggleTheme: () => void;
-  /** Функция для установки конкретной темы */
-  setTheme: (theme: Theme) => void;
-}
+import { Theme, ThemeContextType } from "./ThemeContext.types";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 

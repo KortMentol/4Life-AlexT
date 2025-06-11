@@ -1,0 +1,128 @@
+/* src/styles/globals.css */
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+/* Global styles */
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animation utilities */
+.no-flicker {
+  opacity: 0;
+}
+
+.animations-ready .no-flicker {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Card preload styles */
+.card-preload {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Иконки и элементы с иконками */
+.mt-10.md\:mt-12.flex.items-start.justify-center.text-white\/70,
+.scientific-proof,
+.scientific-container,
+[class*="scientific"],
+.disclaimer,
+.disclaimer-container,
+[class*="disclaimer"],
+.shield-container,
+[class*="shield"] {
+  display: flex !important;
+  align-items: baseline !important;
+}
+
+/* Стили для иконок */
+.mt-10.md\:mt-12.flex.items-start.justify-center.text-white\/70 .text-blue-300,
+.mt-10.md\:mt-12.flex.items-start.justify-center.text-white\/70 svg,
+.scientific-proof svg,
+.scientific-container svg,
+[class*="scientific"] svg,
+.scientific-proof img,
+.scientific-container img,
+[class*="scientific"] img,
+.shield-icon,
+[class*="shield"] svg,
+[class*="shield"] img {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  margin-right: 12px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  top: 0.25em !important;
+}
+
+/* Стили для маленьких иконок (16px) */
+.inline-flex.items-center.gap-2.px-4.py-2.rounded-full svg,
+.inline-flex.items-center.gap-2.px-4.py-2.rounded-full .text-blue-300,
+.disclaimer svg,
+.disclaimer .text-blue-300,
+.disclaimer-container svg,
+.disclaimer-container .text-blue-300 {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  margin-right: 8px !important;
+  position: relative !important;
+  top: 0.125em !important;
+}
+
+/* Гарантируем правильное отображение контейнеров с иконками */
+[class*="scientific"],
+[class*="disclaimer"],
+[class*="shield"] {
+  display: flex !important;
+  align-items: baseline !important;
+}
+
+.container-preload {
+  opacity: 1;
+  transform: translateY(0);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}

@@ -53,7 +53,7 @@ const Header: React.FC = () => {
   // Обработчик клика по навигации
   const handleNavClick = () => {
     // Плавная прокрутка вверх
-    const lenisInstance = (window as any).lenis;
+    const lenisInstance = (window as { lenis?: { scrollTo: (target: number, options?: object) => void } }).lenis;
     if (lenisInstance) {
       lenisInstance.scrollTo(0, { duration: 1.2 });
     } else {

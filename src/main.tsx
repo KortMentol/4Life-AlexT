@@ -6,12 +6,13 @@ import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
 import { FluidProvider } from "./components/effects/FluidContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import "./styles/animations.css";
+// Base styles (Tailwind directives)
+import "./styles/base.css";
+// Global styles (resets, typography, etc.)
+import "./styles/globals.css";
+// Browser/device specific fixes
 import "./styles/fixes.css";
-import "./styles/icon-shield-fix.css";
-import "./styles/index.css";
-import "./styles/menu-animations.css";
-import "./styles/menu-dividers.css";
+// Modern design system and animations
 import "./styles/modern-design.css";
 
 // Функция для инициализации приложения

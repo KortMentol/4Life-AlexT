@@ -169,7 +169,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({
     return () => {
       window.removeEventListener("scroll", checkScroll);
     };
-  }, [location.pathname, activeSection]);
+  }, [location.pathname, activeSection, location.hash]);
 
   // Обработчик клика по ссылке в мега-меню
   const handleLinkClick = (

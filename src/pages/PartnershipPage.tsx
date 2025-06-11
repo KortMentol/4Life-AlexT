@@ -11,9 +11,7 @@ import {
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
 
-interface PartnershipPageProps {
-  // Add any props if needed
-}
+type PartnershipPageProps = object;
 
 const PartnershipPage: FC<PartnershipPageProps> = () => {
   return (
