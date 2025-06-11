@@ -1,5 +1,5 @@
 import Lenis from "@studio-freight/lenis";
-import { Lenis as LenisType, LenisOptions } from "./lenis.types";
+import { LenisOptions, Lenis as LenisType } from "./lenis.types";
 
 // Создаем экземпляр Lenis с оптимальными настройками для современного скроллинга
 const lenisInstance = new Lenis({
@@ -9,19 +9,22 @@ const lenisInstance = new Lenis({
   gestureOrientation: "vertical", // Жесты только вертикальные
   smoothWheel: true, // Плавный скролл колесиком
   wheelMultiplier: 1, // Множитель скорости колесика (стандартный)
-  touchMultiplier: 2, // Множитель для тач-устройств
+  touchMultiplier: 1, // Стандартный множитель для тач-устройств (уменьшен для более естественного скролла)
   infinite: false, // Отключаем бесконечный скролл
   // Расширенные настройки
-  smoothTouch: false, // Отключаем для тачскринов для лучшей производительности
+  smoothTouch: true, // Включаем плавный скролл для тачскринов
   syncTouch: true, // Синхронизация тач-событий для предотвращения проблем с инерцией
-  syncTouchLerp: 0.1, // Коэффициент интерполяции для синхронизации тач-событий
+  syncTouchLerp: 0.05, // Уменьшенный коэффициент интерполяции для более плавной синхронизации тач-событий
 } as LenisOptions);
 
 // Добавляем свойство velocity, которое требуется в нашем типе Lenis
-(lenisInstance as unknown).velocity = 0;
+// Добавляем свойство velocity в экземпляр Lenis
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(lenisInstance as any).velocity = 0;
 
 // Экспортируем с правильным типом
-export const lenis = lenisInstance as unknown as LenisType;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const lenis = lenisInstance as any as LenisType;
 
 // Функция для запуска RAF (Request Animation Frame) цикла
 export const startLenisRaf = () => {

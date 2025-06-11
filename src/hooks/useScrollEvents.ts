@@ -1,19 +1,12 @@
-import { useEffect } from "react";
 import { lenis } from "@/lib/lenis";
-
-type ScrollEventCallback = (scrollInfo: {
-  scroll: number;
-  limit: number;
-  velocity: number;
-  direction: number;
-  progress: number;
-}) => void;
+import { LenisScrollCallback } from "@/lib/lenis.types";
+import { useEffect } from "react";
 
 /**
  * Хук для добавления обработчиков событий скролла с использованием Lenis
  * @param onScroll - Функция обратного вызова, вызываемая при скролле
  */
-export function useScrollEvents(onScroll?: ScrollEventCallback) {
+export function useScrollEvents(onScroll?: LenisScrollCallback) {
   useEffect(() => {
     if (!onScroll || !lenis) return;
 

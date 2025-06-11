@@ -25,6 +25,15 @@ export interface LenisScrollToOptions {
   [key: string]: unknown;
 }
 
+// Определяем тип для callback-функции событий Lenis
+export type LenisScrollCallback = (scrollInfo: {
+  scroll: number;
+  limit: number;
+  velocity: number;
+  direction: number;
+  progress: number;
+}) => void;
+
 export interface Lenis {
   velocity: number;
   stop: () => void;
@@ -35,5 +44,7 @@ export interface Lenis {
     options?: LenisScrollToOptions,
   ) => void;
   resize: () => void;
+  on: (event: string, callback: LenisScrollCallback) => void;
+  off: (event: string, callback: LenisScrollCallback) => void;
   [key: string]: unknown;
 }

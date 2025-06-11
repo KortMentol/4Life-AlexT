@@ -5,10 +5,21 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react({
+    // Включаем флаги будущих версий React Router
+    fastRefresh: true,
+  })],
   css: {
     // Настройки для CSS
     devSourcemap: true,
+    postcss: {
+      plugins: [
+        require('autoprefixer')({
+          // Добавляем автопрефиксер для лучшей совместимости
+          overrideBrowserslist: ['last 2 versions', '> 1%', 'not dead']
+        })
+      ]
+    },
   },
   build: {
     // Оптимизация сборки

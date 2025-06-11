@@ -1,12 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
-import { BrowserRouter } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
-import { startLenisRaf } from "./lib/lenis";
 import { FluidProvider } from "./components/effects/FluidContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { startLenisRaf } from "./lib/lenis";
 
 // Base styles (Tailwind directives)
 import "./styles/base.css";
@@ -29,19 +34,34 @@ const initApp = () => {
     return;
   }
 
+  // Создаем роутер с поддержкой будущих флагов v7
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route
+        path="*"
+        element={
+          <HelmetProvider>
+            <ThemeProvider>
+              <FluidProvider>
+                <ParallaxProvider>
+                  <App />
+                </ParallaxProvider>
+              </FluidProvider>
+            </ThemeProvider>
+          </HelmetProvider>
+        }
+      />,
+    ),
+    {
+      future: {
+        v7_relativeSplatPath: true,
+      },
+    },
+  );
+
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <BrowserRouter>
-        <HelmetProvider>
-          <ThemeProvider>
-            <FluidProvider>
-              <ParallaxProvider>
-                <App />
-              </ParallaxProvider>
-            </FluidProvider>
-          </ThemeProvider>
-        </HelmetProvider>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </React.StrictMode>,
   );
 };

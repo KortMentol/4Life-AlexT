@@ -1,3 +1,4 @@
+import { lenis } from "@/lib/lenis";
 import DynamicLogo from "@/shared/ui/DynamicLogo";
 import HamburgerButton from "@/shared/ui/HamburgerButton";
 import MegaMenu from "@/widgets/MegaMenu";
@@ -7,7 +8,6 @@ import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { lenis } from "@/lib/lenis";
 
 import { mainNav, siteConfig } from "../../config/site";
 import { useTheme } from "../../context/useTheme";
@@ -87,21 +87,19 @@ const Header: React.FC = () => {
               </div>
 
               <div className="flex flex-col">
-                <button
-                  onClick={handleLogoClick}
-                  className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap cursor-pointer bg-transparent border-0 p-0 text-left`}
+                <div
+                  className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap cursor-pointer`}
                 >
                   <TextShineEffect
                     text={siteConfig.distributor.name}
                     duration={10}
                   />
-                </button>
-                <button
-                  onClick={handleLogoClick}
-                  className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"} whitespace-nowrap cursor-pointer bg-transparent border-0 p-0 text-left`}
+                </div>
+                <div
+                  className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"} whitespace-nowrap cursor-pointer`}
                 >
                   Builder Elite
-                </button>
+                </div>
               </div>
             </button>
 
