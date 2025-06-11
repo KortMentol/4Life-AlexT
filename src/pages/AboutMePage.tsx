@@ -9,19 +9,27 @@ const AboutMePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life</title>
+        <title>
+          Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life
+        </title>
         <meta
           name="description"
           content="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни с помощью продуктов 4Life."
         />
-        <meta property="og:title" content="Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life" />
+        <meta
+          property="og:title"
+          content="Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life"
+        />
         <meta
           property="og:description"
           content="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни."
         />
         <meta property="og:image" content="/images/og-about-me.jpg" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/about-me" />
+        <meta
+          property="og:url"
+          content="https://alexander-toshchev-4life.ru/about-me"
+        />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
@@ -45,7 +53,9 @@ const AboutMePage: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="relative z-10"
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white">Обо мне</h1>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
+                Обо мне
+              </h1>
               <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
                 Мой путь к здоровью и как я помогаю другим достичь благополучия
               </p>
@@ -56,7 +66,11 @@ const AboutMePage: React.FC = () => {
         {/* My Story Section */}
         <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70">
           <div className="container mx-auto px-4">
-            <SectionHeading title="Моя история" subtitle="Как всё начиналось" className="text-center mb-12" />
+            <SectionHeading
+              title="Моя история"
+              subtitle="Как всё начиналось"
+              className="text-center mb-12"
+            />
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -66,14 +80,16 @@ const AboutMePage: React.FC = () => {
             >
               <motion.div variants={itemVariants} className="mb-8">
                 <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-6">
-                  Всё началось с моего собственного пути к здоровью. Столкнувшись с проблемами самочувствия, я начал
-                  искать натуральные способы укрепления организма. Так я открыл для себя 4Life и трансфер-факторы,
-                  которые изменили мою жизнь.
+                  Всё началось с моего собственного пути к здоровью.
+                  Столкнувшись с проблемами самочувствия, я начал искать
+                  натуральные способы укрепления организма. Так я открыл для
+                  себя 4Life и трансфер-факторы, которые изменили мою жизнь.
                 </p>
                 <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300">
-                  Увидев потрясающие результаты на себе, я понял, что должен делиться этим знанием с другими. Теперь я
-                  помогаю людям обрести здоровье, энергию и улучшить качество жизни с помощью инновационных продуктов
-                  4Life.
+                  Увидев потрясающие результаты на себе, я понял, что должен
+                  делиться этим знанием с другими. Теперь я помогаю людям
+                  обрести здоровье, энергию и улучшить качество жизни с помощью
+                  инновационных продуктов 4Life.
                 </p>
               </motion.div>
             </motion.div>
@@ -83,7 +99,11 @@ const AboutMePage: React.FC = () => {
         {/* My Values Section */}
         <section className="py-16 md:py-24 bg-gray-50/70 dark:bg-gray-900/70">
           <div className="container mx-auto px-4">
-            <SectionHeading title="Мои ценности" subtitle="Во что я верю" className="text-center mb-12" />
+            <SectionHeading
+              title="Мои ценности"
+              subtitle="Во что я верю"
+              className="text-center mb-12"
+            />
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -93,24 +113,36 @@ const AboutMePage: React.FC = () => {
             >
               {[
                 {
-                  icon: <Heart className="w-12 h-12 text-red-500 mb-4 mx-auto" />,
+                  icon: (
+                    <Heart className="w-12 h-12 text-red-500 mb-4 mx-auto" />
+                  ),
                   title: "Здоровье",
-                  description: "Верю, что здоровье - это основа счастливой и полноценной жизни.",
+                  description:
+                    "Верю, что здоровье - это основа счастливой и полноценной жизни.",
                 },
                 {
-                  icon: <BookOpen className="w-12 h-12 text-blue-500 mb-4 mx-auto" />,
+                  icon: (
+                    <BookOpen className="w-12 h-12 text-blue-500 mb-4 mx-auto" />
+                  ),
                   title: "Образование",
-                  description: "Учусь постоянно и делюсь знаниями о здоровом образе жизни.",
+                  description:
+                    "Учусь постоянно и делюсь знаниями о здоровом образе жизни.",
                 },
                 {
-                  icon: <Users className="w-12 h-12 text-green-500 mb-4 mx-auto" />,
+                  icon: (
+                    <Users className="w-12 h-12 text-green-500 mb-4 mx-auto" />
+                  ),
                   title: "Сообщество",
-                  description: "Создаю поддерживающее сообщество единомышленников.",
+                  description:
+                    "Создаю поддерживающее сообщество единомышленников.",
                 },
                 {
-                  icon: <Award className="w-12 h-12 text-yellow-500 mb-4 mx-auto" />,
+                  icon: (
+                    <Award className="w-12 h-12 text-yellow-500 mb-4 mx-auto" />
+                  ),
                   title: "Качество",
-                  description: "Использую и рекомендую только проверенные продукты высочайшего качества.",
+                  description:
+                    "Использую и рекомендую только проверенные продукты высочайшего качества.",
                 },
               ].map((item, index) => (
                 <motion.div
@@ -120,8 +152,12 @@ const AboutMePage: React.FC = () => {
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
                   <div className="mb-4">{item.icon}</div>
-                  <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {item.description}
+                  </p>
                 </motion.div>
               ))}
             </motion.div>
@@ -131,7 +167,11 @@ const AboutMePage: React.FC = () => {
         {/* Why I Do This Section */}
         <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70">
           <div className="container mx-auto px-4">
-            <SectionHeading title="Почему я это делаю" subtitle="Моя миссия" className="text-center mb-12" />
+            <SectionHeading
+              title="Почему я это делаю"
+              subtitle="Моя миссия"
+              className="text-center mb-12"
+            />
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -141,12 +181,14 @@ const AboutMePage: React.FC = () => {
             >
               <motion.div variants={itemVariants} className="mb-8">
                 <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-6">
-                  Я верю, что каждый заслуживает жить полной, здоровой и счастливой жизнью. Моя миссия - помогать людям
-                  обретать здоровье через образование и качественные продукты 4Life.
+                  Я верю, что каждый заслуживает жить полной, здоровой и
+                  счастливой жизнью. Моя миссия - помогать людям обретать
+                  здоровье через образование и качественные продукты 4Life.
                 </p>
                 <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300">
-                  Присоединяйтесь ко мне в этом путешествии к лучшей версии себя. Вместе мы сможем достичь невероятных
-                  результатов и создать сообщество здоровых и счастливых людей.
+                  Присоединяйтесь ко мне в этом путешествии к лучшей версии
+                  себя. Вместе мы сможем достичь невероятных результатов и
+                  создать сообщество здоровых и счастливых людей.
                 </p>
               </motion.div>
             </motion.div>

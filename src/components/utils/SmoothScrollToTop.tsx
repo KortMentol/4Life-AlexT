@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * Компонент для плавной прокрутки страницы вверх при изменении маршрута
@@ -20,13 +20,13 @@ const SmoothScrollToTop = () => {
         const animateScroll = (currentTime: number) => {
           const elapsed = currentTime - startTime;
           const progress = Math.min(elapsed / duration, 1);
-          
+
           // Кубическая функция для плавного ускорения и замедления
-          const easeInOutCubic = (t: number) => 
+          const easeInOutCubic = (t: number) =>
             t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-          
+
           window.scrollTo(0, start - start * easeInOutCubic(progress));
-          
+
           if (elapsed < duration) {
             requestAnimationFrame(animateScroll);
           } else {
@@ -37,17 +37,17 @@ const SmoothScrollToTop = () => {
 
         requestAnimationFrame(animateScroll);
       };
-      
+
       // Обновляем предыдущий путь
       prevPathname.current = pathname;
-      
+
       // Небольшая задержка для начала анимации
       const timer = setTimeout(scrollToTop, 10);
-      
+
       // Очистка таймера при размонтировании
       return () => clearTimeout(timer);
     }
-    
+
     // Добавляем пустой return для случая, когда путь не изменился
     return undefined;
   }, [pathname]);

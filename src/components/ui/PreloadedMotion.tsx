@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion, MotionProps } from 'framer-motion';
+import React from "react";
+import { motion, MotionProps } from "framer-motion";
 
 /**
  * Свойства компонента PreloadedMotion
@@ -15,17 +15,17 @@ interface PreloadedMotionProps extends MotionProps {
  * Компонент, который предотвращает моргание при первой загрузке
  * Использует предзагруженные варианты анимации для плавного отображения
  */
-const PreloadedMotion: React.FC<PreloadedMotionProps> = ({ 
-  children, 
-  className = "", 
-  ...props 
+const PreloadedMotion: React.FC<PreloadedMotionProps> = ({
+  children,
+  className = "",
+  ...props
 }) => {
   // Предзагруженные варианты без анимации
   const preloadedVariants = {
     visible: {
       opacity: 1,
-      y: 0
-    }
+      y: 0,
+    },
   };
 
   return (

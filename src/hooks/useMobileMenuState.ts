@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 /**
  * Хук для управления состоянием мобильного меню
@@ -6,20 +6,20 @@ import { useState, useCallback } from 'react';
  */
 export const useMobileMenuState = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
   }, []);
-  
+
   const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen(prev => !prev);
+    setMobileMenuOpen((prev) => !prev);
   }, []);
-  
-  return { 
-    mobileMenuOpen, 
-    setMobileMenuOpen, 
+
+  return {
+    mobileMenuOpen,
+    setMobileMenuOpen,
     closeMobileMenu,
-    toggleMobileMenu
+    toggleMobileMenu,
   };
 };
 

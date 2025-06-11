@@ -1,4 +1,4 @@
-import { Variants } from 'framer-motion';
+import { Variants } from "framer-motion";
 
 // Варианты для контейнеров с отслеживанием прокрутки
 export const containerVariants: Variants = {
@@ -18,7 +18,7 @@ export const itemVariants: Variants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 100, damping: 10 }
+    transition: { type: "spring", stiffness: 100, damping: 10 },
   },
 };
 
@@ -40,10 +40,15 @@ export const staggerContainer = {
 };
 
 // Варианты для плавного появления с разными направлениями
-export const fadeIn = (direction: 'up' | 'down' | 'left' | 'right', type: string, delay: number, duration: number) => ({
+export const fadeIn = (
+  direction: "up" | "down" | "left" | "right",
+  type: string,
+  delay: number,
+  duration: number,
+) => ({
   hidden: {
-    x: direction === 'left' ? 100 : direction === 'right' ? -100 : 0,
-    y: direction === 'up' ? 100 : direction === 'down' ? -100 : 0,
+    x: direction === "left" ? 100 : direction === "right" ? -100 : 0,
+    y: direction === "up" ? 100 : direction === "down" ? -100 : 0,
     opacity: 0,
   },
   show: {
@@ -54,7 +59,7 @@ export const fadeIn = (direction: 'up' | 'down' | 'left' | 'right', type: string
       type: type,
       delay: delay,
       duration: duration,
-      ease: 'easeOut',
+      ease: "easeOut",
     },
   },
 });

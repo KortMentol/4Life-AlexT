@@ -1,4 +1,4 @@
-import { keyframes } from '@emotion/react';
+import { keyframes } from "@emotion/react";
 
 // Современная анимация блеска с градиентом
 export const shimmer = keyframes`
@@ -42,31 +42,33 @@ export const logoShimmer = keyframes`
 
 // CSS стили для анимации блеска текста
 export const shimmerTextStyles = {
-  display: 'inline-block',
-  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)',
-  backgroundSize: '200% 100%',
-  backgroundRepeat: 'no-repeat',
-  backgroundClip: 'text',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
+  display: "inline-block",
+  backgroundImage:
+    "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)",
+  backgroundSize: "200% 100%",
+  backgroundRepeat: "no-repeat",
+  backgroundClip: "text",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
   animation: `${textShimmer} 3s ease-in-out infinite`,
-  position: 'relative',
-  overflow: 'hidden',
+  position: "relative",
+  overflow: "hidden",
 };
 
 // CSS стили для анимации блеска логотипа
 export const shimmerLogoStyles = {
-  position: 'relative',
-  overflow: 'hidden',
-  '&::after': {
+  position: "relative",
+  overflow: "hidden",
+  "&::after": {
     content: '""',
-    position: 'absolute',
-    top: '-50%',
-    left: '-50%',
-    width: '200%',
-    height: '200%',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-    transform: 'rotate(30deg)',
+    position: "absolute",
+    top: "-50%",
+    left: "-50%",
+    width: "200%",
+    height: "200%",
+    background:
+      "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+    transform: "rotate(30deg)",
     animation: `${logoShimmer} 4s ease-in-out infinite`,
-  }
+  },
 };

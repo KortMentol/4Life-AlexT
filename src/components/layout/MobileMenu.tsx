@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
-import { mainNav } from '../../config/site';
+import React, { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
+import { mainNav } from "../../config/site";
 
 /**
  * Свойства компонента MobileMenu
@@ -21,23 +21,23 @@ interface MobileMenuProps {
 /**
  * Компонент мобильного меню с анимацией
  */
-const MobileMenu: React.FC<MobileMenuProps> = ({ 
-  isOpen, 
-  onClose, 
-  handleNavClick 
+const MobileMenu: React.FC<MobileMenuProps> = ({
+  isOpen,
+  onClose,
+  handleNavClick,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Блокировка прокрутки при открытом меню
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -47,7 +47,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     const targetHref = href;
     // Закрываем меню
     onClose();
-    
+
     // Используем setTimeout с минимальной задержкой для корректной работы анимации
     // Это безопаснее, чем полагаться на onExitComplete, который может не сработать
     // если компонент размонтируется раньше
@@ -77,7 +77,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               <X size={24} />
             </button>
           </div>
-          
+
           {/* Навигационные ссылки */}
           <motion.nav
             className="flex flex-col items-center justify-center flex-1 space-y-6 p-8"
@@ -87,20 +87,20 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             variants={{
               open: {
                 opacity: 1,
-                transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+                transition: { staggerChildren: 0.1, delayChildren: 0.2 },
               },
               closed: {
                 opacity: 0,
-                transition: { staggerChildren: 0.05, staggerDirection: -1 }
-              }
+                transition: { staggerChildren: 0.05, staggerDirection: -1 },
+              },
             }}
           >
             {mainNav.map((item) => (
-              <motion.div 
-                key={item.href} 
+              <motion.div
+                key={item.href}
                 variants={{
                   open: { y: 0, opacity: 1 },
-                  closed: { y: 20, opacity: 0 }
+                  closed: { y: 20, opacity: 0 },
                 }}
                 transition={{ duration: 0.4 }}
               >
@@ -108,16 +108,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   onClick={() => handleLinkClick(item.href)}
                   className={`px-6 py-3 text-xl font-medium rounded-lg transition-all duration-300 relative overflow-hidden ${
                     location.pathname === item.href
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
                   }`}
                 >
                   {item.title}
                   {location.pathname === item.href && (
-                    <motion.span 
+                    <motion.span
                       className="absolute bottom-0 left-0 h-0.5 bg-blue-500 dark:bg-blue-400"
                       initial={{ width: 0 }}
-                      animate={{ width: '100%' }}
+                      animate={{ width: "100%" }}
                       transition={{ duration: 0.3 }}
                     />
                   )}
@@ -125,7 +125,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               </motion.div>
             ))}
           </motion.nav>
-          
+
           {/* Декоративный элемент */}
           <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
             <div className="absolute top-1/4 -left-20 w-60 h-60 rounded-full bg-blue-400/20 blur-3xl"></div>

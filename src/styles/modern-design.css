@@ -8,7 +8,7 @@
   --primary-blue-light: #e6f0ff;
   --primary-green: #00cc88;
   --primary-green-hover: #00aa66;
-  
+
   /* Нейтральные цвета */
   --neutral-100: #ffffff;
   --neutral-200: #f7f9fc;
@@ -19,25 +19,25 @@
   --neutral-700: #718096;
   --neutral-800: #4a5568;
   --neutral-900: #2d3748;
-  
+
   /* Темная тема */
   --dark-bg-primary: #111827;
   --dark-bg-secondary: #1f2937;
   --dark-bg-tertiary: #374151;
   --dark-text-primary: #f9fafb;
   --dark-text-secondary: #e5e7eb;
-  
+
   /* Эффекты */
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   --glass-blur: 12px;
-  
+
   /* Анимации */
   --transition-fast: 0.15s ease;
   --transition-medium: 0.3s ease;
   --transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  
+
   /* Радиусы */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
@@ -58,13 +58,18 @@
 }
 
 .btn-modern::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: var(--transition-slow);
 }
 
@@ -148,9 +153,15 @@
 
 /* Современные анимации */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .float-animation {
@@ -158,9 +169,15 @@
 }
 
 @keyframes pulse-subtle {
-  0% { opacity: 0.9; }
-  50% { opacity: 1; }
-  100% { opacity: 0.9; }
+  0% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
+  }
 }
 
 .pulse-animation {
@@ -171,7 +188,11 @@
 .decorative-circle {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
   z-index: 0;
   mix-blend-mode: overlay;
 }
@@ -200,7 +221,7 @@
 }
 
 .nav-link-modern::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;

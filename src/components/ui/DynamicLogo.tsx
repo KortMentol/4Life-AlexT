@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import React from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 /**
  * Свойства компонента DynamicLogo
@@ -10,33 +10,34 @@ interface DynamicLogoProps {
   /** CSS классы для стилизации */
   className?: string;
   /** Размер логотипа (высота) */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 /**
  * Компонент динамического логотипа, который автоматически переключается
  * между светлой и темной версией в зависимости от текущей темы
  */
-const DynamicLogo: React.FC<DynamicLogoProps> = ({ 
-  alt = "4Life Logo", 
+const DynamicLogo: React.FC<DynamicLogoProps> = ({
+  alt = "4Life Logo",
   className = "",
-  size = "md"
+  size = "md",
 }) => {
   const { theme } = useTheme();
-  
+
   // Определяем размеры в зависимости от пропа size
   const sizeClasses = {
-    sm: 'h-6 w-auto',
-    md: 'h-9 w-auto', 
-    lg: 'h-12 w-auto',
-    xl: 'h-16 w-auto'
+    sm: "h-6 w-auto",
+    md: "h-9 w-auto",
+    lg: "h-12 w-auto",
+    xl: "h-16 w-auto",
   };
-  
+
   // Выбираем логотип в зависимости от темы
-  const logoSrc = theme === 'dark' 
-    ? '/assets/images/brand/4life-logo-light.svg'  // Белый логотип для темной темы
-    : '/assets/images/brand/4life-logo.svg';       // Синий логотип для светлой темы
-  
+  const logoSrc =
+    theme === "dark"
+      ? "/src/assets/images/brand/4life-logo-light.svg" // Белый логотип для темной темы
+      : "/src/assets/images/brand/4life-logo.svg"; // Синий логотип для светлой темы
+
   return (
     <img
       src={logoSrc}

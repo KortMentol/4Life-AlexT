@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp } from 'lucide-react';
-import { throttle } from '../../utils/throttle';
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronUp } from "lucide-react";
+import { throttle } from "../../utils/throttle";
 
 /**
  * Кнопка для прокрутки страницы вверх, появляющаяся при скролле
@@ -16,15 +16,16 @@ const ScrollToTopButton: React.FC = () => {
   }, []);
 
   // Создаем throttled-версию обработчика скролла
-  const throttledScrollHandler = useCallback(
-    throttle(handleScroll, 200),
-    [handleScroll]
-  );
+  const throttledScrollHandler = useCallback(throttle(handleScroll, 200), [
+    handleScroll,
+  ]);
 
   // Отслеживаем скролл страницы с throttle
   useEffect(() => {
-    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
-    return () => window.removeEventListener('scroll', throttledScrollHandler);
+    window.addEventListener("scroll", throttledScrollHandler, {
+      passive: true,
+    });
+    return () => window.removeEventListener("scroll", throttledScrollHandler);
   }, [throttledScrollHandler]);
 
   // Функция для плавной прокрутки вверх
@@ -36,7 +37,7 @@ const ScrollToTopButton: React.FC = () => {
       // Запасной вариант с нативной прокруткой
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   };

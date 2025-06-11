@@ -24,7 +24,9 @@ const FluidEffect: React.FC = () => {
     // Определяем, является ли устройство мобильным
     const isMobile =
       window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
 
     // Определяем, используется ли светлая тема
     const isLightTheme = theme === "light";
@@ -46,7 +48,13 @@ const FluidEffect: React.FC = () => {
       transparent: true, // Десктоп: true, Мобильные: true
 
       /** Яркость цветов (0.0-1.0) - меньше значение, меньше белых вспышек */
-      brightness: isLightTheme ? (isMobile ? 0.85 : 0.65) : isMobile ? 0.8 : 0.6,
+      brightness: isLightTheme
+        ? isMobile
+          ? 0.85
+          : 0.65
+        : isMobile
+          ? 0.8
+          : 0.6,
 
       // ФИЗИКА ЖИДКОСТИ
 
@@ -164,14 +172,18 @@ const FluidEffect: React.FC = () => {
             const touch = event.touches[0];
             if (touch) {
               const mouseEvent = new MouseEvent(
-                event.type === "touchstart" ? "mousedown" : event.type === "touchend" ? "mouseup" : "mousemove",
+                event.type === "touchstart"
+                  ? "mousedown"
+                  : event.type === "touchend"
+                    ? "mouseup"
+                    : "mousemove",
                 {
                   clientX: touch.clientX,
                   clientY: touch.clientY,
                   bubbles: true,
                   cancelable: true,
                   view: window,
-                }
+                },
               );
               canvas.dispatchEvent(mouseEvent);
             }
@@ -180,7 +192,14 @@ const FluidEffect: React.FC = () => {
       }
     }
 
-    const eventTypes = ["mousemove", "mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
+    const eventTypes = [
+      "mousemove",
+      "mousedown",
+      "mouseup",
+      "touchstart",
+      "touchmove",
+      "touchend",
+    ];
 
     eventTypes.forEach((eventType) => {
       // Все события делаем passive: true, чтобы не блокировать скроллинг

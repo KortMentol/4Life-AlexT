@@ -7,7 +7,12 @@ interface FeatureItemProps {
   delay?: number;
 }
 
-const FeatureItem = ({ icon: Icon, title, description, delay = 0 }: FeatureItemProps) => {
+const FeatureItem = ({
+  icon: Icon,
+  title,
+  description,
+  delay = 0,
+}: FeatureItemProps) => {
   return (
     <motion.div
       className="flex flex-col items-center text-center"

@@ -11,6 +11,7 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
+    "plugin:prettier/recommended",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -21,7 +22,12 @@ module.exports = {
     sourceType: "module",
     project: "./tsconfig.app.json",
   },
-  plugins: ["react", "react-hooks", "@typescript-eslint"],
+  plugins: [
+    "react",
+    "react-hooks",
+    "@typescript-eslint",
+    "react-refresh"
+  ],
   settings: {
     react: {
       version: "detect",
@@ -45,6 +51,10 @@ module.exports = {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
       },
+    ],
+    "react-refresh/only-export-components": [
+      "warn",
+      { allowConstantExport: true },
     ],
   },
   ignorePatterns: ["node_modules/", "dist/", "build/"],

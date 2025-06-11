@@ -1,5 +1,13 @@
 import { motion } from "framer-motion";
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+  Twitter,
+  Youtube,
+} from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../../config/site";
@@ -51,8 +59,9 @@ const Footer: React.FC = () => {
                 <DynamicLogo alt="4Life Logo" className="" size="lg" />
               </Link>
               <p className="text-gray-600 dark:text-gray-400 mb-6 text-pretty">
-                4Life Research – глобальная компания в области велнеса, специализирующаяся на научных разработках для
-                поддержки иммунной системы.
+                4Life Research – глобальная компания в области велнеса,
+                специализирующаяся на научных разработках для поддержки иммунной
+                системы.
               </p>
               <div className="flex space-x-4">
                 <a
@@ -102,7 +111,10 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-gray-900 dark:text-white">
+            <motion.h3
+              variants={itemVariants}
+              className="text-lg font-bold mb-6 text-gray-900 dark:text-white"
+            >
               Быстрые ссылки
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-3">
@@ -156,7 +168,10 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-gray-900 dark:text-white">
+            <motion.h3
+              variants={itemVariants}
+              className="text-lg font-bold mb-6 text-gray-900 dark:text-white"
+            >
               Контакты
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-4">
@@ -180,7 +195,9 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-gray-600 dark:text-gray-400">{siteConfig.contact.address}</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {siteConfig.contact.address}
+                </span>
               </li>
             </motion.ul>
           </motion.div>
@@ -194,7 +211,8 @@ const Footer: React.FC = () => {
             </p>
 
             <p className="text-xs text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
-              Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
+              Информация, представленная на этом вебсайте, относится
+              исключительно к рынку Евразии.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-2">
               БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.

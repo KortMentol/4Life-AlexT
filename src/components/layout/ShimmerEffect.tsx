@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
-import { useTheme } from '../../context/ThemeContext';
+import React from "react";
+import styled from "@emotion/styled";
+import { keyframes } from "@emotion/react";
+import { useTheme } from "../../context/ThemeContext";
 
 // Продвинутая анимация блеска для SVG элементов
 const shimmerEffect = keyframes`
@@ -21,18 +21,18 @@ const ShimmerContainer = styled.div<{ isDark: boolean }>`
   position: relative;
   overflow: hidden;
   display: inline-block;
-  
+
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: ${props => props.isDark 
-      ? 'linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%)'
-      : 'linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0) 100%)'
-    };
+    background: ${(props) =>
+      props.isDark
+        ? "linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%)"
+        : "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0) 100%)"};
     transform: translateX(-100%) skewX(-15deg);
     animation: ${shimmerEffect} 6s ease-in-out infinite;
     border-radius: inherit;
@@ -49,20 +49,20 @@ interface ShimmerEffectProps {
   duration?: number;
 }
 
-export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({ 
-  children, 
+export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({
+  children,
   delay = 0,
-  duration = 6
+  duration = 6,
 }) => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
-  
+  const isDark = theme === "dark";
+
   return (
     <ShimmerContainer
       isDark={isDark}
       style={{
         animationDelay: `${delay}s`,
-        animationDuration: `${duration}s`
+        animationDuration: `${duration}s`,
       }}
     >
       {children}
@@ -82,11 +82,11 @@ const shimmerTextEffect = keyframes`
 
 const ShimmerTextContainer = styled.span<{ isDark: boolean }>`
   background: linear-gradient(
-    90deg, 
-    var(--text-color) 0%, 
-    var(--text-color) 42%, 
+    90deg,
+    var(--text-color) 0%,
+    var(--text-color) 42%,
     var(--highlight-color) 50%,
-    var(--text-color) 58%, 
+    var(--text-color) 58%,
     var(--text-color) 100%
   );
   background-size: 200% auto;
@@ -111,32 +111,39 @@ interface ShimmerTextProps {
   duration?: number;
 }
 
-export const ShimmerText: React.FC<ShimmerTextProps> = ({ 
-  children, 
-  textColor = '#000000', 
-  highlightColor = '#ffffff',
+export const ShimmerText: React.FC<ShimmerTextProps> = ({
+  children,
+  textColor = "#000000",
+  highlightColor = "#ffffff",
   delay = 0,
-  duration = 4
+  duration = 4,
 }) => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
-  
+  const isDark = theme === "dark";
+
   // Адаптируем цвета в зависимости от темы
-  const actualTextColor = isDark && textColor === '#000000' ? '#ffffff' : textColor;
+  const actualTextColor =
+    isDark && textColor === "#000000" ? "#ffffff" : textColor;
   // Для темной темы используем контрастный цвет для блеска, но с меньшей интенсивностью
-  const actualHighlightColor = isDark 
-    ? (actualTextColor === '#ffffff' ? 'rgba(0, 191, 255, 0.8)' : 'rgba(255, 255, 255, 0.8)') 
-    : (highlightColor === '#ffffff' ? '#3b82f6' : highlightColor);
-  
+  const actualHighlightColor = isDark
+    ? actualTextColor === "#ffffff"
+      ? "rgba(0, 191, 255, 0.8)"
+      : "rgba(255, 255, 255, 0.8)"
+    : highlightColor === "#ffffff"
+      ? "#3b82f6"
+      : highlightColor;
+
   return (
     <ShimmerTextContainer
       isDark={isDark}
-      style={{ 
-        '--text-color': actualTextColor, 
-        '--highlight-color': actualHighlightColor,
-        animationDelay: `${delay}s`,
-        animationDuration: `${duration}s`
-      } as React.CSSProperties}
+      style={
+        {
+          "--text-color": actualTextColor,
+          "--highlight-color": actualHighlightColor,
+          animationDelay: `${delay}s`,
+          animationDuration: `${duration}s`,
+        } as React.CSSProperties
+      }
     >
       {children}
     </ShimmerTextContainer>

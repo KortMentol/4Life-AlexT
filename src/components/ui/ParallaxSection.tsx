@@ -36,7 +36,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   // Это обеспечит более плавное движение на мобильных устройствах
   // Применяем parallaxSpeed для регулировки интенсивности эффекта
   const intensity = parallaxSpeed * 10; // Преобразуем скорость в проценты
-  const y = useTransform(scrollYProgress, [0, 1], [`-${intensity}%`, `${intensity}%`]);
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [`-${intensity}%`, `${intensity}%`],
+  );
 
   return (
     <div
@@ -45,10 +49,17 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       style={{ clipPath: clipPath }}
     >
       {/* Контент секции с z-index выше фона */}
-      <div className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}>{children}</div>
+      <div
+        className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}
+      >
+        {children}
+      </div>
 
       {/* Фиксированный фоновый контейнер */}
-      <div className="fixed top-[-10vh] left-0 h-[120vh] w-full" style={{ zIndex: 1 }}>
+      <div
+        className="fixed top-[-10vh] left-0 h-[120vh] w-full"
+        style={{ zIndex: 1 }}
+      >
         <motion.div style={{ y }} className="relative w-full h-full">
           {backgroundVideo ? (
             <video
@@ -63,11 +74,19 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               <source src={backgroundVideo} type="video/webm" />
               {/* Запасной вариант, если видео не поддерживается */}
               {backgroundImage && (
-                <img src={backgroundImage} alt={altText} className={`w-full h-full object-cover ${imageBrightness}`} />
+                <img
+                  src={backgroundImage}
+                  alt={altText}
+                  className={`w-full h-full object-cover ${imageBrightness}`}
+                />
               )}
             </video>
           ) : backgroundImage ? (
-            <img src={backgroundImage} alt={altText} className={`w-full h-full object-cover ${imageBrightness}`} />
+            <img
+              src={backgroundImage}
+              alt={altText}
+              className={`w-full h-full object-cover ${imageBrightness}`}
+            />
           ) : null}
           {/* Слой для затемнения или наложения */}
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>

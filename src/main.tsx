@@ -36,7 +36,7 @@ const initApp = () => {
           </ThemeProvider>
         </HelmetProvider>
       </BrowserRouter>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 };
 

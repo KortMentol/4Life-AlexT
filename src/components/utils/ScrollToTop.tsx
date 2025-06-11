@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * Компонент для автоматической прокрутки страницы вверх при изменении маршрута
@@ -20,7 +20,7 @@ export default function ScrollToTop() {
     if (prevPathnameRef.current !== pathname) {
       // Save the current pathname for the next comparison
       prevPathnameRef.current = pathname;
-      
+
       // Use Lenis to scroll to top if available, otherwise fallback to native
       const scrollToTop = () => {
         if (window.lenis) {
@@ -28,10 +28,10 @@ export default function ScrollToTop() {
           window.lenis.scrollTo(0, { immediate: false });
         } else {
           // Fallback for browsers without Lenis
-          if ('scrollBehavior' in document.documentElement.style) {
+          if ("scrollBehavior" in document.documentElement.style) {
             window.scrollTo({
               top: 0,
-              behavior: 'smooth'
+              behavior: "smooth",
             });
           } else {
             document.documentElement.scrollTop = 0;
@@ -45,11 +45,11 @@ export default function ScrollToTop() {
 
       // Add a small delay and try again in case content is loaded asynchronously
       const timer = setTimeout(scrollToTop, 100);
-      
+
       // Cleanup function
       return () => clearTimeout(timer);
     }
-    
+
     // Return undefined for the case when pathname hasn't changed
     return undefined;
   }, [pathname]);

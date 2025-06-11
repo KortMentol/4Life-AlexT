@@ -103,7 +103,11 @@ const Header: React.FC = () => {
                   e.preventDefault();
                   // Очищаем хэш из URL при клике на логотип
                   if (window.location.hash) {
-                    window.history.pushState("", document.title, window.location.pathname);
+                    window.history.pushState(
+                      "",
+                      document.title,
+                      window.location.pathname,
+                    );
                   }
                   handleNavClick();
                 }
@@ -114,12 +118,19 @@ const Header: React.FC = () => {
               </div>
 
               <div className="flex flex-col">
-                <span className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap`}>
-                  <TextShineEffect text={siteConfig.distributor.name} duration={10} />
+                <span
+                  className={`font-bold text-xl leading-tight transition-colors duration-300 whitespace-nowrap`}
+                >
+                  <TextShineEffect
+                    text={siteConfig.distributor.name}
+                    duration={10}
+                  />
                 </span>
                 <span
                   className={`text-xs font-medium ${
-                    scrolled || theme === "light" ? "dark:text-amber-300 text-amber-600" : "text-amber-300"
+                    scrolled || theme === "light"
+                      ? "dark:text-amber-300 text-amber-600"
+                      : "text-amber-300"
                   } whitespace-nowrap`}
                 >
                   Builder Elite
@@ -128,9 +139,16 @@ const Header: React.FC = () => {
             </NavLink>
 
             {/* Десктопная навигация */}
-            <nav role="navigation" className="hidden md:flex items-center space-x-1">
+            <nav
+              role="navigation"
+              className="hidden md:flex items-center space-x-1"
+            >
               {mainNav.map((item) => (
-                <div key={item.href} className="relative" onMouseEnter={() => handleMenuMouseEnter(item.href)}>
+                <div
+                  key={item.href}
+                  className="relative"
+                  onMouseEnter={() => handleMenuMouseEnter(item.href)}
+                >
                   <NavLink
                     to={item.href}
                     onClick={handleNavClick}
@@ -139,8 +157,8 @@ const Header: React.FC = () => {
                         isActive
                           ? "text-blue-600 dark:text-blue-400"
                           : scrolled || theme === "light"
-                          ? "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                          : "text-gray-300 hover:text-blue-400 hover:bg-gray-800/50"
+                            ? "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            : "text-gray-300 hover:text-blue-400 hover:bg-gray-800/50"
                       }`
                     }
                     aria-label={item.title}

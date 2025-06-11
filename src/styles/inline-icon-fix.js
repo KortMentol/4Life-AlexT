@@ -3,7 +3,7 @@
   // Функция для немедленного применения стилей до загрузки DOM
   function applyEarlyFix() {
     // Создаем стили, которые будут применены немедленно
-    const styleEl = document.createElement('style');
+    const styleEl = document.createElement("style");
     styleEl.textContent = `
       .mt-10.md\\:mt-12.flex.items-start.justify-center.text-white\\/70 {
         display: flex !important;
@@ -60,7 +60,7 @@
   function fixIcons() {
     // Элемент "Научно доказанная эффективность с 1998 года"
     const scientificElements = document.querySelectorAll(
-      ".mt-10.md\\:mt-12.flex.items-start.justify-center.text-white\\/70, [class*=\"scientific\"]"
+      '.mt-10.md\\:mt-12.flex.items-start.justify-center.text-white\\/70, [class*="scientific"]',
     );
     scientificElements.forEach(function (el) {
       el.style.display = "flex";
@@ -80,10 +80,12 @@
     });
 
     // Элемент "Продукция 4Life не заменяет медикаментозное лечение"
-    const disclaimerElements = document.querySelectorAll(".inline-flex.items-center.gap-2.px-4.py-2.rounded-full, [class*=\"disclaimer\"]");
+    const disclaimerElements = document.querySelectorAll(
+      '.inline-flex.items-center.gap-2.px-4.py-2.rounded-full, [class*="disclaimer"]',
+    );
     disclaimerElements.forEach(function (el) {
       el.style.alignItems = "baseline";
-      
+
       const icon = el.querySelector(".text-blue-300, svg, img");
       if (icon) {
         // Фиксируем размер иконки по высоте текста
@@ -114,7 +116,7 @@
 
   // Запускаем функцию через небольшую задержку для гарантии
   setTimeout(fixIcons, 100);
-  
+
   // Запускаем функцию периодически для обработки динамически добавленных элементов
   setInterval(fixIcons, 1000);
 })();

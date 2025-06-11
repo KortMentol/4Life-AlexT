@@ -9,21 +9,32 @@ const AboutPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым</title>
+        <title>
+          О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым
+        </title>
         <meta
           name="description"
           content="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
         />
-        <meta property="og:title" content="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым" />
+        <meta
+          property="og:title"
+          content="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым"
+        />
         <meta
           property="og:description"
           content="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
         />
         <meta property="og:image" content="/images/og-about.jpg" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/about" />
+        <meta
+          property="og:url"
+          content="https://alexander-toshchev-4life.ru/about"
+        />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым" />
+        <meta
+          name="twitter:title"
+          content="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым"
+        />
         <meta
           name="twitter:description"
           content="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
@@ -61,8 +72,9 @@ const AboutPage: React.FC = () => {
               whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
             >
-              Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для
-              укрепления иммунитета.
+              Узнайте о научном подходе 4Life к здоровью и благополучию.
+              Инновационные продукты с Трансфер Факторами для укрепления
+              иммунитета.
             </motion.p>
           </div>
         </section>
@@ -78,7 +90,10 @@ const AboutPage: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="relative z-10"
             >
-              <SectionHeading title="Научный подход 4Life" subtitle="Инновации на основе научных исследований" />
+              <SectionHeading
+                title="Научный подход 4Life"
+                subtitle="Инновации на основе научных исследований"
+              />
             </motion.div>
             <motion.div
               className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10"
@@ -88,27 +103,45 @@ const AboutPage: React.FC = () => {
               viewport={{ once: true, margin: "-50px 0px" }}
             >
               {/* Элемент 1 */}
-              <motion.div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md" variants={itemVariants}>
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                variants={itemVariants}
+              >
                 <FlaskConical className="h-12 w-12 text-blue-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Научные исследования</h3>
+                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">
+                  Научные исследования
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Все продукты 4Life разрабатываются на основе глубоких научных исследований и клинических испытаний.
+                  Все продукты 4Life разрабатываются на основе глубоких научных
+                  исследований и клинических испытаний.
                 </p>
               </motion.div>
               {/* Элемент 2 */}
-              <motion.div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md" variants={itemVariants}>
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                variants={itemVariants}
+              >
                 <TrendingUp className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Непрерывное развитие</h3>
+                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">
+                  Непрерывное развитие
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Компания постоянно инвестирует в научные изыскания для создания все более эффективных решений.
+                  Компания постоянно инвестирует в научные изыскания для
+                  создания все более эффективных решений.
                 </p>
               </motion.div>
               {/* Элемент 3 */}
-              <motion.div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md" variants={itemVariants}>
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md"
+                variants={itemVariants}
+              >
                 <Headphones className="h-12 w-12 text-purple-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Персонализированный подход</h3>
+                <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">
+                  Персонализированный подход
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Наши продукты разработаны с учетом индивидуальных потребностей каждого человека.
+                  Наши продукты разработаны с учетом индивидуальных потребностей
+                  каждого человека.
                 </p>
               </motion.div>
             </motion.div>

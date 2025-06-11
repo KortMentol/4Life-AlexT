@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
+import {
+  cardVariants,
+  containerVariants,
+  itemVariants,
+} from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import ProductCard from "../components/ui/ProductCard";
 import SectionHeading from "../components/ui/SectionHeading";
@@ -11,7 +15,8 @@ const productsData = [
     image:
       "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Transfer Factor Tri-Factor Formula",
-    description: "Основа линейки 4Life, для всесторонней поддержки иммунной системы.",
+    description:
+      "Основа линейки 4Life, для всесторонней поддержки иммунной системы.",
     link: "https://russia.4life.com/products/4life-transfer-factor-tri-factor-formula", // Оригинальная ссылка на продукт
   },
   {
@@ -25,7 +30,8 @@ const productsData = [
     image:
       "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Renuvo",
-    description: "Адаптогенная формула для молодости, восстановления и жизненной энергии.",
+    description:
+      "Адаптогенная формула для молодости, восстановления и жизненной энергии.",
     link: "https://russia.4life.com/products/4life-renuvo", // Оригинальная ссылка на продукт
   },
   {
@@ -39,27 +45,31 @@ const productsData = [
     image:
       "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "Pro-TF",
-    description: "Высококачественный протеин для поддержания мышечной массы и здорового веса.",
+    description:
+      "Высококачественный протеин для поддержания мышечной массы и здорового веса.",
     link: "https://russia.4life.com/products/4life-pro-tf", // Оригинальная ссылка на продукт
   },
   {
     image:
       "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "RiteStart",
-    description: "Комплексный мультивитаминный и минеральный комплекс для ежедневного здоровья.",
+    description:
+      "Комплексный мультивитаминный и минеральный комплекс для ежедневного здоровья.",
     link: "/purchase",
   },
   {
     image:
       "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     title: "BCV",
-    description: "Целевая поддержка для здоровья сердца и всей сердечно-сосудистой системы.",
+    description:
+      "Целевая поддержка для здоровья сердца и всей сердечно-сосудистой системы.",
     link: "/purchase",
   },
   {
     image: "https://i.ibb.co/GtnqX9h/riovida.jpg",
     title: "RioVida",
-    description: "Сокосодержащий напиток с Трансфер Факторами и антиоксидантами.",
+    description:
+      "Сокосодержащий напиток с Трансфер Факторами и антиоксидантами.",
     link: "/purchase",
   },
 ];
@@ -68,21 +78,33 @@ const ProductsPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым</title>
+        <title>
+          Продукты 4Life - Укрепление иммунитета и здоровье с Александром
+          Тощевым
+        </title>
         <meta
           name="description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
         />
-        <meta property="og:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
+        <meta
+          property="og:title"
+          content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
+        />
         <meta
           property="og:description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
         />
         <meta property="og:image" content="/images/og-products.jpg" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/products" />
+        <meta
+          property="og:url"
+          content="https://alexander-toshchev-4life.ru/products"
+        />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
+        <meta
+          name="twitter:title"
+          content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
+        />
         <meta
           name="twitter:description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
@@ -125,7 +147,8 @@ const ProductsPage: React.FC = () => {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
               >
-                Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
+                Откройте для себя инновационные продукты для поддержки
+                иммунитета и общего благополучия.
               </motion.p>
             </motion.div>
           </div>
@@ -164,9 +187,12 @@ const ProductsPage: React.FC = () => {
                 viewport={{ once: true, amount: 0.3 }}
               >
                 <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Управление Весом и Форма</h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
+                  Управление Весом и Форма
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Решения для здорового контроля веса и поддержания оптимальной физической формы.
+                  Решения для здорового контроля веса и поддержания оптимальной
+                  физической формы.
                 </p>
               </motion.div>
               {/* Категория 4 */}
@@ -176,9 +202,12 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.8 }}
               >
                 <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Красота и Уход</h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
+                  Красота и Уход
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Продукты для сияющей кожи, волос и ногтей, разработанные с учетом внутренней красоты.
+                  Продукты для сияющей кожи, волос и ногтей, разработанные с
+                  учетом внутренней красоты.
                 </p>
               </motion.div>
             </motion.div>

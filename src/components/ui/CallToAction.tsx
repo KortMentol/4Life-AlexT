@@ -18,8 +18,8 @@ interface CallToActionProps {
 }
 
 const CallToAction = ({
-  title = '',
-  description = '',
+  title = "",
+  description = "",
   primaryButtonText,
   primaryButtonLink,
   primaryButtonIcon,
@@ -27,19 +27,19 @@ const CallToAction = ({
   secondaryButtonLink,
   secondaryButtonIcon,
   isExternal = false,
-  className = '',
+  className = "",
   buttonText,
-  buttonLink
+  buttonLink,
 }: CallToActionProps) => {
   // Backward compatibility
-  const displayButtonText = primaryButtonText || buttonText || '';
-  const displayButtonLink = primaryButtonLink || buttonLink || '';
-  
+  const displayButtonText = primaryButtonText || buttonText || "";
+  const displayButtonLink = primaryButtonLink || buttonLink || "";
+
   const renderPrimaryButton = () => {
     if (!displayButtonText || !displayButtonLink) return null;
-    
+
     const PrimaryIcon = primaryButtonIcon;
-    
+
     if (isExternal) {
       return (
         <motion.a
@@ -108,9 +108,11 @@ const CallToAction = ({
   };
 
   return (
-    <section className={`py-16 md:py-24 bg-gradient-to-r from-blue-600 to-indigo-700 text-white ${className}`}>
+    <section
+      className={`py-16 md:py-24 bg-gradient-to-r from-blue-600 to-indigo-700 text-white ${className}`}
+    >
       <div className="container mx-auto px-4">
-        <motion.div 
+        <motion.div
           className="max-w-3xl mx-auto text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

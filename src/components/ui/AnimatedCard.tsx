@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
 interface AnimatedCardProps {
   children: React.ReactNode;
@@ -13,12 +13,12 @@ interface AnimatedCardProps {
 }
 
 // Компонент карточки с анимацией появления и hover-эффектом
-const AnimatedCard: React.FC<AnimatedCardProps> = ({ 
-  children, 
-  className = "", 
+const AnimatedCard: React.FC<AnimatedCardProps> = ({
+  children,
+  className = "",
   delay = 0,
   index = 0,
-  noAnimation = false
+  noAnimation = false,
 }) => {
   return (
     <motion.div
@@ -26,9 +26,9 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({
       initial={noAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={noAnimation ? undefined : { opacity: 1, y: 0 }}
       whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
-      transition={{ 
+      transition={{
         duration: 0.3,
-        delay: delay + (index * 0.1)
+        delay: delay + index * 0.1,
       }}
     >
       {children}

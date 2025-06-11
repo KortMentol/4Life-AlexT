@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, ShoppingCart } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowRight, ShoppingCart } from "lucide-react";
 
 export interface ProductCardProps {
   title: string;
@@ -54,7 +54,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </span>
           )}
         </div>
-        
+
         {/* Изображение */}
         <Link to={link} className="block">
           <div className="relative aspect-[4/3] overflow-hidden">
@@ -67,11 +67,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         </Link>
-        
+
         {/* Кнопка быстрого просмотра */}
         <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <Link 
-            to={link} 
+          <Link
+            to={link}
             className="w-full flex items-center justify-center gap-2 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-blue-600 dark:text-blue-400 font-medium rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors"
           >
             <ShoppingCart size={16} />
@@ -79,22 +79,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </Link>
         </div>
       </div>
-      
+
       {/* Контент */}
       <div className="p-5 flex flex-col flex-grow">
         <h3 className="font-bold text-lg mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
           <Link to={link}>{title}</Link>
         </h3>
-        
+
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
           {description}
         </p>
-        
+
         <div className="flex items-center justify-between mt-auto">
-          {price && (
-            <span className="font-bold text-lg">{price}</span>
-          )}
-          
+          {price && <span className="font-bold text-lg">{price}</span>}
+
           <Link
             to={link}
             className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors group/link text-sm"
