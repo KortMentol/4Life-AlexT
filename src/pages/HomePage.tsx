@@ -12,9 +12,7 @@ import { Icons } from "../utils/icons";
 const useCopyToClipboard = (text: string) => {
   const [isCopied, setIsCopied] = useState(false);
 
-  const copyToClipboard = useCallback(async (): Promise<
-    (() => void) | void
-  > => {
+  const copyToClipboard = useCallback(async (): Promise<(() => void) | void> => {
     // Не показываем уведомление, если уже показано
     if (isCopied) return;
 
@@ -46,20 +44,17 @@ const HomePage: React.FC = () => {
     {
       icon: Icons.ShieldCheck,
       title: "Натуральный состав",
-      description:
-        "Продукты 4Life созданы из полностью натуральных компонентов и не содержат химических добавок",
+      description: "Продукты 4Life созданы из полностью натуральных компонентов и не содержат химических добавок",
     },
     {
       icon: Icons.HeartPulse,
       title: "Укрепление иммунитета",
-      description:
-        "Наши продукты научно доказано повышают активность клеток иммунной системы до 437%",
+      description: "Наши продукты научно доказано повышают активность клеток иммунной системы до 437%",
     },
     {
       icon: Icons.PieChart,
       title: "Проверенные результаты",
-      description:
-        "Более 25 лет исследований и тысячи довольных клиентов по всему миру",
+      description: "Более 25 лет исследований и тысячи довольных клиентов по всему миру",
     },
   ];
 
@@ -68,20 +63,17 @@ const HomePage: React.FC = () => {
     {
       icon: Icons.DollarSign,
       title: "Гибкий доход",
-      description:
-        "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени",
+      description: "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени",
     },
     {
       icon: Icons.Users,
       title: "Обучение и поддержка",
-      description:
-        "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса",
+      description: "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса",
     },
     {
       icon: Icons.Globe,
       title: "Глобальные возможности",
-      description:
-        "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний",
+      description: "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний",
     },
   ];
 
@@ -116,27 +108,19 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>
-          4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес
-        </title>
+        <title>4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес</title>
         <meta
           name="description"
           content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
         />
-        <meta
-          property="og:title"
-          content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес"
-        />
+        <meta property="og:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
         <meta
           property="og:description"
           content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
         />
         <meta property="og:image" content="/src/assets/images/og-home.jpg" />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:url"
-          content="https://alexander-toshchev-4life.ru/"
-        />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
@@ -167,28 +151,20 @@ const HomePage: React.FC = () => {
           </motion.div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0">
-            <span className="block mb-1 md:mb-2">
-              Инвестируйте в своё здоровье
-            </span>
+            <span className="block mb-1 md:mb-2">Инвестируйте в своё здоровье</span>
             <span className="block mb-1 md:mb-2 bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent">
               с научным подходом
             </span>
-            <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
-              4Life
-            </span>
+            <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">4Life</span>
           </h1>
 
           <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto">
-            Откройте для себя силу Трансфер Факторов — молекул, которые
-            поддерживают здоровую работу вашей иммунной системы
+            Откройте для себя силу Трансфер Факторов — молекул, которые поддерживают здоровую работу вашей иммунной
+            системы
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto"
-            >
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 to="/products"
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg w-full sm:w-auto"
@@ -199,11 +175,7 @@ const HomePage: React.FC = () => {
               </Link>
             </motion.div>
 
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto"
-            >
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 to="/how-to-buy"
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300 w-full sm:w-auto"
@@ -222,19 +194,14 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <Icons.Shield className="w-4 h-4 md:w-5 md:h-5 text-blue-300 mt+0.5 mr-0.5 md:mr-1" />
-            <span className="text-xs md:text-sm">
-              Научно доказанная эффективность с 1998 года
-            </span>
+            <Icons.Microscope className="w-4 h-4 md:w-5 md:h-5 text-blue-300 mt-0.5 mr-0.5 md:mr-1" />
+            <span className="text-xs md:text-sm">Научно доказанная эффективность с 1998 года</span>
           </motion.div>
         </motion.div>
       </ParallaxSection>
 
       {/* Секция о нас */}
-      <section
-        id="about"
-        className="py-24 bg-gradient-to-b from-white/70 to-blue-50/70 dark:from-gray-900/70 dark:to-gray-800/70"
-      >
+      <section id="about" className="py-24 bg-gradient-to-b from-white/0 to-blue-50/0 dark:from-gray-900/0 dark:to-gray-800/0">
         <div className="container max-w-7xl mx-auto px-6">
           <SectionHeading
             title="О нашей компании"
@@ -260,11 +227,7 @@ const HomePage: React.FC = () => {
             ))}
           </div>
 
-          <motion.div
-            className="mt-16 text-center"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Link
               to="/about"
               className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
@@ -294,18 +257,15 @@ const HomePage: React.FC = () => {
               </div>
 
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 text-center">
-                <span className="block mb-2 text-lg md:text-xl font-medium text-white">
-                  Научный подход к здоровью
-                </span>
+                <span className="block mb-2 text-lg md:text-xl font-medium text-white">Научный подход к здоровью</span>
                 <span className="bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
                   Инновационные продукты для иммунитета
                 </span>
               </h2>
 
               <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto text-center">
-                Продукты 4Life создаются на основе запатентованной технологии
-                Трансфер Факторов — молекул, передающих иммунологическую память
-                и поддерживающих здоровую работу иммунной системы.
+                Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих
+                иммунологическую память и поддерживающих здоровую работу иммунной системы.
               </p>
             </div>
           </div>
@@ -324,11 +284,7 @@ const HomePage: React.FC = () => {
               ))}
             </div>
 
-            <motion.div
-              className="mt-16 text-center"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 to="/products"
                 className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
@@ -357,7 +313,7 @@ const HomePage: React.FC = () => {
       {/* Секция бизнес-возможностей */}
       <section
         id="business"
-        className="py-24 bg-gradient-to-b from-white/70 to-green-50/70 dark:from-gray-900/70 dark:to-gray-800/70 relative overflow-hidden"
+        className="py-24 bg-gradient-to-b from-white/0 to-green-50/0 dark:from-gray-900/0 dark:to-gray-800/0 relative overflow-hidden"
       >
         {/* Декоративные элементы */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10">
@@ -410,18 +366,15 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Цитата */}
-          <div className="mt-16 max-w-3xl mx-auto bg-white/60 dark:bg-gray-800/60 p-8 rounded-xl border border-green-100 dark:border-green-900/50 shadow-lg">
+          <div className="mt-16 max-w-3xl mx-auto bg-white/0 dark:bg-gray-800/0 p-8 rounded-xl border border-green-100/30 dark:border-green-900/30 shadow-lg">
             <div className="flex items-start">
               <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
                 <p className="text-gray-700 dark:text-gray-300 italic mb-4">
-                  &quot;В наши дни люди всему знают цену, но ничего не умеют
-                  ценить. Инвестируйте в своё здоровье сегодня, чтобы
-                  наслаждаться каждым днём полноценно и счастливо!&quot;
+                  &quot;В наши дни люди всему знают цену, но ничего не умеют ценить. Инвестируйте в своё здоровье
+                  сегодня, чтобы наслаждаться каждым днём полноценно и счастливо!&quot;
                 </p>
-                <p className="text-right text-gray-500 dark:text-gray-400 font-medium">
-                  — Оскар Уайльд
-                </p>
+                <p className="text-right text-gray-500 dark:text-gray-400 font-medium">— Оскар Уайльд</p>
               </div>
             </div>
           </div>
@@ -452,16 +405,12 @@ const HomePage: React.FC = () => {
             </h2>
 
             <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto">
-              Присоединяйтесь к нашей команде сегодня и получите персональную
-              консультацию по продуктам и бизнес-возможностям 4Life. Сделайте
-              первый шаг к здоровью и финансовой независимости.
+              Присоединяйтесь к нашей команде сегодня и получите персональную консультацию по продуктам и
+              бизнес-возможностям 4Life. Сделайте первый шаг к здоровью и финансовой независимости.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <a
                   href="https://russia.4life.com/12299550"
                   target="_blank"
@@ -475,10 +424,7 @@ const HomePage: React.FC = () => {
                 </a>
               </motion.div>
 
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <a
                   href="https://russia.4life.com/12299550/signup/PC"
                   target="_blank"
@@ -499,9 +445,7 @@ const HomePage: React.FC = () => {
                 <Icons.Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
                 <div className="relative ml-2 sm:ml-3">
                   <div className="flex flex-wrap items-baseline justify-center gap-x-1.5">
-                    <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">
-                      Используйте ID
-                    </span>
+                    <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">Используйте ID</span>
 
                     <div className="relative inline-flex flex-col">
                       <button
@@ -561,9 +505,7 @@ const HomePage: React.FC = () => {
                                   }}
                                 />
                               </svg>
-                              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                                Скопировано
-                              </span>
+                              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Скопировано</span>
                             </div>
                             {/* Стрелка указывающая на кнопку */}
                             <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/95 dark:bg-gray-800/95 rotate-45 transform origin-center -z-10"></div>
@@ -572,9 +514,7 @@ const HomePage: React.FC = () => {
                       </AnimatePresence>
                     </div>
 
-                    <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">
-                      для получения скидки
-                    </span>
+                    <span className="text-white/80 text-sm sm:text-base whitespace-nowrap">для получения скидки</span>
                   </div>
                 </div>
               </div>

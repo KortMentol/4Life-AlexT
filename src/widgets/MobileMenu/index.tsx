@@ -34,36 +34,36 @@ const navLinks = [
 
 // Изысканные варианты анимации для меню в стиле Awwwards
 const menuVariants = {
-  hidden: { 
+  hidden: {
     x: "100%",
     opacity: 0,
     transition: {
       duration: 0.5,
       ease: [0.16, 1, 0.3, 1], // Плавная кривая Безье
-    }
+    },
   },
-  visible: { 
+  visible: {
     x: 0,
     opacity: 1,
     transition: {
       duration: 0.5,
       ease: [0.16, 1, 0.3, 1], // Плавная кривая Безье
-    }
+    },
   },
-  exit: { 
+  exit: {
     x: "100%",
     opacity: 0,
     transition: {
       duration: 0.4,
       ease: [0.16, 1, 0.3, 1], // Плавная кривая Безье
-    }
+    },
   },
 };
 
 // Анимация для элементов навигации
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
-  visible: (i) => ({
+  visible: (i: number) => ({
     y: 0,
     opacity: 1,
     transition: {
@@ -72,32 +72,32 @@ const itemVariants = {
       ease: [0.16, 1, 0.3, 1],
     },
   }),
-  exit: { 
+  exit: {
     opacity: 0,
-    transition: { 
+    transition: {
       duration: 0.2,
-      ease: "easeOut" 
-    }
-  }
+      ease: "easeOut",
+    },
+  },
 };
 
 // Анимация для overlay
 const overlayVariants = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
-    transition: { 
+    transition: {
       duration: 0.5,
-      ease: [0.16, 1, 0.3, 1]
-    }
+      ease: [0.16, 1, 0.3, 1],
+    },
   },
-  exit: { 
+  exit: {
     opacity: 0,
-    transition: { 
+    transition: {
       duration: 0.4,
-      ease: [0.16, 1, 0.3, 1]
-    }
-  }
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
 };
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
@@ -131,7 +131,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   // Цвета и стили для меню в зависимости от темы
   const borderColor = theme === "dark" ? "border-gray-700" : "border-gray-200";
   const bgColor = theme === "dark" ? "#111827" : "#ffffff";
-  const overlayColor = theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.7)";
+  const overlayColor =
+    theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.7)";
 
   return (
     <AnimatePresence mode="wait">
@@ -172,10 +173,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
               onClick={onClose}
               aria-label="Закрыть меню"
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
+              animate={{
+                opacity: 1,
                 scale: 1,
-                transition: { delay: 0.2, duration: 0.4 }
+                transition: { delay: 0.2, duration: 0.4 },
               }}
               exit={{ opacity: 0, scale: 0.8 }}
             >
@@ -193,20 +194,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </motion.button>
-            
+
             {/* Навигация с каскадной анимацией */}
-            <motion.ul 
+            <motion.ul
               className="flex flex-col gap-3 mt-16"
               initial="hidden"
               animate="visible"
               exit="exit"
             >
               {navLinks.map((link, i) => (
-                <motion.li 
-                  key={link.href}
-                  custom={i}
-                  variants={itemVariants}
-                >
+                <motion.li key={link.href} custom={i} variants={itemVariants}>
                   <NavLink
                     to={link.href}
                     className={({ isActive }) =>
@@ -242,20 +239,20 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 </motion.li>
               ))}
             </motion.ul>
-            
+
             <div className="flex-1" />
-            
+
             {/* Нижний блок с анимацией */}
-            <motion.div 
+            <motion.div
               className="mt-8 text-xs text-center text-gray-500 dark:text-gray-400 select-none"
               initial={{ opacity: 0 }}
-              animate={{ 
+              animate={{
                 opacity: 1,
-                transition: { delay: 0.5, duration: 0.5 }
+                transition: { delay: 0.5, duration: 0.5 },
               }}
               exit={{ opacity: 0 }}
             >
-              © {new Date().getFullYear()} 4Life. Все права защищены.
+              {new Date().getFullYear()} 4Life. Все права защищены.
             </motion.div>
           </motion.nav>
         </>

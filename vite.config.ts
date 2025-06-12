@@ -1,28 +1,13 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-
-// https://vitejs.dev/config/
 import { resolve } from "path";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react({
-    // Включаем флаги будущих версий React Router
-    fastRefresh: true,
-  })],
+  plugins: [react()],
   css: {
-    // Настройки для CSS
     devSourcemap: true,
-    postcss: {
-      plugins: [
-        require('autoprefixer')({
-          // Добавляем автопрефиксер для лучшей совместимости
-          overrideBrowserslist: ['last 2 versions', '> 1%', 'not dead']
-        })
-      ]
-    },
   },
   build: {
-    // Оптимизация сборки
     minify: "terser",
     terserOptions: {
       compress: {
@@ -42,7 +27,6 @@ export default defineConfig({
     },
   },
   server: {
-    // Настройки сервера разработки
     port: 3000,
     strictPort: false,
     open: true,

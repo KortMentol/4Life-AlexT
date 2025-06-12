@@ -113,7 +113,7 @@ const ProductsPage: React.FC = () => {
       </Helmet>
       <div className="min-h-screen text-gray-800 dark:text-gray-200">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100/70 to-teal-200/70 dark:from-gray-800/70 dark:to-gray-900/70 text-center overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100/0 to-teal-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
@@ -155,7 +155,7 @@ const ProductsPage: React.FC = () => {
         </section>
 
         {/* Categories Section */}
-        <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70 relative overflow-hidden">
+        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
@@ -215,7 +215,7 @@ const ProductsPage: React.FC = () => {
         </section>
 
         {/* Products Section */}
-        <section className="py-16 md:py-24 bg-gray-50/70 dark:bg-gray-800/70 relative overflow-hidden">
+        <section className="py-16 md:py-24 bg-gray-50/0 dark:bg-gray-800/0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div

@@ -25,9 +25,7 @@ const FluidEffect: React.FC = () => {
     // Определяем, является ли устройство мобильным
     const isMobile =
       window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     // Определяем, используется ли светлая тема
     const isLightTheme = theme === "light";
@@ -42,20 +40,14 @@ const FluidEffect: React.FC = () => {
 
       /** Палитра цветов для жидкости (HEX формат) */
       colorPalette: isLightTheme
-        ? ["#1a56db", "#4338ca", "#7e22ce", "#be185d", "#db2777"] // Более насыщенные цвета для светлой темы
-        : ["#3b82f6", "#6366f1", "#8b5cf6", "#d946ef", "#ec4899"], // Стандартные цвета для темной темы
+        ? ["#60a5fa", "#93c5fd", "#3b82f6", "#2563eb", "#1d4ed8"] // Нежные голубые оттенки для светлой темы
+        : ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"], // Глубокие синие и фиолетовые оттенки для темной темы
 
       /** Прозрачный фон (true) или цветной (false) */
       transparent: true, // Десктоп: true, Мобильные: true
 
       /** Яркость цветов (0.0-1.0) - меньше значение, меньше белых вспышек */
-      brightness: isLightTheme
-        ? isMobile
-          ? 0.85
-          : 0.65
-        : isMobile
-          ? 0.8
-          : 0.6,
+      brightness: isLightTheme ? (isMobile ? 0.7 : 0.6) : isMobile ? 0.7 : 0.55,
 
       // ФИЗИКА ЖИДКОСТИ
 
@@ -72,7 +64,7 @@ const FluidEffect: React.FC = () => {
       pressureIterations: isMobile ? 16 : 20, // Десктоп: 20, Мобильные: 16
 
       /** Завихрение жидкости (0-100) - чем больше, тем более закрученные формы */
-      curl: isLightTheme ? 35 : 30, // Десктоп: 30, Мобильные: 30-35
+      curl: isLightTheme ? 15 : 18, // Десктоп: 30, Мобильные: 30-35
 
       // ВСПЛЕСКИ (SPLATS)
 
@@ -80,7 +72,7 @@ const FluidEffect: React.FC = () => {
       splatRadius: isLightTheme ? 0.2 : 0.25, // Десктоп: 0.25, Мобильные: 0.2-0.25
 
       /** Сила всплесков (0-10000) - скорость распространения при клике/касании */
-      splatForce: isLightTheme ? 5000 : 6000, // Десктоп: 6000, Мобильные: 5000
+      splatForce: isLightTheme ? 5000 : 5000, // Десктоп: 6000, Мобильные: 5000
 
       // ВИЗУАЛЬНЫЕ ЭФФЕКТЫ
 
@@ -91,7 +83,7 @@ const FluidEffect: React.FC = () => {
       colorful: true, // Десктоп: true, Мобильные: true
 
       /** Скорость смены цветов (1-30) - чем больше, тем быстрее меняются цвета */
-      colorUpdateSpeed: isLightTheme ? 12 : 10, // Десктоп: 10, Мобильные: 12
+      colorUpdateSpeed: isLightTheme ? 8 : 7, // Десктоп: 10, Мобильные: 12
 
       /** Включить взаимодействие при наведении курсора (true/false) */
       hover: true, // Десктоп: true, Мобильные: true
@@ -99,7 +91,7 @@ const FluidEffect: React.FC = () => {
       // ЭФФЕКТ СВЕЧЕНИЯ (BLOOM)
 
       /** Включить эффект свечения (true/false) */
-      bloom: true, // Десктоп: true, Мобильные: true
+      bloom: false, // Десктоп: true, Мобильные: true
 
       /** Количество итераций эффекта свечения - больше значение, сильнее размытие, но ниже производительность */
       bloomIterations: isMobile ? 6 : 8, // Десктоп: 8, Мобильные: 6
@@ -125,7 +117,7 @@ const FluidEffect: React.FC = () => {
       sunraysResolution: isMobile ? 128 : 196, // Десктоп: 196, Мобильные: 128
 
       /** Интенсивность эффекта лучей (0.0-1.0) */
-      sunraysWeight: isLightTheme ? 0.5 : 0.6, // Десктоп: 0.6, Мобильные: 0.5
+      sunraysWeight: isLightTheme ? 0.5 : 0.45, // Десктоп: 0.6, Мобильные: 0.5
 
       // РАЗРЕШЕНИЕ СИМУЛЯЦИИ
 
@@ -141,7 +133,7 @@ const FluidEffect: React.FC = () => {
 
     // Создаем начальные всплески только на десктопе
     if (!isMobile) {
-      simulationRef.current.multipleSplats(3);
+      simulationRef.current.multipleSplats(0);
     }
 
     // Сохраняем экземпляр в контексте для доступа из других компонентов
@@ -173,18 +165,14 @@ const FluidEffect: React.FC = () => {
             const touch = event.touches[0];
             if (touch) {
               const mouseEvent = new MouseEvent(
-                event.type === "touchstart"
-                  ? "mousedown"
-                  : event.type === "touchend"
-                    ? "mouseup"
-                    : "mousemove",
+                event.type === "touchstart" ? "mousedown" : event.type === "touchend" ? "mouseup" : "mousemove",
                 {
                   clientX: touch.clientX,
                   clientY: touch.clientY,
                   bubbles: true,
                   cancelable: true,
                   view: window,
-                },
+                }
               );
               canvas.dispatchEvent(mouseEvent);
             }
@@ -193,14 +181,7 @@ const FluidEffect: React.FC = () => {
       }
     }
 
-    const eventTypes = [
-      "mousemove",
-      "mousedown",
-      "mouseup",
-      "touchstart",
-      "touchmove",
-      "touchend",
-    ];
+    const eventTypes = ["mousemove", "mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
 
     eventTypes.forEach((eventType) => {
       // Все события делаем passive: true, чтобы не блокировать скроллинг
@@ -219,6 +200,7 @@ const FluidEffect: React.FC = () => {
       className="fixed left-0 top-0 w-full h-full pointer-events-none"
       style={{
         zIndex: -1, // Позади всего контента
+        backgroundColor: theme === "light" ? "white" : "#121212", // Белый фон для светлой темы, темный для темной
       }}
     >
       <div ref={containerRef} className="w-full h-full" />

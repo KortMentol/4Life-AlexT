@@ -109,7 +109,7 @@ const CallToAction = ({
 
   return (
     <section
-      className={`py-16 md:py-24 bg-gradient-to-r from-blue-600 to-indigo-700 text-white ${className}`}
+      className={`py-16 md:py-24 bg-gradient-to-r from-blue-600/0 to-indigo-700/0 text-white ${className}`}
     >
       <div className="container mx-auto px-4">
         <motion.div

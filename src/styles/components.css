@@ -1,0 +1,118 @@
+/* Глобальные правила для принудительной прозрачности на всех страницах */
+[class*="/"] {
+  opacity: 0 !important;
+}
+
+/* Принудительная прозрачность для всех секций и блоков */
+section,
+div[class*="bg-"],
+[class*="from-"],
+[class*="to-"] {
+  background-color: transparent !important;
+  --tw-bg-opacity: 0 !important;
+}
+
+/* Стили для секций и блоков контента */
+
+/* Общие стили для всех секций с фоном */
+section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Стили для блоков с полностью прозрачным фоном */
+.bg-white, 
+.bg-gray-50,
+.bg-gray-100,
+.bg-blue-50,
+.bg-green-50,
+[class*="bg-white"],
+[class*="bg-gray-50"],
+[class*="bg-gray-100"],
+[class*="bg-blue-50"],
+[class*="bg-green-50"] {
+  background-color: rgba(255, 255, 255, 0) !important;
+}
+
+/* Стили для темной темы */
+.dark .bg-gray-800,
+.dark .bg-gray-900,
+.dark [class*="bg-gray-800"],
+.dark [class*="bg-gray-900"] {
+  background-color: rgba(17, 24, 39, 0) !important;
+}
+
+/* Стили для градиентных фонов */
+[class*="from-white"],
+[class*="to-white"],
+[class*="from-gray-50"],
+[class*="to-gray-50"],
+[class*="from-blue-50"],
+[class*="to-blue-50"],
+[class*="from-green-50"],
+[class*="to-green-50"],
+[class*="from-"],
+[class*="to-"] {
+  --tw-gradient-from: rgba(255, 255, 255, 0) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) !important;
+  --tw-gradient-from-opacity: 0 !important;
+  --tw-gradient-to-opacity: 0 !important;
+}
+
+/* Стили для градиентных фонов в темной теме */
+.dark [class*="from-gray-800"],
+.dark [class*="to-gray-800"],
+.dark [class*="from-gray-900"],
+.dark [class*="to-gray-900"] {
+  --tw-gradient-from: rgba(17, 24, 39, 0) !important;
+  --tw-gradient-to: rgba(17, 24, 39, 0) !important;
+}
+
+/* Стили для карточек и контейнеров */
+.card, 
+.container, 
+[class*="card-"],
+[class*="container-"] {
+  background-color: rgba(255, 255, 255, 0) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .card, 
+.dark .container, 
+.dark [class*="card-"],
+.dark [class*="container-"] {
+  background-color: rgba(17, 24, 39, 0) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Стили для блоков с информацией */
+.info-block, 
+.feature-block,
+[class*="info-"],
+[class*="feature-"] {
+  background-color: rgba(255, 255, 255, 0) !important;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .info-block, 
+.dark .feature-block,
+.dark [class*="info-"],
+.dark [class*="feature-"] {
+  background-color: rgba(17, 24, 39, 0) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Принудительная прозрачность для всех фонов с opacity */
+[class*="/10"],
+[class*="/20"],
+[class*="/30"],
+[class*="/40"],
+[class*="/50"],
+[class*="/60"],
+[class*="/70"],
+[class*="/80"],
+[class*="/90"] {
+  --tw-bg-opacity: 0 !important;
+  background-color: transparent !important;
+}

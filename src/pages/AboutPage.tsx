@@ -43,7 +43,7 @@ const AboutPage: React.FC = () => {
       </Helmet>
       <div className="min-h-screen text-gray-800 dark:text-gray-200 relative">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100/70 to-indigo-200/70 dark:from-gray-800/70 dark:to-gray-900/70 text-center overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100/0 to-indigo-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/30 dark:to-transparent z-0"></div>
           <div
             className="absolute inset-0 z-0 opacity-30"
@@ -80,7 +80,7 @@ const AboutPage: React.FC = () => {
         </section>
 
         {/* Science Section */}
-        <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70 relative overflow-hidden">
+        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 dark:to-transparent z-0"></div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div

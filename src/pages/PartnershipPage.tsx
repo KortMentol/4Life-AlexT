@@ -51,7 +51,7 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
       </Helmet>
       <div className="min-h-screen text-gray-800 dark:text-gray-200">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-purple-100/70 to-pink-200/70 dark:from-gray-800/70 dark:to-gray-900/70 text-center overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-gradient-to-br from-purple-100/0 to-pink-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">
           <div
             className="absolute inset-0 z-0 opacity-30"
             style={{
@@ -84,7 +84,7 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
         </section>
 
         {/* Секция: Преимущества Партнерства */}
-        <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70 relative">
+        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative">
           <div className="container mx-auto px-4 relative z-10">
             <SectionHeading
               title="Преимущества Партнерства"
@@ -225,7 +225,7 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
         </section>
 
         {/* Начните Свой Путь */}
-        <section className="py-16 md:py-24 bg-white/70 dark:bg-gray-800/70">
+        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0">
           <div className="container mx-auto px-4 text-center">
             <SectionHeading
               title="Начните Свой Путь к Успеху"

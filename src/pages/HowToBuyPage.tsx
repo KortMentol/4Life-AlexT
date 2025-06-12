@@ -73,14 +73,14 @@ const HowToBuyPage = () => {
       </Helmet>
 
       {/* Основная секция страницы */}
-      <section className="py-16 bg-gradient-to-br from-gray-50/70 to-white/70 dark:from-gray-900/70 dark:to-gray-800/70 text-gray-900 dark:text-white min-h-[calc(100vh-var(--header-height)-var(--footer-height))] flex items-center justify-center">
+      <section className="py-16 bg-gradient-to-br from-gray-50/0 to-white/0 dark:from-gray-900/0 dark:to-gray-800/0 text-gray-900 dark:text-white min-h-[calc(100vh-var(--header-height)-var(--footer-height))] flex items-center justify-center">
         <div className="container mx-auto px-4 max-w-4xl mt-16 md:mt-20">
           {/* Анимированный контейнер для всего содержимого страницы */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="bg-white dark:bg-gray-700 rounded-lg shadow-2xl p-8 md:p-12 border border-gray-200 dark:border-gray-600 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 text-center"
+            className="bg-white/0 dark:bg-gray-700/0 rounded-lg shadow-2xl p-8 md:p-12 border border-gray-200/30 dark:border-gray-600/30 backdrop-blur-sm text-center"
           >
             {/* Заголовок секции с описанием */}
             <SectionHeading
