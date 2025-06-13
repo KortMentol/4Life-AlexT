@@ -127,11 +127,13 @@ const HomePage: React.FC = () => {
       {/* Главная секция с параллаксом и видео фоном */}
       <ParallaxSection
         backgroundVideo="/src/assets/videos/backgrounds/Why 4Life Transfer Factor®_.webm"
-        backgroundImage="/src/assets/images/backgrounds/1.jpg"
+        backgroundImageMobile="/src/assets/images/backgrounds/bg-hero-Mobile.webp"
+        backgroundImagePC="/src/assets/images/backgrounds/bg-hero-PC.webp"
         altText="Здоровье и благополучие с 4Life"
         height="min-h-screen h-[110vh] md:h-screen"
         parallaxSpeed={0.2}
         contentClasses="flex flex-col items-center justify-center text-center py-8"
+        skipPreload={true} // Указываем, что изображение уже предварительно загружено
       >
         <motion.div
           className="max-w-4xl px-4 md:px-6 flex flex-col justify-between"
@@ -201,7 +203,10 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция о нас */}
-      <section id="about" className="py-24 bg-gradient-to-b from-white/0 to-blue-50/0 dark:from-gray-900/0 dark:to-gray-800/0">
+      <section
+        id="about"
+        className="py-24 bg-gradient-to-b from-white/0 to-blue-50/0 dark:from-gray-900/0 dark:to-gray-800/0"
+      >
         <div className="container max-w-7xl mx-auto px-6">
           <SectionHeading
             title="О нашей компании"
@@ -248,6 +253,7 @@ const HomePage: React.FC = () => {
           height="auto"
           parallaxSpeed={0.15}
           contentClasses="py-24"
+          skipPreload={true} // Указываем, что изображение уже предварительно загружено
         >
           <div className="container max-w-7xl mx-auto px-6">
             <div className="opacity-100">
