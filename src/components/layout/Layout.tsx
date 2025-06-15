@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import FluidEffect from "../effects/FluidEffect";
 import Footer from "./Footer";
 import Header from "./Header";
+import ScrollToTopButton from "../ui/ScrollToTopButton";
 import SVGFilters from "./SVGFilters";
 import { updateScroll } from "@/lib/lenis";
 
@@ -37,6 +38,7 @@ const Layout: React.FC = () => {
           <Outlet />
         </main>
         <Footer />
+        <ScrollToTopButton />
         <SVGFilters />
       </div>
     </>

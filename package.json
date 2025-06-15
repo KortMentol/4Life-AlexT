@@ -10,12 +10,14 @@
     "lint:fix": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --fix",
     "lint:watch": "esw --ext .js,.jsx,.ts,.tsx --format=codeframe --watch src",
     "preview": "vite preview",
-    "dev:local": "vite --host 192.168.0.10 --port 3000",
+    "dev:local": "vite --host 192.168.0.12 --port 3000",
     "dev:network": "vite --host 0.0.0.0 --port 3000"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@headlessui/react": "^1.7.18",
+    "@heroicons/react": "^2.0.18",
     "@studio-freight/lenis": "^1.0.42",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.344.0",

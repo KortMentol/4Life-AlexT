@@ -38,6 +38,8 @@ import {
   ArrowRight,
   Sun,
   Moon,
+  Truck,
+  BadgePercent,
 } from "lucide-react";
 
 export const Icons = {
@@ -79,6 +81,8 @@ export const Icons = {
   LifeBuoy,
   Sun,
   Moon,
+  Truck,
+  BadgePercent,
 };
 
 export type IconName = keyof typeof Icons;

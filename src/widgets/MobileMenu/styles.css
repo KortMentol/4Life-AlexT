@@ -1,0 +1,9 @@
+/* Убираем выделение при нажатии на гамбургер */
+button {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+}
+
+button:focus {
+  outline: none !important;
+}

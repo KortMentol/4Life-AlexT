@@ -7,6 +7,7 @@ import { useMobileMenuState } from "./hooks/useMobileMenuState";
 import useResetScrollOnNavigation from "./hooks/useResetScrollOnNavigation";
 import useScrollRestoration from "./hooks/useScrollRestoration";
 import { updateScroll } from "./lib/lenis";
+import { ProductListProvider } from "@/context/ProductListContext";
 
 // Ленивая загрузка страниц с оптимизированным синтаксисом
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -142,7 +143,7 @@ function App() {
   }
 
   return (
-    <>
+    <ProductListProvider>
       <ScrollToTopOnRouteChange />
       <RouteChangeHandler onRouteChange={closeMobileMenu} />
       <Suspense fallback={<LoadingScreen />}>
@@ -188,7 +189,7 @@ function App() {
           />
         </Routes>
       </Suspense>
-    </>
+    </ProductListProvider>
   );
 }
 

@@ -1,110 +1,58 @@
+import { productsData } from "@/data/productsData";
+import { Product } from "@/types/Product";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import {
-  cardVariants,
-  containerVariants,
-  itemVariants,
-} from "../animations/variants";
+import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
+import CategoryFilter from "../components/ui/CategoryFilter";
 import ProductCard from "../components/ui/ProductCard";
+import ProductDetailModal from "../components/ui/ProductDetailModal";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
 
-const productsData = [
-  {
-    image:
-      "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "Transfer Factor Tri-Factor Formula",
-    description:
-      "Основа линейки 4Life, для всесторонней поддержки иммунной системы.",
-    link: "https://russia.4life.com/products/4life-transfer-factor-tri-factor-formula", // Оригинальная ссылка на продукт
-  },
-  {
-    image:
-      "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "Transfer Factor Plus Tri-Factor Formula",
-    description: "Мощная комбинация для максимальной поддержки иммунитета.",
-    link: "https://russia.4life.com/products/4life-transfer-factor-plus-tri-factor-formula", // Оригинальная ссылка на продукт
-  },
-  {
-    image:
-      "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "Renuvo",
-    description:
-      "Адаптогенная формула для молодости, восстановления и жизненной энергии.",
-    link: "https://russia.4life.com/products/4life-renuvo", // Оригинальная ссылка на продукт
-  },
-  {
-    image:
-      "https://images.pexels.com/photos/7473853/pexels-photo-7473853.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "Collagen",
-    description: "Поддерживает здоровье кожи, волос, ногтей и суставов.",
-    link: "https://russia.4life.com/products/4life-collagen", // Оригинальная ссылка на продукт
-  },
-  {
-    image:
-      "https://images.pexels.com/photos/7473850/pexels-photo-7473850.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "Pro-TF",
-    description:
-      "Высококачественный протеин для поддержания мышечной массы и здорового веса.",
-    link: "https://russia.4life.com/products/4life-pro-tf", // Оригинальная ссылка на продукт
-  },
-  {
-    image:
-      "https://images.pexels.com/photos/7473851/pexels-photo-7473851.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "RiteStart",
-    description:
-      "Комплексный мультивитаминный и минеральный комплекс для ежедневного здоровья.",
-    link: "/purchase",
-  },
-  {
-    image:
-      "https://images.pexels.com/photos/7473852/pexels-photo-7473852.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    title: "BCV",
-    description:
-      "Целевая поддержка для здоровья сердца и всей сердечно-сосудистой системы.",
-    link: "/purchase",
-  },
-  {
-    image: "https://i.ibb.co/GtnqX9h/riovida.jpg",
-    title: "RioVida",
-    description:
-      "Сокосодержащий напиток с Трансфер Факторами и антиоксидантами.",
-    link: "/purchase",
-  },
-];
-
 const ProductsPage: React.FC = () => {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const categories = Array.from(new Set(productsData.flatMap((p) => p.categories ?? []))).sort();
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    );
+  };
+
+  const clearSelection = () => setSelectedCategories([]);
+
+  const handleQuickView = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const closeModal = () => setSelectedProduct(null);
+  const filteredProducts =
+    selectedCategories.length === 0
+      ? productsData
+      : productsData.filter((p) => (p.categories ?? []).some((cat) => selectedCategories.includes(cat)));
+
   return (
     <>
       <Helmet>
-        <title>
-          Продукты 4Life - Укрепление иммунитета и здоровье с Александром
-          Тощевым
-        </title>
+        <title>Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым</title>
         <meta
           name="description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
         />
-        <meta
-          property="og:title"
-          content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
-        />
+        <meta property="og:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
         <meta
           property="og:description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
         />
         <meta property="og:image" content="/images/og-products.jpg" />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:url"
-          content="https://alexander-toshchev-4life.ru/products"
-        />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/products" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
-        />
+        <meta name="twitter:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
         <meta
           name="twitter:description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
@@ -147,9 +95,92 @@ const ProductsPage: React.FC = () => {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
               >
-                Откройте для себя инновационные продукты для поддержки
-                иммунитета и общего благополучия.
+                Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
               </motion.p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Technology & Science Section */}
+        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
+          <div className="container mx-auto px-4 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px 0px" }}
+              transition={{ duration: 0.5 }}
+              className="relative z-10"
+            >
+              <SectionHeading
+                title="Наши Уникальные Технологии и Научное Превосходство"
+                subtitle="Наука лежит в основе каждой формулы 4Life"
+                centered
+              />
+            </motion.div>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 relative z-10"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px 0px" }}
+            >
+              {/* Transfer Factors */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+              >
+                <Icons.ShieldCheck className="h-12 w-12 text-blue-600 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Трансфер&nbsp;Факторы</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Уникальные молекулы иммунной памяти, обучающие и балансирующие защитные клетки организма.
+                </p>
+              </motion.div>
+              {/* Patents & Research */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.2 }}
+              >
+                <Icons.FlaskConical className="h-12 w-12 text-emerald-600 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Патенты и Исследования</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-3">
+                  Продукция защищена патентами и подтверждена клиническими исследованиями.
+                </p>
+                <a
+                  href="https://russia.4life.com/12299550/page/47/studies-and-publications"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sm font-medium text-primary-600 hover:underline"
+                >
+                  Подробнее
+                  <Icons.ArrowRight className="ml-1 h-4 w-4" />
+                </a>
+              </motion.div>
+              {/* Advisory Board */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.4 }}
+              >
+                <Icons.Users className="h-12 w-12 text-violet-600 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Экспертный Совет</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Формулы разрабатываются при участии ведущих учёных и врачей со всего мира.
+                </p>
+              </motion.div>
+              {/* Quality Control */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.6 }}
+              >
+                <Icons.CheckCircle className="h-12 w-12 text-teal-600 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Строгий Контроль Качества</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Многоступенчатая проверка — от сырья до готового продукта, гарантирует чистоту и эффективность.
+                </p>
+              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -182,37 +213,54 @@ const ProductsPage: React.FC = () => {
               <motion.div
                 className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
                 variants={cardVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
+              >
+                <Icons.Shield className="h-12 w-12 text-blue-500 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Иммунитет и Общее Здоровье</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Базовая поддержка иммунной системы и жизненной энергии.
+                </p>
+              </motion.div>
+              {/* Категория 2 */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.2 }}
+              >
+                <Icons.HeartPulse className="h-12 w-12 text-red-500 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Целевая Поддержка</h3>
+                <p className="text-gray-600 dark:text-gray-400">Решения для сердца, печени, мозга и других систем.</p>
+              </motion.div>
+              {/* Категория 3 */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.4 }}
               >
                 <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Управление Весом и Форма
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Решения для здорового контроля веса и поддержания оптимальной
-                  физической формы.
-                </p>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Управление Весом</h3>
+                <p className="text-gray-600 dark:text-gray-400">Продукты для контроля массы тела и метаболизма.</p>
               </motion.div>
               {/* Категория 4 */}
               <motion.div
                 className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
                 variants={cardVariants}
-                transition={{ delay: 0.8 }}
+                transition={{ delay: 0.6 }}
               >
                 <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Красота и Уход
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Продукты для сияющей кожи, волос и ногтей, разработанные с
-                  учетом внутренней красоты.
-                </p>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Красота и Уход</h3>
+                <p className="text-gray-600 dark:text-gray-400">Коллаген и другие решения для кожи, волос и ногтей.</p>
               </motion.div>
             </motion.div>
           </div>
         </section>
+
+        {/* Category Filter */}
+        <CategoryFilter
+          categories={categories}
+          selected={selectedCategories}
+          toggleCategory={toggleCategory}
+          clearSelection={clearSelection}
+        />
 
         {/* Products Section */}
         <section className="py-16 md:py-24 bg-gray-50/0 dark:bg-gray-800/0 relative overflow-hidden">
@@ -237,7 +285,7 @@ const ProductsPage: React.FC = () => {
               whileInView="show"
               viewport={{ once: true, margin: "-50px 0px" }}
             >
-              {productsData.map((product, index) => (
+              {filteredProducts.map((product, index) => (
                 <motion.div
                   key={index}
                   variants={cardVariants}
@@ -246,15 +294,72 @@ const ProductsPage: React.FC = () => {
                   viewport={{ once: true, amount: 0.3 }}
                   className="relative z-10 h-full"
                 >
-                  <ProductCard
-                    image={product.image}
-                    title={product.title}
-                    description={product.description}
-                    link={product.link}
-                    delay={0.1 * index} // Динамическая задержка
-                  />
+                  <ProductCard product={product} delay={0.1 * index} onQuickView={handleQuickView} />
                 </motion.div>
               ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Why Choose Section */}
+        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
+          <div className="container mx-auto px-4 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px 0px" }}
+              transition={{ duration: 0.5 }}
+              className="relative z-10"
+            >
+              <SectionHeading
+                title="Почему миллионы выбирают 4Life?"
+                subtitle="Три ключевые причины доверять нашему бренду"
+                centered
+              />
+            </motion.div>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px 0px" }}
+            >
+              {/* Innovation & Science */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+              >
+                <Icons.Lightbulb className="h-12 w-12 text-yellow-500 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Инновации и Наука</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Постоянные исследования и запатентованные технологии для максимальной эффективности.
+                </p>
+              </motion.div>
+              {/* Quality & Safety */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.2 }}
+              >
+                <Icons.CheckCircle className="h-12 w-12 text-teal-600 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Качество и Безопасность</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Многоступенчатый контроль качества и сырьё премиум-класса.
+                </p>
+              </motion.div>
+              {/* Global Community */}
+              <motion.div
+                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                variants={cardVariants}
+                transition={{ delay: 0.4 }}
+              >
+                <Icons.Globe className="h-12 w-12 text-indigo-600 mb-4" />
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Глобальное Сообщество</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Миллионы довольных клиентов и дистрибьюторов в 70+ странах мира.
+                </p>
+              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -269,6 +374,11 @@ const ProductsPage: React.FC = () => {
           secondaryButtonLink="/partnership"
         />
       </div>
+
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <ProductDetailModal product={selectedProduct} isOpen={!!selectedProduct} onClose={closeModal} />
+      )}
     </>
   );
 };

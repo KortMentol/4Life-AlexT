@@ -1,0 +1,21 @@
+/* Убираем выделение при нажатии на гамбургер */
+.hamburger-button {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  background-color: transparent !important;
+}
+
+.hamburger-button:focus,
+.hamburger-button:active,
+.hamburger-button:hover {
+  outline: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Убираем стандартное выделение на мобильных устройствах */
+@media (hover: none) {
+  .hamburger-button::after {
+    display: none !important;
+  }
+}

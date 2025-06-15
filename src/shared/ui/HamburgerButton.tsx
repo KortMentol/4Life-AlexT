@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import "./HamburgerButton.css";
 
 interface HamburgerButtonProps {
   isOpen: boolean;
@@ -28,8 +29,7 @@ const HamburgerButton: React.FC<HamburgerButtonProps> = ({
 
   return (
     <button
-      className="flex flex-col justify-center items-center w-10 h-10 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400
-               text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors duration-300"
+      className="hamburger-button flex flex-col justify-center items-center w-10 h-10 text-gray-700 dark:text-gray-300 transition-colors duration-300 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
       onClick={toggle}
       aria-expanded={isOpen}
       aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}

@@ -1,0 +1,37 @@
+/* Стили для иконки списка продуктов */
+.product-list-icon {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+}
+
+/* Убираем стандартное выделение на мобильных устройствах */
+@media (hover: none) {
+  .product-list-icon::after {
+    display: none !important;
+  }
+}
+
+/* Устанавливаем CSS-переменные для цветов */
+:root {
+  --text-normal-light: #374151; /* gray-700 */
+  --text-normal-dark: #d1d5db; /* gray-300 */
+  --text-active-light: #2563eb; /* blue-600 */
+  --text-active-dark: #60a5fa; /* blue-400 */
+}
+
+/* Принудительно устанавливаем цвета для разных состояний */
+.product-list-icon.closed {
+  color: var(--text-normal-light) !important;
+}
+
+.dark .product-list-icon.closed {
+  color: var(--text-normal-dark) !important;
+}
+
+.product-list-icon.open {
+  color: var(--text-active-light) !important;
+}
+
+.dark .product-list-icon.open {
+  color: var(--text-active-dark) !important;
+}
