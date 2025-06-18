@@ -203,45 +203,58 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция о нас */}
+      {/* Секция о нас с белым фоном */}
+      {/* Секция о нас */}
       <section
         id="about"
-        className="py-24 bg-gradient-to-b from-white/0 to-blue-50/0 dark:from-gray-900/0 dark:to-gray-800/0"
+        className="relative py-24"
       >
-        <div className="container max-w-7xl mx-auto px-6">
-          <SectionHeading
-            title="О нашей компании"
-            subtitle="Иммунная наука, подтвержденная исследованиями"
-            description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
-            centered={true}
-            className="max-w-3xl mx-auto"
-            subtitleClassName="text-gray-700 dark:text-blue-400"
-            titleClassName="text-gray-800 dark:text-white"
-            descriptionClassName="mx-auto max-w-2xl text-center"
-          />
+        {/* Белый фон (z-index: -20) */}
+        <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
+        
+        {/* Fluid эффект (z-index: -10) */}
+        <div className="absolute inset-0 -z-10" style={{ zIndex: -10 }}>
+          {/* Здесь будет ваш fluid эффект */}
+        </div>
+        
+        {/* Контент секции (z-index: 1) */}
+        <div className="relative z-10">
+          <div className="container max-w-7xl mx-auto px-6">
+            <SectionHeading
+              title="О нашей компании"
+              subtitle="Иммунная наука, подтвержденная исследованиями"
+              description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
+              centered={true}
+              className="max-w-3xl mx-auto"
+              subtitleClassName="text-gray-700 dark:text-blue-400"
+              titleClassName="text-gray-800 dark:text-white"
+              descriptionClassName="mx-auto max-w-2xl text-center"
+            />
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-            {features.map((feature, index) => (
-              <StaticFeature
-                key={index}
-                icon={feature.icon}
-                title={feature.title}
-                description={feature.description}
-                color="from-blue-500 to-blue-600"
-                className="border-blue-100 dark:border-blue-900/50"
-              />
-            ))}
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+              {features.map((feature, index) => (
+                <StaticFeature
+                  key={index}
+                  icon={feature.icon}
+                  title={feature.title}
+                  description={feature.description}
+                  color="from-blue-500 to-blue-600"
+                  className="border-blue-100 dark:border-blue-900/50"
+                />
+              ))}
+            </div>
+
+            <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                to="/about"
+                className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative z-10">Узнать больше о компании</span>
+                <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
           </div>
-
-          <motion.div className="mt-16 text-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              to="/about"
-              className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-              <span className="relative z-10">Узнать больше о компании</span>
-              <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
-            </Link>
-          </motion.div>
         </div>
       </section>
 
@@ -386,7 +399,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
       {/* Секция призыва к действию с параллаксом */}
       <ParallaxSection
         backgroundImage="/src/assets/images/backgrounds/5.jpg"

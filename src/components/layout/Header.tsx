@@ -2,9 +2,9 @@ import { lenis } from "@/lib/lenis";
 import DynamicLogo from "@/shared/ui/DynamicLogo";
 import HamburgerButton from "@/shared/ui/HamburgerButton";
 import MobileMenu from "@/widgets/MobileMenu";
-import { motion } from "framer-motion";
+import { motion, useScroll, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ProductListIcon from "../ui/ProductListIcon";
 import TextShineEffect from "./TextShineEffect";
@@ -15,30 +15,33 @@ import { useTheme } from "../../context/useTheme";
 const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const [hidden, setHidden] = useState(false);
-  const [lastYPos, setLastYPos] = useState(0);
+
+
+  // Scroll-linked header movement (плавное скрытие/появление в любой точке страницы)
+  const headerHeight = 80; // px – высота хедера (подгоняется под факт.)
+  const { scrollY } = useScroll();
+  const headerOffset = useMotionValue(0); // текущее смещение хедера
+  const smoothY = useSpring(headerOffset, { stiffness: 250, damping: 40 });
+
+  // Предыдущее значение scrollY для определения направления
+  const prevScrollY = React.useRef(0);
+
+  // Актуализируем смещение при каждом изменении scrollY
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const diff = latest - prevScrollY.current;
+
+    // На скролле вниз (diff > 0) скрываем, вверх (diff < 0) — показываем
+    let newOffset = headerOffset.get() - diff;
+
+    // Ограничиваем в пределах [-headerHeight, 0]
+    newOffset = Math.max(-headerHeight, Math.min(0, newOffset));
+    headerOffset.set(newOffset);
+
+    prevScrollY.current = latest;
+  });
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentYPos = window.scrollY;
-      const isScrolledDown = currentYPos > lastYPos;
-
-      if (currentYPos > 150 && isScrolledDown) {
-        setHidden(true);
-      } else {
-        setHidden(false);
-      }
-
-      setLastYPos(currentYPos);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastYPos]);
 
   const handleLogoClick = () => {
     if (location.pathname !== "/") {
@@ -66,25 +69,21 @@ const Header: React.FC = () => {
     <>
       <motion.header
         role="banner"
-        variants={{
-          visible: { y: 0 },
-          hidden: { y: "-100%" },
-        }}
-        animate={hidden ? "hidden" : "visible"}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg"
         style={{
+          y: smoothY,
           WebkitBackdropFilter: "blur(8px)",
           backdropFilter: "blur(8px)",
           top: "env(safe-area-inset-top)",
         }}
+        transition={{ type: "spring", stiffness: 250, damping: 40 }}
+        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg"
       >
         <div className="container max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Left Section: Hamburger on Mobile, Logo + Name on Desktop */}
             <div className="flex items-center">
               <div className="md:hidden relative z-[100] no-highlight">
-                <HamburgerButton isOpen={mobileMenuOpen} toggle={handleHamburgerClick} />
+                                <HamburgerButton isOpen={mobileMenuOpen} toggle={handleHamburgerClick} />
               </div>
               <button
                 onClick={handleLogoClick}

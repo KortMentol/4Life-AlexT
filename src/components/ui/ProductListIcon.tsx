@@ -47,7 +47,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     };
     
     // Добавляем обработчик клика вне модального окна
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: Event) => {
       // Если модальное окно открыто и клик был не по кнопке
       if (isOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         // Проверяем, был ли клик по диалогу (не закрываем в этом случае)
