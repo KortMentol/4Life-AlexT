@@ -1,14 +1,13 @@
 import { lenis } from "@/lib/lenis";
 import DynamicLogo from "@/shared/ui/DynamicLogo";
 import HamburgerButton from "@/shared/ui/HamburgerButton";
-import MegaMenu from "@/widgets/MegaMenu";
 import MobileMenu from "@/widgets/MobileMenu";
-import TextShineEffect from "./TextShineEffect";
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import ProductListIcon from "../ui/ProductListIcon";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import ProductListIcon from "../ui/ProductListIcon";
+import TextShineEffect from "./TextShineEffect";
 
 import { mainNav, siteConfig } from "../../config/site";
 import { useTheme } from "../../context/useTheme";
@@ -40,7 +39,6 @@ const Header: React.FC = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastYPos]);
-
 
   const handleLogoClick = () => {
     if (location.pathname !== "/") {
@@ -86,10 +84,7 @@ const Header: React.FC = () => {
             {/* Left Section: Hamburger on Mobile, Logo + Name on Desktop */}
             <div className="flex items-center">
               <div className="md:hidden relative z-[100] no-highlight">
-                <HamburgerButton
-                  isOpen={mobileMenuOpen}
-                  toggle={handleHamburgerClick}
-                />
+                <HamburgerButton isOpen={mobileMenuOpen} toggle={handleHamburgerClick} />
               </div>
               <button
                 onClick={handleLogoClick}
@@ -104,8 +99,7 @@ const Header: React.FC = () => {
                     text={siteConfig.distributor.name}
                     className="font-bold text-base leading-tight text-gray-800 dark:text-gray-100"
                   />
-                  <div
-                    className={`text-sm font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}>
+                  <div className={`text-sm font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}>
                     Builder Elite
                   </div>
                 </div>
@@ -126,19 +120,15 @@ const Header: React.FC = () => {
                       text={siteConfig.distributor.name}
                       className="font-bold text-sm leading-tight text-gray-900 dark:text-white"
                     />
-                    <div className={`text-xs font-medium ${theme === 'light' ? 'text-amber-600' : 'text-amber-300'}`}>
+                    <div className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}>
                       Builder Elite
                     </div>
                   </div>
                 </button>
               </div>
 
-
               {/* Navigation for Desktop */}
-              <nav
-                role="navigation"
-                className="hidden md:flex items-center space-x-1 h-full"
-              >
+              <nav role="navigation" className="hidden md:flex items-center space-x-1 h-full">
                 {mainNav.map((item) => (
                   <div key={item.href} className="relative flex items-center h-full">
                     <NavLink
@@ -148,8 +138,7 @@ const Header: React.FC = () => {
                           e.preventDefault();
                           lenis.scrollTo(0, {
                             duration: 1.2,
-                            easing: (t) =>
-                              Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
                           });
                         }
                       }}
@@ -157,7 +146,13 @@ const Header: React.FC = () => {
                     >
                       {({ isActive }) => (
                         <>
-                          <span className={isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"}>
+                          <span
+                            className={
+                              isActive
+                                ? "text-blue-600 dark:text-blue-400"
+                                : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                            }
+                          >
                             {item.title}
                           </span>
                           {isActive && (
@@ -197,14 +192,9 @@ const Header: React.FC = () => {
             </div>
           </div>
         </div>
-
-        <MegaMenu />
       </motion.header>
 
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      />
+      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </>
   );
 };
