@@ -40,27 +40,24 @@ export function ScrollToTopOnRouteChange() {
     });
   }, [location.pathname, location.search, location.hash]);
 
-  // Эффект для "невидимого клика" по элементу меню после навигации
+  // Дополнительный эффект для навигации.
+  //     На настольных устройствах делаем лёгкую анимацию (чтобы скрыть возможный контент-флэш).
+  //     На мобильных — пропускаем, оставляем мгновенный «телепорт» без анимации.
   useEffect(() => {
-    // Находим текущий пункт меню
-    const currentNavItem = mainNav.find(
-      (item) => item.href === location.pathname,
-    );
+    const isMobile = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+    if (isMobile) return;
 
-    if (currentNavItem) {
-      // Небольшая задержка для завершения рендеринга
-      const timer = setTimeout(() => {
-        // Принудительно скроллим вверх с плавной анимацией
-        lenis.scrollTo(0, {
-          duration: 0.8,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        });
-      }, 100);
+    const currentNavItem = mainNav.find((item) => item.href === location.pathname);
+    if (!currentNavItem) return;
 
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      lenis.scrollTo(0, {
+        duration: 0.6,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
+    }, 80);
 
-    return undefined; // Явно возвращаем undefined для путей, где нет совпадений
+    return () => clearTimeout(timer);
   }, [location.pathname]);
 
   return null;

@@ -202,8 +202,7 @@ const HomePage: React.FC = () => {
         </motion.div>
       </ParallaxSection>
 
-      {/* Секция о нас */}
-      {/* Секция о нас с белым фоном */}
+
       {/* Секция о нас */}
       <section
         id="about"
@@ -213,11 +212,11 @@ const HomePage: React.FC = () => {
         <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
         
         {/* Fluid эффект (z-index: -10) */}
-        <div className="absolute inset-0 -z-10" style={{ zIndex: -10 }}>
+        <div className="absolute inset-0 -z-10">
           {/* Здесь будет ваш fluid эффект */}
         </div>
         
-        {/* Контент секции (z-index: 1) */}
+        {/* Контент секции (z-index: 10) */}
         <div className="relative z-10">
           <div className="container max-w-7xl mx-auto px-6">
             <SectionHeading

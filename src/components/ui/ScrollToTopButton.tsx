@@ -24,25 +24,28 @@ const Particle = () => {
   );
 };
 
-const RocketExhaust = () => (
+const RocketExhaust: React.FC<{ count: number }> = ({ count }) => (
   <div className="absolute inset-0 flex justify-center">
-    {Array.from({ length: 20 }).map((_, i) => (
+    {Array.from({ length: count }).map((_, i) => (
       <Particle key={i} />
     ))}
   </div>
 );
 
 const ScrollToTopButton: React.FC = () => {
-    const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+
+  // Определяем мобильное устройство по coarse pointer
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+  const particles = isMobile ? 8 : 20;
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      setIsVisible(progress > 0.15);
     };
 
     window.addEventListener("scroll", toggleVisibility, { passive: true });
@@ -50,28 +53,42 @@ const ScrollToTopButton: React.FC = () => {
   }, []);
 
     const scrollToTop = () => {
-    setIsClicked(true);
-    setTimeout(() => setIsClicked(false), 1500); // Длительность анимации выхлопа
+    // Останавливаем текущую прокрутку, чтобы сразу начать подниматься наверх
+    if (!isMobile) {
+      try {
+        lenis.stop();
+      } catch (_) {/* ignore */}
+    }
 
-    lenis.scrollTo(0, {
-      duration: 1.5,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    });
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 1500);
+
+    if (isMobile) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Перезапускаем Lenis, чтобы анимация сработала корректно после stop()
+      lenis.start();
+      lenis.scrollTo(0, {
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
+    }
   };
 
   return (
     <motion.button
+      onPointerDown={scrollToTop}
       onClick={scrollToTop}
       variants={buttonVariants}
       initial="hidden"
       animate={isVisible ? "visible" : "hidden"}
       whileHover={{ scale: 1.1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`fixed bottom-8 right-8 z-50 p-3 bg-gray-900/60 dark:bg-white/60 text-white dark:text-gray-900 rounded-full shadow-lg backdrop-blur-sm ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      className={`fixed bottom-6 right-4 md:bottom-8 md:right-8 z-50 p-2.5 md:p-3 bg-gray-900/60 dark:bg-white/60 text-white dark:text-gray-900 rounded-full shadow-lg backdrop-blur-sm ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
       aria-label="Вернуться наверх"
     >
-            <AnimatePresence>{isClicked && <RocketExhaust />}</AnimatePresence>
-      <ChevronUp size={24} className="relative z-10" />
+            <AnimatePresence>{isClicked && <RocketExhaust count={particles} />}</AnimatePresence>
+      <ChevronUp className="relative z-10 w-5 h-5 md:w-6 md:h-6" />
     </motion.button>
   );
 };

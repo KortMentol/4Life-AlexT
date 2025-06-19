@@ -4,7 +4,7 @@ import HamburgerButton from "@/shared/ui/HamburgerButton";
 import MobileMenu from "@/widgets/MobileMenu";
 import { motion, useScroll, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ProductListIcon from "../ui/ProductListIcon";
 import TextShineEffect from "./TextShineEffect";
@@ -16,11 +16,17 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
+  // Scroll-linked header movement: измеряем фактическую высоту, чтобы скрывать на 100 %
+  const headerRef = React.useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = React.useState(0);
+  useLayoutEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, []);
 
-  // Scroll-linked header movement (плавное скрытие/появление в любой точке страницы)
-  const headerHeight = 80; // px – высота хедера (подгоняется под факт.)
   const { scrollY } = useScroll();
-  const headerOffset = useMotionValue(0); // текущее смещение хедера
+  const headerOffset = useMotionValue(0);
   const smoothY = useSpring(headerOffset, { stiffness: 250, damping: 40 });
 
   // Предыдущее значение scrollY для определения направления
@@ -33,7 +39,7 @@ const Header: React.FC = () => {
     // На скролле вниз (diff > 0) скрываем, вверх (diff < 0) — показываем
     let newOffset = headerOffset.get() - diff;
 
-    // Ограничиваем в пределах [-headerHeight, 0]
+    // Ограничиваем в пределах [-(headerHeight), 0]
     newOffset = Math.max(-headerHeight, Math.min(0, newOffset));
     headerOffset.set(newOffset);
 
@@ -44,20 +50,40 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
+    // Проверяем, мобильное ли устройство
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
     if (location.pathname !== "/") {
       lenis.stop();
       lenis.velocity = 0;
       navigate("/");
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => {
-        lenis.scrollTo(0, { immediate: true });
-        setTimeout(() => lenis.start(), 50);
-      });
+      
+      if (isMobile) {
+        // На мобильных используем нативный скролл
+        window.scrollTo(0, 0);
+      } else {
+        // На десктопе используем Lenis
+        window.scrollTo(0, 0);
+        requestAnimationFrame(() => {
+          lenis.scrollTo(0, { immediate: true });
+          setTimeout(() => lenis.start(), 50);
+        });
+      }
     } else {
-      lenis.scrollTo(0, {
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      });
+      // Если уже на главной странице
+      if (isMobile) {
+        // На мобильных используем нативный скролл
+        window.scrollTo({
+          top: 0,
+          behavior: 'auto' // Мгновенный скролл
+        });
+      } else {
+        // На десктопе используем Lenis
+        lenis.scrollTo(0, {
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        });
+      }
     }
   };
 
@@ -68,6 +94,7 @@ const Header: React.FC = () => {
   return (
     <>
       <motion.header
+        ref={headerRef}
         role="banner"
         style={{
           y: smoothY,
@@ -76,7 +103,7 @@ const Header: React.FC = () => {
           top: "env(safe-area-inset-top)",
         }}
         transition={{ type: "spring", stiffness: 250, damping: 40 }}
-        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg"
+        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow"
       >
         <div className="container max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -110,7 +137,29 @@ const Header: React.FC = () => {
               {/* Name and Status for Mobile */}
               <div className="md:hidden">
                 <button
-                  onClick={handleLogoClick}
+                  onClick={() => {
+                    // Проверяем, мобильное ли устройство
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    
+                    if (location.pathname === "/") {
+                      if (isMobile) {
+                        // На мобильных используем нативный скролл для мгновенного отклика
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'auto' // Используем 'auto' вместо 'smooth' для мгновенного скролла
+                        });
+                      } else {
+                        // На десктопе используем Lenis
+                        lenis.scrollTo(0, {
+                          duration: 1.2,
+                          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                        });
+                      }
+                    } else {
+                      // Если не на главной странице, используем стандартную навигацию
+                      handleLogoClick();
+                    }
+                  }}
                   className="flex flex-col items-center group"
                   aria-label="Главная страница"
                 >
@@ -135,10 +184,23 @@ const Header: React.FC = () => {
                       onClick={(e) => {
                         if (location.pathname === item.href) {
                           e.preventDefault();
-                          lenis.scrollTo(0, {
-                            duration: 1.2,
-                            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                          });
+                          
+                          // Проверяем, мобильное ли устройство
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                          
+                          if (isMobile) {
+                            // На мобильных используем нативный скролл
+                            window.scrollTo({
+                              top: 0,
+                              behavior: 'auto' // Мгновенный скролл
+                            });
+                          } else {
+                            // На десктопе используем Lenis
+                            lenis.scrollTo(0, {
+                              duration: 1.2,
+                              easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                            });
+                          }
                         }
                       }}
                       className="flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative"

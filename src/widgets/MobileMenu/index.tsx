@@ -52,7 +52,10 @@ const menuVariants = {
   exit: {
     x: "-100%",
     opacity: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
+    transition: { 
+      duration: 0.4, 
+      ease: [0.32, 0.72, 0, 1], // Оптимизированная кривая для закрытия
+    },
   },
 };
 
@@ -75,15 +78,16 @@ const overlayVariants = {
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const [dragX, setDragX] = React.useState(0);
   
+  // Создаем ref для отслеживания начальной позиции свайпа
+  const swipeRef = React.useRef<{ startX: number | null }>({ startX: null });
+  
   const handleDrag = (
     _event: MouseEvent | TouchEvent | PointerEvent,
     info: { offset: { x: number; y: number } }
   ) => {
-    // Используем requestAnimationFrame для более плавного обновления
-    requestAnimationFrame(() => {
-      // Устанавливаем только отрицательные значения для движения влево
-      setDragX(Math.min(0, info.offset.x));
-    });
+    // Используем прямое обновление без вложенного requestAnimationFrame для минимизации задержки
+    // Устанавливаем только отрицательные значения для движения влево
+    setDragX(Math.min(0, info.offset.x));
   };
 
   const handleDragEnd = (
@@ -91,10 +95,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }
   ) => {
     // Закрываем меню, если его смахнули влево достаточно далеко или с большой скоростью
-    if (info.offset.x < -window.innerWidth * 0.1 || info.velocity.x < -200) {
+    // Уменьшаем порог скорости для более отзывчивого закрытия
+    if (info.offset.x < -window.innerWidth * 0.08 || info.velocity.x < -150) {
       onClose();
+    } else {
+      // Анимируем возврат в исходное положение
+      setDragX(0);
     }
-    setDragX(0);
   };
 
   const { theme, toggleTheme } = useTheme();
@@ -112,17 +119,76 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   }, [isOpen, pendingRoute, navigate]);
 
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    if (isOpen) {
+      // Блокируем скролл на всей странице
+      document.body.classList.add('menu-open');
+      
+      // Сохраняем текущую позицию скролла
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      
+      // Добавляем обработчик для предотвращения скролла на всем документе
+      const preventScroll = (e: TouchEvent) => {
+        // Разрешаем только горизонтальные свайпы для закрытия меню
+        const touch = e.touches[0];
+        if (!touch) return; // Проверка на undefined
+        
+        const startTouch = swipeRef.current.startX;
+        
+        // Если это горизонтальный свайп (больше по X, чем по Y), разрешаем его
+        if (startTouch && Math.abs(touch.clientX - startTouch) > Math.abs(touch.clientY - window.scrollY)) {
+          return;
+        }
+        
+        // Иначе блокируем скролл
+        e.preventDefault();
+      };
+      
+      // Добавляем обработчик с пассивным: false для возможности вызова preventDefault
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+      
+      return () => {
+        // Восстанавливаем скролл при закрытии меню
+        document.body.classList.remove('menu-open');
+        
+        // Восстанавливаем позицию скролла
+        const scrollY = parseInt(document.body.style.top || '0', 10) * -1;
+        document.body.style.top = '';
+        window.scrollTo(0, scrollY);
+        
+        document.removeEventListener('touchmove', preventScroll);
+      };
+    }
+    
+    // Если меню закрыто, возвращаем пустую функцию очистки
+    return () => {};
   }, [isOpen]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (locked) return;
     if (location.pathname === href) {
-      lenis.scrollTo(0, { duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-      onClose();
+      // Проверяем, мобильное ли устройство
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // На мобильных используем нативный скролл для мгновенного отклика
+        onClose();
+        // Небольшая задержка, чтобы меню успело закрыться
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'auto' // Используем 'auto' вместо 'smooth' для мгновенного скролла
+          });
+        }, 10);
+      } else {
+        // На десктопе используем Lenis
+        lenis.scrollTo(0, { 
+          duration: 1.2, 
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) 
+        });
+        onClose();
+      }
     } else {
       setLocked(true);
       setPendingRoute(href);
@@ -134,30 +200,98 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const bgColor = theme === "dark" ? "#111827" : "#ffffff";
   const overlayColor = theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.7)";
 
+  // Объявление swipeRef перемещено в начало компонента
+  
+  // Обработчик начала свайпа на всем экране
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      swipeRef.current.startX = touch.clientX;
+    }
+  };
+  
+  // Обработчик движения свайпа на всем экране
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!swipeRef.current.startX) return;
+    
+    const touch = e.touches[0];
+    if (!touch) return; // Проверка на undefined
+    
+    const currentX = touch.clientX;
+    const diff = currentX - swipeRef.current.startX;
+    
+    // Определяем, является ли свайп горизонтальным
+    const touchY = touch.clientY;
+    const startY = touch.clientY; // Упрощение, так как мы не отслеживаем startY
+    const isHorizontalSwipe = Math.abs(diff) > Math.abs(touchY - startY);
+    
+    // Если движение влево и это горизонтальный свайп, начинаем закрывать меню
+    if (diff < 0 && isHorizontalSwipe) {
+      setDragX(diff);
+      // Предотвращаем скролл страницы
+      e.preventDefault();
+    }
+  };
+  
+  // Обработчик окончания свайпа на всем экране
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!swipeRef.current.startX) return;
+    
+    const touch = e.changedTouches[0];
+    if (!touch) {
+      swipeRef.current.startX = null;
+      return;
+    }
+    
+    const currentX = touch.clientX;
+    const diff = currentX - swipeRef.current.startX;
+    const velocity = Math.abs(diff) / 150; // Примерная скорость свайпа
+    
+    // Закрываем меню при достаточном свайпе влево
+    if (diff < -50 || (diff < 0 && velocity > 0.5)) {
+      onClose();
+    } else {
+      setDragX(0);
+    }
+    
+    swipeRef.current.startX = null;
+  };
+
   return (
     <AnimatePresence mode="wait">
       {isOpen && (
         <>
           <motion.div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 menu-overlay"
             initial="hidden"
             animate="visible"
             exit="exit"
             variants={overlayVariants}
             onClick={onClose}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             aria-label="Закрыть меню"
-            style={{ backgroundColor: overlayColor }}
+            style={{ 
+              backgroundColor: overlayColor,
+              touchAction: "none", // Блокируем все стандартные жесты
+              pointerEvents: "auto" // Гарантируем, что события касания обрабатываются
+            }}
           />
-                    <motion.nav
+          <motion.nav
             drag="x"
             dragDirectionLock
             dragConstraints={{ left: -1000, right: 0 }}
             dragMomentum={false}
-            dragElastic={0}
-            dragTransition={{ power: 0.2, timeConstant: 400 }}
+            dragElastic={0.05}
+            dragTransition={{ 
+              power: 0.15, 
+              timeConstant: 300,
+              modifyTarget: (target) => Math.round(target * 2) / 2 // Сглаживание для предотвращения субпиксельных рендеров
+            }}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
-            className={`fixed top-0 left-0 z-50 h-full w-[90vw] max-w-sm p-6 flex flex-col shadow-2xl rounded-r-3xl border-r ${borderColor}`}
+            className={`mobile-menu-container fixed top-0 left-0 z-50 h-full w-[90vw] max-w-sm p-6 flex flex-col justify-between shadow-2xl rounded-r-3xl border-r ${borderColor}`}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -168,7 +302,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
             style={{ 
               background: bgColor, 
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              transform: dragX ? `translateX(${dragX}px)` : "none"
+              transform: dragX ? `translateX(${dragX}px)` : "none",
+              willChange: "transform", // Оптимизация для GPU-ускорения
+              backfaceVisibility: "hidden", // Предотвращает мерцание
+              WebkitBackfaceVisibility: "hidden", // Для Safari
+              perspective: "1000px", // Улучшает 3D-рендеринг
+              touchAction: "pan-y", // Разрешаем только вертикальный скролл внутри меню
+              height: "100vh", // Фиксированная высота на весь экран
+              overscrollBehavior: "contain" as const // Предотвращаем скролл родительского элемента
             }}
           >
             <div className={`relative flex flex-col items-center pt-3 pb-3 border-b ${borderColor}`}>
@@ -215,7 +356,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 </div>
               </motion.div>
             </div>
-            <motion.ul className="flex flex-col gap-3 mt-4">
+            <motion.ul className="flex flex-col gap-3 mt-4 flex-grow">
               {navLinks.map((link, i) => (
                 <motion.li key={link.href} custom={i} variants={itemVariants}>
                   <NavLink
@@ -232,15 +373,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
               ))}
             </motion.ul>
 
-            <div className="flex-1" />
+            {/* Убираем flex-1 div, так как используем flex-grow для списка и justify-between для контейнера */}
 
             <motion.div
-              className="mt-8 flex flex-col items-center gap-4"
+              className="mt-6 mb-4 flex flex-col items-center gap-4"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.5, duration: 0.5 } }}
+              animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
               exit={{ opacity: 0 }}
             >
-              <div className="relative w-16 h-8">
+              {/* Переключатель темы */}
+              <div className="relative w-16 h-8 mb-2">
                 <motion.div 
                   className="absolute inset-0 rounded-full"
                   style={{
@@ -297,6 +439,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                   aria-label="Переключить тему"
                 />
               </div>
+              
+              {/* Копирайт */}
               <div className="text-xs text-center text-gray-500 dark:text-gray-400 select-none">
                 © {new Date().getFullYear()} 4Life. Все права защищены.
               </div>
