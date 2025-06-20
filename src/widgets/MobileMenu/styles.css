@@ -1,53 +1,13 @@
-/* Убираем выделение при нажатии на гамбургер */
-button {
-  -webkit-tap-highlight-color: transparent !important;
-  outline: none !important;
-}
-
-button:focus {
-  outline: none !important;
-}
-
-/* Оптимизация для плавных анимаций */
-.mobile-menu-container {
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Предотвращение мерцания при анимации */
-@media (pointer: fine) {
-  .mobile-menu-container {
-    transition: transform 0.01ms linear !important;
-  }
-}
-
-/* Оптимизация для высокой частоты обновления экрана */
-@supports (animation-timeline: scroll()) {
-  .mobile-menu-container {
-    animation-timeline: scroll();
-    animation-range: normal;
-  }
-}
-
-/* Блокировка скролла при открытом меню */
+/* Блокировка скролла страницы при открытом меню */
 body.menu-open {
   overflow: hidden !important;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  touch-action: none;
-  -webkit-overflow-scrolling: none;
+  overscroll-behavior: none;
 }
 
-/* Стили для оверлея с блокировкой скролла */
-.menu-overlay {
-  touch-action: none !important;
-  -webkit-touch-callout: none;
+/* Улучшение работы свайпа на мобильных устройствах */
+.mobile-menu-container {
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }

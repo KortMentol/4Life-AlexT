@@ -84,7 +84,7 @@ const ScrollToTopButton: React.FC = () => {
       animate={isVisible ? "visible" : "hidden"}
       whileHover={{ scale: 1.1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`fixed bottom-6 right-4 md:bottom-8 md:right-8 z-50 p-2.5 md:p-3 bg-gray-900/60 dark:bg-white/60 text-white dark:text-gray-900 rounded-full shadow-lg backdrop-blur-sm ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      className={`fixed bottom-6 right-4 md:bottom-8 md:right-8 z-40 p-2.5 md:p-3 bg-gray-900/60 dark:bg-white/60 text-white dark:text-gray-900 rounded-full shadow-lg backdrop-blur-sm ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
       aria-label="Вернуться наверх"
     >
             <AnimatePresence>{isClicked && <RocketExhaust count={particles} />}</AnimatePresence>

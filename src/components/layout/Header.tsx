@@ -1,7 +1,7 @@
 import { lenis } from "@/lib/lenis";
 import DynamicLogo from "@/shared/ui/DynamicLogo";
 import HamburgerButton from "@/shared/ui/HamburgerButton";
-import MobileMenu from "@/widgets/MobileMenu";
+import { MobileMenu } from "@/widgets";
 import { motion, useScroll, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import React, { useState, useLayoutEffect } from "react";
