@@ -13,6 +13,15 @@ import { useFluid } from "./useFluid";
 const FluidEffect: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
+  // Определяем характеристики устройства
+  const isTouchDevice = React.useMemo(
+    () => window.matchMedia('(pointer: coarse)').matches,
+    []
+  );
+  // Для размеров и производительности всё ещё ориентируемся на ширину экрана
+  const isNarrowViewport = React.useMemo(() => window.innerWidth < 768, []);
+  // "Мобильное" в смысле лимитов производительности
+  const isMobile = isTouchDevice || isNarrowViewport;
   const { setFluidInstance } = useFluid();
   const { theme } = useTheme();
 
@@ -22,10 +31,7 @@ const FluidEffect: React.FC = () => {
     // Инициализация симуляции
     simulationRef.current = new WebGLFluidEnhanced(containerRef.current);
 
-    // Определяем, является ли устройство мобильным
-    const isMobile =
-      window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // isMobile уже определён выше
 
     // Определяем, используется ли светлая тема
     const isLightTheme = theme === "light";
@@ -86,7 +92,7 @@ const FluidEffect: React.FC = () => {
       colorUpdateSpeed: isLightTheme ? 8 : 7, // Десктоп: 10, Мобильные: 12
 
       /** Включить взаимодействие при наведении курсора (true/false) */
-      hover: true, // Десктоп: true, Мобильные: true
+      hover: !isTouchDevice, // Для устройств с мышью оставляем hover даже при узком экране
 
       // ЭФФЕКТ СВЕЧЕНИЯ (BLOOM)
 
@@ -131,11 +137,6 @@ const FluidEffect: React.FC = () => {
     // Запуск симуляции
     simulationRef.current.start();
 
-    // Создаем начальные всплески только на десктопе
-    if (!isMobile) {
-      simulationRef.current.multipleSplats(0);
-    }
-
     // Сохраняем экземпляр в контексте для доступа из других компонентов
     setFluidInstance(simulationRef.current as unknown as FluidInstance);
 
@@ -150,10 +151,14 @@ const FluidEffect: React.FC = () => {
 
   // Обработка событий мыши и касаний на main элементе
   useEffect(() => {
+    const isScrollingRef = { current: false } as { current: boolean };
+
     const mainElement = document.querySelector("main");
     if (!mainElement) return;
 
     function handleEvent(event: Event) {
+      if (isScrollingRef.current) return; // Не создаём всплески пока идёт прокрутка
+
       if (containerRef.current) {
         const canvas = containerRef.current.querySelector("canvas");
         if (canvas) {
@@ -188,19 +193,23 @@ const FluidEffect: React.FC = () => {
       mainElement.addEventListener(eventType, handleEvent, { passive: true });
     });
 
-    return () => {
+    const cleanup = () => {
       eventTypes.forEach((eventType) => {
         mainElement.removeEventListener(eventType, handleEvent);
       });
     };
+
+    return cleanup;
   }, []);
 
   return (
     <div
-      className="fixed left-0 top-0 w-full h-full pointer-events-none"
+      className="fixed inset-0 w-full pointer-events-none"
       style={{
-        zIndex: -1, // Позади всего контента
-        backgroundColor: theme === "light" ? "white" : "#121212", // Белый фон для светлой темы, темный для темной
+        zIndex: -1,
+        backgroundColor: "transparent",
+        height: "100lvh", // фиксируем самую большую высоту визуального viewport
+        maxHeight: "100vh", // фолбэк для старых браузеров
       }}
     >
       <div ref={containerRef} className="w-full h-full" />

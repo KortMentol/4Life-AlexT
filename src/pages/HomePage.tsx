@@ -331,12 +331,14 @@ const HomePage: React.FC = () => {
       {/* Секция бизнес-возможностей */}
       <section
         id="business"
-        className="py-24 bg-gradient-to-b from-white/0 to-green-50/0 dark:from-gray-900/0 dark:to-gray-800/0 relative overflow-hidden"
+        className="relative py-24"
       >
-        {/* Декоративные элементы */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10">
-          <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-green-300 dark:bg-green-700 mix-blend-multiply filter blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-300 dark:bg-blue-700 mix-blend-multiply filter blur-3xl"></div>
+        {/* Белый фон (z-index: -20) */}
+        <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
+        
+        {/* Fluid эффект (z-index: -10) */}
+        <div className="absolute inset-0 -z-10">
+          {/* Здесь будет ваш fluid эффект */}
         </div>
 
         <div className="container max-w-7xl mx-auto px-6 relative z-10">

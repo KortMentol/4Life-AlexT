@@ -82,6 +82,13 @@ export default {
         "4xl": "2rem",
         "5xl": "3rem",
       },
+      zIndex: {
+        fluid: "-1",
+        parallax: "0",
+        content: "10",
+        header: "100",
+        overlay: "200",
+      },
       maxWidth: {
         "8xl": "90rem",
       },
