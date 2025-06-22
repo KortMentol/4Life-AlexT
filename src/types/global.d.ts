@@ -1,1 +1,0 @@
-// This file intentionally left empty as we've moved the Window interface to lenis.d.ts

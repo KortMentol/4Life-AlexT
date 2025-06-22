@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue } from "framer-motion";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 export interface ParallaxSectionProps {
@@ -34,6 +34,8 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
   // Определяем, является ли устройство мобильным
   useEffect(() => {
@@ -45,6 +47,21 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
+  
+  // Отслеживание движения курсора для эффекта псевдо-3D
+  useEffect(() => {
+    if (isMobile) return;
+    const handleMouseMove = (event: MouseEvent) => {
+      const { clientX, clientY } = event;
+      // Преобразуем координаты в диапазон от -1 до 1
+      const x = (clientX / window.innerWidth) * 2 - 1;
+      const y = (clientY / window.innerHeight) * 2 - 1;
+      mouseX.set(x);
+      mouseY.set(y);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isMobile, mouseX, mouseY]);
 
   // Выбираем подходящее изображение в зависимости от устройства
   const currentBackgroundImage =
@@ -53,6 +70,15 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       : !isMobile && backgroundImagePC
         ? backgroundImagePC
         : backgroundImage;
+        
+  // Создаем трансформируемые motion values для разных слоев
+  const contentX = useTransform(mouseX, [-1, 1], [15, -15]);
+  const contentY = useTransform(mouseY, [-1, 1], [10, -10]);
+
+  // Округляем значения, чтобы устранить субпиксельное дрожание текста
+  const contentXRounded = useTransform(contentX, (v) => Math.round(v));
+  const contentYRounded = useTransform(contentY, (v) => Math.round(v));
+  const bgX = useTransform(mouseX, [-1, 1], [-25, 25]);
 
   /**
    * Состояние, отвечающее за то, когда мы начинаем подгружать видео.
@@ -114,11 +140,24 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       style={{ clipPath: clipPath }}
     >
       {/* Контент секции с z-index выше фона */}
-      <div className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}>{children}</div>
+      <motion.div 
+        className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}
+        style={{ x: isMobile ? 0 : contentXRounded, y: isMobile ? 0 : contentYRounded }}
+        transition={{ type: "spring", stiffness: 150, damping: 20 }}
+      >
+        {children}
+      </motion.div>
 
       {/* Фиксированный фоновый контейнер */}
       <div className="fixed top-[-10vh] left-0 h-[120vh] w-full" style={{ zIndex: 1 }}>
-        <motion.div style={{ y }} className="relative w-full h-full">
+        <motion.div 
+          style={{ 
+            y: y, 
+            x: isMobile ? 0 : bgX,
+            scale: 1.1 // Увеличиваем фон, чтобы избежать пустых краев
+          }} 
+          className="relative w-full h-full"
+        >
           {backgroundVideo && shouldLoadVideo ? (
             <video
               autoPlay
