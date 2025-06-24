@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './components.css';
+
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -51,19 +51,4 @@ body {
   overflow-x: hidden;
 }
 
-/* Стили для предотвращения моргания при загрузке */
-.no-flicker {
-  opacity: 0;
-}
 
-.animations-ready .no-flicker {
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Стили для предзагруженных карточек */
-.card-preload {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}

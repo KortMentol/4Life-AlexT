@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import usePreloadedAnimation from "../../hooks/usePreloadedAnimation";
 
 interface AnimatedFeatureProps {
   children: React.ReactNode;
@@ -8,24 +7,33 @@ interface AnimatedFeatureProps {
   index?: number;
 }
 
-// Компонент для элементов с функциями/преимуществами с предзагруженной анимацией
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  }),
+};
+
 const AnimatedFeature: React.FC<AnimatedFeatureProps> = ({
   children,
   className = "",
   index = 0,
 }) => {
-  const { preloadedVariants, preloadClass } = usePreloadedAnimation();
-
   return (
     <motion.div
-      className={`${className} ${preloadClass}`}
-      variants={preloadedVariants}
-      initial="visible"
-      whileHover={{ y: -5 }}
-      transition={{
-        duration: 0.3,
-        delay: index * 0.1,
-      }}
+      className={className}
+      custom={index}
+      variants={itemVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.5 }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
     >
       {children}
     </motion.div>
