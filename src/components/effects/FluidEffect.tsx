@@ -1,8 +1,8 @@
-import { useTheme } from "@/context/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import React, { useEffect, useRef } from "react";
 import WebGLFluidEnhanced from "webgl-fluid-enhanced";
-import { FluidInstance } from "./FluidContext.types";
-import { useFluid } from "./useFluid";
+import { FluidInstance } from "@/context/FluidContext.types";
+import { useFluid } from "@/hooks/useFluid";
 
 /**
  * Компонент FluidEffect - создает эффект жидкости на фоне сайта
@@ -15,8 +15,8 @@ const FluidEffect: React.FC = () => {
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
   // Определяем характеристики устройства
   const isTouchDevice = React.useMemo(
-    () => window.matchMedia('(pointer: coarse)').matches,
-    []
+    () => window.matchMedia("(pointer: coarse)").matches,
+    [],
   );
   // Для размеров и производительности всё ещё ориентируемся на ширину экрана
   const isNarrowViewport = React.useMemo(() => window.innerWidth < 768, []);
@@ -30,8 +30,6 @@ const FluidEffect: React.FC = () => {
 
     // Инициализация симуляции
     simulationRef.current = new WebGLFluidEnhanced(containerRef.current);
-
-    // isMobile уже определён выше
 
     // Определяем, используется ли светлая тема
     const isLightTheme = theme === "light";
@@ -147,7 +145,7 @@ const FluidEffect: React.FC = () => {
         setFluidInstance(null);
       }
     };
-  }, [setFluidInstance, theme]);
+  }, [setFluidInstance, theme, isMobile, isTouchDevice]);
 
   // Обработка событий мыши и касаний на main элементе
   useEffect(() => {
@@ -170,14 +168,18 @@ const FluidEffect: React.FC = () => {
             const touch = event.touches[0];
             if (touch) {
               const mouseEvent = new MouseEvent(
-                event.type === "touchstart" ? "mousedown" : event.type === "touchend" ? "mouseup" : "mousemove",
+                event.type === "touchstart"
+                  ? "mousedown"
+                  : event.type === "touchend"
+                    ? "mouseup"
+                    : "mousemove",
                 {
                   clientX: touch.clientX,
                   clientY: touch.clientY,
                   bubbles: true,
                   cancelable: true,
                   view: window,
-                }
+                },
               );
               canvas.dispatchEvent(mouseEvent);
             }
@@ -186,7 +188,14 @@ const FluidEffect: React.FC = () => {
       }
     }
 
-    const eventTypes = ["mousemove", "mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
+    const eventTypes = [
+      "mousemove",
+      "mousedown",
+      "mouseup",
+      "touchstart",
+      "touchmove",
+      "touchend",
+    ];
 
     eventTypes.forEach((eventType) => {
       // Все события делаем passive: true, чтобы не блокировать скроллинг

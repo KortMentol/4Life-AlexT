@@ -57,5 +57,18 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
-  ignorePatterns: ["node_modules/", "dist/", "build/"],
+  ignorePatterns: [
+    "node_modules/",
+    "dist/",
+    "build/",
+    "coverage/",
+    "*.config.js",
+    "*.config.cjs",
+    "*.config.mjs",
+    "*.config.ts",
+    "postcss.config.js",
+    "tailwind.config.js",
+    "vite.config.ts",
+    "**/*.d.ts"
+  ],
 };

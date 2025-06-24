@@ -1,5 +1,5 @@
 import React from "react";
-import { useTheme } from "../../context/useTheme";
+import { useTheme } from "../../hooks/useTheme";
 
 /**
  * Свойства компонента DynamicLogo

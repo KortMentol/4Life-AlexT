@@ -1,4 +1,4 @@
-import { useProductList } from "@/context/ProductListContext";
+import { useProductList } from "@/hooks/useProductList";
 import "./ProductListIcon.css";
 import { Dialog, Transition } from "@headlessui/react";
 import {
@@ -25,31 +25,46 @@ const messengerButtonVariants = {
     scale: 1,
     transition: { duration: 0.3, ease: "easeOut" },
   },
-  exit: { opacity: 0, y: 10, scale: 0.8, transition: { duration: 0.2, ease: "easeIn" } },
+  exit: {
+    opacity: 0,
+    y: 10,
+    scale: 0.8,
+    transition: { duration: 0.2, ease: "easeIn" },
+  },
 };
 
 const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
-  const { items, removeFromList, updateItemQuantity, getTotalItems, clearList } = useProductList();
+  const {
+    items,
+    removeFromList,
+    updateItemQuantity,
+    getTotalItems,
+    clearList,
+  } = useProductList();
 
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  
+
   // Следим за состоянием модального окна для корректного обновления цвета иконки
   useEffect(() => {
     // Этот эффект запускается при изменении isOpen
     // и гарантирует, что состояние иконки всегда соответствует состоянию модального окна
-    
+
     // Добавляем обработчик события Escape для закрытия модального окна
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === "Escape" && isOpen) {
         closeModal();
       }
     };
-    
+
     // Добавляем обработчик клика вне модального окна
     const handleClickOutside = (event: Event) => {
       // Если модальное окно открыто и клик был не по кнопке
-      if (isOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+      if (
+        isOpen &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
         // Проверяем, был ли клик по диалогу (не закрываем в этом случае)
         const dialogElement = document.querySelector('[role="dialog"]');
         if (dialogElement && !dialogElement.contains(event.target as Node)) {
@@ -58,22 +73,25 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
         }
       }
     };
-    
+
     if (isOpen) {
-      document.addEventListener('keydown', handleEscapeKey);
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener("keydown", handleEscapeKey);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isOpen]);
   const [showMessengerOptions, setShowMessengerOptions] = useState(false);
   const [clientId, setClientId] = useState<string>(
-    () => (typeof window !== "undefined" && localStorage.getItem("clientId4life")) || ""
+    () =>
+      (typeof window !== "undefined" &&
+        localStorage.getItem("clientId4life")) ||
+      "",
   );
 
   useEffect(() => {
@@ -87,7 +105,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
   const fatherName = "Александр";
 
   const openModal = () => setIsOpen(true);
-  
+
   // Обработчик для клика по оверлею (вне модального окна)
   const handleBackdropClick = (e: React.MouseEvent) => {
     // Проверяем, что клик был именно по оверлею, а не по содержимому модального окна
@@ -104,7 +122,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
 
   const generateMessage = () => {
     let message = `Здравствуйте, ${fatherName}! Хочу приобрести у вас:\n\n`;
-    items.forEach((item: typeof items[number]) => {
+    items.forEach((item: (typeof items)[number]) => {
       message += `- ${item.name} (${item.quantity} шт.)\n`;
     });
     if (clientId) {
@@ -130,7 +148,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     <>
       <motion.button
         ref={buttonRef}
-        className={`product-list-icon relative p-2 rounded-full ${isOpen ? 'text-blue-600 dark:text-blue-400 open' : 'text-gray-700 dark:text-gray-300 closed'} hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${className}`}
+        className={`product-list-icon relative p-2 rounded-full ${isOpen ? "text-blue-600 dark:text-blue-400 open" : "text-gray-700 dark:text-gray-300 closed"} hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${className}`}
         onClick={openModal}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -154,11 +172,15 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
 
       {/* Modal */}
       <Transition show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => {
-          // Принудительно устанавливаем isOpen в false при любом закрытии диалога
-          setIsOpen(false);
-          setShowMessengerOptions(false);
-        }}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => {
+            // Принудительно устанавливаем isOpen в false при любом закрытии диалога
+            setIsOpen(false);
+            setShowMessengerOptions(false);
+          }}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -171,7 +193,19 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
             <div className="fixed inset-0 bg-black/70" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto" onClick={handleBackdropClick}>
+          <div
+            className="fixed inset-0 overflow-y-auto"
+            onClick={handleBackdropClick}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleBackdropClick(e as unknown as React.MouseEvent);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Закрыть модальное окно"
+          >
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
                 as={Fragment}
@@ -196,11 +230,13 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                   </Dialog.Title>
 
                   {items.length === 0 ? (
-                    <p className="text-gray-400 text-center py-10">Ваш список пуст. Добавьте продукты!</p>
+                    <p className="text-gray-400 text-center py-10">
+                      Ваш список пуст. Добавьте продукты!
+                    </p>
                   ) : (
                     <>
                       <ul className="divide-y divide-gray-700 max-h-96 overflow-y-auto pr-2">
-                        {items.map((item: typeof items[number]) => (
+                        {items.map((item: (typeof items)[number]) => (
                           <motion.li
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -208,15 +244,36 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                             exit={{ opacity: 0, x: -50 }}
                             className="py-4 flex items-center space-x-4"
                           >
-                            <img src={item.image} alt={item.name} className="w-16 h-16 object-contain rounded-md" />
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-16 h-16 object-contain rounded-md"
+                            />
                             <div className="flex-grow">
-                              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
-                              <p className="text-gray-400 text-sm line-clamp-2">{item.shortDescription}</p>
+                              <h4 className="text-lg font-semibold text-white">
+                                {item.name}
+                              </h4>
+                              <p className="text-gray-400 text-sm line-clamp-2">
+                                {item.shortDescription}
+                              </p>
                             </div>
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                onClick={() =>
+                                  updateItemQuantity(item.id, item.quantity - 1)
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    updateItemQuantity(
+                                      item.id,
+                                      item.quantity - 1,
+                                    );
+                                  }
+                                }}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+                                tabIndex={0}
+                                aria-label="Уменьшить количество"
                               >
                                 <MinusIcon className="h-4 w-4" />
                               </button>
@@ -224,15 +281,35 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                onClick={() =>
+                                  updateItemQuantity(item.id, item.quantity + 1)
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    updateItemQuantity(
+                                      item.id,
+                                      item.quantity + 1,
+                                    );
+                                  }
+                                }}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+                                tabIndex={0}
+                                aria-label="Увеличить количество"
                               >
                                 <PlusIcon className="h-4 w-4" />
                               </button>
                             </div>
                             <button
                               onClick={() => removeFromList(item.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  removeFromList(item.id);
+                                }
+                              }}
                               className="p-1 rounded-full text-red-400 hover:text-red-600 transition-colors duration-200"
+                              tabIndex={0}
                               aria-label="Удалить из списка"
                             >
                               <TrashIcon className="h-6 w-6" />
@@ -263,7 +340,9 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                           ) : clientId.trim() === "" ? (
                             <div className="flex flex-col space-y-4 w-full">
                               <label className="text-sm text-gray-300 flex flex-col items-start w-full">
-                                <span className="mb-1">Введите ваш ID клиента 4Life (если есть):</span>
+                                <span className="mb-1">
+                                  Введите ваш ID клиента 4Life (если есть):
+                                </span>
                                 <input
                                   type="text"
                                   value={clientId}
@@ -273,7 +352,10 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 />
                               </label>
                               <motion.button
-                                onClick={() => clientId.trim() && setShowMessengerOptions(true)}
+                                onClick={() =>
+                                  clientId.trim() &&
+                                  setShowMessengerOptions(true)
+                                }
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
                                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all duration-300 w-full"

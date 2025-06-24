@@ -6,6 +6,7 @@ import Header from "./Header";
 import ScrollToTopButton from "../ui/ScrollToTopButton";
 import SVGFilters from "./SVGFilters";
 import { updateScroll } from "@/lib/lenis";
+import { FluidProvider } from "@/context/FluidProvider";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -31,7 +32,9 @@ const Layout: React.FC = () => {
 
   return (
     <>
-      <FluidEffect />
+      <FluidProvider>
+        <FluidEffect />
+      </FluidProvider>
       <div className="flex flex-col min-h-screen">
         <Header />
         <main id="main-content" className="flex-grow">

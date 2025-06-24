@@ -1,4 +1,4 @@
-import { useProductList } from "@/context/ProductListContext";
+import { useProductList } from "@/hooks/useProductList";
 import { Product } from "@/types/Product";
 import { motion } from "framer-motion";
 import { ArrowRight, Eye, ShoppingCart } from "lucide-react";
@@ -11,7 +11,11 @@ export interface ProductCardProps {
   onQuickView: (product: Product) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, delay = 0, onQuickView }) => {
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  delay = 0,
+  onQuickView,
+}) => {
   const { image, name, shortDescription, link } = product;
   const { addToList } = useProductList();
 
@@ -70,7 +74,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, delay = 0, onQuickVi
           {link ? <Link to={link}>{name}</Link> : name}
         </h3>
 
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">{shortDescription}</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+          {shortDescription}
+        </p>
 
         <div className="mt-auto flex flex-col gap-3">
           <motion.button

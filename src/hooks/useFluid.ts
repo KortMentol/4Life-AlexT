@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { FluidContext } from "./FluidContext.helpers";
+import { FluidContext } from "@/context/FluidContext.helpers";
 
 /**
  * Хук для доступа к FluidContext

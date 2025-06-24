@@ -1,19 +1,26 @@
 import { lenis } from "@/lib/lenis";
-import DynamicLogo from "@/shared/ui/DynamicLogo";
-import HamburgerButton from "@/shared/ui/HamburgerButton";
-import { MobileMenu } from "@/widgets";
-import { motion, useScroll, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
+import MobileMenu from "./MobileMenu";
+import {
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+} from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import React, { useState, useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import DynamicLogo from "../ui/DynamicLogo";
+import HamburgerButton from "../ui/HamburgerButton";
 import ProductListIcon from "../ui/ProductListIcon";
-import TextShineEffect from "./TextShineEffect";
+import TextShineEffect from "../effects/TextShineEffect";
 
-import { mainNav, siteConfig } from "../../config/site";
-import { useTheme } from "../../context/useTheme";
+import { useTheme } from "../../hooks/useTheme";
+import { mainNav, siteConfig } from "../../site-config/site";
 
 const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   // Scroll-linked header movement: измеряем фактическую высоту, чтобы скрывать на 100 %
@@ -36,6 +43,9 @@ const Header: React.FC = () => {
   useMotionValueEvent(scrollY, "change", (latest) => {
     const diff = latest - prevScrollY.current;
 
+    // Устанавливаем состояние скролла
+    setScrolled(latest > 50);
+
     // На скролле вниз (diff > 0) скрываем, вверх (diff < 0) — показываем
     let newOffset = headerOffset.get() - diff;
 
@@ -52,12 +62,12 @@ const Header: React.FC = () => {
   const handleLogoClick = () => {
     // Проверяем, мобильное ли устройство
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
+
     if (location.pathname !== "/") {
       lenis.stop();
       lenis.velocity = 0;
       navigate("/");
-      
+
       if (isMobile) {
         // На мобильных используем нативный скролл
         window.scrollTo(0, 0);
@@ -75,7 +85,7 @@ const Header: React.FC = () => {
         // На мобильных используем нативный скролл
         window.scrollTo({
           top: 0,
-          behavior: 'auto' // Мгновенный скролл
+          behavior: "auto", // Мгновенный скролл
         });
       } else {
         // На десктопе используем Lenis
@@ -110,7 +120,11 @@ const Header: React.FC = () => {
             {/* Left Section: Hamburger on Mobile, Logo + Name on Desktop */}
             <div className="flex items-center">
               <div className="md:hidden relative z-[100] no-highlight">
-                                <HamburgerButton isOpen={mobileMenuOpen} toggle={handleHamburgerClick} />
+                <HamburgerButton
+                  isOpen={mobileMenuOpen}
+                  toggle={handleHamburgerClick}
+                  scrolled={scrolled}
+                />
               </div>
               <button
                 onClick={handleLogoClick}
@@ -125,7 +139,9 @@ const Header: React.FC = () => {
                     text={siteConfig.distributor.name}
                     className="font-bold text-base leading-tight text-gray-800 dark:text-gray-100"
                   />
-                  <div className={`text-sm font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}>
+                  <div
+                    className={`text-sm font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}
+                  >
                     Builder Elite
                   </div>
                 </div>
@@ -139,20 +155,23 @@ const Header: React.FC = () => {
                 <button
                   onClick={() => {
                     // Проверяем, мобильное ли устройство
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(
+                      navigator.userAgent,
+                    );
+
                     if (location.pathname === "/") {
                       if (isMobile) {
                         // На мобильных используем нативный скролл для мгновенного отклика
                         window.scrollTo({
                           top: 0,
-                          behavior: 'auto' // Используем 'auto' вместо 'smooth' для мгновенного скролла
+                          behavior: "auto", // Используем 'auto' вместо 'smooth' для мгновенного скролла
                         });
                       } else {
                         // На десктопе используем Lenis
                         lenis.scrollTo(0, {
                           duration: 1.2,
-                          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                          easing: (t) =>
+                            Math.min(1, 1.001 - Math.pow(2, -10 * t)),
                         });
                       }
                     } else {
@@ -168,7 +187,9 @@ const Header: React.FC = () => {
                       text={siteConfig.distributor.name}
                       className="font-bold text-sm leading-tight text-gray-900 dark:text-white"
                     />
-                    <div className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}>
+                    <div
+                      className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}
+                    >
                       Builder Elite
                     </div>
                   </div>
@@ -176,29 +197,38 @@ const Header: React.FC = () => {
               </div>
 
               {/* Navigation for Desktop */}
-              <nav role="navigation" className="hidden md:flex items-center space-x-1 h-full">
+              <nav
+                role="navigation"
+                className="hidden md:flex items-center space-x-1 h-full"
+              >
                 {mainNav.map((item) => (
-                  <div key={item.href} className="relative flex items-center h-full">
+                  <div
+                    key={item.href}
+                    className="relative flex items-center h-full"
+                  >
                     <NavLink
                       to={item.href}
                       onClick={(e) => {
                         if (location.pathname === item.href) {
                           e.preventDefault();
-                          
+
                           // Проверяем, мобильное ли устройство
-                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                          
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(
+                            navigator.userAgent,
+                          );
+
                           if (isMobile) {
                             // На мобильных используем нативный скролл
                             window.scrollTo({
                               top: 0,
-                              behavior: 'auto' // Мгновенный скролл
+                              behavior: "auto", // Мгновенный скролл
                             });
                           } else {
                             // На десктопе используем Lenis
                             lenis.scrollTo(0, {
                               duration: 1.2,
-                              easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                              easing: (t) =>
+                                Math.min(1, 1.001 - Math.pow(2, -10 * t)),
                             });
                           }
                         }
@@ -255,7 +285,10 @@ const Header: React.FC = () => {
         </div>
       </motion.header>
 
-      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
     </>
   );
 };

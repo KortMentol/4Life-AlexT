@@ -4,7 +4,8 @@ export const productsData: Product[] = [
   {
     id: "tf-plus",
     name: "4Life Transfer Factor Plus® Tri-Factor® Formula",
-    image: "https://raw.githubusercontent.com/4life-official-assets/products/master/tf-plus.webp", // Замените на локальный путь, когда добавите изображения
+    image:
+      "https://raw.githubusercontent.com/4life-official-assets/products/master/tf-plus.webp", // Замените на локальный путь, когда добавите изображения
     shortDescription: "Мощная поддержка иммунной системы, активация NK-клеток.",
     longDescription:
       "Инновационная формула, сочетающая Трансфер Факторы с запатентованной смесью Cordyvant®, разработанной для максимальной поддержки иммунной системы. Активизирует естественные клетки-киллеры (NK-клетки) до 437 %, обеспечивая комплексную защиту организма.",
@@ -20,40 +21,62 @@ export const productsData: Product[] = [
       "Антиоксидантная защита",
       "Повышение жизненного тонуса",
     ],
-    scientificNotes: "Plus™ Tri-Factor® ‑ один из самых мощных иммунных модуляторов в линейке 4Life.",
+    scientificNotes:
+      "Plus™ Tri-Factor® ‑ один из самых мощных иммунных модуляторов в линейке 4Life.",
     lpValue: 50,
     categories: ["Иммунитет", "Общее здоровье"],
   },
   {
     id: "tf-trifactor",
     name: "4Life Transfer Factor® Tri-Factor® Formula",
-    image: "https://raw.githubusercontent.com/4life-official-assets/products/master/tf-trifactor.webp",
+    image:
+      "https://raw.githubusercontent.com/4life-official-assets/products/master/tf-trifactor.webp",
     shortDescription: "Базовая поддержка и обучение иммунной системы.",
     longDescription:
       "Сочетание Трансфер Факторов из коровьего молозива и яичного желтка обеспечивает фундаментальное обучение и балансировку иммунной системы. Помогает распознавать, реагировать и запоминать угрозы.",
-    keyIngredients: ["4Life Transfer Factor™ из молозива", "4Life Transfer Factor™ из яичного желтка"],
-    benefits: ["Обучение и балансировка иммунитета", "Поддержка общего здоровья", "Укрепление клеточного иммунитета"],
-    scientificNotes: "Ключевой продукт 4Life, на основе которого построена вся линейка.",
+    keyIngredients: [
+      "4Life Transfer Factor™ из молозива",
+      "4Life Transfer Factor™ из яичного желтка",
+    ],
+    benefits: [
+      "Обучение и балансировка иммунитета",
+      "Поддержка общего здоровья",
+      "Укрепление клеточного иммунитета",
+    ],
+    scientificNotes:
+      "Ключевой продукт 4Life, на основе которого построена вся линейка.",
     lpValue: 30,
     categories: ["Иммунитет", "Общее здоровье"],
   },
   {
     id: "riovida",
     name: "4Life Transfer Factor® RioVida® Tri-Factor® Formula",
-    image: "https://raw.githubusercontent.com/4life-official-assets/products/master/riovida.webp",
+    image:
+      "https://raw.githubusercontent.com/4life-official-assets/products/master/riovida.webp",
     shortDescription: "Жидкий антиоксидантный комплекс с Трансфер Факторами.",
     longDescription:
       "Первый и единственный жидкий продукт с Трансфер Факторами. Сочетает мощные антиоксиданты ягод асаи, граната и черники с иммунной поддержкой Tri-Factor® Formula.",
-    keyIngredients: ["4Life Transfer Factor™ Tri-Factor™ Formula", "Сок асаи", "Сок граната", "Черника"],
-    benefits: ["Мощная антиоксидантная защита", "Иммунная поддержка", "Повышение энергии"],
-    scientificNotes: "RioVida® сочетает антиоксидантную защиту и иммуномодуляцию в удобной форме.",
+    keyIngredients: [
+      "4Life Transfer Factor™ Tri-Factor™ Formula",
+      "Сок асаи",
+      "Сок граната",
+      "Черника",
+    ],
+    benefits: [
+      "Мощная антиоксидантная защита",
+      "Иммунная поддержка",
+      "Повышение энергии",
+    ],
+    scientificNotes:
+      "RioVida® сочетает антиоксидантную защиту и иммуномодуляцию в удобной форме.",
     lpValue: 40,
     categories: ["Антиоксиданты", "Иммунитет"],
   },
   {
     id: "protf",
     name: "PRO-TF®",
-    image: "https://raw.githubusercontent.com/4life-official-assets/products/master/pro-tf.webp",
+    image:
+      "https://raw.githubusercontent.com/4life-official-assets/products/master/pro-tf.webp",
     shortDescription: "Высококачественный протеин для мышц и метаболизма.",
     longDescription:
       "Запатентованная смесь гидролизованных протеинов и 4Life Transfer Factor™ для поддержки роста мышц, сжигания жира и восстановления.",
@@ -62,15 +85,21 @@ export const productsData: Product[] = [
       "Гидролизат яичного белка",
       "4Life Transfer Factor™ Tri-Factor™ Formula",
     ],
-    benefits: ["Поддержка мышечной массы", "Ускорение метаболизма", "Быстрое восстановление"],
-    scientificNotes: "PRO-TF® объединяет спортивное питание и иммунную поддержку.",
+    benefits: [
+      "Поддержка мышечной массы",
+      "Ускорение метаболизма",
+      "Быстрое восстановление",
+    ],
+    scientificNotes:
+      "PRO-TF® объединяет спортивное питание и иммунную поддержку.",
     lpValue: 45,
     categories: ["Спорт", "Метаболизм", "Управление весом"],
   },
   {
     id: "collagen",
     name: "4Life Transfer Factor® Collagen",
-    image: "https://raw.githubusercontent.com/4life-official-assets/products/master/collagen.webp",
+    image:
+      "https://raw.githubusercontent.com/4life-official-assets/products/master/collagen.webp",
     shortDescription: "Комплекс красоты для кожи, суставов и иммунитета.",
     longDescription:
       "Гидролизованный морской коллаген, обогащённый Трансфер Факторами, витаминами и антиоксидантами для комплексной поддержки красоты и здоровья.",
@@ -80,21 +109,36 @@ export const productsData: Product[] = [
       "Витамин C",
       "Биотин",
     ],
-    benefits: ["Упругость и увлажнение кожи", "Крепкие волосы и ногти", "Поддержка суставов"],
-    scientificNotes: "Коллаген 4Life сочетает нутрикосметику и иммуномодуляцию.",
+    benefits: [
+      "Упругость и увлажнение кожи",
+      "Крепкие волосы и ногти",
+      "Поддержка суставов",
+    ],
+    scientificNotes:
+      "Коллаген 4Life сочетает нутрикосметику и иммуномодуляцию.",
     lpValue: 35,
     categories: ["Красота", "Суставы", "Иммунитет"],
   },
   {
     id: "preobiotics",
     name: "Pre/o Biotics™",
-    image: "https://raw.githubusercontent.com/4life-official-assets/products/master/preobiotics.webp",
+    image:
+      "https://raw.githubusercontent.com/4life-official-assets/products/master/preobiotics.webp",
     shortDescription: "Смесь про- и пребиотиков для здоровой микрофлоры.",
     longDescription:
       "Пять штаммов пробиотиков и три вида пребиотиков в микрокапсулах доставляются прямо в толстый кишечник для максимальной эффективности.",
-    keyIngredients: ["5 штаммов пробиотиков", "3 вида пребиотиков", "Клюквенный экстракт"],
-    benefits: ["Здоровье пищеварительной системы", "Баланс микрофлоры", "Повышение иммунитета (через кишечник)"],
-    scientificNotes: "Уникальная технология микрокапсулирования защищает пробиотики от кислой среды желудка.",
+    keyIngredients: [
+      "5 штаммов пробиотиков",
+      "3 вида пребиотиков",
+      "Клюквенный экстракт",
+    ],
+    benefits: [
+      "Здоровье пищеварительной системы",
+      "Баланс микрофлоры",
+      "Повышение иммунитета (через кишечник)",
+    ],
+    scientificNotes:
+      "Уникальная технология микрокапсулирования защищает пробиотики от кислой среды желудка.",
     lpValue: 30,
     categories: ["Пищеварение", "Иммунитет"],
   },
@@ -107,7 +151,8 @@ export const productsData: Product[] = [
       "Базовая поддержка иммунной системы на основе молозива и ультрафильтрованного концентрата трансфер факторов.",
     keyIngredients: ["УльтраФактор XF (молозиво)"],
     benefits: ["Поддержка иммунитета", "Обучение иммунных клеток"],
-    scientificNotes: "Трансфер факторы устойчивы к пищеварительным ферментам и сохраняют активность.",
+    scientificNotes:
+      "Трансфер факторы устойчивы к пищеварительным ферментам и сохраняют активность.",
     categories: ["Иммунитет"],
   },
   {
@@ -119,7 +164,8 @@ export const productsData: Product[] = [
       "Удобный порционный гель с ягодными антиоксидантами и запатентованной формулой трансфер факторов для поддержки иммунитета и энергии.",
     keyIngredients: ["Ацерола", "Чёрная смородина", "4Life Transfer Factor™"],
     benefits: ["Антиоксидантная защита", "Повышение энергии"],
-    scientificNotes: "Запатентованная жидкая формула обеспечивает быструю биодоступность.",
+    scientificNotes:
+      "Запатентованная жидкая формула обеспечивает быструю биодоступность.",
     categories: ["Иммунитет", "Антиоксиданты"],
   },
   {
@@ -139,7 +185,8 @@ export const productsData: Product[] = [
     name: "4Life Transfer Factor Renuvo®",
     image: "https://media.4life.com/images/products/renuvo.png",
     shortDescription: "Антистрессовая формула и восстановление организма.",
-    longDescription: "Содержит адаптогены и трансфер факторы для снижения воздействия стресса и защиты клеток.",
+    longDescription:
+      "Содержит адаптогены и трансфер факторы для снижения воздействия стресса и защиты клеток.",
     keyIngredients: ["Ашваганда", "4Life Transfer Factor™", "Ресвератрол"],
     benefits: ["Уменьшение стресса", "Клеточная защита"],
     scientificNotes: "Запатентованная формула (US 9,566,305).",
@@ -150,7 +197,8 @@ export const productsData: Product[] = [
     name: "4Life Transfer Factor GluCoach®",
     image: "https://media.4life.com/images/products/glucoach.png",
     shortDescription: "Поддержка здорового обмена глюкозы.",
-    longDescription: "Комбинация фитонутриентов, хрома и трансфер факторов для поддержки уровней сахара в крови.",
+    longDescription:
+      "Комбинация фитонутриентов, хрома и трансфер факторов для поддержки уровней сахара в крови.",
     keyIngredients: ["Экстракт корицы", "Хром", "4Life Transfer Factor™"],
     benefits: ["Контроль уровня сахара", "Нормализация обмена веществ"],
     scientificNotes: "Специальная формула для метаболического баланса.",
@@ -161,7 +209,8 @@ export const productsData: Product[] = [
     name: "4Life Transfer Factor Cardio®",
     image: "https://media.4life.com/images/products/cardio.png",
     shortDescription: "Поддержка сердечно-сосудистой системы.",
-    longDescription: "Трансфер факторы в сочетании с коэнзимом Q10 и омега-3 кислотами для здоровья сердца.",
+    longDescription:
+      "Трансфер факторы в сочетании с коэнзимом Q10 и омега-3 кислотами для здоровья сердца.",
     keyIngredients: ["4Life Transfer Factor™", "Коэнзим Q10", "Омега-3"],
     benefits: ["Здоровье сердца", "Сосудистая защита"],
     scientificNotes: "Запатентованная формула (US 7,815,943).",
@@ -172,7 +221,8 @@ export const productsData: Product[] = [
     name: "4Life Transfer Factor BelleVie™",
     image: "https://media.4life.com/images/products/bellevie.png",
     shortDescription: "Комплекс для мозга и концентрации.",
-    longDescription: "Синергия бакопы, гинкго билоба и трансфер факторов для улучшения памяти и когнитивных функций.",
+    longDescription:
+      "Синергия бакопы, гинкго билоба и трансфер факторов для улучшения памяти и когнитивных функций.",
     keyIngredients: ["Бакопа", "Гинкго билоба", "4Life Transfer Factor™"],
     benefits: ["Память", "Фокус", "Когнитивная поддержка"],
     scientificNotes: "Травяной ноотроп в сочетании с трансфер факторами.",
@@ -183,7 +233,8 @@ export const productsData: Product[] = [
     name: "RiteStart® для мужчин",
     image: "https://media.4life.com/images/products/ritestart-men.png",
     shortDescription: "Мультикомплекс для мужского здоровья и иммунитета.",
-    longDescription: "Витамины, минералы и трансфер факторы для энергии, иммунитета и поддержки простаты.",
+    longDescription:
+      "Витамины, минералы и трансфер факторы для энергии, иммунитета и поддержки простаты.",
     keyIngredients: ["Витамины", "Минералы", "4Life Transfer Factor™"],
     benefits: ["Энергия", "Иммунитет", "Поддержка простаты"],
     scientificNotes: "Полный мультикомплекс для мужчин.",
@@ -194,7 +245,8 @@ export const productsData: Product[] = [
     name: "RiteStart® для женщин",
     image: "https://media.4life.com/images/products/ritestart-women.png",
     shortDescription: "Мультикомплекс для женского здоровья и иммунитета.",
-    longDescription: "Содержит железо, кальций и трансфер факторы для энергии, иммунитета и гормонального баланса.",
+    longDescription:
+      "Содержит железо, кальций и трансфер факторы для энергии, иммунитета и гормонального баланса.",
     keyIngredients: ["Железо", "Кальций", "4Life Transfer Factor™"],
     benefits: ["Энергия", "Иммунитет", "Гормональный баланс"],
     scientificNotes: "Включает нутриенты для костей и сердца.",
@@ -205,7 +257,8 @@ export const productsData: Product[] = [
     name: "4LifeTransform® для мужчин",
     image: "https://media.4life.com/images/products/transform-men.png",
     shortDescription: "Поддержка гормонального и физического состояния мужчин.",
-    longDescription: "Формула с цинком, магнием и трансфер факторами для тестостерона и выносливости.",
+    longDescription:
+      "Формула с цинком, магнием и трансфер факторами для тестостерона и выносливости.",
     keyIngredients: ["Цинк", "Магний", "4Life Transfer Factor™"],
     benefits: ["Тестостерон", "Выносливость"],
     scientificNotes: "Поддержка мужского метаболизма.",
@@ -216,7 +269,8 @@ export const productsData: Product[] = [
     name: "4LifeTransform® для женщин",
     image: "https://media.4life.com/images/products/transform-women.png",
     shortDescription: "Энергия и гормональный баланс для женщин.",
-    longDescription: "Фитоэстрогены, витамины и трансфер факторы для женского энергии и благополучия.",
+    longDescription:
+      "Фитоэстрогены, витамины и трансфер факторы для женского энергии и благополучия.",
     keyIngredients: ["Соя", "Фолиевая кислота", "4Life Transfer Factor™"],
     benefits: ["Гормональный баланс", "Энергия"],
     scientificNotes: "Формула с фитоэстрогенами.",
@@ -227,8 +281,14 @@ export const productsData: Product[] = [
     name: "Energy Go Stix® Ягоды",
     image: "https://media.4life.com/images/products/go-stix.png",
     shortDescription: "Энергетик с аминокислотами и трансфер факторами.",
-    longDescription: "Пакетики с гуараной, таурином, витаминами и трансфер факторами для энергии и фокуса без сахара.",
-    keyIngredients: ["Гуарана", "Таурин", "Витамины", "4Life Transfer Factor™"],
+    longDescription:
+      "Пакетики с гуараной, таурином, витаминами и трансфер факторами для энергии и фокуса без сахара.",
+    keyIngredients: [
+      "Гуарана",
+      "Таурин",
+      "Витамины",
+      "4Life Transfer Factor™",
+    ],
     benefits: ["Энергия", "Фокус", "Иммунная поддержка"],
     scientificNotes: "Формула без добавленного сахара.",
     categories: ["Энергия", "Спорт"],
@@ -238,7 +298,8 @@ export const productsData: Product[] = [
     name: "4Life Transfer Factor Chewable™ (Children)",
     image: "https://media.4life.com/images/products/chewable.png",
     shortDescription: "Иммунная поддержка и витамины для детей.",
-    longDescription: "Жевательные таблетки с витаминами A, C, D, E и трансфер факторами для роста и развития детей.",
+    longDescription:
+      "Жевательные таблетки с витаминами A, C, D, E и трансфер факторами для роста и развития детей.",
     keyIngredients: ["Витамины A, C, D, E", "4Life Transfer Factor™"],
     benefits: ["Иммунитет", "Рост", "Развитие"],
     scientificNotes: "Специальная формула для детей.",

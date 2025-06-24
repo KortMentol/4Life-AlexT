@@ -2,7 +2,9 @@ import Lenis from "@studio-freight/lenis";
 import { LenisOptions, Lenis as LenisType } from "./lenis.types";
 
 // Определяем, является ли устройство мобильным
-const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const isMobile =
+  typeof navigator !== "undefined" &&
+  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 // Создаем экземпляр Lenis с оптимальными настройками для современного скроллинга
 const lenisInstance = new Lenis({
@@ -19,7 +21,6 @@ const lenisInstance = new Lenis({
   // Отключаем syncTouch, чтобы Lenis не блокировал нативные события и тулбар мог скрываться
   syncTouch: false,
   lerp: isMobile ? 0.05 : 0.1, // Уменьшаем линейную интерполяцию для мобильных (ближе к мгновенному)
-
 } as LenisOptions);
 
 // Добавляем свойство velocity, которое требуется в нашем типе Lenis
@@ -41,7 +42,8 @@ export const startLenisRaf = () => {
     // Для мобильных устройств можно ограничить частоту обновлений для экономии ресурсов
     if (isMobile) {
       // Обновляем не чаще 60 раз в секунду на мобильных
-      if (time - lastTime > 16) { // ~60fps
+      if (time - lastTime > 16) {
+        // ~60fps
         lenis.raf(time);
         lastTime = time;
       }
@@ -49,7 +51,7 @@ export const startLenisRaf = () => {
       // На десктопе обновляем каждый кадр
       lenis.raf(time);
     }
-    
+
     rafId = requestAnimationFrame(raf);
   };
 
@@ -85,18 +87,20 @@ export const scrollTo = (
   options = {},
 ) => {
   // Определяем, является ли устройство мобильным
-  const isMobileDevice = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
+  const isMobileDevice =
+    typeof navigator !== "undefined" &&
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   // На мобильных устройствах используем нативный скролл для мгновенного отклика
-  if (isMobileDevice && typeof target === 'number' && target === 0) {
+  if (isMobileDevice && typeof target === "number" && target === 0) {
     // Если скроллим в начало страницы на мобильном устройстве
     window.scrollTo({
       top: 0,
-      behavior: 'auto' // Используем 'auto' вместо 'smooth' для мгновенного скролла
+      behavior: "auto", // Используем 'auto' вместо 'smooth' для мгновенного скролла
     });
     return;
   }
-  
+
   // В остальных случаях используем Lenis
   lenis.scrollTo(target, {
     offset: 0,

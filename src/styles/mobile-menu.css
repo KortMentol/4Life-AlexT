@@ -1,0 +1,34 @@
+/* Mobile Menu Styles */
+
+/* Блокировка скролла при открытом меню */
+.menu-open {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Стили для мобильного меню */
+.mobile-menu__nav {
+  /* Дополнительные стили для навигации */
+}
+
+/* Стили для sci-fi ссылок */
+.sci-fi-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.sci-fi-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
+
+.sci-fi-link:hover::before {
+  left: 100%;
+}

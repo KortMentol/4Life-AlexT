@@ -13,7 +13,12 @@ const chipVariants = {
   visible: { opacity: 1, scale: 1 },
 };
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ categories, selected, toggleCategory, clearSelection }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({
+  categories,
+  selected,
+  toggleCategory,
+  clearSelection,
+}) => {
   return (
     <div className="sticky top-20 z-20 w-full py-4 backdrop-blur-md bg-white/30 dark:bg-gray-800/30 rounded-xl shadow-inner flex flex-wrap gap-2 justify-center">
       {categories.map((cat) => {

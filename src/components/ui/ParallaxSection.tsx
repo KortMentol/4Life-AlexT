@@ -47,7 +47,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
-  
+
   // Отслеживание движения курсора для эффекта псевдо-3D
   useEffect(() => {
     if (isMobile) return;
@@ -59,8 +59,8 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       mouseX.set(x);
       mouseY.set(y);
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isMobile, mouseX, mouseY]);
 
   // Выбираем подходящее изображение в зависимости от устройства
@@ -70,7 +70,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       : !isMobile && backgroundImagePC
         ? backgroundImagePC
         : backgroundImage;
-        
+
   // Создаем трансформируемые motion values для разных слоев
   const contentX = useTransform(mouseX, [-1, 1], [15, -15]);
   const contentY = useTransform(mouseY, [-1, 1], [10, -10]);
@@ -87,7 +87,9 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   /** Загружаем фоновое изображение заранее, чтобы избежать эффекта "пролистывания" сверху вниз. */
-  const [imageLoaded, setImageLoaded] = useState(skipPreload || !currentBackgroundImage);
+  const [imageLoaded, setImageLoaded] = useState(
+    skipPreload || !currentBackgroundImage,
+  );
 
   useEffect(() => {
     // Если изображение уже предварительно загружено или его нет, пропускаем загрузку
@@ -105,7 +107,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     const startLoading = () => {
       // Переносим в requestIdleCallback, если доступен, чтобы не соревноваться с основным потоком.
       if ("requestIdleCallback" in window) {
-        (window as any).requestIdleCallback(() => setShouldLoadVideo(true));
+        (
+          window as unknown as {
+            requestIdleCallback: (callback: () => void) => void;
+          }
+        ).requestIdleCallback(() => setShouldLoadVideo(true));
       } else {
         // Fallback
         setTimeout(() => setShouldLoadVideo(true), 0);
@@ -131,7 +137,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   // Это обеспечит более плавное движение на мобильных устройствах
   // Применяем parallaxSpeed для регулировки интенсивности эффекта
   const intensity = parallaxSpeed * 10; // Преобразуем скорость в проценты
-  const y = useTransform(scrollYProgress, [0, 1], [`-${intensity}%`, `${intensity}%`]);
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [`-${intensity}%`, `${intensity}%`],
+  );
 
   return (
     <div
@@ -140,22 +150,28 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       style={{ clipPath: clipPath }}
     >
       {/* Контент секции с z-index выше фона */}
-      <motion.div 
+      <motion.div
         className={`relative z-10 w-full h-full p-8 md:p-12 lg:p-16 ${contentClasses} ${blendMode}`}
-        style={{ x: isMobile ? 0 : contentXRounded, y: isMobile ? 0 : contentYRounded }}
+        style={{
+          x: isMobile ? 0 : contentXRounded,
+          y: isMobile ? 0 : contentYRounded,
+        }}
         transition={{ type: "spring", stiffness: 150, damping: 20 }}
       >
         {children}
       </motion.div>
 
       {/* Фиксированный фоновый контейнер */}
-      <div className="fixed top-[-10vh] left-0 h-[120vh] w-full" style={{ zIndex: 1 }}>
-        <motion.div 
-          style={{ 
-            y: y, 
+      <div
+        className="fixed top-[-10vh] left-0 h-[120vh] w-full"
+        style={{ zIndex: 1 }}
+      >
+        <motion.div
+          style={{
+            y: y,
             x: isMobile ? 0 : bgX,
-            scale: 1.1 // Увеличиваем фон, чтобы избежать пустых краев
-          }} 
+            scale: 1.1, // Увеличиваем фон, чтобы избежать пустых краев
+          }}
           className="relative w-full h-full"
         >
           {backgroundVideo && shouldLoadVideo ? (

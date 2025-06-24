@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { siteConfig } from "../../config/site";
+import { siteConfig } from "../../site-config/site";
 import DynamicLogo from "../ui/DynamicLogo";
 
 const Footer: React.FC = () => {

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import InteractiveProductCard from './InteractiveProductCard';
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import InteractiveProductCard from "./InteractiveProductCard";
 
 interface ProductData {
   id: number;
@@ -15,7 +15,9 @@ interface KineticCarouselProps {
   products: ProductData[];
 }
 
-const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) => {
+const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
+  products,
+}) => {
   return (
     <div className="w-full">
       <Swiper
@@ -34,7 +36,10 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
         className="w-full"
       >
         {[...products, ...products].map((product, index) => (
-          <SwiperSlide key={`${product.id}-${index}`} className="flex justify-center">
+          <SwiperSlide
+            key={`${product.id}-${index}`}
+            className="flex justify-center"
+          >
             <div className="w-[80vw] max-w-sm">
               <InteractiveProductCard product={product} />
             </div>

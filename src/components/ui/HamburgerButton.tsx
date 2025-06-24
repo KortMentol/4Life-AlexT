@@ -30,7 +30,7 @@ const HamburgerButton: React.FC<HamburgerButtonProps> = ({
 
   return (
     <button
-      className={`flex flex-col justify-center items-center w-10 h-10 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+      className={`flex flex-col justify-center items-center w-10 h-10 rounded-full focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${
         scrolled
           ? "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/70"
           : "text-gray-300 hover:bg-gray-800/30"

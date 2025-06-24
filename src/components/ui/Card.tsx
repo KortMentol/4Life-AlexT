@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import InteractiveCard from "../interactive/InteractiveCard";
 
 interface CardProps {
   children: React.ReactNode;
@@ -24,7 +25,7 @@ const Card: React.FC<CardProps> = ({
   isInteractive = true,
 }) => {
   // Базовые классы
-  const baseClasses = "card-modern overflow-hidden relative";
+  const baseClasses = "card-modern overflow-hidden relative cursor-interactive";
 
   // Классы для вариантов
   const variantClasses = {
@@ -58,38 +59,49 @@ const Card: React.FC<CardProps> = ({
   // Рендер в зависимости от типа карточки
   if (to) {
     return (
-      <motion.div {...cardAnimation}>
-        <Link to={to} className={`${allClasses} block`} onClick={onClick}>
-          {children}
-        </Link>
-      </motion.div>
+      <InteractiveCard
+        glowEffect={hoverEffect === "glow"}
+        className={allClasses}
+      >
+        <motion.div {...cardAnimation}>
+          <Link to={to} className="block" onClick={onClick}>
+            {children}
+          </Link>
+        </motion.div>
+      </InteractiveCard>
     );
   }
 
   if (href) {
     return (
-      <motion.div {...cardAnimation}>
-        <a
-          href={href}
-          className={`${allClasses} block`}
-          onClick={onClick}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {children}
-        </a>
-      </motion.div>
+      <InteractiveCard
+        glowEffect={hoverEffect === "glow"}
+        className={allClasses}
+      >
+        <motion.div {...cardAnimation}>
+          <a
+            href={href}
+            className="block"
+            onClick={onClick}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {children}
+          </a>
+        </motion.div>
+      </InteractiveCard>
     );
   }
 
   return (
-    <motion.div
-      className={`${allClasses} ${onClick && isInteractive ? "cursor-pointer" : ""}`}
-      onClick={isInteractive ? onClick : undefined}
-      {...cardAnimation}
-    >
-      {children}
-    </motion.div>
+    <InteractiveCard glowEffect={hoverEffect === "glow"} className={allClasses}>
+      <motion.div
+        onClick={isInteractive ? onClick : undefined}
+        {...cardAnimation}
+      >
+        {children}
+      </motion.div>
+    </InteractiveCard>
   );
 };
 

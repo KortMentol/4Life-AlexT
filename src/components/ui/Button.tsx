@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import MagneticEffect from "../effects/MagneticEffect";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -31,7 +32,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   // Базовые классы
   const baseClasses =
-    "btn-modern inline-flex items-center justify-center gap-2 font-medium transition-all rounded-lg";
+    "btn-modern btn-cursor-effect cursor-interactive inline-flex items-center justify-center gap-2 font-medium transition-all rounded-lg";
 
   // Классы для вариантов
   const variantClasses = {
@@ -70,50 +71,56 @@ const Button: React.FC<ButtonProps> = ({
   // Рендер в зависимости от типа кнопки
   if (to) {
     return (
-      <motion.div
-        whileHover={{ scale: disabled ? 1 : 1.02 }}
-        whileTap={{ scale: disabled ? 1 : 0.98 }}
-      >
-        <Link
-          to={to}
-          className={allClasses}
-          onClick={disabled ? undefined : onClick}
+      <MagneticEffect strength={0.2}>
+        <motion.div
+          whileHover={{ scale: disabled ? 1 : 1.02 }}
+          whileTap={{ scale: disabled ? 1 : 0.98 }}
         >
-          {content}
-        </Link>
-      </motion.div>
+          <Link
+            to={to}
+            className={allClasses}
+            onClick={disabled ? undefined : onClick}
+          >
+            {content}
+          </Link>
+        </motion.div>
+      </MagneticEffect>
     );
   }
 
   if (href) {
     return (
-      <motion.div
-        whileHover={{ scale: disabled ? 1 : 1.02 }}
-        whileTap={{ scale: disabled ? 1 : 0.98 }}
-      >
-        <a
-          href={href}
-          className={allClasses}
-          onClick={disabled ? undefined : onClick}
-          target={isExternal ? "_blank" : undefined}
-          rel={isExternal ? "noopener noreferrer" : undefined}
+      <MagneticEffect strength={0.2}>
+        <motion.div
+          whileHover={{ scale: disabled ? 1 : 1.02 }}
+          whileTap={{ scale: disabled ? 1 : 0.98 }}
         >
-          {content}
-        </a>
-      </motion.div>
+          <a
+            href={href}
+            className={allClasses}
+            onClick={disabled ? undefined : onClick}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noopener noreferrer" : undefined}
+          >
+            {content}
+          </a>
+        </motion.div>
+      </MagneticEffect>
     );
   }
 
   return (
-    <motion.button
-      className={allClasses}
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
-    >
-      {content}
-    </motion.button>
+    <MagneticEffect strength={0.2}>
+      <motion.button
+        className={allClasses}
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
+        whileHover={{ scale: disabled ? 1 : 1.02 }}
+        whileTap={{ scale: disabled ? 1 : 0.98 }}
+      >
+        {content}
+      </motion.button>
+    </MagneticEffect>
   );
 };
 

@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import React, { useEffect, useRef } from "react";
-import { useTheme } from "../../context/useTheme";
+import { useTheme } from "../../hooks/useTheme";
 
 // Голографический эффект с градиентом
 const holographicShimmer = keyframes`

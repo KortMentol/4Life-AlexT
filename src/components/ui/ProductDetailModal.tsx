@@ -1,4 +1,4 @@
-import { useProductList } from "@/context/ProductListContext";
+import { useProductList } from "@/hooks/useProductList";
 import { Product } from "@/types/Product";
 import { Dialog, Transition } from "@headlessui/react";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
@@ -10,7 +10,11 @@ interface ProductDetailModalProps {
   onClose: () => void;
 }
 
-const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, isOpen, onClose }) => {
+const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
+  product,
+  isOpen,
+  onClose,
+}) => {
   const { addToList } = useProductList();
   const [quantity, setQuantity] = useState(1);
 
@@ -52,7 +56,10 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, isOpen
                   <Dialog.Title className="text-xl font-bold text-gray-800 dark:text-gray-100">
                     {product.name}
                   </Dialog.Title>
-                  <button onClick={onClose} className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-300">
+                  <button
+                    onClick={onClose}
+                    className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -60,21 +67,29 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, isOpen
                 {/* Image & Info */}
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="md:flex-shrink-0 md:w-1/2">
-                    <img src={product.image} alt={product.name} className="w-full h-auto rounded-lg object-cover" />
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-auto rounded-lg object-cover"
+                    />
                   </div>
                   <div className="flex-1">
                     <p className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-line">
                       {product.longDescription}
                     </p>
 
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Преимущества:</h4>
+                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                      Преимущества:
+                    </h4>
                     <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">
                       {product.benefits.map((b) => (
                         <li key={b}>{b}</li>
                       ))}
                     </ul>
 
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Ключевые ингредиенты:</h4>
+                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                      Ключевые ингредиенты:
+                    </h4>
                     <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">
                       {product.keyIngredients.map((k) => (
                         <li key={k}>{k}</li>
@@ -89,7 +104,9 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, isOpen
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="w-10 text-center font-medium">{quantity}</span>
+                      <span className="w-10 text-center font-medium">
+                        {quantity}
+                      </span>
                       <button
                         onClick={increment}
                         className="p-2 bg-gray-100 dark:bg-gray-800 rounded hover:bg-gray-200 dark:hover:bg-gray-700"

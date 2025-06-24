@@ -9,8 +9,9 @@ import {
 } from "react-router-dom";
 import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
-import { FluidProvider } from "./components/effects/FluidContext";
-import { ThemeProvider } from "./context/ThemeContext";
+import { CursorRenderer } from "./components/cursor/CursorRenderer";
+import { FluidProvider } from "./context/FluidProvider";
+import { ThemeProvider } from "./context/ThemeProvider";
 import { startLenisRaf } from "./lib/lenis";
 
 // Base styles (Tailwind directives)
@@ -21,6 +22,10 @@ import "./styles/globals.css";
 import "./styles/fixes.css";
 // Modern design system and animations
 import "./styles/modern-design.css";
+// Advanced cursor styles
+import "./styles/cursor.css";
+// Mobile menu styles
+import "./styles/mobile-menu.css";
 
 // Инициализация плавного скроллинга
 startLenisRaf();
@@ -42,11 +47,13 @@ const initApp = () => {
         element={
           <HelmetProvider>
             <ThemeProvider>
-              <FluidProvider>
-                <ParallaxProvider>
-                  <App />
-                </ParallaxProvider>
-              </FluidProvider>
+              <CursorRenderer>
+                <FluidProvider>
+                  <ParallaxProvider>
+                    <App />
+                  </ParallaxProvider>
+                </FluidProvider>
+              </CursorRenderer>
             </ThemeProvider>
           </HelmetProvider>
         }
