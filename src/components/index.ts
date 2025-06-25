@@ -1,6 +1,3 @@
-// Cursor components
-export * from "./cursor";
-
 // Interactive components
 export * from "./interactive";
 

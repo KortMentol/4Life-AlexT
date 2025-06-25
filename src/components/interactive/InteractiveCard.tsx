@@ -17,9 +17,6 @@ const InteractiveCard: React.FC<InteractiveCardProps> = ({
   pulseEffect = false,
 }) => {
   const cardClasses = [
-    "cursor-interactive",
-    glowEffect ? "cursor-glow" : "",
-    pulseEffect ? "cursor-pulse" : "",
     className,
   ]
     .filter(Boolean)

@@ -48,25 +48,13 @@ export const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
   const getTotalItems = () =>
     items.reduce((total, item) => total + item.quantity, 0);
 
-  // Expose both new and legacy API for smoother migration
-  const value: ProductListContextType & {
-    /* legacy aliases */
-    cartItems: ProductListItem[];
-    addToCart: ProductListContextType["addToList"];
-    removeFromCart: ProductListContextType["removeFromList"];
-    updateCartItemQuantity: ProductListContextType["updateItemQuantity"];
-  } = {
+  const value: ProductListContextType = {
     items,
     addToList,
     removeFromList,
     updateItemQuantity,
     clearList,
     getTotalItems,
-    /* legacy aliases */
-    cartItems: items,
-    addToCart: addToList,
-    removeFromCart: removeFromList,
-    updateCartItemQuantity: updateItemQuantity,
   };
 
   return (

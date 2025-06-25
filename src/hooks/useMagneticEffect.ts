@@ -9,9 +9,11 @@ interface UseMagneticEffectOptions {
   ease?: number;
 }
 
-export const useMagneticEffect = (options: UseMagneticEffectOptions = {}) => {
+export const useMagneticEffect = <T extends HTMLElement = HTMLElement>(
+  options: UseMagneticEffectOptions = {},
+) => {
   const { strength = 0.3, distance = 100, ease = 0.1 } = options;
-  const elementRef = useRef<HTMLElement>(null);
+  const elementRef = useRef<T>(null);
   const animationFrameRef = useRef<number>();
   const mousePositionRef = useRef({ x: 0, y: 0 });
   const elementPositionRef = useRef({ x: 0, y: 0 });
@@ -71,5 +73,5 @@ export const useMagneticEffect = (options: UseMagneticEffectOptions = {}) => {
     };
   }, [strength, distance, ease]);
 
-  return elementRef;
+  return elementRef as React.RefObject<T>;
 };

@@ -21,7 +21,7 @@ const MagneticEffect: React.FC<MagneticEffectProps> = ({
   className = "",
 }) => {
   // Используем хук useMagneticEffect для создания эффекта
-  const elementRef = useMagneticEffect({
+  const elementRef = useMagneticEffect<HTMLDivElement>({
     strength,
     distance,
     ease,

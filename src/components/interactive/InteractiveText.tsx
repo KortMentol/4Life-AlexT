@@ -17,8 +17,6 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({
   as: Component = "span",
 }) => {
   const textClasses = [
-    "cursor-text-effect",
-    waveEffect ? "cursor-wave-effect" : "",
     className,
   ]
     .filter(Boolean)

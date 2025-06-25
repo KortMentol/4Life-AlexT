@@ -32,7 +32,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   // Базовые классы
   const baseClasses =
-    "btn-modern btn-cursor-effect cursor-interactive inline-flex items-center justify-center gap-2 font-medium transition-all rounded-lg";
+    "btn-modern inline-flex items-center justify-center gap-2 font-medium transition-all rounded-lg";
 
   // Классы для вариантов
   const variantClasses = {
@@ -50,7 +50,7 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   // Классы для состояния disabled
-  const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "";
+  const disabledClasses = disabled ? "opacity-50" : "";
 
   // Объединяем все классы
   const allClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`;

@@ -25,7 +25,7 @@ const Card: React.FC<CardProps> = ({
   isInteractive = true,
 }) => {
   // Базовые классы
-  const baseClasses = "card-modern overflow-hidden relative cursor-interactive";
+  const baseClasses = "card-modern overflow-hidden relative";
 
   // Классы для вариантов
   const variantClasses = {

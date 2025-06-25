@@ -378,7 +378,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
 
           <div className="mt-6 mb-4 flex flex-col items-center gap-4">
             <div
-              className="relative w-16 h-8 mb-2 cursor-pointer group"
+              className="relative w-16 h-8 mb-2 group"
               onClick={toggleTheme}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
