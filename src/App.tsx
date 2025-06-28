@@ -8,6 +8,8 @@ import { useMobileMenuState } from "./hooks/useMobileMenuState";
 import useResetScrollOnNavigation from "./hooks/useResetScrollOnNavigation";
 import useScrollRestoration from "./hooks/useScrollRestoration";
 import { updateScroll } from "./lib/lenis";
+import PerformanceDebug from "./components/debug/PerformanceDebug";
+import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
 
 // Ленивая загрузка страниц с оптимизированным синтаксисом
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -112,6 +114,13 @@ const LoadingScreen = () => (
 function App() {
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const { closeMobileMenu } = useMobileMenuState();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const checkDevice = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
 
   // Используем хук для восстановления позиции скролла
   useScrollRestoration();
@@ -198,6 +207,7 @@ function App() {
             />
           </Routes>
         </Suspense>
+        {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
       </ProductListProvider>
     </ThemeProvider>
   );

@@ -5,7 +5,6 @@ interface InteractiveTextProps {
   children: React.ReactNode;
   className?: string;
   magneticStrength?: number;
-  waveEffect?: boolean;
   as?: keyof JSX.IntrinsicElements;
 }
 
@@ -13,7 +12,6 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({
   children,
   className = "",
   magneticStrength = 0.1,
-  waveEffect = false,
   as: Component = "span",
 }) => {
   const textClasses = [

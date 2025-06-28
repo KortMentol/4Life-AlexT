@@ -8,8 +8,11 @@ import SVGFilters from "./SVGFilters";
 import { updateScroll } from "@/lib/lenis";
 import { FluidProvider } from "@/context/FluidProvider";
 
+
 const Layout: React.FC = () => {
   const location = useLocation();
+  
+  // Обновляем Lenis при изменении маршрута и после рендеринга контента
 
   // Обновляем Lenis при изменении маршрута и после рендеринга контента
   useEffect(() => {
@@ -37,6 +40,7 @@ const Layout: React.FC = () => {
       </FluidProvider>
       <div className="flex flex-col min-h-screen">
         <Header />
+
         <main id="main-content" className="flex-grow">
           <Outlet />
         </main>

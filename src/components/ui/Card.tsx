@@ -59,10 +59,7 @@ const Card: React.FC<CardProps> = ({
   // Рендер в зависимости от типа карточки
   if (to) {
     return (
-      <InteractiveCard
-        glowEffect={hoverEffect === "glow"}
-        className={allClasses}
-      >
+      <InteractiveCard className={allClasses}>
         <motion.div {...cardAnimation}>
           <Link to={to} className="block" onClick={onClick}>
             {children}
@@ -74,10 +71,7 @@ const Card: React.FC<CardProps> = ({
 
   if (href) {
     return (
-      <InteractiveCard
-        glowEffect={hoverEffect === "glow"}
-        className={allClasses}
-      >
+      <InteractiveCard className={allClasses}>
         <motion.div {...cardAnimation}>
           <a
             href={href}
@@ -94,7 +88,7 @@ const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <InteractiveCard glowEffect={hoverEffect === "glow"} className={allClasses}>
+    <InteractiveCard className={allClasses}>
       <motion.div
         onClick={isInteractive ? onClick : undefined}
         {...cardAnimation}

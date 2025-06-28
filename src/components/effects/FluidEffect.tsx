@@ -6,121 +6,91 @@ import React, { useEffect, useRef } from "react";
 import WebGLFluidEnhanced from "webgl-fluid-enhanced";
 
 /**
- * КОНФИГУРАЦИИ ЭФФЕКТА ЖИДКОСТИ ДЛЯ РАЗНЫХ УРОВНЕЙ ПРОИЗВОДИТЕЛЬНОСТИ
- *
- * Настройки оптимизированы для трех уровней производительности:
- * - high: Максимальное качество
- * - medium: Сбалансированные настройки
- * - low: Минимальные настройки
+ * КОНФИГУРАЦИЯ ЭФФЕКТА ЖИДКОСТИ
+ * Адаптируется под уровень производительности устройства: high, medium, low
+ * Уровень определяется автоматически с помощью usePerformanceTier на основе характеристик устройства
+ * @param {PerformanceTier} tier - Уровень производительности (high: 80+ очков, medium: 55-79 очков, low: 0-54 очков)
+ * @param {boolean} isMobile - Флаг мобильного устройства
  */
-const fluidConfigs = {
-  high: {
-    /** Разрешение сетки красителя - больше значение, качественнее эффект, но ниже производительность */
-    dyeResolution: 1224,
-    /** Разрешение сетки симуляции - больше значение, точнее физика, но ниже производительность */
-    simResolution: 140,
-    /** Скорость рассеивания плотности жидкости (0.0-1.0) - чем ближе к 0, тем дольше сохраняется цвет */
-    densityDissipation: 0.8,
-    /** Скорость рассеивания скорости жидкости (0.0-1.0) - чем ближе к 0, тем дольше движется жидкость */
-    velocityDissipation: 0.1,
-    /** Давление жидкости (0.0-1.0) - влияет на скорость распространения */
-    pressure: 0.7,
-    /** Количество итераций расчета давления - больше значение, точнее физика, но ниже производительность */
-    pressureIterations: 10,
-    /** Завихрение жидкости (0-100) - чем больше, тем более закрученные формы */
-    curl: 20,
-    /** Радиус всплесков (0.0-1.0) - размер пятен при клике/касании */
-    splatRadius: 0.3,
-    /** Сила всплесков (0-10000) - скорость распространения при клике/касании */
-    splatForce: 5000,
-    /** Включить затенение (true/false) - создает объемный эффект */
-    shading: true,
-    /** Включить эффект свечения (true/false) */
-    bloom: false,
-    /** Количество итераций эффекта свечения - больше значение, сильнее размытие, но ниже производительность */
-    bloomIterations: 8,
-    /** Разрешение эффекта свечения - больше значение, качественнее эффект, но ниже производительность */
-    bloomResolution: 256,
-    /** Интенсивность эффекта свечения (0.0-1.0) - сила свечения */
-    bloomIntensity: 0.4,
-    /** Порог эффекта свечения (0.0-1.0) - с какой яркости начинается свечение */
-    bloomThreshold: 0.8,
-    /** Плавность перехода эффекта свечения (0.0-1.0) */
-    bloomSoftKnee: 0.7,
-    /** Включить эффект лучей (true/false) */
-    sunrays: true,
-    /** Разрешение эффекта лучей - больше значение, качественнее эффект, но ниже производительность */
-    sunraysResolution: 196,
-    /** Интенсивность эффекта лучей (0.0-1.0) */
-    sunraysWeight: 0.45,
-  },
-  medium: {
-    /** Разрешение сетки красителя - оптимизировано для средней производительности */
-    dyeResolution: 768,
-    /** Разрешение сетки симуляции - сбалансированное значение */
-    simResolution: 96,
-    /** Скорость рассеивания плотности - немного быстрее для экономии ресурсов */
-    densityDissipation: 0.97,
-    /** Скорость рассеивания скорости - высокое значение для мобильных устройств */
-    velocityDissipation: 0.98,
-    /** Давление жидкости - снижено для экономии производительности */
-    pressure: 0.7,
-    /** Количество итераций расчета давления - оптимизировано */
-    pressureIterations: 16,
-    /** Завихрение жидкости - умеренное значение */
-    curl: 15,
-    /** Радиус всплесков - немного увеличен для лучшей видимости на мобильных */
-    splatRadius: 0.3,
-    /** Сила всплесков - снижена для экономии ресурсов */
-    splatForce: 4500,
-    /** Затенение включено для сохранения качества */
-    shading: true,
-    /** Эффект свечения отключен для экономии производительности */
-    bloom: false,
-    /** Количество итераций свечения - минимальное */
+const getFluidConfig = (tier: string, isMobile: boolean) => ({
+  /** Разрешение текстуры красителя (пиксели) - чем больше, тем детальнее цвета, но больше нагрузка на GPU */
+  dyeResolution: tier === "high" ? 1024 : tier === "medium" ? 512 : 256,
+  /** Разрешение сетки физической симуляции (пиксели) - чем больше, тем точнее физика, но больше вычислений */
+  simResolution: isMobile ? 128 : 256,
+  /** Скорость затухания плотности (0.0-1.0) - чем ближе к 1.0, тем быстрее исчезают цвета */
+  densityDissipation: 1,
+  /** Скорость затухания скорости (0.0-1.0) - чем ближе к 1.0, тем быстрее останавливается движение */
+  velocityDissipation: 0.01,
+  /** Сила давления жидкости (0.0-1.0) - чем меньше, тем сильнее распространение волн */
+  pressure: 0.01,
+  /** Количество итераций расчета давления (1-50) - чем больше, тем точнее физика, но медленнее */
+  pressureIterations: tier === "high" ? 50 : tier === "medium" ? 25 : 10,
+  /** Сила завихрений (0-100) - чем больше, тем более закрученные формы */
+  curl: isMobile ? 15 : 35,
+  /** Радиус всплесков (0.0-1.0) - размер пятен при взаимодействии */
+  splatRadius: isMobile ? 0.18 : 0.22,
+  /** Сила всплесков (0-10000) - скорость распространения при взаимодействии */
+  splatForce: isMobile ? 6000 : 7000,
+  /** Объемное затенение - создает 3D эффект, но требует больше GPU */
+  shading: tier === "high" ? true : false,
+  /** Эффект свечения */
+  bloom: false,
+  /** Эффект солнечных лучей */
+  sunrays: tier === "high" ? true : false,
+});
+
+/**
+ * КОНФИГУРАЦИЯ ЭФФЕКТА ЖИДКОСТИ (Общие настройки)
+ * Адаптивные настройки для разных устройств и тем
+ */
+const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolean) => {
+  const isLightTheme = theme === "light";
+  return {
+    /** Прозрачность фона - позволяет видеть контент под эффектом */
+    transparent: true,
+    /** Яркость эффекта - на мобильных выше для лучшей видимости */
+    brightness: isMobile ? 1.0 : isLightTheme ? 0.9 : 0.7,
+    /** Палитра цветов - адаптируется под светлую/темную тему */
+    colorPalette: isLightTheme
+      ? ["#0369a1", "#0891b2", "#1e40af", "#1d4ed8", "#0e7490"]
+      : ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"],
+    /** Многоцветность - включает смешивание цветов */
+    colorful: true,
+    /** Скорость смены цветов (1-10) - меньше на мобильных для экономии ресурсов */
+    colorUpdateSpeed: 8,
+    /** Реакция на наведение мыши - отключена на тач-устройствах */
+    hover: !isTouchDevice,
+    /** Цвет фона canvas */
+    backgroundColor: "#000000",
+    /** Инверсия цветов */
+    inverted: false,
+    /** Количество итераций bloom эффекта - меньше на мобильных */
     bloomIterations: 6,
-    /** Разрешение свечения - снижено */
-    bloomResolution: 128,
-    /** Интенсивность свечения - снижена */
-    bloomIntensity: 0.3,
-    /** Порог свечения - повышен */
-    bloomThreshold: 0.9,
-    /** Эффект лучей включен с минимальными настройками */
-    sunrays: true,
-    /** Разрешение лучей - минимальное */
-    sunraysResolution: 128,
-    /** Интенсивность лучей - снижена */
-    sunraysWeight: 0.3,
-  },
-  low: {
-    /** Разрешение сетки красителя - минимальное для слабых устройств */
-    dyeResolution: 512,
-    /** Разрешение сетки симуляции - минимальное */
-    simResolution: 64,
-    /** Скорость рассеивания плотности - быстрое рассеивание */
-    densityDissipation: 0.96,
-    /** Скорость рассеивания скорости - быстрое затухание */
-    velocityDissipation: 0.97,
-    /** Давление жидкости - минимальное */
-    pressure: 0.6,
-    /** Количество итераций расчета давления - минимальное */
-    pressureIterations: 12,
-    /** Завихрение жидкости - минимальное */
-    curl: 10,
-    /** Радиус всплесков - увеличен для компенсации низкого качества */
-    splatRadius: 0.35,
-    /** Сила всплесков - минимальная */
-    splatForce: 3500,
-    /** Затенение отключено для экономии производительности */
-    shading: false,
-    /** Эффект свечения отключен */
-    bloom: false,
-    /** Эффект лучей отключен */
-    sunrays: false,
-  },
+    /** Разрешение bloom эффекта (пиксели) */
+    bloomResolution: 196,
+    /** Интенсивность свечения (0.0-1.0) */
+    bloomIntensity: 0.6,
+    /** Порог срабатывания bloom (0.0-1.0) */
+    bloomThreshold: 0.7,
+    /** Мягкость перехода bloom (0.0-1.0) */
+    bloomSoftKnee: 0.5,
+    /** Разрешение солнечных лучей (пиксели) */
+    sunraysResolution: 196,
+    /** Интенсивность солнечных лучей (0.0-1.0) */
+    sunraysWeight: 1.0,
+    /** Дополнительные оптимизации для мобильных устройств */
+    ...(isMobile && {
+      /** Состояние паузы - false для активного режима */
+      paused: false,
+      /** Встроенный режим - оптимизация для интеграции */
+      embedded: true,
+      /** Автоматические всплески - отключены для экономии ресурсов */
+      multipleSplats: 0,
+    }),
+  };
 };
 
-const FluidEffect: React.FC = () => {
+const FluidEffect: React.FC = () => { // Fluid FPS Effect
   const containerRef = useRef<HTMLDivElement>(null);
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
   const { setFluidInstance } = useFluid();
@@ -128,30 +98,62 @@ const FluidEffect: React.FC = () => {
   const tier = usePerformanceTier();
 
   const isTouchDevice = React.useMemo(() => window.matchMedia("(pointer: coarse)").matches, []);
-  const isMobile = React.useMemo(() => /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), []);
+  const isMobile = React.useMemo(
+    () => /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+    []
+  );
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    simulationRef.current = new WebGLFluidEnhanced(containerRef.current);
+    // Отложенная инициализация для мобильных устройств
+    const initFluid = () => {
+      try {
+        simulationRef.current = new WebGLFluidEnhanced(containerRef.current!);
 
-    const isLightTheme = theme === "light";
-    const config = fluidConfigs[tier];
+        // Получаем конфигурацию на основе уровня производительности и общих настроек
+        const fluidConfig = getFluidConfig(tier, isMobile);
+        const commonConfig = getCommonConfig(theme, isMobile, isTouchDevice);
 
-    simulationRef.current.setConfig({
-      ...config,
-      transparent: true,
-      brightness: isMobile ? 0.5 : (isLightTheme ? 0.7 : 0.6),
-      colorPalette: isLightTheme
-        ? ["#60a5fa", "#93c5fd", "#3b82f6", "#2563eb", "#1d4ed8"]
-        : ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"],
-      colorful: true,
-      colorUpdateSpeed: 8,
-      hover: !isTouchDevice,
-    });
+        simulationRef.current.setConfig({
+          ...fluidConfig,
+          ...commonConfig,
+        });
 
-    simulationRef.current.start();
-    setFluidInstance(simulationRef.current as unknown as FluidInstance);
+        simulationRef.current.start();
+        setFluidInstance(simulationRef.current as unknown as FluidInstance);
+        
+        console.log('🌊 Fluid FPS Effect успешно инициализирован:', {
+          tier,  // Уровень производительности из usePerformanceTier
+          config: {
+            ...fluidConfig,
+            ...commonConfig
+          },
+          isMobile,
+          isTouchDevice,
+          canvas: containerRef.current?.querySelector('canvas')
+        });
+        
+        // Отслеживаем производительность для аналитики
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'fluid_effect_initialized', {
+            'event_category': 'performance',
+            'event_label': tier,
+            'value': tier === 'high' ? 3 : tier === 'medium' ? 2 : 1
+          });
+        }
+      } catch (error) {
+        console.error('❌ Ошибка инициализации FluidEffect:', error);
+      }
+    };
+
+    // На мобильных устройствах даем время на загрузку DOM
+    if (isMobile) {
+      const timer = setTimeout(initFluid, 100);
+      return () => clearTimeout(timer);
+    } else {
+      initFluid();
+    }
 
     return () => {
       if (simulationRef.current) {
@@ -171,37 +173,69 @@ const FluidEffect: React.FC = () => {
 
     function handleEvent(event: Event) {
       if (!containerRef.current) return;
-      
+
       const canvas = containerRef.current.querySelector("canvas");
       if (!canvas) return;
 
+      // Проверяем, что событие не происходит в области дебагера
+      const debugElement = document.querySelector('[class*="debugContainer"]');
+      if (debugElement && event.target && debugElement.contains(event.target as Node)) {
+        return; // Игнорируем события из дебагера
+      }
+
       if (event instanceof MouseEvent) {
-        canvas.dispatchEvent(new MouseEvent(event.type, event));
+        const mouseEvent = new MouseEvent(event.type, {
+          clientX: event.clientX,
+          clientY: event.clientY,
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        });
+        canvas.dispatchEvent(mouseEvent);
       } else if (event instanceof TouchEvent) {
         const touch = event.touches[0] || event.changedTouches[0];
         if (!touch) return;
+        
+        // Только для canvas взаимодействий, не блокируем скролл
+        const canvasRect = canvas.getBoundingClientRect();
+        const isDirectCanvasTouch = touch.clientX >= canvasRect.left && touch.clientX <= canvasRect.right &&
+                                   touch.clientY >= canvasRect.top && touch.clientY <= canvasRect.bottom;
+        
+        // preventDefault только для touchstart на canvas для активации эффекта
+        if (event.type === 'touchstart' && isDirectCanvasTouch) {
+          event.preventDefault();
+        }
 
-        // Сохраняем последнее touch-событие
+        // Сохраняем последнее touch-событие для непрерывности
         if (event.type === "touchmove") {
           lastTouchEvent = event;
         }
 
-        // Основное событие для библиотеки
-        const mouseEvent = new MouseEvent(
-          event.type === "touchstart" ? "mousedown" : event.type === "touchend" ? "mouseup" : "mousemove",
-          {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            bubbles: true,
-            cancelable: true,
-            view: window,
-          }
-        );
+        // Преобразуем touch в mouse события для WebGL библиотеки
+        const mouseEventType = event.type === "touchstart" ? "mousedown" : 
+                              event.type === "touchend" ? "mouseup" : "mousemove";
+        
+        const mouseEvent = new MouseEvent(mouseEventType, {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          // Добавляем дополнительные свойства для лучшей совместимости
+          button: 0,
+          buttons: event.type === "touchend" ? 0 : 1,
+        });
+        
         canvas.dispatchEvent(mouseEvent);
 
-        // ПРИНУДИТЕЛЬНОЕ ПОДДЕРЖАНИЕ СОСТОЯНИЯ
+        // Система непрерывной передачи событий для плавности
         if (event.type === "touchstart") {
-          // Начинаем постоянное дублирование событий
+          // Очищаем предыдущий интервал если есть
+          if (touchInterval) {
+            clearInterval(touchInterval);
+          }
+          
+          // Начинаем непрерывную передачу для поддержания активности
           touchInterval = setInterval(() => {
             if (lastTouchEvent && lastTouchEvent.touches[0]) {
               const continuousEvent = new MouseEvent("mousemove", {
@@ -210,12 +244,14 @@ const FluidEffect: React.FC = () => {
                 bubbles: true,
                 cancelable: true,
                 view: window,
+                button: 0,
+                buttons: 1,
               });
               canvas.dispatchEvent(continuousEvent);
             }
-          }, 16); // 60 FPS
+          }, 16); // 60 FPS для плавности
         } else if (event.type === "touchend") {
-          // Останавливаем дублирование
+          // Завершаем непрерывную передачу
           if (touchInterval) {
             clearInterval(touchInterval);
             touchInterval = null;
@@ -227,8 +263,11 @@ const FluidEffect: React.FC = () => {
 
     const eventTypes = ["mousemove", "mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
     eventTypes.forEach((eventType) => {
-      // Все события passive: true чтобы НЕ блокировать скролл
-      mainElement.addEventListener(eventType, handleEvent, { passive: true });
+      // Все события passive для разрешения скролла
+      mainElement.addEventListener(eventType, handleEvent, { 
+        passive: true,
+        capture: false 
+      });
     });
 
     return () => {

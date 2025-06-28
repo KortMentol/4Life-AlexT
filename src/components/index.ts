@@ -13,5 +13,8 @@ export * from "./ui";
 // Magic UI components
 export * from "./magicui";
 
+// Debug components
+export * from "./debug";
+
 // Utils
 export * from "./utils";
