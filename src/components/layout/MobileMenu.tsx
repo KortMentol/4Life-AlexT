@@ -43,31 +43,21 @@ const navLinks = [
 const overlayVariants = {
   hidden: {
     opacity: 0,
-    backdropFilter: "blur(0px)",
-    WebkitBackdropFilter: "blur(0px)",
   },
   visible: {
     opacity: 1,
     backdropFilter: "blur(24px)",
     WebkitBackdropFilter: "blur(24px)",
     transition: {
-      duration: 0.8,
+      duration: 0.5,
       ease: [0.16, 1, 0.3, 1],
-      opacity: { duration: 0.6 },
-      backdropFilter: { duration: 1.2, ease: "easeOut" },
-      WebkitBackdropFilter: { duration: 1.2, ease: "easeOut" },
     },
   },
   exit: {
     opacity: 0,
-    backdropFilter: "blur(0px)",
-    WebkitBackdropFilter: "blur(0px)",
     transition: {
-      duration: 0.6,
+      duration: 0.4,
       ease: [0.7, 0, 0.84, 0],
-      opacity: { duration: 0.4, delay: 0.1 },
-      backdropFilter: { duration: 0.8, ease: "easeIn" },
-      WebkitBackdropFilter: { duration: 0.8, ease: "easeIn" },
     },
   },
 };
@@ -82,24 +72,16 @@ const menuVariants = {
     x: 0,
     opacity: 1,
     transition: {
-      type: "spring",
-      damping: 25,
-      stiffness: 120,
-      mass: 0.8,
-      duration: 0.8,
-      opacity: { duration: 0.4, delay: 0.2 },
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1], // EaseOutQuint
     },
   },
   exit: {
     x: "-100%",
     opacity: 0,
     transition: {
-      type: "spring",
-      damping: 30,
-      stiffness: 150,
-      mass: 0.6,
-      duration: 0.6,
-      opacity: { duration: 0.3 },
+      duration: 0.45,
+      ease: [0.76, 0, 0.24, 1], // EaseInOutQuint
     },
   },
 };
@@ -114,8 +96,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const [pendingRoute, setPendingRoute] = React.useState<string | null>(null);
   const [locked, setLocked] = React.useState(false);
-  const scrollPositionRef = React.useRef(0);
-
   React.useEffect(() => {
     if (!isOpen && pendingRoute) {
       navigate(pendingRoute);
@@ -126,23 +106,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      // Сохраняем текущую позицию скролла
-      scrollPositionRef.current =
-        window.pageYOffset || document.documentElement.scrollTop;
-      document.body.classList.add("menu-open");
-      // Устанавливаем top для body чтобы сохранить визуальную позицию
-      document.body.style.top = `-${scrollPositionRef.current}px`;
       lenis.stop();
     } else {
-      document.body.classList.remove("menu-open");
-      document.body.style.top = "";
-      // Восстанавливаем позицию скролла
-      window.scrollTo(0, scrollPositionRef.current);
       lenis.start();
     }
     return () => {
-      document.body.classList.remove("menu-open");
-      document.body.style.top = "";
       lenis.start();
     };
   }, [isOpen]);
@@ -214,13 +182,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          style={overlayStyle}
+          style={{ ...overlayStyle, willChange: "opacity" }}
           onClick={onClose}
         />,
         <motion.nav
           key="menu"
           className="mobile-menu__nav fixed top-0 left-0 h-full w-screen max-w-none z-50 p-6 flex flex-col justify-between"
           style={{
+            willChange: "transform, opacity",
             background:
               theme === "dark"
                 ? `
@@ -234,8 +203,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 radial-gradient(circle at 50% 90%, rgba(34,197,94,0.15) 0%, transparent 50%),
                 linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 50%, rgba(241,245,249,0.85) 100%)
               `,
-            backdropFilter: "blur(32px) saturate(200%)",
-            WebkitBackdropFilter: "blur(32px) saturate(200%)",
             border:
               theme === "dark"
                 ? "1px solid rgba(255,255,255,0.08)"

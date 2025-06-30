@@ -21,8 +21,8 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
   return (
     <div className="w-full">
       <Swiper
-        spaceBetween={26}
-        slidesPerView={1.2}
+        spaceBetween={20}
+        slidesPerView={1.37}
         centeredSlides={true}
         loop={true}
         loopAdditionalSlides={1}

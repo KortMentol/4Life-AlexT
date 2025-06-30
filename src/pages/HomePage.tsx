@@ -13,6 +13,9 @@ import { Icons } from "../utils/icons";
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
+  // --- ГЛАВНЫЙ ПАРАМЕТР СИЛЫ ПАРАЛЛАКСА ---
+  const GLOBAL_PARALLAX_STRENGTH = 30;
+
   // Данные для секции преимуществ
   const features = [
     {
@@ -119,7 +122,7 @@ const HomePage: React.FC = () => {
         backgroundImagePC="/src/assets/images/backgrounds/bg-hero-PC.webp"
         altText="Здоровье и благополучие с 4Life"
         height="min-h-screen h-[110vh] md:h-screen"
-        parallaxSpeed={0.2}
+        parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
         contentClasses="flex flex-col items-center justify-center text-center py-8"
         skipPreload={true} // Указываем, что изображение уже предварительно загружено
       >
@@ -159,15 +162,14 @@ const HomePage: React.FC = () => {
             вашей иммунной системы, который помогает ей работать эффективнее.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center items-center">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto"
             >
               <Link
                 to="/products"
-                className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg w-full sm:w-auto"
+                className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 <span className="relative z-10">Каталог здоровья</span>
@@ -178,11 +180,10 @@ const HomePage: React.FC = () => {
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto"
             >
               <Link
                 to="/how-to-buy"
-                className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300 w-full sm:w-auto"
+                className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300"
               >
                 <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 <span className="relative z-10">Получить скидку</span>
@@ -265,7 +266,7 @@ const HomePage: React.FC = () => {
           backgroundImage="/src/assets/images/backgrounds/2.jpg"
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
-          parallaxSpeed={0.15}
+          parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
           contentClasses="py-24"
           skipPreload={true} // Указываем, что изображение уже предварительно загружено
         >
@@ -437,9 +438,9 @@ const HomePage: React.FC = () => {
       <ParallaxSection
         backgroundImage="/src/assets/images/backgrounds/5.jpg"
         altText="Присоединяйтесь к команде 4Life"
-        height="100vh"
-        parallaxSpeed={0.2}
-        contentClasses="py-32 pb-16 min-h-screen flex items-center"
+        height="min-h-screen"
+        parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
+        contentClasses="flex flex-col items-center justify-center text-center py-24"
         imageBrightness="brightness-[.5]"
       >
         <div className="container max-w-7xl mx-auto px-6 text-center">
