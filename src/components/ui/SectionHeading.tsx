@@ -159,7 +159,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {description && (
         <motion.p
-          className={`mt-4 text-gray-600 dark:text-gray-300 ${descriptionSizeClasses[size]} ${descriptionClassName}`}
+          className={`mt-4 text-gray-600 dark:text-gray-300 ${descriptionSizeClasses[size]} ${align === "center" ? "mx-auto" : ""} ${descriptionClassName}`}
           {...descriptionAnimation}
         >
           {description}

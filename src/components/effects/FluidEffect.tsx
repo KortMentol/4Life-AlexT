@@ -5,6 +5,10 @@ import { useTheme } from "@/hooks/useTheme";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import WebGLFluidEnhanced from "webgl-fluid-enhanced";
 
+// --- РУБИЛЬНИК ЭФФЕКТА ---
+// Если true = эффект выключен, если false = эффект включен.
+const DISABLE_FLUID_EFFECT = true;
+
 /**
  * КОНФИГУРАЦИЯ ЭФФЕКТА ЖИДКОСТИ
  * Адаптируется под уровень производительности устройства: high, medium, low
@@ -12,6 +16,7 @@ import WebGLFluidEnhanced from "webgl-fluid-enhanced";
  * @param {PerformanceTier} tier - Уровень производительности (high: 80+ очков, medium: 50-79 очков, low: 0-49 очков)
  * @param {boolean} isMobile - Флаг мобильного устройства
  */
+
 const getFluidConfig = (tier: string, isMobile: boolean) => ({
   /** Разрешение текстуры красителя (пиксели) - чем больше, тем детальнее цвета, но больше нагрузка на GPU */
   dyeResolution: tier === "high" ? 1024 : tier === "medium" ? 512 : 256,
@@ -20,7 +25,7 @@ const getFluidConfig = (tier: string, isMobile: boolean) => ({
   /** Скорость затухания плотности (0.0-1.0) - чем ближе к 1.0, тем быстрее исчезают цвета */
   densityDissipation: 1,
   /** Скорость затухания скорости (0.0-1.0) - чем ближе к 1.0, тем быстрее останавливается движение */
-  velocityDissipation: 0.01,
+  velocityDissipation: isMobile ? 0.4 : 0.01,
   /** Сила давления жидкости (0.0-1.0) - чем меньше, тем сильнее распространение волн */
   pressure: 0.01,
   /** Количество итераций расчета давления (1-50) - чем больше, тем точнее физика, но медленнее */
@@ -33,8 +38,6 @@ const getFluidConfig = (tier: string, isMobile: boolean) => ({
   splatForce: isMobile ? 6000 : 7000,
   /** Объемное затенение - создает 3D эффект, но требует больше GPU */
   shading: tier === "high" ? true : false,
-  /** Эффект свечения */
-  bloom: false,
   /** Эффект солнечных лучей */
   sunrays: tier === "high" ? true : false,
 });
@@ -49,31 +52,33 @@ const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolea
     /** Прозрачность фона - позволяет видеть контент под эффектом */
     transparent: true,
     /** Яркость эффекта - на мобильных выше для лучшей видимости */
-    brightness: isMobile ? 1.0 : isLightTheme ? 0.9 : 0.7,
+    brightness: isMobile ? 1.1 : isLightTheme ? 0.9 : 0.7,
     /** Палитра цветов - адаптируется под светлую/темную тему */
     colorPalette: isLightTheme
-      ? ["#0369a1", "#0891b2", "#1e40af", "#1d4ed8", "#0e7490"]
+      ? ["#172554", "#1e3a8a", "#312e81", "#0b1945", "#283593"]
       : ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"],
     /** Многоцветность - включает смешивание цветов */
     colorful: true,
     /** Скорость смены цветов (1-10) - меньше на мобильных для экономии ресурсов */
-    colorUpdateSpeed: 8,
+    colorUpdateSpeed: isMobile ? 5 : 10,
     /** Реакция на наведение мыши - отключена на тач-устройствах */
     hover: !isTouchDevice,
     /** Цвет фона canvas */
     backgroundColor: "#000000",
     /** Инверсия цветов */
     inverted: false,
+    /** Эффект свечения */
+    bloom: isMobile && isLightTheme,
     /** Количество итераций bloom эффекта - меньше на мобильных */
     bloomIterations: 6,
     /** Разрешение bloom эффекта (пиксели) */
-    bloomResolution: 196,
+    bloomResolution: isMobile ? 128 : 196,
     /** Интенсивность свечения (0.0-1.0) */
-    bloomIntensity: 0.6,
+    bloomIntensity: isMobile ? 0.3 : 0.6,
     /** Порог срабатывания bloom (0.0-1.0) */
-    bloomThreshold: 0.7,
+    bloomThreshold: isMobile ? 0.4 : 0.7,
     /** Мягкость перехода bloom (0.0-1.0) */
-    bloomSoftKnee: 0.5,
+    bloomSoftKnee: isMobile ? 0.3 : 0.5,
     /** Разрешение солнечных лучей (пиксели) */
     sunraysResolution: 196,
     /** Интенсивность солнечных лучей (0.0-1.0) */
@@ -91,6 +96,10 @@ const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolea
 };
 
 const FluidEffect: React.FC = () => {
+  if (DISABLE_FLUID_EFFECT) {
+    return null;
+  }
+
   const containerRef = useRef<HTMLDivElement>(null);
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
   const stopTimerRef = useRef<NodeJS.Timeout | null>(null);

@@ -2,10 +2,8 @@ import { lenis } from "@/lib/lenis";
 import MobileMenu from "./MobileMenu";
 import {
   motion,
-  useMotionValue,
   useMotionValueEvent,
   useScroll,
-  useSpring,
 } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import React, { useLayoutEffect, useState } from "react";
@@ -22,6 +20,7 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [isHidden, setIsHidden] = useState(false);
 
   // Scroll-linked header movement: измеряем фактическую высоту, чтобы скрывать на 100 %
   const headerRef = React.useRef<HTMLElement>(null);
@@ -33,27 +32,36 @@ const Header: React.FC = () => {
   }, []);
 
   const { scrollY } = useScroll();
-  const headerOffset = useMotionValue(0);
-  const smoothY = useSpring(headerOffset, { stiffness: 250, damping: 40 });
+  const lastY = React.useRef(0);
 
-  // Предыдущее значение scrollY для определения направления
-  const prevScrollY = React.useRef(0);
+  // Продвинутая логика скрытия/показа хедера
+  // Основана на принципах headroom.js для лучшего UX
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const SCROLL_DOWN_THRESHOLD = 15; // Порог для скрытия (вниз)
+    const SCROLL_UP_THRESHOLD = 5; // Порог для показа (вверх)
+    const direction = y - lastY.current;
 
-  // Актуализируем смещение при каждом изменении scrollY
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const diff = latest - prevScrollY.current;
+    // Устанавливаем состояние скролла для фона в любом случае
+    setScrolled(y > 50);
 
-    // Устанавливаем состояние скролла
-    setScrolled(latest > 50);
+    // 1. В безопасной зоне наверху или при достижении конца страницы - всегда показывать
+    // (проверка на конец страницы может быть добавлена дополнительно)
+    if (y < headerHeight) {
+      setIsHidden(false);
+      lastY.current = y;
+      return;
+    }
 
-    // На скролле вниз (diff > 0) скрываем, вверх (diff < 0) — показываем
-    let newOffset = headerOffset.get() - diff;
+    // 2. Основная логика: скрывать при уверенном скролле вниз, показывать при любом скролле вверх
+    if (direction > SCROLL_DOWN_THRESHOLD) {
+      // Уверенный скролл вниз — скрываем хедер
+      setIsHidden(true);
+    } else if (direction < -SCROLL_UP_THRESHOLD) {
+      // Скролл вверх — показываем хедер
+      setIsHidden(false);
+    }
 
-    // Ограничиваем в пределах [-(headerHeight), 0]
-    newOffset = Math.max(-headerHeight, Math.min(0, newOffset));
-    headerOffset.set(newOffset);
-
-    prevScrollY.current = latest;
+    lastY.current = y;
   });
 
   const location = useLocation();
@@ -106,13 +114,17 @@ const Header: React.FC = () => {
       <motion.header
         ref={headerRef}
         role="banner"
+        variants={{
+          visible: { y: 0 },
+          hidden: { y: "-100%" },
+        }}
+        animate={isHidden ? "hidden" : "visible"}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
         style={{
-          y: smoothY,
           WebkitBackdropFilter: "blur(8px)",
           backdropFilter: "blur(8px)",
           top: "env(safe-area-inset-top)",
         }}
-        transition={{ type: "spring", stiffness: 250, damping: 40 }}
         className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow"
       >
         <div className="container max-w-7xl mx-auto px-4">

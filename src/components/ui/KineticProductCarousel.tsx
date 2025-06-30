@@ -1,7 +1,13 @@
-import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import InteractiveProductCard from "./InteractiveProductCard";
+import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+// Импортируем модули и стили для эффекта Куба и Пагинации
+import { EffectCube, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-cube';
+import 'swiper/css/pagination';
+
+import InteractiveProductCard from './InteractiveProductCard';
 
 interface ProductData {
   id: number;
@@ -18,31 +24,42 @@ interface KineticCarouselProps {
 const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
   products,
 }) => {
+  // При loop=true Swiper сам обрабатывает дублирование слайдов.
+  // Использования оригинального массива `products` достаточно, даже для 3 элементов.
+  if (!products || products.length === 0) {
+    return null; // Или можно вернуть компонент-заглушку
+  }
+
   return (
-    <div className="w-full">
+    // Контейнер для центрирования карусели по вертикали и горизонтали
+        // Внешние отступы убраны и должны задаваться на родительской странице
+    <div className="w-full flex justify-center">
       <Swiper
-        spaceBetween={20}
-        slidesPerView={1.37}
-        centeredSlides={true}
-        loop={true}
-        loopAdditionalSlides={1}
-        watchSlidesProgress={true}
+        effect={'cube'}
         grabCursor={true}
-        touchRatio={1}
-        threshold={10}
-        followFinger={true}
-        allowTouchMove={true}
-        simulateTouch={true}
-        className="w-full"
+        cubeEffect={{
+          shadow: false, // Отключаем тени для производительности
+          slideShadows: false, // Отключаем тени для производительности
+          shadowOffset: 20,
+          shadowScale: 0.94,
+        }}
+        loop={true}
+        pagination={{
+          clickable: true,
+        }}
+        modules={[EffectCube, Pagination]}
+        // Задаем адаптивную ширину самой карусели, чтобы центрирование работало
+        className="w-[80vw] max-w-sm"
+        slidesPerView={1}
+        centeredSlides={true}
       >
-        {[...products, ...products].map((product, index) => (
+        {products.map((product) => (
           <SwiperSlide
-            key={`${product.id}-${index}`}
-            className="flex justify-center"
+            key={product.id}
+            className="flex justify-center items-center"
           >
-            <div className="w-[80vw] max-w-sm">
-              <InteractiveProductCard product={product} />
-            </div>
+            {/* Внутренний div для задания ширины больше не нужен */}
+            <InteractiveProductCard product={product} />
           </SwiperSlide>
         ))}
       </Swiper>
@@ -51,3 +68,4 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
 };
 
 export default KineticProductCarousel;
+

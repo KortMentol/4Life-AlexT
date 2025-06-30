@@ -20,7 +20,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
 }) => {
   return (
     <motion.div
-      className="h-full"
+      className="h-full transform-gpu" // Добавляем transform-gpu для аппаратного ускорения
       whileHover={{ y: -5, rotateY: 5, scale: 1.02 }}
       transition={{ duration: 0.3 }}
       style={{
@@ -28,7 +28,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
         transformStyle: "preserve-3d",
       }}
     >
-      <div className="relative z-10 h-full min-h-[420px] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70 card-hover-effect hover:shadow-2xl transition-all duration-300 flex flex-col">
+      <div className="relative z-10 h-full min-h-[420px] bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70 card-hover-effect hover:shadow-2xl transition-all duration-300 flex flex-col">
         <Link to={product.link}>
           <img
             src={product.image}

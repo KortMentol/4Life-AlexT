@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import ParallaxSection from "../components/ui/ParallaxSection";
 import SectionHeading from "../components/ui/SectionHeading";
 import StaticFeature from "../components/ui/StaticFeature";
-import TiltedFeatureCard from "../components/ui/TiltedFeatureCard";
+
 import KineticProductCarousel from "../components/ui/KineticProductCarousel";
 import InteractiveProductCard from "../components/ui/InteractiveProductCard";
 import { AuroraText } from "../components/magicui/aurora-text";
@@ -121,7 +121,7 @@ const HomePage: React.FC = () => {
         backgroundImageMobile="/src/assets/images/backgrounds/bg-hero-Mobile.webp"
         backgroundImagePC="/src/assets/images/backgrounds/bg-hero-PC.webp"
         altText="Здоровье и благополучие с 4Life"
-        height="min-h-screen h-[110vh] md:h-screen"
+        height="h-screen"
         parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
         contentClasses="flex flex-col items-center justify-center text-center py-8"
         skipPreload={true} // Указываем, что изображение уже предварительно загружено
@@ -208,7 +208,7 @@ const HomePage: React.FC = () => {
       </ParallaxSection>
 
       {/* Секция о нас */}
-      <section id="about" className="relative py-24">
+      <section id="about" className="relative py-24 md:min-h-[110vh] flex flex-col">
         {/* Белый фон (z-index: -20) */}
         <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
 
@@ -225,137 +225,121 @@ const HomePage: React.FC = () => {
               subtitle="Наука, которой доверяют миллионы"
               description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
               centered={true}
-              className="max-w-3xl mx-auto"
-              subtitleClassName="text-gray-700 dark:text-blue-400"
-              titleClassName="text-gray-800 dark:text-white"
-              descriptionClassName="mx-auto max-w-2xl text-center"
+              titleClassName="text-black dark:text-gray-100"
+              subtitleClassName="text-blue-600 dark:text-blue-400"
             />
-
             <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
               {features.map((feature, index) => (
-                <TiltedFeatureCard
+                <StaticFeature
                   key={index}
                   icon={feature.icon}
                   title={feature.title}
                   description={feature.description}
+                  colorTheme="blue"
                 />
               ))}
             </div>
-
-            <motion.div
-              className="mt-16 text-center"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link
-                to="/about"
-                className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg transition-all duration-300"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="relative z-10">Узнать больше о компании</span>
-                <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
-              </Link>
-            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Секция продуктов с параллаксом */}
+      {/* Секция продуктов */}
       <section id="products">
         <ParallaxSection
           backgroundImage="/src/assets/images/backgrounds/2.jpg"
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
           parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
-          contentClasses="py-24"
           skipPreload={true} // Указываем, что изображение уже предварительно загружено
         >
-          <div className="container max-w-7xl mx-auto px-6">
-            <div className="opacity-100">
-              {/* Декоративный элемент - полоска */}
-              <div className="flex justify-center mb-8">
-                <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
+          <div className="py-12 sm:py-16 bg-gray-50/10 dark:bg-gray-900/50">
+            <div className="container max-w-7xl mx-auto px-6">
+              <div className="opacity-100">
+                {/* Декоративный элемент - полоска */}
+                <div className="flex justify-center mb-8">
+                  <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
+                </div>
+
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 text-center">
+                  <span className="block mb-2 text-lg md:text-xl font-medium text-white">
+                    Научный подход к здоровью
+                  </span>
+                  <AuroraText
+                    colors={["#007BFF", "#FFFFFF", "#3B82F6", "#60A5FA"]}
+                    speed={1.3}
+                  >
+                    Инновационные продукты для иммунитета
+                  </AuroraText>
+                </h2>
+
+                <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto text-center">
+                  Продукты 4Life создаются на основе запатентованной технологии
+                  Трансфер Факторов — молекул, передающих иммунологическую память
+                  и поддерживающих здоровую работу иммунной системы.
+                </p>
+              </div>
+            </div>
+
+            <div className="container max-w-7xl mx-auto">
+              {/* ... Заголовок и описание секции ... */}
+
+              <div className="mt-12">
+                {/* --- ДЕСКТОПНАЯ ВЕРСИЯ (ГРИД) --- */}
+                <motion.div
+                  className="hidden lg:grid grid-cols-3 gap-8 px-6"
+                  initial="initial"
+                  whileInView="inView"
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ staggerChildren: 0.1 }}
+                >
+                  {popularProducts.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      variants={{
+                        initial: { opacity: 0, y: 30 },
+                        inView: {
+                          opacity: 1,
+                          y: 0,
+                          transition: { duration: 0.6 },
+                        },
+                      }}
+                    >
+                      <InteractiveProductCard product={product} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* --- МОБИЛЬНАЯ И ПЛАНШЕТНАЯ ВЕРСИЯ (КАРУСЕЛЬ) --- */}
+                <div className="block lg:hidden -mx-6">
+                  <KineticProductCarousel products={popularProducts} />
+                </div>
               </div>
 
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 text-center">
-                <span className="block mb-2 text-lg md:text-xl font-medium text-white">
-                  Научный подход к здоровью
-                </span>
-                <AuroraText
-                  colors={["#007BFF", "#FFFFFF", "#3B82F6", "#60A5FA"]}
-                  speed={1.3}
-                >
-                  Инновационные продукты для иммунитета
-                </AuroraText>
-              </h2>
-
-              <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto text-center">
-                Продукты 4Life создаются на основе запатентованной технологии
-                Трансфер Факторов — молекул, передающих иммунологическую память
-                и поддерживающих здоровую работу иммунной системы.
-              </p>
-            </div>
-          </div>
-
-          <div className="container max-w-7xl mx-auto">
-            {/* ... Заголовок и описание секции ... */}
-
-            <div className="mt-16">
-              {/* --- ДЕСКТОПНАЯ ВЕРСИЯ (ГРИД) --- */}
               <motion.div
-                className="hidden lg:grid grid-cols-3 gap-8 px-6"
-                initial="initial"
-                whileInView="inView"
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ staggerChildren: 0.1 }}
+                className="mt-12 text-center px-6"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {popularProducts.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    variants={{
-                      initial: { opacity: 0, y: 30 },
-                      inView: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.6 },
-                      },
-                    }}
-                  >
-                    <InteractiveProductCard product={product} />
-                  </motion.div>
-                ))}
+                <Link
+                  to="/products"
+                  className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
+                    Посмотреть все
+                  </span>
+                  <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+                  <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
+                </Link>
               </motion.div>
 
-              {/* --- МОБИЛЬНАЯ И ПЛАНШЕТНАЯ ВЕРСИЯ (КАРУСЕЛЬ) --- */}
-              <div className="block lg:hidden -mx-6 pb-16">
-                <KineticProductCarousel products={popularProducts} />
-              </div>
-            </div>
-
-            <motion.div
-              className="mt-16 text-center px-6"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link
-                to="/products"
-                className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
-                  Посмотреть все
-                </span>
-                <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
-                <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-300 group-hover:w-full transition-all duration-500 ease-in-out"></span>
-              </Link>
-            </motion.div>
-
-            <div className="mt-10 text-center px-6">
-              <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
-                <Icons.ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
-                <span className="text-white/80 text-sm sm:text-base ml-2 sm:ml-3">
-                  Продукция 4Life не заменяет медикаментозное лечение
-                </span>
+              <div className="mt-10 text-center px-6">
+                <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
+                  <Icons.ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
+                  <span className="text-white/80 text-sm sm:text-base ml-2 sm:ml-3">
+                    Продукция 4Life не заменяет медикаментозное лечение
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -380,7 +364,7 @@ const HomePage: React.FC = () => {
               description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
               centered={true}
               className="max-w-3xl mx-auto"
-              subtitleClassName="text-primary-blue dark:text-blue-400 font-semibold tracking-wide text-gray-700"
+              subtitleClassName="text-blue-600 dark:text-blue-400 font-semibold tracking-wide"
               titleClassName="font-extrabold tracking-tight text-gray-800 dark:text-white"
             />
           </div>
@@ -392,7 +376,6 @@ const HomePage: React.FC = () => {
                 icon={benefit.icon}
                 title={benefit.title}
                 description={benefit.description}
-                color="from-green-500 to-green-600"
               />
             ))}
           </div>
@@ -438,7 +421,7 @@ const HomePage: React.FC = () => {
       <ParallaxSection
         backgroundImage="/src/assets/images/backgrounds/5.jpg"
         altText="Присоединяйтесь к команде 4Life"
-        height="min-h-screen"
+        height="h-[120vh]"
         parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
         contentClasses="flex flex-col items-center justify-center text-center py-24"
         imageBrightness="brightness-[.5]"
