@@ -17,6 +17,36 @@ interface SectionProps {
   containerWidth?: "sm" | "md" | "lg" | "xl" | "full";
 }
 
+/**
+ * @module components/ui/Section
+ * @description Универсальный компонент-обертка для создания контентных секций с гибкими настройками.
+ * Позволяет легко задавать фон (светлый, темный, градиентный, прозрачный, "стеклянный"), вертикальные отступы, ширину контентного контейнера и добавлять декоративные фоновые градиенты.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {React.ReactNode} children - Содержимое секции.
+ * @param {string} [className] - Дополнительные CSS-классы для элемента `section`.
+ * @param {string} [id] - HTML-атрибут `id` для секции.
+ * @param {'light' | 'dark' | 'gradient' | 'transparent' | 'glass'} [background='light'] - Тип фона секции.
+ * @param {'none' | 'sm' | 'md' | 'lg' | 'xl'} [spacing='lg'] - Размер вертикальных отступов (padding-top и padding-bottom).
+ * @param {boolean} [withDecoration=false] - Включает/отключает декоративное размытое градиентное пятно на фоне.
+ * @param {'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} [decorationPosition='top-right'] - Позиция декоративного элемента.
+ * @param {'blue' | 'green' | 'purple' | 'amber' | 'pink'} [decorationColor='blue'] - Цвет декоративного элемента.
+ * @param {'sm' | 'md' | 'lg' | 'xl' | 'full'} [containerWidth='xl'] - Максимальная ширина внутреннего контейнера для контента.
+ *
+ * @see motion - Компонент из `framer-motion` для анимации дочерних элементов.
+ * @see SectionHeading - Компонент заголовка, который часто используется внутри `Section`.
+ *
+ * @usage
+ * Основа для построения большинства страниц. Используется для структурирования контента и визуального разделения блоков.
+ *
+ * @example
+ * <Section background="dark" spacing="xl" withDecoration decorationColor="purple">
+ *   <SectionHeading title="Наши Преимущества" />
+ *   // ... другой контент
+ * </Section>
+ */
 const Section: React.FC<SectionProps> = ({
   children,
   className = "",

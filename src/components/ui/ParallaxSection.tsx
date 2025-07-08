@@ -1,5 +1,5 @@
 import React, { ReactNode, useRef, useEffect, useState } from "react";
-import { useScroll, useTransform, motion } from "framer-motion";
+import { useScroll, useTransform, motion, useInView } from "framer-motion";
 
 export interface ParallaxSectionProps {
   backgroundImage?: string;
@@ -10,13 +10,21 @@ export interface ParallaxSectionProps {
   children?: ReactNode;
   height?: string;
   contentClasses?: string;
-  parallaxStrength?: number; // Сила параллакса (например, 20 для 20% смещения)
+  parallaxStrength?: number;
   imageBrightness?: string;
   blendMode?: string;
   clipPath?: string;
   skipPreload?: boolean;
+  lazyLoad?: boolean;
 }
 
+/**
+ * @module components/ui/ParallaxSection
+ * @description Создает секцию с "умным" параллакс-эффектом, который адаптируется под любую силу, не допуская черных полос.
+ * @author Kort
+ * @version 4.0.0
+ * @param {number} [parallaxStrength=40] - Общая дополнительная высота фона в `vh`. Например, 40 означает, что фон будет на 40vh выше экрана и будет двигаться на 20vh вверх и вниз от центра.
+ */
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
   backgroundImageMobile,
@@ -26,14 +34,16 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   children,
   height = "h-screen",
   contentClasses = "flex items-center justify-center",
-  parallaxStrength = 20, // Дефолтная сила 20% -> "-20%" to "20%"
+  parallaxStrength = 40, // Рекомендованное значение для заметного, но плавного эффекта
   imageBrightness = "brightness-[.6] dark:brightness-[.4]",
   blendMode = "",
   clipPath = "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)",
   skipPreload = false,
+  lazyLoad = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const inView = useInView(containerRef, { once: true, margin: "200px" });
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -47,18 +57,16 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     offset: ["start end", "end start"],
   });
 
-  // NEW: Transform in vh units for predictable movement
-  const y = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [`-${parallaxStrength}vh`, `${parallaxStrength}vh`]
-  );
+  // Движение от -половины до +половины общей силы смещения
+  const y = useTransform(scrollYProgress, [0, 1], [
+    `-${parallaxStrength / 2}vh`,
+    `${parallaxStrength / 2}vh`,
+  ]);
 
   const finalBackgroundImage = isMobile
     ? backgroundImageMobile || backgroundImage
     : backgroundImagePC || backgroundImage;
 
-  // Preload logic
   useEffect(() => {
     if (finalBackgroundImage && !skipPreload) {
       const img = new Image();
@@ -66,54 +74,45 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     }
   }, [finalBackgroundImage, skipPreload]);
 
-  // NEW: Calculate height needed to cover travel distance
-  const backgroundHeight = 100 + parallaxStrength * 2;
-
   return (
     <section
       ref={containerRef}
-      className={`relative ${height} overflow-hidden`}
-      style={{ clipPath }}
+      className={`relative overflow-hidden ${height} ${blendMode}`}
+      style={{ clipPath: clipPath, WebkitClipPath: clipPath }}
     >
-      {/* Контейнер для контента */}
-      <div
-        className={`relative z-10 w-full h-full ${contentClasses} ${blendMode}`}
-      >
-        {children}
-      </div>
+      <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
 
-      {/* Background Container: fixed, covers viewport, hides overflow */}
-      <div className="fixed top-0 left-0 w-full h-screen -z-10 overflow-hidden">
-        {/* Background Image: Taller than viewport, moves with transform */}
+      {/* Фон в отдельном fixed-контейнере для производительности */}
+      <div
+        className="fixed left-0 w-full -z-10"
+        style={{
+          // Фон выше на parallaxStrength, чтобы было куда двигаться
+          height: `calc(100vh + ${parallaxStrength}vh)`,
+          // Смещаем вверх на половину, чтобы центрировать
+          top: `-${parallaxStrength / 2}vh`,
+        }}
+      >
         <motion.div
-          className={`relative w-full ${imageBrightness}`}
-          style={{
-            y,
-            height: `${backgroundHeight}vh`,
-            top: `-${parallaxStrength}vh`,
-            willChange: "transform",
-          }}
+          className={`relative w-full h-full ${imageBrightness}`}
+          style={{ y, willChange: "transform" }}
         >
           {backgroundVideo ? (
             <video
-              className="h-full w-full object-cover"
-              src={backgroundVideo}
+              className="absolute top-0 left-0 h-full w-full object-cover"
+              src={inView ? backgroundVideo : undefined}
               autoPlay
               loop
               muted
               playsInline
               aria-label={altText}
-              controls={false}
-              disablePictureInPicture
-              controlsList="nodownload nofullscreen noremoteplayback"
             />
           ) : (
             finalBackgroundImage && (
               <img
-                src={finalBackgroundImage}
+                src={lazyLoad && !inView ? undefined : finalBackgroundImage}
                 alt={altText}
-                className="h-full w-full object-cover"
-                loading="eager"
+                className="absolute top-0 left-0 h-full w-full object-cover"
+                loading="lazy"
               />
             )
           )}

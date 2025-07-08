@@ -1,4 +1,5 @@
 import { ProductListProvider } from "@/context/ProductListProvider";
+import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, Route, Routes } from "react-router-dom";
@@ -30,23 +31,16 @@ const PreloadImages = ({ onComplete }: PreloadImagesProps) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Определяем размеры экрана для логирования (если нужно)
-    // const isMobile = window.innerWidth < 768;
-    // console.log("Загрузка изображений для", isMobile ? "мобильного" : "десктопного", "устройства");
+    const isMobile = window.innerWidth < 768;
 
     // Пути к изображениям для предварительной загрузки
-    const heroImageMobile =
-      "/src/assets/images/backgrounds/bg-hero-Mobile.webp";
-    const heroImagePC = "/src/assets/images/backgrounds/bg-hero-PC.webp";
+    const heroImage = isMobile
+      ? "/src/assets/images/backgrounds/bg-hero-Mobile.webp"
+      : "/src/assets/images/backgrounds/bg-hero-PC.webp";
     const productsBgImage = "/src/assets/images/backgrounds/2.jpg";
 
     // Список изображений для предварительной загрузки
-    // Загружаем оба изображения независимо от устройства для кэширования
-    const imagesToPreload = [
-      heroImageMobile,
-      heroImagePC,
-      productsBgImage, // Второе фоновое изображение для секции продуктов
-    ];
+    const imagesToPreload = [heroImage, productsBgImage];
 
     let loadedCount = 0;
 
@@ -163,7 +157,14 @@ function App() {
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<HomePage />} />
+              <Route
+                index
+                element={
+                  <FluidProvider>
+                    <HomePage />
+                  </FluidProvider>
+                }
+              />
               <Route path="products" element={<ProductsPage />} />
               <Route path="about" element={<AboutPage />} />
               <Route path="about-me" element={<AboutMePage />} />

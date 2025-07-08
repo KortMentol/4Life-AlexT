@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
-import { FluidProvider } from "./context/FluidProvider";
+
 import { ThemeProvider } from "./context/ThemeProvider";
 import { startLenisRaf } from "./lib/lenis";
 
@@ -44,11 +44,9 @@ const initApp = () => {
         element={
           <HelmetProvider>
             <ThemeProvider>
-              <FluidProvider>
-                <ParallaxProvider>
-                  <App />
-                </ParallaxProvider>
-              </FluidProvider>
+              <ParallaxProvider>
+                <App />
+              </ParallaxProvider>
             </ThemeProvider>
           </HelmetProvider>
         }

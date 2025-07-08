@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import MagneticEffect from "../effects/MagneticEffect";
+
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -17,6 +17,48 @@ interface ButtonProps {
   disabled?: boolean;
 }
 
+/**
+ * @module components/ui/Button
+ * @description Универсальный компонент кнопки с современным дизайном и анимациями.
+ * Поддерживает несколько стилей (variant), размеров (size), и может функционировать как внутренняя ссылка (`<Link>`), внешняя ссылка (`<a>`) или стандартная кнопка (`<button>`).
+ * Интегрирован с `MagneticEffect` для эффекта примагничивания и `framer-motion` для анимации масштабирования при наведении и клике.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {React.ReactNode} children - Содержимое кнопки (обычно текст).
+ * @param {string} [to] - Путь для внутренней навигации (использует React Router `Link`).
+ * @param {string} [href] - URL для внешней ссылки.
+ * @param {() => void} [onClick] - Функция, вызываемая при клике.
+ * @param {'primary' | 'secondary' | 'outline' | 'ghost'} [variant='primary'] - Визуальный стиль кнопки.
+ * @param {'sm' | 'md' | 'lg'} [size='md'] - Размер кнопки.
+ * @param {string} [className] - Дополнительные CSS-классы.
+ * @param {React.ReactNode} [icon] - Иконка для отображения внутри кнопки.
+ * @param {'left' | 'right'} [iconPosition='right'] - Позиция иконки относительно текста.
+ * @param {boolean} [isExternal=false] - Если `true`, ссылка `href` откроется в новой вкладке.
+ * @param {boolean} [disabled=false] - Блокирует взаимодействие с кнопкой.
+ *
+ * @see Link - Компонент из `react-router-dom` для навигации.
+ * @see MagneticEffect - Кастомный хук для создания эффекта "примагничивания" курсора.
+ * @see motion - Компонент из `framer-motion` для анимаций.
+ *
+ * @usage
+ * Является основным интерактивным элементом на всем сайте.
+ * 
+ * 1. **В шапке (`src/components/layout/Header.tsx`):**
+ *    - Используется для навигационных ссылок и кнопки связи.
+ * 2. **В блоках призыва к действию (`src/components/ui/CallToAction.tsx`):**
+ *    - Как основная кнопка для целевых действий.
+ * 3. **На страницах (`src/pages/*.tsx`):**
+ *    - Для фильтрации, отправки форм и других пользовательских взаимодействий.
+ *
+ * @example
+ * // Стандартная кнопка с действием
+ * <Button variant="primary" onClick={() => alert('Clicked!')}>Нажми меня</Button>
+ * 
+ * // Кнопка-ссылка для внутренней навигации с иконкой
+ * <Button to="/products" variant="secondary" icon={<ArrowRight />}>Продукты</Button>
+ */
 const Button: React.FC<ButtonProps> = ({
   children,
   to,
@@ -71,56 +113,50 @@ const Button: React.FC<ButtonProps> = ({
   // Рендер в зависимости от типа кнопки
   if (to) {
     return (
-      <MagneticEffect strength={0.2}>
-        <motion.div
-          whileHover={{ scale: disabled ? 1 : 1.02 }}
-          whileTap={{ scale: disabled ? 1 : 0.98 }}
+      <motion.div
+        whileHover={{ scale: disabled ? 1 : 1.02 }}
+        whileTap={{ scale: disabled ? 1 : 0.98 }}
+      >
+        <Link
+          to={to}
+          className={allClasses}
+          onClick={disabled ? undefined : onClick}
         >
-          <Link
-            to={to}
-            className={allClasses}
-            onClick={disabled ? undefined : onClick}
-          >
-            {content}
-          </Link>
-        </motion.div>
-      </MagneticEffect>
+          {content}
+        </Link>
+      </motion.div>
     );
   }
 
   if (href) {
     return (
-      <MagneticEffect strength={0.2}>
-        <motion.div
-          whileHover={{ scale: disabled ? 1 : 1.02 }}
-          whileTap={{ scale: disabled ? 1 : 0.98 }}
+      <motion.div
+        whileHover={{ scale: disabled ? 1 : 1.02 }}
+        whileTap={{ scale: disabled ? 1 : 0.98 }}
+      >
+        <a
+          href={href}
+          className={allClasses}
+          onClick={disabled ? undefined : onClick}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
         >
-          <a
-            href={href}
-            className={allClasses}
-            onClick={disabled ? undefined : onClick}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
-          >
-            {content}
-          </a>
-        </motion.div>
-      </MagneticEffect>
+          {content}
+        </a>
+      </motion.div>
     );
   }
 
   return (
-    <MagneticEffect strength={0.2}>
-      <motion.button
-        className={allClasses}
-        onClick={disabled ? undefined : onClick}
-        disabled={disabled}
-        whileHover={{ scale: disabled ? 1 : 1.02 }}
-        whileTap={{ scale: disabled ? 1 : 0.98 }}
-      >
-        {content}
-      </motion.button>
-    </MagneticEffect>
+    <motion.button
+      className={allClasses}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      whileHover={{ scale: disabled ? 1 : 1.02 }}
+      whileTap={{ scale: disabled ? 1 : 0.98 }}
+    >
+      {content}
+    </motion.button>
   );
 };
 

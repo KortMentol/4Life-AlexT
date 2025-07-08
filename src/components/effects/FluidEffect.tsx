@@ -7,7 +7,7 @@ import WebGLFluidEnhanced from "webgl-fluid-enhanced";
 
 // --- РУБИЛЬНИК ЭФФЕКТА ---
 // Если true = эффект выключен, если false = эффект включен.
-const DISABLE_FLUID_EFFECT = true;
+const DISABLE_FLUID_EFFECT = false;
 
 /**
  * КОНФИГУРАЦИЯ ЭФФЕКТА ЖИДКОСТИ
@@ -19,13 +19,13 @@ const DISABLE_FLUID_EFFECT = true;
 
 const getFluidConfig = (tier: string, isMobile: boolean) => ({
   /** Разрешение текстуры красителя (пиксели) - чем больше, тем детальнее цвета, но больше нагрузка на GPU */
-  dyeResolution: tier === "high" ? 1024 : tier === "medium" ? 512 : 256,
+  dyeResolution: isMobile ? 256 : 1024,
   /** Разрешение сетки физической симуляции (пиксели) - чем больше, тем точнее физика, но больше вычислений */
-  simResolution: isMobile ? 128 : 256,
+  simResolution: isMobile ? 150 : 256,
   /** Скорость затухания плотности (0.0-1.0) - чем ближе к 1.0, тем быстрее исчезают цвета */
   densityDissipation: 1,
   /** Скорость затухания скорости (0.0-1.0) - чем ближе к 1.0, тем быстрее останавливается движение */
-  velocityDissipation: isMobile ? 0.4 : 0.01,
+  velocityDissipation: isMobile ? 0.9 : 0.3,
   /** Сила давления жидкости (0.0-1.0) - чем меньше, тем сильнее распространение волн */
   pressure: 0.01,
   /** Количество итераций расчета давления (1-50) - чем больше, тем точнее физика, но медленнее */
@@ -60,7 +60,7 @@ const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolea
     /** Многоцветность - включает смешивание цветов */
     colorful: true,
     /** Скорость смены цветов (1-10) - меньше на мобильных для экономии ресурсов */
-    colorUpdateSpeed: isMobile ? 5 : 10,
+    colorUpdateSpeed: 10,
     /** Реакция на наведение мыши - отключена на тач-устройствах */
     hover: !isTouchDevice,
     /** Цвет фона canvas */
@@ -158,7 +158,7 @@ const FluidEffect: React.FC = () => {
 
         console.log(`[FluidEffect] Initialized for theme: ${theme}`);
       } catch (error) {
-        console.error('[FluidEffect] Initialization Error:', error);
+        console.error("[FluidEffect] Initialization Error:", error);
       }
     };
 
@@ -168,7 +168,7 @@ const FluidEffect: React.FC = () => {
     return () => {
       try {
         console.log(`[FluidEffect] Cleaning up for theme: ${theme}`);
-        
+
         if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
 
         if (simulationRef.current) {
@@ -178,14 +178,14 @@ const FluidEffect: React.FC = () => {
 
         if (containerRef.current) {
           // Полная и надежная очистка контейнера.
-          containerRef.current.innerHTML = '';
+          containerRef.current.innerHTML = "";
         }
 
         setFluidInstance(null);
         isRunningRef.current = false;
-        console.log('[FluidEffect] Cleanup complete.');
+        console.log("[FluidEffect] Cleanup complete.");
       } catch (error) {
-        console.error('[FluidEffect] Cleanup Error:', error);
+        console.error("[FluidEffect] Cleanup Error:", error);
       }
     };
   }, [setFluidInstance, theme, tier, isTouchDevice, isMobile]);
@@ -198,8 +198,32 @@ const FluidEffect: React.FC = () => {
 
     let lastTouchEvent: TouchEvent | null = null;
     let touchInterval: NodeJS.Timeout | null = null;
+    let animationFrameId: number | null = null;
+    let lastMouseEvent: MouseEvent | null = null;
+
+    // Эта функция будет вызываться в requestAnimationFrame
+    const updateAnimation = () => {
+      if (!lastMouseEvent) {
+        animationFrameId = null;
+        return;
+      }
+
+      handleEvent(lastMouseEvent);
+      animationFrameId = null; // Освобождаем для следующего кадра
+    };
+
+    // Throttled-обработчик для mousemove
+    const throttledMouseMoveHandler = (event: MouseEvent) => {
+      lastMouseEvent = event;
+      if (animationFrameId === null) {
+        animationFrameId = requestAnimationFrame(updateAnimation);
+      }
+    };
 
     function handleEvent(event: Event) {
+      const target = event.target as HTMLElement;
+      if (target?.closest?.('[data-parallax-section="true"]')) return;
+
       if (!containerRef.current) return;
       const canvas = containerRef.current.querySelector("canvas");
       if (!canvas) return;
@@ -253,7 +277,7 @@ const FluidEffect: React.FC = () => {
         if (event.type === "touchstart") {
           if (touchInterval) clearInterval(touchInterval);
           touchInterval = setInterval(() => {
-            if (lastTouchEvent && lastTouchEvent.touches[0]) {
+            if (lastTouchEvent?.touches[0]) {
               const continuousEvent = new MouseEvent("mousemove", {
                 clientX: lastTouchEvent.touches[0].clientX,
                 clientY: lastTouchEvent.touches[0].clientY,
@@ -274,14 +298,21 @@ const FluidEffect: React.FC = () => {
       }
     }
 
-    const eventTypes = ["mousemove", "mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
-    eventTypes.forEach((eventType) => {
-      mainElement.addEventListener(eventType, handleEvent, { passive: true, capture: false });
+    // Прямые обработчики для кликов и тапов
+    const directEventTypes = ["mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
+    directEventTypes.forEach((type) => {
+      mainElement.addEventListener(type, handleEvent, { passive: true });
     });
+
+    // Throttled-обработчик для движения мыши
+    mainElement.addEventListener("mousemove", throttledMouseMoveHandler as EventListener, { passive: true });
 
     return () => {
       if (touchInterval) clearInterval(touchInterval);
-      eventTypes.forEach((eventType) => mainElement.removeEventListener(eventType, handleEvent));
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      directEventTypes.forEach((type) => mainElement.removeEventListener(type, handleEvent));
+      mainElement.removeEventListener("mousemove", throttledMouseMoveHandler as EventListener);
     };
   }, [startAnimation, scheduleStopAnimation]);
 

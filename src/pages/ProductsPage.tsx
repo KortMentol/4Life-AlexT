@@ -1,7 +1,5 @@
-import { productsData } from "@/data/productsData";
-import { Product } from "@/types/Product";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { GlowEffect } from "../components/layout/GlowEffect";
 import { Helmet } from "react-helmet-async";
 import {
   cardVariants,
@@ -9,42 +7,10 @@ import {
   itemVariants,
 } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
-import CategoryFilter from "../components/ui/CategoryFilter";
-import ProductCard from "../components/ui/ProductCard";
-import ProductDetailModal from "../components/ui/ProductDetailModal";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
 
 const ProductsPage: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
-  const categories = Array.from(
-    new Set(productsData.flatMap((p) => p.categories ?? [])),
-  ).sort();
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category],
-    );
-  };
-
-  const clearSelection = () => setSelectedCategories([]);
-
-  const handleQuickView = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  const closeModal = () => setSelectedProduct(null);
-  const filteredProducts =
-    selectedCategories.length === 0
-      ? productsData
-      : productsData.filter((p) =>
-          (p.categories ?? []).some((cat) => selectedCategories.includes(cat)),
-        );
-
   return (
     <>
       <Helmet>
@@ -101,15 +67,17 @@ const ProductsPage: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="relative z-10"
             >
-              <motion.h1
-                className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-              >
-                Наш Полный Каталог Продукции 4Life
-              </motion.h1>
+              <GlowEffect>
+                <motion.h1
+                  className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
+                  variants={itemVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  Каталог Продукции 4Life
+                </motion.h1>
+              </GlowEffect>
               <motion.p
                 className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
                 variants={itemVariants}
@@ -303,56 +271,7 @@ const ProductsPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Category Filter */}
-        <CategoryFilter
-          categories={categories}
-          selected={selectedCategories}
-          toggleCategory={toggleCategory}
-          clearSelection={clearSelection}
-        />
 
-        {/* Products Section */}
-        <section className="py-16 md:py-24 bg-gray-50/0 dark:bg-gray-800/0 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
-          <div className="container mx-auto px-4 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px 0px" }}
-              transition={{ duration: 0.5 }}
-              className="relative z-10"
-            >
-              <SectionHeading
-                title="Продукция 4Life"
-                subtitle="Выберите продукты 4Life для своего здоровья и благополучия."
-              />
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12 relative z-10"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-50px 0px" }}
-            >
-              {filteredProducts.map((product, index) => (
-                <motion.div
-                  key={index}
-                  variants={cardVariants}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.3 }}
-                  className="relative z-10 h-full"
-                >
-                  <ProductCard
-                    product={product}
-                    delay={0.1 * index}
-                    onQuickView={handleQuickView}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
 
         {/* Why Choose Section */}
         <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
@@ -436,14 +355,6 @@ const ProductsPage: React.FC = () => {
         />
       </div>
 
-      {/* Product Detail Modal */}
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          isOpen={!!selectedProduct}
-          onClose={closeModal}
-        />
-      )}
     </>
   );
 };

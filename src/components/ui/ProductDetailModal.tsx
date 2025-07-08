@@ -10,6 +10,48 @@ interface ProductDetailModalProps {
   onClose: () => void;
 }
 
+/**
+ * @module components/ui/ProductDetailModal
+ * @description Модальное окно для детального просмотра продукта ("Quick View").
+ * Построено на базе Headless UI (`Dialog`, `Transition`) для обеспечения доступности и плавных анимаций.
+ * Отображает подробную информацию о продукте, включая описание, преимущества, ингредиенты, и позволяет выбрать количество и добавить товар в список покупок с помощью хука `useProductList`.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {Product} product - Объект с данными продукта для отображения.
+ * @param {boolean} isOpen - Состояние, определяющее, открыто ли модальное окно.
+ * @param {() => void} onClose - Функция обратного вызова для закрытия модального окна.
+ *
+ * @see Dialog - Компонент модального окна из Headless UI.
+ * @see Transition - Компонент для управления анимациями входа/выхода из Headless UI.
+ * @see useProductList - Хук для управления списком продуктов.
+ * @see ProductCard - Компонент, который обычно инициирует открытие этого модального окна.
+ *
+ * @usage
+ * Используется на страницах каталога для реализации функции "Быстрый просмотр".
+ * Состояние `isOpen` и функция `onClose` управляются родительским компонентом.
+ *
+ * @example
+ * const [isModalOpen, setIsModalOpen] = useState(false);
+ * const [selectedProduct, setSelectedProduct] = useState(null);
+ * 
+ * const handleQuickView = (product) => {
+ *   setSelectedProduct(product);
+ *   setIsModalOpen(true);
+ * };
+ * 
+ * const closeModal = () => setIsModalOpen(false);
+ * 
+ * // ... в рендере
+ * {selectedProduct && (
+ *   <ProductDetailModal
+ *     isOpen={isModalOpen}
+ *     onClose={closeModal}
+ *     product={selectedProduct}
+ *   />
+ * )}
+ */
 const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   product,
   isOpen,

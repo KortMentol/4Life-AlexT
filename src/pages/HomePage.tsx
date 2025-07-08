@@ -1,20 +1,26 @@
 import { motion } from "framer-motion";
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import ParallaxSection from "../components/ui/ParallaxSection";
 import SectionHeading from "../components/ui/SectionHeading";
-import StaticFeature from "../components/ui/StaticFeature";
-
-import KineticProductCarousel from "../components/ui/KineticProductCarousel";
-import InteractiveProductCard from "../components/ui/InteractiveProductCard";
 import { AuroraText } from "../components/magicui/aurora-text";
 import { Icons } from "../utils/icons";
+
+// --- LAZY LOADED COMPONENTS ---
+// Для максимальной производительности загружаем компоненты "ниже сгиба" только когда они нужны.
+const StaticFeature = lazy(() => import("../components/ui/StaticFeature"));
+const KineticProductCarousel = lazy(
+  () => import("../components/ui/KineticProductCarousel")
+);
+const InteractiveProductCard = lazy(
+  () => import("../components/ui/InteractiveProductCard")
+);
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
   // --- ГЛАВНЫЙ ПАРАМЕТР СИЛЫ ПАРАЛЛАКСА ---
-  const GLOBAL_PARALLAX_STRENGTH = 30;
+  const GLOBAL_PARALLAX_STRENGTH = 40;
 
   // Данные для секции преимуществ
   const features = [
@@ -228,17 +234,19 @@ const HomePage: React.FC = () => {
               titleClassName="text-black dark:text-gray-100"
               subtitleClassName="text-blue-600 dark:text-blue-400"
             />
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-              {features.map((feature, index) => (
-                <StaticFeature
-                  key={index}
-                  icon={feature.icon}
-                  title={feature.title}
-                  description={feature.description}
-                  colorTheme="blue"
-                />
-              ))}
-            </div>
+            <Suspense fallback={<div className="mt-16 h-[300px] w-full" />}>
+              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+                {features.map((feature, index) => (
+                  <StaticFeature
+                    key={index}
+                    icon={feature.icon}
+                    title={feature.title}
+                    description={feature.description}
+                    colorTheme="blue"
+                  />
+                ))}
+              </div>
+            </Suspense>
           </div>
         </div>
       </section>
@@ -247,6 +255,7 @@ const HomePage: React.FC = () => {
       <section id="products">
         <ParallaxSection
           backgroundImage="/src/assets/images/backgrounds/2.jpg"
+          lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
           parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
@@ -283,37 +292,39 @@ const HomePage: React.FC = () => {
             <div className="container max-w-7xl mx-auto">
               {/* ... Заголовок и описание секции ... */}
 
-              <div className="mt-12">
-                {/* --- ДЕСКТОПНАЯ ВЕРСИЯ (ГРИД) --- */}
-                <motion.div
-                  className="hidden lg:grid grid-cols-3 gap-8 px-6"
-                  initial="initial"
-                  whileInView="inView"
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ staggerChildren: 0.1 }}
-                >
-                  {popularProducts.map((product) => (
-                    <motion.div
-                      key={product.id}
-                      variants={{
-                        initial: { opacity: 0, y: 30 },
-                        inView: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: 0.6 },
-                        },
-                      }}
-                    >
-                      <InteractiveProductCard product={product} />
-                    </motion.div>
-                  ))}
-                </motion.div>
+              <Suspense fallback={<div className="mt-12 h-[500px] w-full" />}>
+                <div className="mt-12">
+                  {/* --- ДЕСКТОПНАЯ ВЕРСИЯ (ГРИД) --- */}
+                  <motion.div
+                    className="hidden lg:grid grid-cols-3 gap-8 px-6"
+                    initial="initial"
+                    whileInView="inView"
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ staggerChildren: 0.1 }}
+                  >
+                    {popularProducts.map((product) => (
+                      <motion.div
+                        key={product.id}
+                        variants={{
+                          initial: { opacity: 0, y: 30 },
+                          inView: {
+                            opacity: 1,
+                            y: 0,
+                            transition: { duration: 0.6 },
+                          },
+                        }}
+                      >
+                        <InteractiveProductCard product={product} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
 
-                {/* --- МОБИЛЬНАЯ И ПЛАНШЕТНАЯ ВЕРСИЯ (КАРУСЕЛЬ) --- */}
-                <div className="block lg:hidden -mx-6">
-                  <KineticProductCarousel products={popularProducts} />
+                  {/* --- МОБИЛЬНАЯ И ПЛАНШЕТНАЯ ВЕРСИЯ (КАРУСЕЛЬ) --- */}
+                  <div className="block lg:hidden -mx-6">
+                    <KineticProductCarousel products={popularProducts} />
+                  </div>
                 </div>
-              </div>
+              </Suspense>
 
               <motion.div
                 className="mt-12 text-center px-6"
@@ -322,7 +333,7 @@ const HomePage: React.FC = () => {
               >
                 <Link
                   to="/products"
-                  className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
+                  className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 md:backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-blue-500/80 to-blue-400/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
@@ -369,16 +380,18 @@ const HomePage: React.FC = () => {
             />
           </div>
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-            {benefits.map((benefit, index) => (
-              <StaticFeature
-                key={index}
-                icon={benefit.icon}
-                title={benefit.title}
-                description={benefit.description}
-              />
-            ))}
-          </div>
+          <Suspense fallback={<div className="mt-16 h-[300px] w-full" />}>
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+              {benefits.map((benefit, index) => (
+                <StaticFeature
+                  key={index}
+                  icon={benefit.icon}
+                  title={benefit.title}
+                  description={benefit.description}
+                />
+              ))}
+            </div>
+          </Suspense>
 
           <div className="mt-16 text-center">
             <motion.div

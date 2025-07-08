@@ -32,6 +32,25 @@ const RocketExhaust: React.FC<{ count: number }> = ({ count }) => (
   </div>
 );
 
+/**
+ * @module components/ui/ScrollToTopButton
+ * @description Кнопка для плавной прокрутки страницы вверх.
+ * Появляется, когда пользователь прокручивает страницу вниз более чем на 15%. При нажатии инициирует плавную прокрутку к началу страницы, используя библиотеку `lenis` для десктопов и нативный `window.scrollTo` для мобильных устройств. При клике воспроизводит анимацию "реактивного выхлопа" с помощью системы частиц.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @see lenis - Библиотека для плавной прокрутки, с которой интегрируется кнопка.
+ * @see motion - Компонент из `framer-motion` для анимации кнопки и частиц.
+ * @see AnimatePresence - Компонент `framer-motion` для управления анимацией появления/исчезновения дочерних элементов (частиц).
+ *
+ * @usage
+ * Компонент не принимает пропсов. Обычно размещается в корневом компоненте приложения (`App.tsx`) или в общем макете (`Layout.tsx`), чтобы быть доступным на всех страницах.
+ *
+ * @example
+ * // В App.tsx или Layout.tsx
+ * <ScrollToTopButton />
+ */
 const ScrollToTopButton: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClicked, setIsClicked] = useState(false);

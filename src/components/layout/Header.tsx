@@ -121,11 +121,9 @@ const Header: React.FC = () => {
         animate={isHidden ? "hidden" : "visible"}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         style={{
-          WebkitBackdropFilter: "blur(8px)",
-          backdropFilter: "blur(8px)",
           top: "env(safe-area-inset-top)",
         }}
-        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow"
+        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 md:backdrop-blur-md shadow"
       >
         <div className="container max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">

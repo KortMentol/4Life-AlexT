@@ -1,28 +1,17 @@
 import React from "react";
-import MagneticEffect from "../effects/MagneticEffect";
 
 interface InteractiveCardProps {
   children: React.ReactNode;
   className?: string;
-  magneticStrength?: number;
 }
 
 const InteractiveCard: React.FC<InteractiveCardProps> = ({
   children,
   className = "",
-  magneticStrength = 0.15,
 }) => {
-  const cardClasses = [
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const cardClasses = [className].filter(Boolean).join(" ");
 
-  return (
-    <MagneticEffect strength={magneticStrength} className={cardClasses}>
-      {children}
-    </MagneticEffect>
-  );
+  return <div className={cardClasses}>{children}</div>;
 };
 
 export default InteractiveCard;

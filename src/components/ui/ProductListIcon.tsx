@@ -1,17 +1,17 @@
 import { useProductList } from "@/hooks/useProductList";
-import "./ProductListIcon.css";
 import { Dialog, Transition } from "@headlessui/react";
 import {
+  ClipboardDocumentListIcon as ClipboardListIcon,
   MinusIcon,
   PaperAirplaneIcon,
   PlusIcon,
   TrashIcon,
   XMarkIcon,
-  ClipboardDocumentListIcon as ClipboardListIcon,
 } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { Fragment, useEffect, useState, useRef } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { FaTelegram, FaWhatsapp } from "react-icons/fa";
+import "./ProductListIcon.css";
 
 interface ProductListIconProps {
   className?: string;
@@ -33,14 +33,32 @@ const messengerButtonVariants = {
   },
 };
 
+/**
+ * @module components/ui/ProductListIcon
+ * @description Многофункциональный компонент, который отображает иконку списка покупок с количеством товаров и открывает модальное окно со всем списком.
+ * Модальное окно позволяет пользователям управлять списком: изменять количество товаров, удалять позиции, очищать список и отправлять его в мессджеры (Telegram, WhatsApp).
+ * Компонент использует `useProductList` для управления состоянием, `Headless UI` для доступного модального окна и `framer-motion` для анимаций.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {string} [className] - Дополнительные CSS-классы для позиционирования иконки.
+ *
+ * @see useProductList - Хук для управления состоянием списка продуктов.
+ * @see Dialog - Компонент модального окна из Headless UI.
+ * @see Transition - Компонент для анимации из Headless UI.
+ * @see motion - Компонент для анимации из framer-motion.
+ *
+ * @usage
+ * Обычно размещается в `App.tsx` или в главном layout-компоненте, чтобы быть доступным на всех страницах.
+ * Часто используется как плавающая кнопка (Floating Action Button).
+ *
+ * @example
+ * // В App.tsx или Layout.tsx
+ * <ProductListIcon className="fixed bottom-8 right-8 z-50" />
+ */
 const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
-  const {
-    items,
-    removeFromList,
-    updateItemQuantity,
-    getTotalItems,
-    clearList,
-  } = useProductList();
+  const { items, removeFromList, updateItemQuantity, getTotalItems, clearList } = useProductList();
 
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -60,11 +78,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     // Добавляем обработчик клика вне модального окна
     const handleClickOutside = (event: Event) => {
       // Если модальное окно открыто и клик был не по кнопке
-      if (
-        isOpen &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
+      if (isOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         // Проверяем, был ли клик по диалогу (не закрываем в этом случае)
         const dialogElement = document.querySelector('[role="dialog"]');
         if (dialogElement && !dialogElement.contains(event.target as Node)) {
@@ -88,10 +102,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
   }, [isOpen]);
   const [showMessengerOptions, setShowMessengerOptions] = useState(false);
   const [clientId, setClientId] = useState<string>(
-    () =>
-      (typeof window !== "undefined" &&
-        localStorage.getItem("clientId4life")) ||
-      "",
+    () => (typeof window !== "undefined" && localStorage.getItem("clientId4life")) || ""
   );
 
   useEffect(() => {
@@ -230,9 +241,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                   </Dialog.Title>
 
                   {items.length === 0 ? (
-                    <p className="text-gray-400 text-center py-10">
-                      Ваш список пуст. Добавьте продукты!
-                    </p>
+                    <p className="text-gray-400 text-center py-10">Ваш список пуст. Добавьте продукты!</p>
                   ) : (
                     <>
                       <ul className="divide-y divide-gray-700 max-h-96 overflow-y-auto pr-2">
@@ -244,31 +253,18 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                             exit={{ opacity: 0, x: -50 }}
                             className="py-4 flex items-center space-x-4"
                           >
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-16 h-16 object-contain rounded-md"
-                            />
+                            <img src={item.image} alt={item.name} className="w-16 h-16 object-contain rounded-md" />
                             <div className="flex-grow">
-                              <h4 className="text-lg font-semibold text-white">
-                                {item.name}
-                              </h4>
-                              <p className="text-gray-400 text-sm line-clamp-2">
-                                {item.shortDescription}
-                              </p>
+                              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
+                              <p className="text-gray-400 text-sm line-clamp-2">{item.shortDescription}</p>
                             </div>
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() =>
-                                  updateItemQuantity(item.id, item.quantity - 1)
-                                }
+                                onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
                                     e.preventDefault();
-                                    updateItemQuantity(
-                                      item.id,
-                                      item.quantity - 1,
-                                    );
+                                    updateItemQuantity(item.id, item.quantity - 1);
                                   }
                                 }}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
@@ -281,16 +277,11 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() =>
-                                  updateItemQuantity(item.id, item.quantity + 1)
-                                }
+                                onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
                                     e.preventDefault();
-                                    updateItemQuantity(
-                                      item.id,
-                                      item.quantity + 1,
-                                    );
+                                    updateItemQuantity(item.id, item.quantity + 1);
                                   }
                                 }}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
@@ -340,9 +331,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                           ) : clientId.trim() === "" ? (
                             <div className="flex flex-col space-y-4 w-full">
                               <label className="text-sm text-gray-300 flex flex-col items-start w-full">
-                                <span className="mb-1">
-                                  Введите ваш ID клиента 4Life (если есть):
-                                </span>
+                                <span className="mb-1">Введите ваш ID клиента 4Life (если есть):</span>
                                 <input
                                   type="text"
                                   value={clientId}
@@ -352,10 +341,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 />
                               </label>
                               <motion.button
-                                onClick={() =>
-                                  clientId.trim() &&
-                                  setShowMessengerOptions(true)
-                                }
+                                onClick={() => clientId.trim() && setShowMessengerOptions(true)}
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
                                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all duration-300 w-full"

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { motion, useAnimation, useInView } from "framer-motion";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { motion, useAnimation, useInView } from "framer-motion";
+import React, { memo, useEffect, useRef } from "react";
 
 interface StaticFeatureProps {
   icon: React.ElementType;
@@ -11,9 +11,35 @@ interface StaticFeatureProps {
 }
 
 /**
- * Компонент для отображения преимуществ с интеллектуальной анимацией:
- * - На десктопе: анимация при наведении курсора.
- * - На мобильных: анимация при появлении в поле зрения во время скролла.
+ * @module components/ui/StaticFeature
+ * @description Компонент для отображения отдельного преимущества или характеристики с иконкой, заголовком и описанием.
+ * Обладает интеллектуальной анимацией: на десктопных устройствах анимация запускается при наведении курсора, а на мобильных — при попадании компонента в область видимости во время прокрутки. Это обеспечивает как интерактивность, так и хорошую производительность.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {React.ElementType} icon - Компонент иконки для отображения (например, из `lucide-react`).
+ * @param {string} title - Заголовок преимущества.
+ * @param {string} description - Описание преимущества.
+ * @param {'blue' | 'green'} [colorTheme='green'] - Цветовая схема компонента.
+ * @param {string} [className] - Дополнительные CSS-классы для корневого элемента.
+ *
+ * @see useIsMobile - Хук для определения типа устройства.
+ * @see useAnimation - Хук `framer-motion` для управления анимациями.
+ * @see useInView - Хук `framer-motion` для отслеживания видимости элемента.
+ *
+ * @usage
+ * Идеально подходит для использования в грид-сетках на главной странице или страницах продуктов для перечисления ключевых особенностей.
+ *
+ * @example
+ * import { ShieldCheck } from 'lucide-react';
+ * 
+ * <StaticFeature
+ *   icon={ShieldCheck}
+ *   title="Надежная Защита"
+ *   description="Наши продукты проходят строгий контроль качества."
+ *   colorTheme="blue"
+ * />
  */
 const StaticFeature: React.FC<StaticFeatureProps> = ({
   icon: Icon,
@@ -62,25 +88,8 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
       transition: {
         duration: 0.6,
         ease: "easeOut",
-        when: "beforeChildren",
-        staggerChildren: 0.15,
       },
     },
-  };
-
-  const iconVariants = {
-    hidden: { scale: 0.9, opacity: 0 },
-    visible: { scale: 1.1, opacity: 1, transition: { duration: 0.4, ease: "easeOut" } },
-  };
-
-  const barVariants = {
-    hidden: { width: "0%" },
-    visible: { width: "100%", transition: { duration: 0.7, ease: "easeInOut" } },
-  };
-
-  const itemVariants = {
-    hidden: { y: 10, opacity: 0 },
-    visible: { y: 0, opacity: 1 },
   };
 
   if (isMobile) {
@@ -90,33 +99,23 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
         variants={containerVariants}
         initial="hidden"
         animate={controls}
-        className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border ${theme.border} shadow-lg ${className}`}
+        className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg ${className}`}
       >
-        <motion.div
-          variants={iconVariants}
+        <div
           className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${theme.icon} flex items-center justify-center mb-6 shadow-md`}
         >
           <Icon className="w-8 h-8 text-white" />
-        </motion.div>
+        </div>
 
-        <motion.h3
-          variants={itemVariants}
-          className={`text-xl font-bold mb-4 text-gray-800 dark:text-white`}
-        >
+        <h3 className={`text-xl font-bold mb-4 text-gray-800 dark:text-white`}>
           {title}
-        </motion.h3>
-        <motion.p
-          variants={itemVariants}
-          className="text-gray-600 dark:text-gray-300 leading-relaxed"
-        >
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
           {description}
-        </motion.p>
+        </p>
 
         <div className="mt-6">
-          <motion.div
-            variants={barVariants}
-            className={`h-1 bg-gradient-to-r ${theme.hoverBar}`}
-          />
+          <div className={`h-1 bg-gradient-to-r ${theme.hoverBar}`} />
         </div>
       </motion.div>
     );
@@ -124,7 +123,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
 
   return (
     <div
-      className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className}`}
+      className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className}`}
     >
       <div
         className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${theme.icon} flex items-center justify-center mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300`}
@@ -137,9 +136,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
       >
         {title}
       </h3>
-      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-        {description}
-      </p>
+      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{description}</p>
 
       <div
         className={`w-0 h-1 bg-gradient-to-r ${theme.hoverBar} mt-6 group-hover:w-full transition-all duration-500`}
@@ -148,4 +145,4 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
   );
 };
 
-export default StaticFeature;
+export default memo(StaticFeature);

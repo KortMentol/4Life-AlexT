@@ -21,6 +21,53 @@ interface HeroProps {
   children?: React.ReactNode;
 }
 
+/**
+ * @module components/ui/Hero
+ * @description Гибкий и многофункциональный компонент "Hero-секции" для создания заглавных экранов.
+ * Поддерживает фоновые изображения, оверлеи, настройку высоты, расположения и ширины контента, а также цветовые схемы текста.
+ * Включает анимированные текстовые блоки и кнопки, используя `framer-motion` для плавного появления.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {string} title - Основной заголовок.
+ * @param {string} [subtitle] - Подзаголовок, отображаемый над основным заголовком.
+ * @param {string} [description] - Описательный текст под заголовком.
+ * @param {string} [primaryButtonText] - Текст для основной кнопки.
+ * @param {string} [primaryButtonLink] - Ссылка для основной кнопки.
+ * @param {string} [secondaryButtonText] - Текст для вторичной кнопки.
+ * @param {string} [secondaryButtonLink] - Ссылка для вторичной кнопки.
+ * @param {string} [backgroundImage] - URL фонового изображения.
+ * @param {boolean} [backgroundOverlay=true] - Включает/отключает темный оверлей поверх фона.
+ * @param {number} [backgroundOverlayOpacity=0.5] - Прозрачность оверлея.
+ * @param {'full' | 'large' | 'medium' | 'small'} [height='large'] - Высота секции.
+ * @param {'center' | 'left' | 'right'} [contentPosition='center'] - Горизонтальное выравнивание контента.
+ * @param {'narrow' | 'medium' | 'wide' | 'full'} [contentWidth='medium'] - Максимальная ширина контейнера с контентом.
+ * @param {'light' | 'dark'} [textColor='light'] - Цвет текста для контраста с фоном.
+ * @param {boolean} [withDecoration=true] - Включает/отключает декоративные элементы (градиенты, круги).
+ * @param {React.ReactNode} [children] - Дополнительные дочерние элементы для вставки в контент.
+ *
+ * @see Button - Компонент для создания кнопок.
+ * @see motion - Компонент из `framer-motion` для анимаций.
+ *
+ * @usage
+ * Используется как главный визуальный элемент на большинстве страниц для привлечения внимания.
+ * 
+ * 1. **На главной странице (`src/pages/HomePage.tsx`):**
+ *    - Для представления компании и основного предложения.
+ * 2. **На странице "О нас" (`src/pages/AboutPage.tsx`):**
+ *    - Для создания вступительной секции с миссией компании.
+ *
+ * @example
+ * <Hero
+ *   title="Инновации для вашего здоровья"
+ *   subtitle="Передовые технологии"
+ *   description="Откройте для себя продукты, которые изменят вашу жизнь."
+ *   backgroundImage="/path/to/image.jpg"
+ *   primaryButtonText="Каталог"
+ *   primaryButtonLink="/products"
+ * />
+ */
 const Hero: React.FC<HeroProps> = ({
   title,
   subtitle,

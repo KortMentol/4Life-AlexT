@@ -6,30 +6,15 @@ import TextShineEffect from "@/components/effects/TextShineEffect";
 import Accordion, { AccordionItem } from "@/components/ui/Accordion";
 import { Icons } from "@/utils/icons";
 import SectionHeading from "../components/ui/SectionHeading";
+import {
+  buttonVariants,
+  containerVariants,
+  itemVariants,
+} from "@/animations/variants";
 
 // Страница описывает процесс покупки 4Life в 2 шага и преимущества ПК
 const HowToBuyPage = () => {
-  // 3. Определение вариантов анимаций для Framer Motion
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-  };
-
-  const buttonVariants = {
-    rest: { scale: 1 },
-    hover: { scale: 1.05 },
-    tap: { scale: 0.95 },
-  };
 
   // Преимущества для Приоритетного Клиента
   const pcBenefits = [

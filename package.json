@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "postinstall": "patch-package",
     "build": "vite build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0",
     "lint:fix": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --fix",
@@ -22,6 +23,7 @@
     "@use-gesture/react": "^10.3.1",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.344.0",
+    "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",

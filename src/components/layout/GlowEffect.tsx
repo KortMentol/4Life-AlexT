@@ -1,193 +1,86 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useTheme } from "../../hooks/useTheme";
 
-// Продвинутая анимация свечения для темной темы
+// Анимация свечения для темной темы в неоновом бирюзовом цвете.
 const glowDark = keyframes`
-  0% {
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.4)) drop-shadow(0 0 5px rgba(0, 255, 255, 0.2));
   }
   50% {
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
-  }
-  100% {
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.6)) drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
   }
 `;
 
-// Продвинутая анимация свечения для светлой темы
+// Анимация свечения для светлой темы в энергичном пурпурном цвете.
 const glowLight = keyframes`
-  0% {
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 3px rgba(0, 0, 0, 0.1));
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(220, 38, 147, 0.4)) drop-shadow(0 0 5px rgba(220, 38, 147, 0.2));
   }
   50% {
-    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.15)) drop-shadow(0 0 5px rgba(0, 0, 0, 0.15));
-  }
-  100% {
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 3px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 0 5px rgba(220, 38, 147, 0.6)) drop-shadow(0 0 10px rgba(220, 38, 147, 0.4));
   }
 `;
 
-// Контейнер с эффектом свечения
+// Стилизованный контейнер, который применяет анимацию в зависимости от темы.
 const GlowContainer = styled.div<{ isDark: boolean }>`
   position: relative;
   display: inline-block;
-  animation: ${(props) => (props.isDark ? glowDark : glowLight)} 3s ease-in-out
-    infinite;
+  animation: ${({ isDark }) => (isDark ? glowDark : glowLight)} var(--animation-duration, 3s) ease-in-out
+    var(--animation-delay, 0s) infinite;
 `;
 
 interface GlowEffectProps {
   children: React.ReactNode;
-  color?: string;
-  intensity?: number; // Оставляем в интерфейсе для GlowEffect
+  /** Длительность одного цикла анимации в секундах. */
   duration?: number;
+  /** Задержка перед началом анимации в секундах. */
   delay?: number;
 }
 
-export const GlowEffect: React.FC<GlowEffectProps> = ({
-  children,
-  color = "rgba(255, 215, 0, 0.7)",
-  intensity = 1,
-  duration = 3,
-  delay = 0,
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+/**
+ * @module components/layout/GlowEffect
+ * @description Компонент для создания анимированного эффекта свечения вокруг дочерних элементов.
+ * Эффект реализован с помощью CSS `filter: drop-shadow` для оптимальной производительности и автоматически
+ * адаптируется к светлой и темной теме, используя разные keyframes-анимации.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {React.ReactNode} children - Дочерние элементы, которые будут обернуты эффектом.
+ * @param {number} [duration=3] - Длительность одного цикла анимации в секундах.
+ * @param {number} [delay=0] - Задержка перед началом анимации в секундах.
+ *
+ * @see glowDark - Анимация keyframes для темной темы.
+ * @see glowLight - Анимация keyframes для светлой темы.
+ *
+ * @usage
+ * Используется для акцентирования внимания на ключевых заголовках или элементах интерфейса.
+ * 
+ * 1. **На странице "Продукты" (`src/pages/ProductsPage.tsx`):**
+ *    - Для главного заголовка "Наш Полный Каталог Продукции 4Life".
+ *
+ * @example
+ * <GlowEffect duration={4}>
+ *   <h1>Важный заголовок</h1>
+ * </GlowEffect>
+ */
+export const GlowEffect: React.FC<GlowEffectProps> = ({ children, duration = 3, delay = 0 }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-
-  // Адаптируем цвет в зависимости от темы
-  const adaptedColor = isDark
-    ? color
-    : color.includes("rgba")
-      ? color.replace(
-          /rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/,
-          "rgba($1, $2, $3, 0.3)",
-        )
-      : "rgba(0, 0, 0, 0.3)";
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Настраиваем анимацию с помощью CSS переменных
-    container.style.setProperty("--glow-color", adaptedColor);
-    // Используем intensity в CSS переменной
-    container.style.setProperty("--glow-intensity", intensity.toString());
-    container.style.setProperty("--animation-duration", `${duration}s`);
-    container.style.setProperty("--animation-delay", `${delay}s`);
-  }, [adaptedColor, intensity, duration, delay]);
 
   return (
     <GlowContainer
-      ref={containerRef}
       isDark={isDark}
-      style={{
-        animationDuration: `${duration}s`,
-        animationDelay: `${delay}s`,
-      }}
+      style={
+        {
+          "--animation-duration": `${duration}s`,
+          "--animation-delay": `${delay}s`,
+        } as React.CSSProperties
+      }
     >
       {children}
     </GlowContainer>
-  );
-};
-
-// Продвинутый эффект свечения с частицами
-export const ParticleGlowEffect: React.FC<
-  Omit<GlowEffectProps, "intensity"> & { particleCount?: number }
-> = ({
-  children,
-  color = "rgba(255, 215, 0, 0.7)",
-  duration = 3,
-  delay = 0,
-  particleCount = 5,
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
-  // Адаптируем цвет в зависимости от темы
-  const adaptedColor = isDark
-    ? color
-    : color.includes("rgba")
-      ? color.replace(
-          /rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/,
-          "rgba($1, $2, $3, 0.2)",
-        )
-      : "rgba(0, 0, 0, 0.2)";
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Создаем и добавляем частицы
-    for (let i = 0; i < particleCount; i++) {
-      const particle = document.createElement("div");
-      particle.className = "glow-particle";
-
-      // Случайное позиционирование частиц
-      const size = Math.random() * 4 + 2;
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-      particle.style.background = adaptedColor;
-      particle.style.borderRadius = "50%";
-      particle.style.position = "absolute";
-      particle.style.filter = `blur(${size / 2}px)`;
-      particle.style.opacity = "0";
-
-      // Анимация частиц
-      const animDuration = Math.random() * 3 + 2;
-      const animDelay = Math.random() * 2;
-
-      particle.style.animation = `particle-glow ${animDuration}s ease-in-out ${animDelay}s infinite`;
-
-      // Добавляем стиль для анимации
-      if (!document.getElementById("particle-glow-keyframes")) {
-        const style = document.createElement("style");
-        style.id = "particle-glow-keyframes";
-        style.innerHTML = `
-          @keyframes particle-glow {
-            0% { 
-              opacity: 0;
-              transform: translate(0, 0);
-            }
-            50% { 
-              opacity: 0.8;
-              transform: translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px);
-            }
-            100% { 
-              opacity: 0;
-              transform: translate(0, 0);
-            }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-
-      // Случайное позиционирование
-      particle.style.left = `${Math.random() * 100}%`;
-      particle.style.top = `${Math.random() * 100}%`;
-
-      container.appendChild(particle);
-    }
-
-    return () => {
-      // Очистка частиц при размонтировании
-      const particles = container.querySelectorAll(".glow-particle");
-      particles.forEach((particle) => particle.remove());
-    };
-  }, [particleCount, adaptedColor]);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "relative",
-        display: "inline-block",
-        animation: `${isDark ? glowDark : glowLight} ${duration}s ease-in-out ${delay}s infinite`,
-      }}
-    >
-      {children}
-    </div>
   );
 };

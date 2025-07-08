@@ -14,6 +14,35 @@ interface AccordionProps {
   className?: string;
 }
 
+/**
+ * @module components/ui/Accordion
+ * @description Компонент "аккордеон" для отображения сворачиваемых секций контента.
+ * Построен с использованием Headless UI для доступности и Framer Motion для плавных анимаций.
+ * Каждая секция может быть раскрыта или скрыта по клику на заголовок.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {AccordionItem[]} items - Массив объектов, представляющих секции аккордеона. Каждый объект должен содержать `id`, `title` и `content`.
+ * @param {string} [className] - Дополнительные CSS-классы для кастомизации контейнера аккордеона.
+ *
+ * @see Disclosure - Компонент из Headless UI, управляющий состоянием (открыто/закрыто).
+ * @see Transition - Компонент из Headless UI для анимации появления/исчезновения контента.
+ * @see motion - Объект из Framer Motion, используемый для создания анимаций.
+ *
+ * @usage
+ * Используется для организации контента в формате "вопрос-ответ" или для группировки информации.
+ * 
+ * 1. **На странице "Как купить" (`src/pages/HowToBuyPage.tsx`):**
+ *    - Для отображения часто задаваемых вопросов и ответов на них.
+ *
+ * @example
+ * const faqItems = [
+ *   { id: 1, title: 'Как сделать заказ?', content: 'Вы можете сделать заказ через наш сайт...' },
+ *   { id: 2, title: 'Какие способы доставки?', content: 'Мы предлагаем курьерскую доставку и самовывоз.' }
+ * ];
+ * <Accordion items={faqItems} />
+ */
 const Accordion: React.FC<AccordionProps> = ({ items, className = "" }) => {
   return (
     <div className={`w-full ${className}`}>

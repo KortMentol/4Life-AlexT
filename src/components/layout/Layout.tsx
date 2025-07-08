@@ -4,7 +4,6 @@ import FluidEffect from "../effects/FluidEffect";
 import Footer from "./Footer";
 import Header from "./Header";
 import ScrollToTopButton from "../ui/ScrollToTopButton";
-import SVGFilters from "./SVGFilters";
 import { updateScroll } from "@/lib/lenis";
 import { FluidProvider } from "@/context/FluidProvider";
 
@@ -46,7 +45,6 @@ const Layout: React.FC = () => {
         </main>
         <Footer />
         <ScrollToTopButton />
-        <SVGFilters />
       </div>
     </>
   );

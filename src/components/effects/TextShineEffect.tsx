@@ -1,9 +1,9 @@
-import React from "react";
-import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
+import styled from "@emotion/styled";
+import React from "react";
 import { useTheme } from "../../hooks/useTheme";
 
-// Простая анимация блеска - один проход слева направо
+// Простая анимация блеска - один проход справа налево
 const shineEffect = keyframes`
   from {
     mask-position: -150% 0;
@@ -48,11 +48,35 @@ const ShineTextContainer = styled.span<ShineTextContainerProps>`
   }
 `;
 
-const TextShineEffect: React.FC<ShineTextProps> = ({
-  text,
-  className = "",
-  duration = 5,
-}) => {
+/**
+ * @module components/effects/TextShineEffect
+ * @description Компонент для создания анимированного эффекта "блеска" на тексте.
+ * Эффект достигается с помощью CSS-маски, которая движется поверх текста,
+ * создавая иллюзию пробегающего блика. Компонент автоматически адаптирует
+ * цвета для светлой и темной тем.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {string} text - Текст, к которому применяется эффект.
+ * @param {string} [className] - Дополнительные CSS-классы для контейнера.
+ * @param {number} [duration=5] - Длительность одной итерации анимации в секундах.
+ *
+ * @see shineEffect - Анимация keyframes, отвечающая за движение маски.
+ *
+ * @usage
+ * Используется для акцентирования внимания на важных текстовых элементах.
+ *
+ * 1. **В шапке сайта (`src/components/layout/Header.tsx`):**
+ *    - Для имени "Александр Тощев" в десктопной и мобильной версиях.
+ *
+ * 2. **На странице "Как купить" (`src/pages/HowToBuyPage.tsx`):**
+ *    - Для заголовка "Как Приобрести Продукцию 4Life".
+ *
+ * @example
+ * <TextShineEffect text="Важный заголовок" duration={3} />
+ */
+const TextShineEffect: React.FC<ShineTextProps> = ({ text, className = "", duration = 5 }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 

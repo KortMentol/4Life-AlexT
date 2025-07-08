@@ -7,13 +7,45 @@ import { Link } from "react-router-dom";
 
 export interface ProductCardProps {
   product: Product;
-  delay?: number;
   onQuickView: (product: Product) => void;
 }
 
+/**
+ * @module components/ui/ProductCard
+ * @description Стандартная карточка продукта для отображения в каталогах и списках.
+ * Включает изображение, название, краткое описание и кнопки действий: "Быстрый просмотр", "Добавить в Список" и "Подробнее".
+ * Использует `framer-motion` для анимации появления и эффектов при наведении. Взаимодействует с `useProductList` для добавления товаров в список.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {Product} product - Объект с данными продукта.
+ * @param {Product} product - Объект с данными продукта.
+ * @param {(product: Product) => void} onQuickView - Функция обратного вызова, срабатывающая при клике на кнопку "Быстрый просмотр".
+ *
+ * @see motion - Компонент из `framer-motion` для анимаций.
+ * @see Link - Компонент из `react-router-dom` для навигации.
+ * @see useProductList - Хук для управления списком продуктов.
+ * @see ProductDetailModal - Модальное окно, которое обычно вызывается функцией `onQuickView`.
+ *
+ * @usage
+ * Основной компонент для отображения товаров на странице каталога (`src/pages/ProductsPage.tsx`).
+ *
+ * @example
+ * const product = {
+ *   id: 1,
+ *   name: 'Название продукта',
+ *   shortDescription: 'Описание...',
+ *   image: '/path/to/image.jpg',
+ *   link: '/products/1'
+ * };
+ * 
+ * const handleQuickView = (p) => console.log('Quick view for:', p.name);
+ * 
+ * <ProductCard product={product} onQuickView={handleQuickView} delay={0.2} />
+ */
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  delay = 0,
   onQuickView,
 }) => {
   const { image, name, shortDescription, link } = product;
@@ -22,15 +54,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const handleAddToCart = () => addToList(product, 1);
 
   return (
-    <motion.div
-      className="card-modern group h-full flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.5, delay }}
-      whileHover={{ y: -5 }}
-      whileTap={{ scale: 0.97 }}
-    >
+    <div className="card-modern group h-full flex flex-col">
+
       {/* Изображение с оверлеем */}
       <div className="relative overflow-hidden rounded-t-lg">
         {/* Кнопка Quick View */}
@@ -100,7 +125,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

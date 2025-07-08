@@ -7,6 +7,38 @@ interface HamburgerButtonProps {
   scrolled: boolean;
 }
 
+/**
+ * @module components/ui/HamburgerButton
+ * @description Анимированная кнопка-гамбургер для переключения состояния мобильного меню.
+ * Плавно трансформируется из трех линий в крестик (и обратно) с помощью `framer-motion`.
+ * Также меняет свой стиль в зависимости от того, проскроллена ли страница. Имеет необходимые ARIA-атрибуты для доступности.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {boolean} isOpen - Текущее состояние меню (открыто/закрыто), управляет анимацией.
+ * @param {() => void} toggle - Callback-функция для изменения состояния меню.
+ * @param {boolean} scrolled - Флаг, указывающий, прокручена ли страница, для адаптации стилей.
+ *
+ * @see motion - Компонент из `framer-motion` для анимации SVG-линий.
+ *
+ * @usage
+ * Используется в шапке сайта для управления видимостью мобильного меню.
+ * 
+ * 1. **В шапке сайта (`src/components/layout/Header.tsx`):**
+ *    - Отображается на мобильных устройствах и служит триггером для открытия/закрытия `MobileMenu`.
+ *
+ * @example
+ * const [isOpen, setIsOpen] = useState(false);
+ * const [scrolled, setScrolled] = useState(false);
+ * // ... логика для отслеживания скролла ...
+ * 
+ * <HamburgerButton 
+ *   isOpen={isOpen} 
+ *   toggle={() => setIsOpen(!isOpen)} 
+ *   scrolled={scrolled} 
+ * />
+ */
 const HamburgerButton: React.FC<HamburgerButtonProps> = ({
   isOpen,
   toggle,

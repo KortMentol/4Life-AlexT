@@ -13,6 +13,45 @@ const chipVariants = {
   visible: { opacity: 1, scale: 1 },
 };
 
+/**
+ * @module components/ui/CategoryFilter
+ * @description Компонент для фильтрации контента по категориям.
+ * Отображает список категорий в виде кликабельных "чипов". Пользователь может выбрать одну или несколько категорий для фильтрации.
+ * Также имеется кнопка для сброса выбранных фильтров. Компонент использует `framer-motion` для анимации чипов.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @param {string[]} categories - Массив строк со всеми доступными категориями.
+ * @param {string[]} selected - Массив строк с именами выбранных в данный момент категорий.
+ * @param {(category: string) => void} toggleCategory - Callback-функция, вызываемая при клике на чип категории.
+ * @param {() => void} clearSelection - Callback-функция, вызываемая при клике на кнопку "Сбросить".
+ *
+ * @see motion - Компонент из `framer-motion` для анимаций.
+ *
+ * @usage
+ * Используется на странице продуктов для фильтрации списка товаров.
+ * 
+ * 1. **На странице "Продукты" (`src/pages/ProductsPage.tsx`):**
+ *    - Позволяет пользователям легко отсортировать каталог по интересующим их категориям.
+ *
+ * @example
+ * const allCategories = ['Здоровье', 'Красота', 'Спорт'];
+ * const [selected, setSelected] = useState(['Здоровье']);
+ * 
+ * const toggle = (cat) => {
+ *   setSelected(prev => 
+ *     prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+ *   );
+ * };
+ * 
+ * <CategoryFilter 
+ *   categories={allCategories} 
+ *   selected={selected} 
+ *   toggleCategory={toggle} 
+ *   clearSelection={() => setSelected([])} 
+ * />
+ */
 const CategoryFilter: React.FC<CategoryFilterProps> = ({
   categories,
   selected,
