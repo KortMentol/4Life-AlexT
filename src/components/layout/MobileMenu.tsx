@@ -1,3 +1,17 @@
+/**
+ * @module src/components/layout/MobileMenu.tsx
+ * @description Полноэкранное мобильное меню с эффектом "glassmorphism". Появляется слева, блокируя прокрутку основного контента. Содержит навигационные ссылки, логотип, переключатель темы и кнопку закрытия. Анимации реализованы с помощью `framer-motion`, включая поддержку закрытия меню свайпом.
+ * @author Kort
+ * @version 1.0.0
+ * @param {boolean} isOpen - Флаг, определяющий, открыто ли меню.
+ * @param {() => void} onClose - Функция обратного вызова для закрытия меню.
+ * @see Header - Компонент, который управляет состоянием и отображением MobileMenu.
+ * @usage
+ * 1. `src/components/layout/Header.tsx`: Рендерится внутри Header, который передает ему пропсы `isOpen` и `onClose` для управления видимостью.
+ * @example
+ * const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+ * <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+ */
 import { useTheme } from "../../hooks/useTheme";
 import { lenis } from "@/lib/lenis";
 import { AnimatePresence, motion } from "framer-motion";

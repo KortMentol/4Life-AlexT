@@ -1,5 +1,5 @@
-import React, { ReactNode, useRef, useEffect, useState } from "react";
-import { useScroll, useTransform, motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 export interface ParallaxSectionProps {
   backgroundImage?: string;
@@ -20,10 +20,44 @@ export interface ParallaxSectionProps {
 
 /**
  * @module components/ui/ParallaxSection
- * @description Создает секцию с "умным" параллакс-эффектом, который адаптируется под любую силу, не допуская черных полос.
+ * @description
+ * Создает полноэкранную или кастомную секцию с "умным" параллакс-эффектом для фона (изображение или видео).
+ * Анимация реализована через `framer-motion` для максимальной производительности и плавности.
+ * Компонент автоматически рассчитывает смещение, чтобы избежать появления пустых полей при любой силе параллакса.
+ *
  * @author Kort
- * @version 4.0.0
- * @param {number} [parallaxStrength=40] - Общая дополнительная высота фона в `vh`. Например, 40 означает, что фон будет на 40vh выше экрана и будет двигаться на 20vh вверх и вниз от центра.
+ * @version 1.1.0
+ *
+ * @param {string} [backgroundImage] - URL фонового изображения по умолчанию.
+ * @param {string} [backgroundImageMobile] - URL фонового изображения для мобильных устройств.
+ * @param {string} [backgroundImagePC] - URL фонового изображения для десктопных устройств.
+ * @param {string} [backgroundVideo] - URL фонового видео (имеет приоритет над изображениями).
+ * @param {string} altText - Альтернативный текст для фонового изображения.
+ * @param {ReactNode} [children] - Дочерние элементы, отображаемые поверх фона.
+ * @param {string} [height='h-screen'] - Высота секции (CSS-класс).
+ * @param {string} [contentClasses] - CSS-классы для стилизации контейнера с контентом.
+ * @param {number} [parallaxStrength=40] - Сила параллакс-эффекта в `vh`. **Примечание:** В `HomePage.tsx` это значение переопределяется глобальной константой `GLOBAL_PARALLAX_STRENGTH`.
+ * @param {string} [imageBrightness] - CSS-класс для управления яркостью фона.
+ * @param {boolean} [lazyLoad=true] - Включает ленивую загрузку для фонового изображения.
+ *
+ * @usage
+ * Компонент является основой для всех крупных визуальных секций на главной странице:
+ * 1. **`src/pages/HomePage.tsx` (строка 125):** Главный экран (Hero Section).
+ *    - **Контекст:** Используется с фоновым видео на десктопе и статичным изображением на мобильных.
+ *    - **Ключевые props:** `backgroundVideo`, `backgroundImageMobile`, `height="h-screen"`, `parallaxStrength={GLOBAL_PARALLAX_STRENGTH}`.
+ * 2. **`src/pages/HomePage.tsx` (строка 256):** Секция с продуктами.
+ *    - **Контекст:** Демонстрирует карусель/сетку продуктов на фоне статичного изображения.
+ *    - **Ключевые props:** `backgroundImage`, `height="auto"`, `lazyLoad={true}`, `parallaxStrength={GLOBAL_PARALLAX_STRENGTH}`.
+ *
+ * @example
+ * <ParallaxSection
+ *   backgroundImagePC="/assets/images/background.jpg"
+ *   backgroundImageMobile="/assets/images/background-mobile.jpg"
+ *   altText="Красивый фон"
+ *   parallaxStrength={40}
+ * >
+ *   <h1 className="text-white">Контент секции</h1>
+ * </ParallaxSection>
  */
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
@@ -58,10 +92,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   });
 
   // Движение от -половины до +половины общей силы смещения
-  const y = useTransform(scrollYProgress, [0, 1], [
-    `-${parallaxStrength / 2}vh`,
-    `${parallaxStrength / 2}vh`,
-  ]);
+  const y = useTransform(scrollYProgress, [0, 1], [`-${parallaxStrength / 2}vh`, `${parallaxStrength / 2}vh`]);
 
   const finalBackgroundImage = isMobile
     ? backgroundImageMobile || backgroundImage
@@ -92,10 +123,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
           top: `-${parallaxStrength / 2}vh`,
         }}
       >
-        <motion.div
-          className={`relative w-full h-full ${imageBrightness}`}
-          style={{ y, willChange: "transform" }}
-        >
+        <motion.div className={`relative w-full h-full ${imageBrightness}`} style={{ y, willChange: "transform" }}>
           {backgroundVideo ? (
             <video
               className="absolute top-0 left-0 h-full w-full object-cover"

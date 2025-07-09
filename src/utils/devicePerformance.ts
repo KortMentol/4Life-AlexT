@@ -1,10 +1,34 @@
 /**
- * Cистема определения производительности устройств
- * Используется как в дебагере, так и в основном приложении
+ * @module src/utils/devicePerformance.ts
+ * @description Предоставляет комплексную систему для определения производительности устройства пользователя.
+ * Включает две основные функции: `detectDeviceSpecs` для сбора технических характеристик (RAM, CPU, GPU и т.д.)
+ * и `calculatePerformanceScore` для вычисления итогового балла и присвоения уровня производительности ('low', 'medium', 'high').
+ * Это позволяет адаптировать функционал приложения, например, отключая ресурсоемкие анимации на слабых устройствах.
+ * @author Kort
+ * @version 1.0.0
+ * @usage
+ * 1. `src/hooks/usePerformanceTier.ts`: Используется для определения уровня производительности и предоставления его через хук.
+ * @example
+ * import { detectDeviceSpecs, calculatePerformanceScore } from '@/utils/devicePerformance';
+ *
+ * const specs = detectDeviceSpecs();
+ * const { tier } = calculatePerformanceScore(specs);
+ *
+ * if (tier === 'low') {
+ *   // Отключить сложные анимации
+ * }
  */
 
+/**
+ * @type PerformanceTier
+ * @description Определяет уровень производительности устройства: 'low', 'medium', 'high'.
+ */
 export type PerformanceTier = "low" | "medium" | "high";
 
+/**
+ * @interface DeviceSpecs
+ * @description Определяет структуру объекта с техническими характеристиками устройства, которые собираются функцией `detectDeviceSpecs`.
+ */
 export interface DeviceSpecs {
   ram: string;
   cpuCores: number;
@@ -19,6 +43,13 @@ export interface DeviceSpecs {
   thermalState?: string;
 }
 
+/**
+ * @function detectDeviceSpecs
+ * @description Собирает подробные технические характеристики устройства, используя доступные Web API.
+ * Включает информацию о RAM, CPU, GPU, WebGL, разрешении экрана, сетевом подключении и других параметрах.
+ * Применяет эвристики для определения характеристик, которые не могут быть получены напрямую.
+ * @returns {DeviceSpecs} Объект с техническими характеристиками устройства.
+ */
 export const detectDeviceSpecs = (): DeviceSpecs => {
   const canvas = document.createElement("canvas");
   const gl2 = canvas.getContext("webgl2") as WebGL2RenderingContext | null;
@@ -347,10 +378,12 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
 };
 
 /**
- * Рассчитывает производительность устройства по единой системе скоринга
- *
- * @param specs - Характеристики устройства
- * @returns Объект с итоговым баллом и уровнем производительности
+ * @function calculatePerformanceScore
+ * @description Рассчитывает итоговый балл производительности на основе собранных технических характеристик.
+ * Присваивает баллы за каждый параметр (тип устройства, RAM, CPU, GPU и т.д.) и на основе суммы определяет
+ * уровень производительности ('low', 'medium', 'high').
+ * @param {DeviceSpecs} specs - Объект с характеристиками устройства, полученный от `detectDeviceSpecs`.
+ * @returns {{score: number, tier: PerformanceTier}} Объект с итоговым баллом и уровнем производительности.
  */
 export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; tier: PerformanceTier } => {
   let score = 0;

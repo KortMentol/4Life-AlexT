@@ -1,3 +1,17 @@
+/**
+ * @module src/context/ProductListProvider.tsx
+ * @description Провайдер для управления состоянием списка продуктов (корзины). Реализует логику добавления, удаления, обновления количества и очистки списка. Синхронизирует состояние с `localStorage`, чтобы сохранять выбор пользователя между сессиями.
+ * @author Kort
+ * @version 1.0.0
+ * @param {React.ReactNode} children - Дочерние компоненты, которые получат доступ к контексту.
+ * @see ProductListUtils - Утилиты для работы с `localStorage`.
+ * @usage
+ * 1. `src/App.tsx`: Оборачивает все приложение, чтобы обеспечить глобальный доступ к списку продуктов.
+ * @example
+ * <ProductListProvider>
+ *   <App />
+ * </ProductListProvider>
+ */
 import { Product } from "@/types/Product";
 import React, { useEffect, useState } from "react";
 import {

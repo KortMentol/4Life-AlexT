@@ -3,7 +3,18 @@ import { ThemeContext, ThemeProviderProps } from "./ThemeContext.helpers";
 import { Theme } from "./ThemeContext.types";
 
 /**
- * Провайдер темы для приложения
+ * @module src/context/ThemeProvider.tsx
+ * @description Провайдер для управления темой оформления (светлая/темная). Определяет начальную тему на основе настроек пользователя в `localStorage` или системных настроек. Предоставляет функции для переключения и установки темы. Автоматически применяет нужный класс к `<html>`.
+ * @author Kort
+ * @version 1.0.0
+ * @param {React.ReactNode} children - Дочерние компоненты, которые получат доступ к контексту.
+ * @usage
+ * 1. `src/main.tsx`: Оборачивает все приложение для глобального доступа к теме.
+ * 2. `src/App.tsx`: (Избыточно) Также оборачивает приложение.
+ * @example
+ * <ThemeProvider>
+ *   <App />
+ * </ThemeProvider>
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Инициализация темы из localStorage с проверкой валидности

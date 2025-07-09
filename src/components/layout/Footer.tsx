@@ -1,3 +1,18 @@
+/**
+ * @module src/components/layout/Footer.tsx
+ * @description Компонент подвала сайта. Содержит информацию о компании, ссылки на социальные сети, блок быстрой навигации, контактные данные и юридическую информацию (копирайт, дисклеймеры). Элементы футера анимируются при появлении в области видимости.
+ * @author Kort
+ * @version 1.0.0
+ * @see DynamicLogo - Используется для отображения логотипа в футере.
+ * @usage
+ * 1. `src/components/layout/Layout.tsx`: Вставляется внизу основного макета, чтобы присутствовать на всех страницах сайта.
+ * @example
+ * <Layout>
+ *   <Header />
+ *   <main>...</main>
+ *   <Footer />
+ * </Layout>
+ */
 import { motion } from "framer-motion";
 import {
   Facebook,

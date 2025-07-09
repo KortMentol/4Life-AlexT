@@ -1,10 +1,34 @@
+/**
+ * @module src/lib/lenis.ts
+ * @description Этот модуль инициализирует и настраивает синглтон-экземпляр библиотеки Lenis для плавной прокрутки.
+ * Он экспортирует сам экземпляр `lenis` и набор утилитарных функций для управления скроллом: запуск и остановка,
+ * прокрутка к элементу и обновление при изменениях в DOM. Конфигурация оптимизирована для десктопных и мобильных устройств,
+ * обеспечивая нативный скролл на мобильных для лучшего UX.
+ * @author Kort
+ * @version 1.0.0
+ * @see src/lib/lenis.types.ts
+ * @see https://github.com/studio-freight/lenis
+ * @usage
+ * 1. `src/components/layout/Layout.tsx`: Инициализирует RAF-цикл с помощью `startLenisRaf`.
+ * 2. `src/components/layout/Header.tsx`: Использует `scrollTo` для навигации по якорным ссылкам.
+ * 3. `src/components/layout/MobileMenu.tsx`: Использует `scrollTo` для навигации и `stopScroll`/`startScroll` для блокировки прокрутки при открытом меню.
+ * 4. `src/components/ui/ScrollToTopButton.tsx`: Использует `scrollTo` для прокрутки наверх страницы.
+ * 5. `src/hooks/useResetScrollOnNavigation.ts`: Использует `scrollTo` для сброса прокрутки при смене маршрута.
+ * 6. `src/hooks/useScrollRestoration.ts`: Использует `updateScroll` для обновления Lenis при изменениях DOM.
+ * @example
+ * import { scrollTo } from '@/lib/lenis';
+ *
+ * const MyComponent = () => (
+ *   <button onClick={() => scrollTo('#target-section')}>
+ *     Scroll to Section
+ *   </button>
+ * );
+ */
 import Lenis from "@studio-freight/lenis";
 import { LenisOptions, Lenis as LenisType } from "./lenis.types";
 
 // Определяем, является ли устройство мобильным
-const isMobile =
-  typeof navigator !== "undefined" &&
-  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const isMobile = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 // Создаем экземпляр Lenis с оптимальными настройками для современного скроллинга
 const lenisInstance = new Lenis({
@@ -28,11 +52,18 @@ const lenisInstance = new Lenis({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (lenisInstance as any).velocity = 0;
 
-// Экспортируем с правильным типом
+/**
+ * @description Синглтон-экземпляр Lenis, настроенный с оптимальными параметрами.
+ * @type {LenisType}
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const lenis = lenisInstance as any as LenisType;
 
-// Функция для запуска RAF (Request Animation Frame) цикла
+/**
+ * @description Запускает цикл `requestAnimationFrame` (RAF) для Lenis, который обеспечивает плавную анимацию скролла.
+ * Функция также добавляет обработчики для оптимизации производительности: приостанавливает RAF, когда вкладка неактивна,
+ * и очищает его при выгрузке страницы.
+ */
 export const startLenisRaf = () => {
   let rafId: number;
   let lastTime = 0;
@@ -81,15 +112,16 @@ export const startLenisRaf = () => {
   document.addEventListener("visibilitychange", handleVisibilityChange);
 };
 
-// Вспомогательные функции для управления скроллом
-export const scrollTo = (
-  target: string | HTMLElement | number,
-  options = {},
-) => {
+/**
+ * @description Утилита для плавной прокрутки к указанной цели (элемент, селектор или числовое значение).
+ * На мобильных устройствах использует нативный `window.scrollTo` для мгновенной прокрутки вверх,
+ * в остальных случаях делегирует управление Lenis.
+ * @param {string | HTMLElement | number} target - Цель для прокрутки.
+ * @param {LenisScrollToOptions} [options={}] - Дополнительные опции для Lenis.
+ */
+export const scrollTo = (target: string | HTMLElement | number, options = {}) => {
   // Определяем, является ли устройство мобильным
-  const isMobileDevice =
-    typeof navigator !== "undefined" &&
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isMobileDevice = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   // На мобильных устройствах используем нативный скролл для мгновенного отклика
   if (isMobileDevice && typeof target === "number" && target === 0) {
@@ -111,15 +143,22 @@ export const scrollTo = (
   });
 };
 
-// Функция для остановки скролла
+/**
+ * @description Полностью останавливает скролл Lenis.
+ */
 export const stopScroll = () => {
   lenis.stop();
   // Сбрасываем скорость и инерцию при остановке
   lenis.velocity = 0;
 };
 
-// Функция для возобновления скролла
+/**
+ * @description Возобновляет скролл Lenis после остановки.
+ */
 export const startScroll = () => lenis.start();
 
-// Функция для обновления Lenis при изменениях DOM
+/**
+ * @description Пересчитывает размеры и обновляет экземпляр Lenis.
+ * Необходимо вызывать при изменениях в DOM, которые влияют на высоту страницы (например, открытие/закрытие аккордеона).
+ */
 export const updateScroll = () => lenis.resize();

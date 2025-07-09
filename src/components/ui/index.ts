@@ -1,7 +1,6 @@
 export { default as Accordion } from "./Accordion";
 export { default as Button } from "./Button";
 export { default as CallToAction } from "./CallToAction";
-export { default as Card } from "./Card";
 export { default as CategoryFilter } from "./CategoryFilter";
 export { default as DynamicLogo } from "./DynamicLogo";
 export { default as HamburgerButton } from "./HamburgerButton";

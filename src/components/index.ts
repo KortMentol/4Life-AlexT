@@ -1,6 +1,3 @@
-// Interactive components
-export * from "./interactive";
-
 // Effects
 export * from "./effects";
 

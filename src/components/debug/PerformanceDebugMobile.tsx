@@ -5,6 +5,23 @@ import { Gauge, Smartphone, Wifi, Monitor, ChevronDown, ChevronUp, X, HardDrive,
 
 
 
+/**
+ * @module components/debug/PerformanceDebugMobile
+ * @description
+ * `PerformanceDebugMobile` — это компактная, оптимизированная для сенсорных экранов версия плавающей UI-панели для мониторинга производительности.
+ * Отображает ключевые метрики (FPS, время кадра, балл производительности) и адаптирована для мобильных устройств.
+ *
+ * @author Kort
+ * @version 1.0.0
+ *
+ * @usage
+ * Компонент используется в корневом файле приложения для отладки на мобильных устройствах:
+ * 1. **`src/App.tsx` (строка 211):** Рендерится условно, когда `isMobile` имеет значение `true`, предоставляя оверлей с данными о производительности.
+ *
+ * @example
+ * // Вставляется в App.tsx без пропсов
+ * <PerformanceDebugMobile />
+ */
 const PerformanceDebugMobile: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isCompact, setIsCompact] = useState(true);

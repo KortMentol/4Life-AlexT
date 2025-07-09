@@ -1,3 +1,23 @@
+/**
+ * @module src/components/layout/Layout.tsx
+ * @description Основной компонент-макет приложения. Он определяет общую структуру страницы, включая Header, Footer и основную область контента, в которой отображаются дочерние маршруты через <Outlet>. Также интегрирует глобальные эффекты, такие как FluidEffect, и управляет обновлениями плавной прокрутки Lenis при смене URL.
+ * @author Kort
+ * @version 1.0.0
+ * @see Header - Шапка сайта.
+ * @see Footer - Подвал сайта.
+ * @see FluidEffect - Компонент для фонового WebGL-эффекта.
+ * @see ScrollToTopButton - Кнопка для прокрутки наверх.
+ * @see FluidProvider - Контекст-провайдер для управления Fluid-эффектом.
+ * @usage
+ * 1. `src/App.tsx`: Используется как корневой элемент для всех маршрутов приложения, обеспечивая единый макет для всех страниц.
+ * @example
+ * <Routes>
+ *   <Route path="/" element={<Layout />}>
+ *     <Route index element={<HomePage />} />
+ *     <Route path="products" element={<ProductsPage />} />
+ *   </Route>
+ * </Routes>
+ */
 import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import FluidEffect from "../effects/FluidEffect";

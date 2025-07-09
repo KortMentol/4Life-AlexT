@@ -1,11 +1,7 @@
-/**
- * Доступные темы приложения
- */
+/** @description Определяет доступные темы приложения. */
 export type Theme = "light" | "dark";
 
-/**
- * Тип контекста темы
- */
+/** @description Определяет структуру данных, предоставляемых `ThemeContext`. */
 export interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
