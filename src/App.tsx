@@ -8,7 +8,7 @@ import RouteChangeHandler from "./components/utils/RouteChangeHandler";
 import { useMobileMenuState } from "./hooks/useMobileMenuState";
 import useResetScrollOnNavigation from "./hooks/useResetScrollOnNavigation";
 import useScrollRestoration from "./hooks/useScrollRestoration";
-import { updateScroll } from "./lib/lenis";
+import { lenis, updateScroll } from "./lib/lenis";
 import PerformanceDebug from "./components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
 
@@ -121,6 +121,77 @@ function App() {
 
   // Используем хук для принудительного сброса скролла при навигации
   useResetScrollOnNavigation();
+
+  // --- НАЧАЛО ГЛОБАЛЬНОГО РЕШЕНИЯ ДЛЯ БЛОКИРОВКИ СКРОЛЛА ---
+  useEffect(() => {
+    // Сохраняем начальные координаты касания
+    let touchStartX = 0;
+    let touchStartY = 0;
+    // Флаг, который показывает, определили ли мы уже доминирующую ось скролла для текущего жеста
+    let scrollDirectionDetermined = false;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      // Запоминаем точку начала жеста
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      // Сбрасываем флаг для нового жеста
+      scrollDirectionDetermined = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      // Если мы уже определили направление для этого жеста, ничего не делаем
+      if (scrollDirectionDetermined) return;
+
+      const currentX = touch.clientX;
+      const currentY = touch.clientY;
+
+      // Вычисляем смещение от начальной точки
+      const deltaX = Math.abs(currentX - touchStartX);
+      const deltaY = Math.abs(currentY - touchStartY);
+
+      // Устанавливаем порог, чтобы избежать случайного срабатывания при мелких дрожаниях
+      const sensitivityThreshold = 5; // 5 пикселей
+
+      if (deltaX > sensitivityThreshold || deltaY > sensitivityThreshold) {
+        // Если горизонтальное движение преобладает, останавливаем Lenis
+        if (deltaX > deltaY) {
+          lenis.stop();
+        }
+        // Если вертикальное — убеждаемся, что Lenis работает (на случай, если был остановлен ранее)
+        else {
+          lenis.start();
+        }
+        // Мы определили направление, больше не будем проверять для этого жеста
+        scrollDirectionDetermined = true;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      // Когда жест заканчивается, всегда запускаем Lenis снова
+      lenis.start();
+    };
+
+    // Добавляем глобальные слушатели на весь документ
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+
+    // Очистка при размонтировании компонента
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, []); // Пустой массив зависимостей для выполнения один раз
+  // --- КОНЕЦ ГЛОБАЛЬНОГО РЕШЕНИЯ ---
 
   // Обновляем Lenis при монтировании компонента и при изменении размера окна
   useEffect(() => {
