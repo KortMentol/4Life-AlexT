@@ -19,7 +19,7 @@ const DISABLE_FLUID_EFFECT = false;
 
 const getFluidConfig = (tier: string, isMobile: boolean) => ({
   /** Разрешение текстуры красителя (пиксели) - чем больше, тем детальнее цвета, но больше нагрузка на GPU */
-  dyeResolution: isMobile ? 256 : 1024,
+  dyeResolution: isMobile ? 512 : 1024,
   /** Разрешение сетки физической симуляции (пиксели) - чем больше, тем точнее физика, но больше вычислений */
   simResolution: isMobile ? 150 : 256,
   /** Скорость затухания плотности (0.0-1.0) - чем ближе к 1.0, тем быстрее исчезают цвета */

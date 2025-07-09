@@ -1,64 +1,87 @@
+/**
+ * @module src/lib/lenis
+ * @description Этот модуль инициализирует и настраивает библиотеку Lenis для создания эффекта плавной "вязкой" прокрутки,
+ * имитирующей Locomotive Scroll. Он экспортирует сконфигурированный синглтон-экземпляр Lenis и утилитарные функции
+ * для управления прокруткой во всем приложении. Конфигурация тщательно подобрана для обеспечения максимальной
+ * плавности и отзывчивости на десктопных и мобильных устройствах.
+ * @author Kort
+ * @version 1.0.0
+ * @see {@link https://lenis.studiofreight.com/docs|Документация Lenis}
+ * @usage
+ * 1. `src/hooks/useScrollRestoration.ts`: Используется функция `updateScroll` для обновления состояния скролла при восстановлении позиции.
+ * 2. `src/hooks/useResetScrollOnNavigation.ts`: Используется экземпляр `lenis` для сброса прокрутки к верху страницы при навигации.
+ * 3. `src/components/ui/ScrollToTopButton.tsx`: Используется экземпляр `lenis` для реализации плавной прокрутки наверх.
+ * 4. `src/components/layout/Header.tsx`: Используется экземпляр `lenis` для отслеживания событий скролла и изменения состояния хедера.
+ * 5. `src/components/layout/MobileMenu.tsx`: Используется экземпляр `lenis` для блокировки и разблокировки прокрутки при открытии/закрытии мобильного меню.
+ * 6. `src/components/layout/Layout.tsx`: Используется функция `updateScroll` для пересчета размеров контейнера скролла при изменениях в DOM.
+ * @example
+ * // В корневом компоненте приложения (например, Layout.tsx)
+ * // необходимо запустить цикл requestAnimationFrame для Lenis.
+ * import { useEffect } from 'react';
+ * import { startLenisRaf } from '@/lib/lenis';
+ *
+ * const Layout = ({ children }) => {
+ *   useEffect(() => {
+ *     startLenisRaf();
+ *   }, []);
+ *
+ *   return <main>{children}</main>;
+ * };
+ */
 import Lenis from "@studio-freight/lenis";
 import { LenisOptions, Lenis as LenisType } from "./lenis.types";
 
-// Создаем экземпляр Lenis с настройками, имитирующими Locomotive Scroll
+// Создаем экземпляр Lenis с настройками для идеального мобильного скролла
 const lenisInstance = new Lenis({
   // --- КЛЮЧЕВЫЕ ПАРАМЕТРЫ ДЛЯ ВЯЗКОСТИ И ПЛАВНОСТИ ---
 
-  // 1. lerp (Linear Interpolation) - главный параметр "вязкости".
-  // Значение 0.07 уже хорошее, но для максимальной "тягучести" можно попробовать 0.05 - 0.06.
-  // Чем ниже, тем медленнее скролл "догоняет" реальную позицию.
-  lerp: 0.06,
+  // 1. lerp - для максимальной плавности и "вязкости" как на giuligartner.com
+  lerp: 0.07,
 
-  // 2. wheelMultiplier - множитель скорости для колеса мыши.
-  // Уменьшаем его, чтобы скролл стал "тяжелее" и требовал больше движений колесом.
-  wheelMultiplier: 1.3,
+  // 2. wheelMultiplier - для десктопа, умеренная скорость
+  wheelMultiplier: 1.5,
 
-  // 3. touchMultiplier - множитель скорости для касаний.
-  // Также уменьшаем для создания ощущения "сопротивления" и инерции на мобильных.
-  touchMultiplier: 0.9,
+  // 3. touchMultiplier - критично для мобильных, делаем более чувствительным
+  touchMultiplier: 1,
 
   // --- НАСТРОЙКИ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ---
 
-  // 4. syncTouch - ОБЯЗАТЕЛЬНО true.
-  // Позволяет Lenis работать вместе с нативным скроллом, что критично для жестов,
-  // таких как "pull-to-refresh" и правильной работы горизонтальных свайпов.
+  // 4. syncTouch - включаем для работы с нативными жестами
   syncTouch: true,
 
-  // 5. smoothTouch - Устанавливаем в false.
-  // Когда syncTouch: true, лучше отключить собственную эмуляцию плавности Lenis для тач-событий,
-  // чтобы избежать конфликтов и получить более предсказуемое, "нативное" ощущение инерции.
-  smoothTouch: false, 
+  // 5. smoothTouch - ВКЛЮЧАЕМ для плавности на мобильных
+  smoothTouch: true,
+
+  // 6. syncTouchLerp - дополнительная плавность для тач-событий
+  syncTouchLerp: 0.08,
 
   // --- ОБЩИЕ НАСТРОЙКИ ---
-  
-  // Указываем, что Lenis управляет прокруткой всего окна.
+
   wrapper: window,
-  
-  // Отключаем бесконечную прокрутку.
   infinite: false,
-  
-  // Остальные параметры оставляем как есть, они хорошие.
-  duration: 1.5,
-  easing: (t) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2),
+  duration: 1.2,
+  easing: (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
   orientation: "vertical",
   gestureOrientation: "vertical",
   smoothWheel: true,
 } as LenisOptions);
 
-
 // --- УТИЛИТАРНЫЕ ФУНКЦИИ ---
 
-// Приводим инстанс к нашему типу LenisType
+/**
+ * @description Сконфигурированный экземпляр Lenis для управления плавной прокруткой.
+ * @type {LenisType}
+ */
 export const lenis = lenisInstance as any as LenisType;
 // Добавляем свойство velocity, которое требуется в нашем типе Lenis
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (lenis as any).velocity = 0;
 
-
 /**
- * @description Запускает глобальный requestAnimationFrame цикл для Lenis.
- * Этот цикл будет обновлять позицию скролла на каждом кадре, создавая плавность.
+ * @description Запускает глобальный цикл requestAnimationFrame для Lenis.
+ * Этот цикл необходим для обновления позиции скролла на каждом кадре, что создает эффект плавности.
+ * Функция также содержит оптимизацию: цикл останавливается, когда вкладка браузера неактивна, и возобновляется при возвращении.
+ * Вызывать эту функцию нужно один раз при инициализации приложения.
  */
 export const startLenisRaf = () => {
   let rafId: number;
@@ -67,13 +90,13 @@ export const startLenisRaf = () => {
     lenis.raf(time);
     rafId = requestAnimationFrame(raf);
   };
-  
+
   rafId = requestAnimationFrame(raf);
 
   // Оптимизация: останавливаем RAF, когда вкладка неактивна
   const handleVisibilityChange = () => {
     if (document.hidden) {
-      if(rafId) cancelAnimationFrame(rafId);
+      if (rafId) cancelAnimationFrame(rafId);
       rafId = 0;
     } else if (!rafId) {
       rafId = requestAnimationFrame(raf);
@@ -83,12 +106,16 @@ export const startLenisRaf = () => {
   document.addEventListener("visibilitychange", handleVisibilityChange);
 };
 
-// Функции scrollTo, stopScroll, startScroll, updateScroll остаются без изменений.
-// Они уже написаны хорошо.
-
+/**
+ * @description Плавно прокручивает страницу к указанной цели.
+ * @param {string | HTMLElement | number} target - Цель для прокрутки. Может быть CSS-селектором, DOM-элементом или числовым значением (позиция в пикселях).
+ * @param {object} [options={}] - Дополнительные опции для Lenis.scrollTo().
+ * @see {@link https://lenis.studiofreight.com/docs#methods-scrollto|Документация Lenis.scrollTo}
+ */
 export const scrollTo = (target: string | HTMLElement | number, options = {}) => {
   const isMobileDevice = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+  // Специальная обработка для скролла в самый верх на мобильных устройствах для избежания багов
   if (isMobileDevice && typeof target === "number" && target === 0) {
     window.scrollTo({ top: 0, behavior: "auto" });
     return;
@@ -103,11 +130,18 @@ export const scrollTo = (target: string | HTMLElement | number, options = {}) =>
   });
 };
 
-export const stopScroll = () => {
-  lenis.stop();
-  lenis.velocity = 0;
-};
+/**
+ * @description Мгновенно останавливает любую активную плавную прокрутку.
+ */
+export const stopScroll = () => lenis.stop();
 
+/**
+ * @description Возобновляет обработку событий прокрутки после вызова stopScroll().
+ */
 export const startScroll = () => lenis.start();
 
+/**
+ * @description Принудительно пересчитывает размеры контейнера прокрутки.
+ * Необходимо вызывать после динамического добавления/удаления контента или изменения размеров окна.
+ */
 export const updateScroll = () => lenis.resize();

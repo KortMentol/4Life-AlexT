@@ -25,6 +25,8 @@ export interface LenisOptions {
   smoothTouch?: boolean;
   syncTouch?: boolean;
   syncTouchLerp?: number;
+  lerp?: number;
+  wrapper?: Window | HTMLElement;
   [key: string]: unknown;
 }
 
