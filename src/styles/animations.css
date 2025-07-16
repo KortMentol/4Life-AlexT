@@ -1,1 +1,375 @@
-/* Файл оставлен пустым - анимации теперь управляются через framer-motion */
+/**
+ * Глобальные CSS-анимации для сайта
+ */
+
+/* Анимация пульсации свечения */
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 5px var(--primary);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary);
+  }
+  100% {
+    box-shadow: 0 0 5px var(--primary);
+  }
+}
+
+/* Анимация появления элементов */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация появления элементов слева */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Анимация появления элементов справа */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Анимация появления элементов снизу */
+@keyframes slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация появления элементов сверху */
+@keyframes slide-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация масштабирования */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Анимация вращения */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Анимация блеска */
+@keyframes shine {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/* Анимация пульсации */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Анимация дрожания */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Анимация волны */
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-5px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(5px);
+  }
+}
+
+/* Анимация мерцания */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Анимация градиента */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Анимация ауры */
+@keyframes aurora {
+  0% {
+    background-position: 0% 50%;
+    transform: rotate(-5deg) scale(0.9);
+  }
+  25% {
+    background-position: 50% 100%;
+    transform: rotate(5deg) scale(1.1);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: rotate(-3deg) scale(0.95);
+  }
+  75% {
+    background-position: 50% 0%;
+    transform: rotate(3deg) scale(1.05);
+  }
+  100% {
+    background-position: 0% 50%;
+    transform: rotate(-5deg) scale(0.9);
+  }
+}
+
+/* Классы для анимаций */
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.7s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.7s ease-out forwards;
+}
+
+.animate-slide-in-bottom {
+  animation: slide-in-bottom 0.7s ease-out forwards;
+}
+
+.animate-slide-in-top {
+  animation: slide-in-top 0.7s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.7s ease-out forwards;
+}
+
+.animate-rotate {
+  animation: rotate 2s linear infinite;
+}
+
+.animate-shine {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shine 2s infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    var(--secondary) 50%,
+    var(--primary) 100%
+  );
+  background-size: 200% 100%;
+  animation: gradient 5s ease infinite;
+}
+
+.animate-aurora {
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    var(--secondary) 50%,
+    var(--primary) 100%
+  );
+  background-size: 200% 200%;
+  animation: aurora 8s ease-in-out infinite alternate;
+}
+
+/* Задержки анимаций */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Длительности анимаций */
+.duration-300 {
+  animation-duration: 0.3s;
+}
+
+.duration-500 {
+  animation-duration: 0.5s;
+}
+
+.duration-700 {
+  animation-duration: 0.7s;
+}
+
+.duration-1000 {
+  animation-duration: 1s;
+}
+
+.duration-2000 {
+  animation-duration: 2s;
+}
+
+/* Функции плавности анимаций */
+.ease-linear {
+  animation-timing-function: linear;
+}
+
+.ease-in {
+  animation-timing-function: ease-in;
+}
+
+.ease-out {
+  animation-timing-function: ease-out;
+}
+
+.ease-in-out {
+  animation-timing-function: ease-in-out;
+}
+
+/* Количество повторений анимаций */
+.infinite {
+  animation-iteration-count: infinite;
+}
+
+.once {
+  animation-iteration-count: 1;
+}
+
+.twice {
+  animation-iteration-count: 2;
+}
+
+/* Направление анимаций */
+.alternate {
+  animation-direction: alternate;
+}
+
+.reverse {
+  animation-direction: reverse;
+}
+
+/* Состояние анимаций */
+.paused {
+  animation-play-state: paused;
+}
+
+.running {
+  animation-play-state: running;
+}
+
+/* Режим заполнения анимаций */
+.forwards {
+  animation-fill-mode: forwards;
+}
+
+.backwards {
+  animation-fill-mode: backwards;
+}
+
+.both {
+  animation-fill-mode: both;
+}

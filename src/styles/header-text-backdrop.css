@@ -1,0 +1,39 @@
+/* Стили для улучшения читаемости текста в хедере */
+
+/* Базовый стиль для текста с подложкой */
+.text-with-backdrop {
+  position: relative;
+  z-index: 1;
+}
+
+/* Подложка для текста в светлой теме */
+.light .text-with-backdrop::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  top: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  z-index: -1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+/* Подложка для текста в темной теме */
+.dark .text-with-backdrop::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  top: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  z-index: -1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+}

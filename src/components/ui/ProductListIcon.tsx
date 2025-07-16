@@ -159,13 +159,13 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     <>
       <motion.button
         ref={buttonRef}
-        className={`product-list-icon relative p-2 rounded-full ${isOpen ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"} hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${className}`}
+        className={`product-list-icon relative p-2 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${className}`}
         onClick={openModal}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         aria-label="Мой Список"
       >
-        <ClipboardListIcon className="h-7 w-7" />
+        <ClipboardListIcon className="h-7 w-7 header-adaptive-text" />
         <AnimatePresence>
           {getTotalItems() > 0 && (
             <motion.span

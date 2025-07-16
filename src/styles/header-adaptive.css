@@ -1,0 +1,34 @@
+/* Адаптивные стили для хедера - современный подход 2025 */
+
+/* Адаптивный текст в хедере */
+.header-adaptive-text {
+  color: white !important; /* Белый текст для темной темы */
+  transition: color 0.3s ease; /* Плавный переход при смене темы */
+}
+
+/* На светлой теме текст становится темным */
+.light .header-adaptive-text {
+  color: #1e293b !important; /* Темный текст для светлой темы */
+}
+
+/* Адаптивный цвет для иконок */
+.icon-adaptive-color {
+  color: white !important; /* Белый цвет для темной темы */
+  transition: color 0.3s ease; /* Плавный переход при смене темы */
+}
+
+/* На светлой теме иконки становятся темными */
+.light .icon-adaptive-color {
+  color: #1e293b !important; /* Темный цвет для светлой темы */
+}
+
+/* Адаптивный фон для элементов */
+.header-adaptive-bg {
+  background-color: white !important; /* Белый фон для темной темы */
+  transition: background-color 0.3s ease; /* Плавный переход при смене темы */
+}
+
+/* На светлой теме фон становится темным */
+.light .header-adaptive-bg {
+  background-color: #1e293b !important; /* Темный фон для светлой темы */
+}

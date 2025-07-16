@@ -1,20 +1,20 @@
 import React from "react";
 import { motion } from "framer-motion";
 
+
 interface HamburgerButtonProps {
   isOpen: boolean;
   toggle: () => void;
-  scrolled: boolean;
 }
 
 /**
  * @module components/ui/HamburgerButton
- * @description Анимированная кнопка-гамбургер для переключения состояния мобильного меню.
+ * @description Премиальная анимированная кнопка-гамбургер для переключения состояния мобильного меню.
  * Плавно трансформируется из трех линий в крестик (и обратно) с помощью `framer-motion`.
  * Также меняет свой стиль в зависимости от того, проскроллена ли страница. Имеет необходимые ARIA-атрибуты для доступности.
  *
  * @author Kort
- * @version 1.0.0
+ * @version 2.0.0
  *
  * @param {boolean} isOpen - Текущее состояние меню (открыто/закрыто), управляет анимацией.
  * @param {() => void} toggle - Callback-функция для изменения состояния меню.
@@ -42,57 +42,54 @@ interface HamburgerButtonProps {
 const HamburgerButton: React.FC<HamburgerButtonProps> = ({
   isOpen,
   toggle,
-  scrolled,
 }) => {
-  // Варианты анимации для линий гамбургера
-  const topLineVariants = {
-    closed: { rotate: 0, y: 0 },
-    open: { rotate: 45, y: 6 },
-  };
 
-  const middleLineVariants = {
-    closed: { opacity: 1 },
-    open: { opacity: 0 },
-  };
-
-  const bottomLineVariants = {
-    closed: { rotate: 0, y: 0 },
-    open: { rotate: -45, y: -6 },
-  };
 
   return (
-    <button
-      className={`flex flex-col justify-center items-center w-10 h-10 rounded-full focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${
-        scrolled
-          ? "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/70"
-          : "text-gray-300 hover:bg-gray-800/30"
-      } transition-colors duration-300`}
+    <motion.button
       onClick={toggle}
+      className="relative w-10 h-10 focus:outline-none text-gray-900 dark:text-cyan-300 [-webkit-tap-highlight-color:transparent]"
+      animate={isOpen ? "open" : "closed"}
       aria-expanded={isOpen}
       aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
       aria-controls="mobile-menu"
     >
-      <div className="w-6 h-5 flex flex-col justify-between">
-        <motion.span
-          className="w-full h-0.5 rounded-full transform origin-left bg-gray-900 dark:bg-gray-300"
-          variants={topLineVariants}
-          animate={isOpen ? "open" : "closed"}
-          transition={{ duration: 0.3 }}
+      <motion.svg width="28" height="28" viewBox="0 0 24 24" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <motion.line
+          x1="4" y1="6" x2="20" y2="6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          variants={{
+            closed: { rotate: 0, y: 0 },
+            open: { rotate: 45, y: 6 },
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
         />
-        <motion.span
-          className="w-full h-0.5 rounded-full bg-gray-900 dark:bg-gray-300"
-          variants={middleLineVariants}
-          animate={isOpen ? "open" : "closed"}
-          transition={{ duration: 0.3 }}
+        <motion.line
+          x1="4" y1="12" x2="20" y2="12"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          variants={{
+            closed: { opacity: 1 },
+            open: { opacity: 0 },
+          }}
+          transition={{ duration: 0.1 }}
         />
-        <motion.span
-          className="w-full h-0.5 rounded-full transform origin-left bg-gray-900 dark:bg-gray-300"
-          variants={bottomLineVariants}
-          animate={isOpen ? "open" : "closed"}
-          transition={{ duration: 0.3 }}
+        <motion.line
+          x1="4" y1="18" x2="20" y2="18"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          variants={{
+            closed: { rotate: 0, y: 0 },
+            open: { rotate: -45, y: -6 },
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
         />
-      </div>
-    </button>
+      </motion.svg>
+    </motion.button>
   );
 };
 

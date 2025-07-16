@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Импорт стилей для кнопки прокрутки вверх */
+@import './scroll-to-top.css';
+@import './header-comets.css';
 
 
 :root {

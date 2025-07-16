@@ -3,7 +3,7 @@ import { motion, useAnimation, useInView } from "framer-motion";
 import React, { memo, useEffect, useRef } from "react";
 
 interface StaticFeatureProps {
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   colorTheme?: "blue" | "green";
@@ -53,7 +53,12 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, margin: "-100px 0px" });
 
-  const themes = {
+  const themes: Record<"green" | "blue", {
+    icon: string;
+    border: string;
+    hoverText: string;
+    hoverBar: string;
+  }> = {
     green: {
       icon: "from-green-500 to-green-600",
       border: "border-green-100 dark:border-green-900/50",
@@ -99,7 +104,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
         variants={containerVariants}
         initial="hidden"
         animate={controls}
-        className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg ${className}`}
+        className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg ${className || ''}`}
       >
         <div
           className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${theme.icon} flex items-center justify-center mb-6 shadow-md`}
@@ -123,7 +128,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
 
   return (
     <div
-      className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className}`}
+      className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className || ''}`}
     >
       <div
         className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${theme.icon} flex items-center justify-center mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300`}

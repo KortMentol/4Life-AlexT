@@ -1,8 +1,8 @@
 /**
  * @module src/components/layout/MobileMenu.tsx
- * @description Полноэкранное мобильное меню с эффектом "glassmorphism". Появляется слева, блокируя прокрутку основного контента. Содержит навигационные ссылки, логотип, переключатель темы и кнопку закрытия. Анимации реализованы с помощью `framer-motion`, включая поддержку закрытия меню свайпом.
+ * @description Полноэкранное мобильное меню с эффектом "glassmorphism". Появляется с плавной анимацией, блокируя прокрутку основного контента. Содержит навигационные ссылки, логотип, переключатель темы и кнопку закрытия. Анимации реализованы с помощью `framer-motion`, включая поддержку закрытия меню свайпом и нативным скроллом.
  * @author Kort
- * @version 1.0.0
+ * @version 2.0.0
  * @param {boolean} isOpen - Флаг, определяющий, открыто ли меню.
  * @param {() => void} onClose - Функция обратного вызова для закрытия меню.
  * @see Header - Компонент, который управляет состоянием и отображением MobileMenu.
@@ -26,8 +26,13 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { mobileMenuVariants, overlayVariants } from "../../animations/headerAnimations";
+import { isMobileDevice } from "../../utils/deviceUtils";
+import { lockScroll } from "../../utils/domUtils";
+import { useGlassmorphism } from "../../hooks/useGlassmorphism";
+import { scrollToTop } from "../../utils/navigationUtils";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import DynamicLogo from "../ui/DynamicLogo";
 
@@ -53,55 +58,25 @@ const navLinks = [
   { title: "Контакты", href: "/contact", icon: <Phone size={22} /> },
 ];
 
-// Плавные анимации как туман
-const overlayVariants = {
-  hidden: {
-    opacity: 0,
-  },
-  visible: {
-    opacity: 1,
-    backdropFilter: "blur(24px)",
-    WebkitBackdropFilter: "blur(24px)",
-    transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.4,
-      ease: [0.7, 0, 0.84, 0],
-    },
-  },
-};
-
-// Анимации для самого меню
-const menuVariants = {
-  hidden: {
-    x: "-100%",
-    opacity: 0,
-  },
-  visible: {
-    x: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1], // EaseOutQuint
-    },
-  },
-  exit: {
-    x: "-100%",
-    opacity: 0,
-    transition: {
-      duration: 0.45,
-      ease: [0.76, 0, 0.24, 1], // EaseInOutQuint
-    },
-  },
-};
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+  
+  // Используем хук для создания эффекта гласморфизма в sci-fi стиле
+  useGlassmorphism({
+    blur: 16,
+    saturation: 200,
+    brightness: isDark ? 0.95 : 1.05,
+    intensity: 'strong'
+  });
+  
+  // Для нативного скролла
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  
+  // Убираем обработку свайпа вниз, оставляем только горизонтальный свайп
+
   const dragConstraints = React.useMemo(
     () => ({ left: -window.innerWidth, right: 0 }),
     [],
@@ -118,73 +93,85 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen, pendingRoute, navigate]);
 
+  // Используем ref для хранения функции разблокировки скролла
+  const unlockScrollRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       lenis.stop();
+      unlockScrollRef.current = lockScroll();
+      document.body.classList.add('menu-open');
     } else {
       lenis.start();
+      if (unlockScrollRef.current) {
+        unlockScrollRef.current();
+        unlockScrollRef.current = null;
+      }
+      document.body.classList.remove('menu-open');
     }
+    
     return () => {
       lenis.start();
+      if (unlockScrollRef.current) {
+        unlockScrollRef.current();
+        unlockScrollRef.current = null;
+      }
+      document.body.classList.remove('menu-open');
     };
   }, [isOpen]);
 
-  const handleLinkClick = (e: React.MouseEvent, href: string) => {
+  const handleMobileMenuLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (locked) return;
+    
     if (location.pathname === href) {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-      if (isMobile) {
-        onClose();
-        setTimeout(() => {
-          window.scrollTo({
-            top: 0,
-            behavior: "auto",
-          });
-        }, 10);
-      } else {
-        lenis.scrollTo(0, {
-          duration: 1.2,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        });
-        onClose();
-      }
+      // Если мы уже на этой странице, закрываем меню и скроллим к верху
+      onClose();
+      setTimeout(() => {
+        scrollToTop({ immediate: isMobileDevice() });
+      }, 10);
     } else {
+      // Если мы переходим на другую страницу, сначала закрываем меню, а потом переходим
       setLocked(true);
       setPendingRoute(href);
       onClose();
     }
   };
 
-  const borderColor = theme === "dark" ? "border-gray-700" : "border-white/30";
-  const overlayStyle =
-    theme === "dark"
-      ? {
-          background: `
-      radial-gradient(circle at 20% 30%, rgba(0,255,255,0.12) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(255,0,255,0.12) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(0,100,255,0.08) 0%, transparent 50%),
-      linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.75) 100%)
-    `,
-          backdropFilter: "blur(24px) saturate(200%) brightness(1.1)",
-          WebkitBackdropFilter: "blur(24px) saturate(200%) brightness(1.1)",
-          borderImage:
-            "linear-gradient(135deg, rgba(0,255,255,0.3), rgba(255,0,255,0.3)) 1",
-        }
-      : {
-          background: `
-      radial-gradient(circle at 25% 25%, rgba(59,130,246,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(168,85,247,0.12) 0%, transparent 50%),
-      radial-gradient(circle at 50% 90%, rgba(34,197,94,0.08) 0%, transparent 50%),
-      linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(248,250,252,0.6) 100%)
-    `,
-          backdropFilter: "blur(28px) saturate(180%) brightness(1.05)",
-          WebkitBackdropFilter: "blur(28px) saturate(180%) brightness(1.05)",
-          border: "1px solid rgba(255,255,255,0.4)",
-          boxShadow:
-            "0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5)",
-        };
+  const borderColor = isDark ? "border-gray-700" : "border-white/30";
+  
+  // Используем хук для создания эффекта гласморфизма для оверлея
+  const { style: overlayStyle } = useGlassmorphism({
+    blur: 28,
+    saturation: isDark ? 160 : 180,
+    brightness: isDark ? 0.8 : 1.05,
+    opacity: isDark ? 0.9 : 0.8,
+    intensity: 'strong'
+  });
+
+  // Функция для безопасного вызова onClose при свайпе - улучшенная версия
+  const handleDragEnd = (_: any, info: any) => {
+    if (info && 
+        typeof info.offset === 'object' && 
+        typeof info.velocity === 'object' && 
+        typeof info.offset?.x === 'number' && 
+        typeof info.velocity?.x === 'number') {
+      // Закрываем меню даже при небольшом свайпе влево
+      if (info.offset.x < -50 || info.velocity.x < -200) {
+        onClose();
+      }
+    }
+  };
+  
+  // Обработка свайпа в процессе движения
+  const handleDrag = (_: any, info: any) => {
+    if (info && 
+        typeof info.offset === 'object' && 
+        typeof info.offset?.x === 'number' && 
+        info.offset.x < -150) {
+      onClose();
+    }
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -196,39 +183,21 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          style={{ ...overlayStyle, willChange: "opacity" }}
+          style={{ ...overlayStyle, willChange: "opacity, backdrop-filter" }}
           onClick={onClose}
         />,
         <motion.nav
           key="menu"
-          className="mobile-menu__nav fixed top-0 left-0 h-full w-screen max-w-none z-50 p-6 flex flex-col justify-between"
+          ref={menuRef}
+          className="mobile-menu__nav fixed top-0 left-0 h-full w-screen max-w-none z-50 p-6 pt-safe flex flex-col justify-between overflow-y-auto glassmorphism"
           style={{
             willChange: "transform, opacity",
-            background:
-              theme === "dark"
-                ? `
-                radial-gradient(circle at 10% 20%, rgba(0,255,255,0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(255,0,255,0.08) 0%, transparent 40%),
-                linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 50%, rgba(51,65,85,0.85) 100%)
-              `
-                : `
-                radial-gradient(circle at 20% 30%, rgba(59,130,246,0.25) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(168,85,247,0.2) 0%, transparent 50%),
-                radial-gradient(circle at 50% 90%, rgba(34,197,94,0.15) 0%, transparent 50%),
-                linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 50%, rgba(241,245,249,0.85) 100%)
-              `,
-            border:
-              theme === "dark"
-                ? "1px solid rgba(255,255,255,0.08)"
-                : "1px solid rgba(59,130,246,0.2)",
-            boxShadow:
-              theme === "dark"
-                ? "0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)"
-                : "0 25px 50px rgba(59,130,246,0.15), 0 0 100px rgba(168,85,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9)",
+            opacity: 1,
+            boxShadow: isDark ? "0 4px 30px rgba(0, 255, 255, 0.2)" : "0 4px 30px rgba(59, 130, 246, 0.2)"
           }}
           role="navigation"
           aria-label="Мобильное меню"
-          variants={menuVariants}
+          variants={mobileMenuVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -242,38 +211,26 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
             bounceStiffness: 300,
             bounceDamping: 40,
           }}
-          onUpdate={(latest) => {
-            if (typeof latest.x !== "undefined" && Number(latest.x) > 0) {
+          onUpdate={(latest: any) => {
+            if (latest && typeof latest.x !== "undefined" && Number(latest.x) > 0) {
               latest.x = 0;
             }
           }}
           onClick={(e) => e.stopPropagation()}
-          onDragEnd={(_, info) => {
-            if (info.offset.x < -100 || info.velocity.x < -300) {
-              onClose();
-            }
-          }}
+          onDrag={handleDrag}
+          onDragEnd={handleDragEnd}
         >
           <div
             className={`relative flex flex-col items-center pt-3 pb-3 border-b ${borderColor}`}
           >
             <motion.button
               onClick={onClose}
-              className="absolute -left-2 -top-2 p-3 rounded-2xl backdrop-blur-md shadow-lg border overflow-hidden group"
+              className="absolute -left-2 -top-2 p-3 rounded-2xl backdrop-blur-md shadow-glow border overflow-hidden group"
               style={{
-                background:
-                  theme === "dark"
-                    ? "linear-gradient(135deg, rgba(0,255,255,0.15) 0%, rgba(255,0,255,0.15) 100%)"
-                    : "linear-gradient(135deg, rgba(59,130,246,0.4) 0%, rgba(168,85,247,0.4) 100%)",
-                borderColor:
-                  theme === "dark"
-                    ? "rgba(0,255,255,0.3)"
-                    : "rgba(59,130,246,0.6)",
-                color: theme === "dark" ? "#00ffff" : "#ffffff",
-                boxShadow:
-                  theme === "dark"
-                    ? "0 0 20px rgba(0,255,255,0.3)"
-                    : "0 0 20px rgba(59,130,246,0.4), 0 4px 15px rgba(168,85,247,0.2)",
+                background: `var(--gradient)`,
+                borderColor: `var(--border)`,
+                color: `var(--primary)`,
+                boxShadow: `var(--glow)`
               }}
               aria-label="Закрыть меню"
               whileHover={{
@@ -329,38 +286,49 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
           <ul className="flex flex-col gap-3 mt-4 flex-grow">
-            {navLinks.map((link) => (
-              <li key={link.href}>
+            {navLinks.map((link, index) => (
+              <motion.li 
+                key={link.href}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0,
+                  transition: { 
+                    delay: 0.05 * index + 0.1,
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1]
+                  }
+                }}
+              >
                 <NavLink
                   to={link.href}
-                  className={({ isActive }) =>
-                    `sci-fi-link group relative flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-500 select-none [-webkit-tap-highlight-color:transparent] overflow-hidden ${
-                      isActive
-                        ? theme === "dark"
-                          ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 border border-cyan-400/30 shadow-[0_0_20px_rgba(0,255,255,0.3)]"
-                          : "bg-gradient-to-r from-blue-500/15 to-purple-500/15 text-blue-600 border border-blue-400/40 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                        : theme === "dark"
-                          ? "bg-white/5 hover:bg-white/10 text-white/90 hover:text-white border border-white/10 hover:border-white/20"
-                          : "bg-gradient-to-r from-white/70 to-white/50 hover:from-white/90 hover:to-white/70 text-gray-900 border border-blue-200/60 hover:border-blue-300/80 shadow-md hover:shadow-lg"
-                    } hover:scale-[1.02] hover:shadow-lg backdrop-blur-sm`
-                  }
-                  onClick={(e) => handleLinkClick(e, link.href)}
+                  onClick={(e) => handleMobileMenuLinkClick(e, link.href)}
                 >
-                  <span className="relative z-10 inline-flex items-center justify-center">
-                    {link.icon}
-                  </span>
-                  <span className="relative z-10 font-medium">
-                    {link.title}
-                  </span>
+                  {({ isActive }) => (
+                    <div
+                      className={`sci-fi-link group relative flex items-center gap-4 px-4 py-3.5 rounded-xl text-lg font-semibold transition-all duration-300 select-none [-webkit-tap-highlight-color:transparent] overflow-hidden backdrop-blur-md ${
+                        isActive
+                          ? "text-white bg-white/20 dark:bg-white/15 border border-white/30 dark:border-white/20 shadow-lg"
+                          : "text-gray-800 dark:text-white/80 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-transparent"
+                      }`}
+                    >
+                      <span className={`relative z-10 transition-colors duration-300 ${isActive ? "text-white" : "text-gray-700 dark:text-white/80"}`}>
+                        {link.icon}
+                      </span>
+                      <span className={`relative z-10 transition-colors duration-300 ${isActive ? "text-white" : "text-gray-800 dark:text-white"}`}>
+                        {link.title}
+                      </span>
+                    </div>
+                  )}
                 </NavLink>
-              </li>
+              </motion.li>
             ))}
           </ul>
 
           <div className="mt-6 mb-4 flex flex-col items-center gap-4">
             <div
               className="relative w-16 h-8 mb-2 group"
-              onClick={toggleTheme}
+              onClick={() => toggleTheme()}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -374,21 +342,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
               <motion.div
                 className="absolute inset-0 rounded-2xl border-2 backdrop-blur-md"
                 style={{
-                  background:
-                    theme === "light"
-                      ? "linear-gradient(135deg, rgba(59,130,246,0.4) 0%, rgba(168,85,247,0.4) 100%)"
-                      : "linear-gradient(135deg, rgba(0,255,255,0.15) 0%, rgba(255,0,255,0.15) 100%)",
-                  borderColor:
-                    theme === "light"
-                      ? "rgba(59,130,246,0.6)"
-                      : "rgba(0,255,255,0.3)",
+                  background: `var(--gradient)`,
+                  borderColor: `var(--border)`
                 }}
                 initial={false}
                 animate={{
-                  boxShadow:
-                    theme === "light"
-                      ? "0 0 25px rgba(59,130,246,0.5), 0 0 40px rgba(168,85,247,0.3), inset 0 1px 0 rgba(255,255,255,0.7)"
-                      : "0 0 25px rgba(0,255,255,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  boxShadow: `var(--glow), inset 0 1px 0 ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.7)'}`,
                 }}
                 transition={{
                   type: "spring",
@@ -400,34 +359,31 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
 
               <div className="absolute inset-0 flex items-center justify-between px-1.5">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center">
-                  <Moon size={16} className="text-white" />
+                  {/* Иконка Луны */}
+                  <Moon size={16} className="text-white/80" />
                 </div>
                 <div className="w-6 h-6 rounded-full flex items-center justify-center">
-                  <Sun size={16} className="text-white" />
+                  {/* Иконка Солнца */}
+                  <Sun size={16} className="text-yellow-400" />
                 </div>
               </div>
 
               <motion.div
                 className="absolute top-1 w-6 h-6 rounded-full flex items-center justify-center z-10 border backdrop-blur-sm"
                 style={{
-                  background:
-                    theme === "light"
-                      ? "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%)"
-                      : "linear-gradient(135deg, rgba(0,255,255,0.2) 0%, rgba(255,0,255,0.2) 100%)",
-                  borderColor:
-                    theme === "light"
-                      ? "rgba(255,255,255,0.6)"
-                      : "rgba(0,255,255,0.4)",
+                  background: isDark
+                    ? `var(--gradient)`
+                    : `linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%)`,
+                  borderColor: isDark
+                    ? `var(--border)`
+                    : `rgba(255,255,255,0.6)`,
                 }}
                 initial={false}
                 animate={{
-                  right: theme === "light" ? "0.25rem" : "auto",
-                  left: theme === "light" ? "auto" : "0.25rem",
-                  boxShadow:
-                    theme === "light"
-                      ? "0 0 15px rgba(255,255,255,0.8), 0 4px 12px rgba(59,130,246,0.3)"
-                      : "0 0 20px rgba(0,255,255,0.5), 0 4px 12px rgba(0,0,0,0.3)",
-                  rotate: theme === "light" ? 0 : 180,
+                  right: isDark ? "auto" : "0.25rem",
+                  left: isDark ? "0.25rem" : "auto",
+                  boxShadow: `var(--glow), 0 4px 12px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(59,130,246,0.3)'}`,
+                  rotate: isDark ? 180 : 0,
                 }}
                 transition={{
                   type: "spring",
@@ -436,10 +392,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                   mass: 1.2,
                 }}
               >
-                {theme === "light" ? (
-                  <Sun size={16} className="text-amber-500" />
+                {isDark ? (
+                  <Moon size={16} className="text-primary" />
                 ) : (
-                  <Moon size={16} className="text-cyan-300" />
+                  <Sun size={16} className="text-secondary" />
                 )}
               </motion.div>
             </div>
@@ -447,7 +403,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
               {new Date().getFullYear()} 4Life. Все права защищены.
             </div>
           </div>
-        </motion.nav>,
+        </motion.nav>
       ]}
     </AnimatePresence>
   );

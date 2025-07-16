@@ -1,0 +1,86 @@
+/* Стили для эффекта комет в хедере */
+
+/* Путь для движения комет */
+.comet-path {
+  fill: none;
+  stroke: none;
+}
+
+/* Стили для комет */
+.comet {
+  position: absolute;
+  pointer-events: none;
+  width: 6px;
+  height: 6px;
+}
+
+/* Голова кометы */
+.comet-head {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  position: absolute;
+}
+
+/* Темная тема */
+.dark .comet-head {
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.9) 0%, rgba(0, 255, 255, 0.3) 70%, transparent 100%);
+  box-shadow: 
+    0 0 10px 2px rgba(0, 255, 255, 0.5),
+    0 0 20px 4px rgba(0, 255, 255, 0.3);
+}
+
+/* Светлая тема */
+.light .comet-head {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.9) 0%, rgba(59, 130, 246, 0.3) 70%, transparent 100%);
+  box-shadow: 
+    0 0 10px 2px rgba(59, 130, 246, 0.5),
+    0 0 20px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* След кометы */
+.comet-tail {
+  position: absolute;
+  height: 3px;
+  transform-origin: left center;
+}
+
+/* Темная тема */
+.dark .comet-tail {
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 255, 255, 0.4) 30%, transparent 100%);
+  filter: blur(1px) drop-shadow(0 0 3px rgba(0, 255, 255, 0.5));
+}
+
+/* Светлая тема */
+.light .comet-tail {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.8) 0%, rgba(59, 130, 246, 0.4) 30%, transparent 100%);
+  filter: blur(1px) drop-shadow(0 0 3px rgba(59, 130, 246, 0.5));
+}
+
+/* Анимация движения комет по SVG-пути */
+@keyframes moveAlongPath {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+/* Поддержка для разных браузеров */
+.comet-1 {
+  offset-path: path('M 50,2 A 48,48 0 1 1 49.9999,2');
+  animation: moveAlongPath 30s linear infinite;
+}
+
+.comet-2 {
+  offset-path: path('M 50,2 A 48,48 0 1 0 49.9999,2');
+  animation: moveAlongPath 30s linear infinite reverse;
+}
+
+/* Дополнительные стили для поддержки в Safari */
+@supports not (offset-path: path('')) {
+  .comet-1, .comet-2 {
+    display: none;
+  }
+}

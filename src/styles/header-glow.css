@@ -1,0 +1,141 @@
+/* Анимированный эффект свечения для хедера */
+
+@keyframes headerGlowDark {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.35), 0 0 15px rgba(0, 255, 255, 0.15);
+  }
+}
+
+@keyframes headerGlowLight {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 0 10px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15), 0 0 15px rgba(59, 130, 246, 0.15);
+  }
+}
+
+.dark .header-glow-effect {
+  animation: headerGlowDark 4s ease-in-out infinite;
+}
+
+.light .header-glow-effect {
+  animation: headerGlowLight 4s ease-in-out infinite;
+}
+
+/* Анимированный эффект движения градиента для хедера */
+@keyframes gradientMoveDark {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes gradientMoveLight {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.dark .header-gradient-move {
+  background: linear-gradient(90deg, 
+    rgba(0, 255, 255, 0.05) 0%, 
+    rgba(255, 0, 255, 0.05) 50%, 
+    rgba(0, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: gradientMoveDark 8s ease infinite;
+}
+
+.light .header-gradient-move {
+  background: linear-gradient(90deg, 
+    rgba(59, 130, 246, 0.05) 0%, 
+    rgba(168, 85, 247, 0.05) 50%, 
+    rgba(59, 130, 246, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: gradientMoveLight 8s ease infinite;
+}
+
+/* Улучшенные стили для хедера */
+.header-modern {
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Светлая тема */
+.light .header-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(59, 130, 246, 0.3) 50%, 
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+.light .header-modern::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(59, 130, 246, 0.3) 50%, 
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+/* Темная тема */
+.dark .header-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(0, 255, 255, 0.3) 50%, 
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+.dark .header-modern::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(0, 255, 255, 0.3) 50%, 
+    transparent 100%
+  );
+  z-index: 1;
+}

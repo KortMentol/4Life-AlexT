@@ -11,7 +11,7 @@ import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
 
 import { ThemeProvider } from "./context/ThemeProvider";
-import { startLenisRaf } from "./lib/lenis";
+
 
 // Base styles (Tailwind directives)
 import "./styles/base.css";
@@ -23,9 +23,10 @@ import "./styles/fixes.css";
 import "./styles/modern-design.css";
 // Mobile menu styles
 import "./styles/mobile-menu.css";
+// Стили для хедера
+import "./styles/header-glow.css";
 
-// Инициализация плавного скроллинга
-startLenisRaf();
+// Lenis инициализируется автоматически. Простого импорта любого компонента из ./lib/lenis достаточно.
 
 // Функция для инициализации приложения
 const initApp = () => {

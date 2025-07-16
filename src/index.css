@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Импорт CSS-переменных для темы */
+@import './styles/theme-variables.css';
+@import './styles/mobile-menu.css';
+@import './styles/animations.css';
+
 @keyframes pan {
   0% {
     background-position: 0% 0%;
@@ -18,7 +23,7 @@ html {
 
 /* Стили для фиксированного навбара */
 body {
-  padding-top: env(safe-area-inset-top);
+  padding-top: 0;
 }
 
 @layer base {
@@ -112,3 +117,5 @@ body {
     @apply mb-4;
   }
 }
+
+/* Стили для адаптивного хедера перенесены в header-adaptive.css */

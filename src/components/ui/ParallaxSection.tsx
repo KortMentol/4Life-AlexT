@@ -132,6 +132,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               loop
               muted
               playsInline
+              disablePictureInPicture
               aria-label={altText}
             />
           ) : (

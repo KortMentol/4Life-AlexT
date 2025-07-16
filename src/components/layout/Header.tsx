@@ -1,8 +1,8 @@
 /**
  * @module src/components/layout/Header.tsx
- * @description Адаптивный компонент шапки сайта. На мобильных устройствах отображает кнопку-гамбургер и название, на десктопе — полноценное навигационное меню. Реализует эффект "headroom.js", скрываясь при прокрутке вниз и появляясь при прокрутке вверх для экономии места на экране. Содержит логотип, навигацию, переключатель темы и иконку списка продуктов.
+ * @description Адаптивный компонент шапки сайта с нативным скроллом. Реализует эффект следования за скроллом, плавно появляясь и исчезая в зависимости от направления прокрутки. Содержит логотип, навигацию, переключатель темы и иконку списка продуктов с эффектами гласморфизма.
  * @author Kort
- * @version 1.0.0
+ * @version 2.1.0
  * @see MobileMenu - Используется для отображения навигации на мобильных устройствах.
  * @see DynamicLogo - Отображает логотип сайта.
  * @see HamburgerButton - Кнопка для открытия/закрытия мобильного меню.
@@ -16,115 +16,66 @@
  *   <Footer />
  * </Layout>
  */
-import { lenis } from "@/lib/lenis";
-import MobileMenu from "./MobileMenu";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-} from "framer-motion";
+import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import DynamicLogo from "../ui/DynamicLogo";
+
+import HeaderComets from "../effects/HeaderComets";
+
 import HamburgerButton from "../ui/HamburgerButton";
 import ProductListIcon from "../ui/ProductListIcon";
 import TextShineEffect from "../effects/TextShineEffect";
+import MobileMenu from "./MobileMenu";
 
 import { useTheme } from "../../hooks/useTheme";
+import { useNativeScroll } from "../../hooks/useNativeScroll";
+
+import { useGlassmorphism } from "../../hooks/useGlassmorphism";
 import { mainNav, siteConfig } from "../../site-config/site";
+import { headerVariants, navItemVariants, logoVariants } from "../../animations/headerAnimations";
+import { isMobileDevice } from "../../utils/deviceUtils";
+import { scrollToTop, handleLinkClick } from "../../utils/navigationUtils";
 
 const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-  const [isHidden, setIsHidden] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
 
-  // Scroll-linked header movement: измеряем фактическую высоту, чтобы скрывать на 100 %
-  const headerRef = React.useRef<HTMLElement>(null);
-  const [headerHeight, setHeaderHeight] = React.useState(0);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   useLayoutEffect(() => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
     }
   }, []);
 
-  const { scrollY } = useScroll();
-  const lastY = React.useRef(0);
+  const { headerY, headerOpacity } = useNativeScroll({ headerHeight, topOffset: 8 });
+  const { style: glassmorphismStyle } = useGlassmorphism();
 
-  // Продвинутая логика скрытия/показа хедера
-  // Основана на принципах headroom.js для лучшего UX
-  useMotionValueEvent(scrollY, "change", (y) => {
-    const SCROLL_DOWN_THRESHOLD = 15; // Порог для скрытия (вниз)
-    const SCROLL_UP_THRESHOLD = 5; // Порог для показа (вверх)
-    const direction = y - lastY.current;
+  // Обработка прокрутки для глассморфизма происходит в хуке useGlassmorphism
 
-    // Устанавливаем состояние скролла для фона в любом случае
-    setScrolled(y > 50);
 
-    // 1. В безопасной зоне наверху или при достижении конца страницы - всегда показывать
-    // (проверка на конец страницы может быть добавлена дополнительно)
-    if (y < headerHeight) {
-      setIsHidden(false);
-      lastY.current = y;
-      return;
-    }
 
-    // 2. Основная логика: скрывать при уверенном скролле вниз, показывать при любом скролле вверх
-    if (direction > SCROLL_DOWN_THRESHOLD) {
-      // Уверенный скролл вниз — скрываем хедер
-      setIsHidden(true);
-    } else if (direction < -SCROLL_UP_THRESHOLD) {
-      // Скролл вверх — показываем хедер
-      setIsHidden(false);
-    }
 
-    lastY.current = y;
-  });
 
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogoClick = () => {
-    // Проверяем, мобильное ли устройство
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (location.pathname !== "/") {
-      lenis.stop();
-      lenis.velocity = 0;
-      navigate("/");
-
-      if (isMobile) {
-        // На мобильных используем нативный скролл
-        window.scrollTo(0, 0);
-      } else {
-        // На десктопе используем Lenis
-        window.scrollTo(0, 0);
-        requestAnimationFrame(() => {
-          lenis.scrollTo(0, { immediate: true });
-          setTimeout(() => lenis.start(), 50);
-        });
-      }
-    } else {
-      // Если уже на главной странице
-      if (isMobile) {
-        // На мобильных используем нативный скролл
-        window.scrollTo({
-          top: 0,
-          behavior: "auto", // Мгновенный скролл
-        });
-      } else {
-        // На десктопе используем Lenis
-        lenis.scrollTo(0, {
-          duration: 1.2,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        });
-      }
-    }
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
   };
 
   const handleHamburgerClick = () => {
-    setMobileMenuOpen((prev) => !prev);
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogoClick = () => {
+    if (location.pathname === "/") {
+      scrollToTop({ immediate: isMobileDevice() });
+    } else {
+      navigate("/");
+    }
   };
 
   return (
@@ -132,26 +83,24 @@ const Header: React.FC = () => {
       <motion.header
         ref={headerRef}
         role="banner"
-        variants={{
-          visible: { y: 0 },
-          hidden: { y: "-100%" },
-        }}
-        animate={isHidden ? "hidden" : "visible"}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        variants={headerVariants}
+        initial="visible"
+        animate="visible"
         style={{
-          top: "env(safe-area-inset-top)",
+          y: headerY,
+          ...glassmorphismStyle,
         }}
-        className="fixed w-full z-40 top-0 py-3 md:py-4 bg-white/90 dark:bg-gray-900/90 md:backdrop-blur-md shadow"
-      >
-        <div className="container max-w-7xl mx-auto px-4">
+        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full glassmorphism header-glow-effect header-modern}`}>
+        <div className="header-gradient-move absolute inset-0 rounded-full"></div>
+        <HeaderComets />
+        <div className="container max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex items-center justify-between">
             {/* Left Section: Hamburger on Mobile, Logo + Name on Desktop */}
             <div className="flex items-center">
-              <div className="md:hidden relative z-[100] no-highlight">
+              <div className="md:hidden relative z-[100] no-highlight -ml-1 flex items-center">
                 <HamburgerButton
                   isOpen={mobileMenuOpen}
                   toggle={handleHamburgerClick}
-                  scrolled={scrolled}
                 />
               </div>
               <button
@@ -159,20 +108,40 @@ const Header: React.FC = () => {
                 className="hidden md:flex items-center space-x-4 group"
                 aria-label="Главная страница"
               >
-                <div className="relative z-10 transition-transform duration-300 group-hover:scale-105">
-                  <DynamicLogo alt="4Life Logo" size="md" />
-                </div>
+                {/* Обертка для применения адаптивного цвета */}
                 <div>
+                  <motion.div 
+                    className="relative z-10 transition-transform duration-300 group-hover:scale-105"
+                    style={{ opacity: headerOpacity }}
+                    variants={logoVariants}
+                    initial="initial"
+                    animate="animate"
+                    whileHover="hover"
+                  >
+                    {/* Используем разные версии логотипа в зависимости от темы */}
+                    <img 
+                      src={isDark ? "/src/assets/images/brand/4life-logo-light.svg" : "/src/assets/images/brand/4life-logo.svg"} 
+                      alt="4Life Logo" 
+                      className="h-9 w-auto" />
+                  </motion.div>
+                </div>
+                <motion.div style={{ 
+                  opacity: headerOpacity, 
+                  color: isDark ? "white" : "#1e293b",
+                  textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)" 
+                }} className="header-adaptive-text font-bold">
                   <TextShineEffect
                     text={siteConfig.distributor.name}
-                    className="font-bold text-base leading-tight text-gray-800 dark:text-gray-100"
+                    className="font-bold text-base leading-tight"
                   />
-                  <div
-                    className={`text-sm font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}
-                  >
+                  <div className="text-sm font-medium" style={{ 
+                    color: "#e6b800", 
+                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
+                    fontWeight: "600"
+                  }}>
                     Builder Elite
                   </div>
-                </div>
+                </motion.div>
               </button>
             </div>
 
@@ -182,101 +151,73 @@ const Header: React.FC = () => {
               <div className="md:hidden">
                 <button
                   onClick={() => {
-                    // Проверяем, мобильное ли устройство
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(
-                      navigator.userAgent,
-                    );
-
                     if (location.pathname === "/") {
-                      if (isMobile) {
-                        // На мобильных используем нативный скролл для мгновенного отклика
-                        window.scrollTo({
-                          top: 0,
-                          behavior: "auto", // Используем 'auto' вместо 'smooth' для мгновенного скролла
-                        });
-                      } else {
-                        // На десктопе используем Lenis
-                        lenis.scrollTo(0, {
-                          duration: 1.2,
-                          easing: (t) =>
-                            Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                        });
-                      }
+                      scrollToTop({ immediate: isMobileDevice() });
                     } else {
-                      // Если не на главной странице, используем стандартную навигацию
                       handleLogoClick();
-                    }
+                    } 
                   }}
                   className="flex flex-col items-center group"
-                  aria-label="Главная страница"
-                >
-                  <div className="text-center">
+                  aria-label="Главная страница">
+                  <motion.div
+                    className="text-center header-adaptive-text font-bold"
+                    style={{ 
+                      opacity: headerOpacity, 
+                      color: isDark ? "white" : "#1e293b",
+                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)" 
+                    }}>
                     <TextShineEffect
                       text={siteConfig.distributor.name}
-                      className="font-bold text-sm leading-tight text-gray-900 dark:text-white"
+                      className="font-bold text-sm leading-tight"
                     />
-                    <div
-                      className={`text-xs font-medium ${theme === "light" ? "text-amber-600" : "text-amber-300"}`}
-                    >
+                    <div className="text-xs font-medium" style={{ 
+                      color: "#e6b800", 
+                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
+                      fontWeight: "600"
+                    }}>
                       Builder Elite
                     </div>
-                  </div>
+                  </motion.div>
                 </button>
               </div>
 
               {/* Navigation for Desktop */}
-              <nav
+              <motion.nav
                 role="navigation"
                 className="hidden md:flex items-center space-x-1 h-full"
-              >
-                {mainNav.map((item) => (
-                  <div
+                style={{ opacity: headerOpacity }}>
+                {mainNav.map((item, index) => (
+                  <motion.div
                     key={item.href}
                     className="relative flex items-center h-full"
-                  >
+                    variants={navItemVariants}
+                    initial="initial"
+                    animate="animate"
+                    whileHover="hover"
+                    whileTap="tap"
+                    custom={index}>
                     <NavLink
                       to={item.href}
-                      onClick={(e) => {
-                        if (location.pathname === item.href) {
-                          e.preventDefault();
-
-                          // Проверяем, мобильное ли устройство
-                          const isMobile = /iPhone|iPad|iPod|Android/i.test(
-                            navigator.userAgent,
-                          );
-
-                          if (isMobile) {
-                            // На мобильных используем нативный скролл
-                            window.scrollTo({
-                              top: 0,
-                              behavior: "auto", // Мгновенный скролл
-                            });
-                          } else {
-                            // На десктопе используем Lenis
-                            lenis.scrollTo(0, {
-                              duration: 1.2,
-                              easing: (t) =>
-                                Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                            });
-                          }
-                        }
-                      }}
-                      className="flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative"
-                    >
+                      onClick={(e) =>
+                        handleLinkClick(e, navigate, item.href, location.pathname, {
+                          immediate: isMobileDevice(),
+                        })
+                      }
+                      className="flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative">
                       {({ isActive }) => (
                         <>
                           <span
-                            className={
-                              isActive
-                                ? "text-blue-600 dark:text-blue-400"
-                                : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                            }
-                          >
+                            className={`header-adaptive-text transition-opacity duration-300 ${isActive ? "font-semibold opacity-100" : "opacity-80 hover:opacity-100"}`}
+                            style={{ 
+                              color: isDark ? "white" : "#1e293b",
+                              textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)" 
+                            }}>
                             {item.title}
                           </span>
                           {isActive && (
                             <motion.span
-                              className="absolute bottom-1.5 left-0 right-0 h-0.5 bg-blue-500 dark:bg-blue-400"
+                              className="absolute bottom-1.5 left-0 right-0 h-0.5" // Подчеркивание тоже будет адаптивным
+                              style={{ backgroundColor: isDark ? "white" : "#1e293b" }}
                               layoutId="underline"
                               initial={{ width: 0 }}
                               animate={{ width: "100%" }}
@@ -286,29 +227,54 @@ const Header: React.FC = () => {
                         </>
                       )}
                     </NavLink>
-                  </div>
+                  </motion.div>
                 ))}
-              </nav>
+              </motion.nav>
             </div>
 
             {/* Right Section: Icons */}
-            <div className="flex items-center justify-end">
-              <div className="hidden md:flex items-center space-x-2 bg-gray-100 dark:bg-gray-800/80 rounded-full p-1 transition-all duration-300 shadow-inner">
-                <ProductListIcon />
-                <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
-                <button
+            <motion.div
+              className="flex items-center justify-end"
+              style={{ opacity: headerOpacity }}>
+              <motion.div 
+                className="hidden md:flex items-center space-x-2"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
+                style={{ color: isDark ? "white" : "#1e293b" }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  style={{ color: isDark ? "white" : "#1e293b" }}
+                >
+                  <ProductListIcon />
+                </motion.div>
+                <div className="w-px h-6 mx-1" style={{ opacity: 0.7, backgroundColor: isDark ? "white" : "#1e293b" }}></div>
+                <motion.button
                   type="button"
                   onClick={toggleTheme}
-                  className={`p-2 rounded-full ${theme === "light" ? "text-gray-600 hover:bg-gray-200" : "text-gray-400 hover:bg-gray-700"} transition-colors duration-300`}
+                  className="p-2 rounded-full transition-colors duration-300 header-adaptive-text"
                   aria-label="Переключить тему"
+                  whileHover={{ scale: 1.1, rotate: 15 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  style={{ color: isDark ? "white" : "#1e293b" }}
                 >
-                  {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-                </button>
-              </div>
-              <div className="md:hidden">
+                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                </motion.button>
+              </motion.div>
+              <motion.div
+                className="md:hidden"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                style={{ color: isDark ? "white" : "#1e293b" }}>
                 <ProductListIcon />
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </motion.header>

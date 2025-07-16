@@ -5,18 +5,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#007bff",
+        primary: "var(--primary)",
+        secondary: "var(--secondary)",
+        accent: "var(--accent)",
+        text: "var(--text)",
+        "text-muted": "var(--text-muted)",
+        bg: "var(--bg)",
+        "bg-muted": "var(--bg-muted)",
+        border: "var(--border)",
+        // Сохраняем старые цвета для обратной совместимости
         "primary-dark": "#0056b3",
         "primary-darker": "#003d80",
-        secondary: "#6c757d",
-        accent: "#1e3a8a",
         background: {
           DEFAULT: "#f9fafb",
           dark: "#1a1a1a",
-        },
-        text: {
-          DEFAULT: "#333333",
-          dark: "#e5e5e5",
         },
         "4life-blue": "#007bff",
         "4life-green": "#28a745",
@@ -42,6 +44,7 @@ export default {
         "text-lg": "0 2px 8px rgba(0, 0, 0, 0.4)",
         "text-md": "0 1px 4px rgba(0, 0, 0, 0.3)",
         "text-sm": "0 1px 2px rgba(0, 0, 0, 0.2)",
+        glow: "var(--glow)",
       },
       keyframes: {
         "fade-in": {

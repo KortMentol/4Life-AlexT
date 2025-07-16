@@ -138,11 +138,10 @@ const Hero: React.FC<HeroProps> = ({
 
   return (
     <section
+      id="hero-section"
       className={`relative flex items-center justify-center overflow-hidden ${heightClasses[height]}`}
       style={{
-        backgroundImage: backgroundImage
-          ? `url(${backgroundImage})`
-          : undefined,
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
