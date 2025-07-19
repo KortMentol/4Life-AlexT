@@ -12,7 +12,7 @@ import { lenis, updateScroll } from "./lib/lenis";
 import PerformanceDebug from "./components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
 
-// Ленивая загрузка страниц с оптимизированным синтаксисом
+// Ленивая загрузка страниц
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProductsPage = lazy(() => import("./pages/ProductsPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
@@ -20,71 +20,6 @@ const AboutMePage = lazy(() => import("./pages/AboutMePage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PartnershipPage = lazy(() => import("./pages/PartnershipPage"));
 const HowToBuyPage = lazy(() => import("./pages/HowToBuyPage"));
-
-// Интерфейс для пропсов компонента предварительной загрузки
-interface PreloadImagesProps {
-  onComplete: () => void;
-}
-
-// Компонент предварительной загрузки изображений
-const PreloadImages = ({ onComplete }: PreloadImagesProps) => {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-
-    // Пути к изображениям для предварительной загрузки
-    const heroImage = isMobile
-      ? "/src/assets/images/backgrounds/bg-hero-Mobile.webp"
-      : "/src/assets/images/backgrounds/bg-hero-PC.webp";
-    const productsBgImage = "/src/assets/images/backgrounds/2.jpg";
-
-    // Список изображений для предварительной загрузки
-    const imagesToPreload = [heroImage, productsBgImage];
-
-    let loadedCount = 0;
-
-    // Загружаем все изображения
-    imagesToPreload.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        loadedCount++;
-        setProgress(Math.floor((loadedCount / imagesToPreload.length) * 100));
-        if (loadedCount === imagesToPreload.length) {
-          // Небольшая задержка для плавности
-          setTimeout(() => {
-            onComplete();
-          }, 300);
-        }
-      };
-      img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === imagesToPreload.length) {
-          onComplete();
-        }
-      };
-    });
-  }, [onComplete]);
-
-  return (
-    <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
-      <div className="flex flex-col items-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <img
-            src="/src/assets/images/brand/4life-logo.svg"
-            alt="4Life Logo"
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8"
-          />
-        </div>
-        <p className="mt-4 text-lg font-medium">
-          Загрузка сайта 4Life... {progress}%
-        </p>
-      </div>
-    </div>
-  );
-};
 
 // Компонент загрузки для других страниц
 const LoadingScreen = () => (
@@ -106,7 +41,6 @@ const LoadingScreen = () => (
 );
 
 function App() {
-  const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const { closeMobileMenu } = useMobileMenuState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -116,110 +50,104 @@ function App() {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Используем хук для восстановления позиции скролла
+  // Хуки для скролла
   useScrollRestoration();
-
-  // Используем хук для принудительного сброса скролла при навигации
   useResetScrollOnNavigation();
-
-  // --- НАЧАЛО ГЛОБАЛЬНОГО РЕШЕНИЯ ДЛЯ БЛОКИРОВКИ СКРОЛЛА ---
+  
+  // Логика для скрытия статического прелоадера
   useEffect(() => {
-    // Сохраняем начальные координаты касания
+    const isMobileDevice = window.innerWidth < 768;
+    const heroImage = isMobileDevice
+      ? "/src/assets/images/backgrounds/bg-hero-Mobile.webp"
+      : "/src/assets/images/backgrounds/bg-hero-PC.webp";
+    
+    const imagesToPreload = [heroImage]; 
+    let loadedCount = 0;
+
+    const onAssetsLoaded = () => {
+      const preloader = document.getElementById('preloader');
+      if (preloader) {
+        preloader.classList.add('hidden');
+        setTimeout(() => {
+          preloader.remove();
+        }, 500); // Совпадает с transition в CSS
+      }
+    };
+
+    imagesToPreload.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = img.onerror = () => {
+        loadedCount++;
+        if (loadedCount === imagesToPreload.length) {
+          setTimeout(onAssetsLoaded, 300);
+        }
+      };
+    });
+    
+    if (imagesToPreload.length === 0) {
+      onAssetsLoaded();
+    }
+  }, []);
+
+  // Глобальное решение для блокировки скролла
+  useEffect(() => {
     let touchStartX = 0;
     let touchStartY = 0;
-    // Флаг, который показывает, определили ли мы уже доминирующую ось скролла для текущего жеста
     let scrollDirectionDetermined = false;
 
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
       if (!touch) return;
-
-      // Запоминаем точку начала жеста
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
-      // Сбрасываем флаг для нового жеста
       scrollDirectionDetermined = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       const touch = e.touches[0];
-      if (!touch) return;
-
-      // Если мы уже определили направление для этого жеста, ничего не делаем
-      if (scrollDirectionDetermined) return;
-
-      const currentX = touch.clientX;
-      const currentY = touch.clientY;
-
-      // Вычисляем смещение от начальной точки
-      const deltaX = Math.abs(currentX - touchStartX);
-      const deltaY = Math.abs(currentY - touchStartY);
-
-      // Устанавливаем порог, чтобы избежать случайного срабатывания при мелких дрожаниях
-      const sensitivityThreshold = 5; // 5 пикселей
+      if (!touch || scrollDirectionDetermined) return;
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - touchStartY);
+      const sensitivityThreshold = 5;
 
       if (deltaX > sensitivityThreshold || deltaY > sensitivityThreshold) {
-        // Если горизонтальное движение преобладает, останавливаем Lenis
         if (deltaX > deltaY) {
           lenis.stop();
-        }
-        // Если вертикальное — убеждаемся, что Lenis работает (на случай, если был остановлен ранее)
-        else {
+        } else {
           lenis.start();
         }
-        // Мы определили направление, больше не будем проверять для этого жеста
         scrollDirectionDetermined = true;
       }
     };
 
     const handleTouchEnd = () => {
-      // Когда жест заканчивается, всегда запускаем Lenis снова
       lenis.start();
     };
 
-    // Добавляем глобальные слушатели на весь документ
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
     document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
-    // Очистка при размонтировании компонента
     return () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, []); // Пустой массив зависимостей для выполнения один раз
-  // --- КОНЕЦ ГЛОБАЛЬНОГО РЕШЕНИЯ ---
+  }, []);
 
-  // Обновляем Lenis при монтировании компонента и при изменении размера окна
+  // Обновление Lenis
   useEffect(() => {
-    // Обновляем Lenis после полной загрузки страницы
     window.addEventListener("load", updateScroll);
-
-    // Обновляем Lenis при изменении размера окна
     window.addEventListener("resize", updateScroll);
-
-    // Обновляем Lenis сразу после монтирования
     updateScroll();
-
     return () => {
       window.removeEventListener("load", updateScroll);
       window.removeEventListener("resize", updateScroll);
     };
   }, []);
-
-  // Если мы на главной странице и изображения еще не загружены, показываем экран предварительной загрузки
-  const [pathname, setPathname] = useState(window.location.pathname);
-
-  useEffect(() => {
-    setPathname(window.location.pathname);
-  }, []);
-
-  if (pathname === "/" && !imagesPreloaded) {
-    return <PreloadImages onComplete={() => setImagesPreloaded(true)} />;
-  }
 
   return (
     <ThemeProvider>

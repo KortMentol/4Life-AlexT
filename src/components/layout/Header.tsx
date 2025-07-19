@@ -216,7 +216,7 @@ const Header: React.FC = () => {
                           </span>
                           {isActive && (
                             <motion.span
-                              className="absolute bottom-1.5 left-0 right-0 h-0.5" // Подчеркивание тоже будет адаптивным
+                              className="absolute bottom-1 left-0 right-0 h-0.5" // Подчеркивание тоже будет адаптивным
                               style={{ backgroundColor: isDark ? "white" : "#1e293b" }}
                               layoutId="underline"
                               initial={{ width: 0 }}
