@@ -1,46 +1,37 @@
 import { motion } from "framer-motion";
-import { GlowEffect } from "../components/layout/GlowEffect";
 import { Helmet } from "react-helmet-async";
-import {
-  cardVariants,
-  containerVariants,
-  itemVariants,
-} from "../animations/variants";
+import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
+import { GlowEffect } from "../components/layout/GlowEffect";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
 import { Icons } from "../utils/icons";
 
+// Варианты анимации для страницы
+const pageVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
+  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+};
+
 const ProductsPage: React.FC = () => {
   return (
-    <>
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <Helmet>
-        <title>
-          Продукты 4Life - Укрепление иммунитета и здоровье с Александром
-          Тощевым
-        </title>
+        <title>Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым</title>
         <meta
           name="description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
         />
-        <meta
-          property="og:title"
-          content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
-        />
+        <meta property="og:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
         <meta
           property="og:description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
         />
         <meta property="og:image" content="/images/og-products.jpg" />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:url"
-          content="https://alexander-toshchev-4life.ru/products"
-        />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/products" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
-        />
+        <meta name="twitter:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
         <meta
           name="twitter:description"
           content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
@@ -85,8 +76,7 @@ const ProductsPage: React.FC = () => {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
               >
-                Откройте для себя инновационные продукты для поддержки
-                иммунитета и общего благополучия.
+                Откройте для себя инновационные продукты для поддержки иммунитета и общего благополучия.
               </motion.p>
             </motion.div>
           </div>
@@ -122,12 +112,9 @@ const ProductsPage: React.FC = () => {
                 variants={cardVariants}
               >
                 <Icons.ShieldCheck className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Трансфер&nbsp;Факторы
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Трансфер Факторы</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Уникальные молекулы иммунной памяти, обучающие и балансирующие
-                  защитные клетки организма.
+                  Уникальные молекулы иммунной памяти, обучающие и балансирующие защитные клетки организма.
                 </p>
               </motion.div>
               {/* Patents & Research */}
@@ -137,12 +124,9 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.2 }}
               >
                 <Icons.FlaskConical className="h-12 w-12 text-emerald-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Патенты и Исследования
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Патенты и Исследования</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  Продукция защищена патентами и подтверждена клиническими
-                  исследованиями.
+                  Продукция защищена патентами и подтверждена клиническими исследованиями.
                 </p>
                 <a
                   href="https://russia.4life.com/12299550/page/47/studies-and-publications"
@@ -161,12 +145,9 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.4 }}
               >
                 <Icons.Users className="h-12 w-12 text-violet-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Экспертный Совет
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Экспертный Совет</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Формулы разрабатываются при участии ведущих учёных и врачей со
-                  всего мира.
+                  Формулы разрабатываются при участии ведущих учёных и врачей со всего мира.
                 </p>
               </motion.div>
               {/* Quality Control */}
@@ -176,12 +157,9 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.6 }}
               >
                 <Icons.CheckCircle className="h-12 w-12 text-teal-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Строгий Контроль Качества
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Строгий Контроль Качества</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Многоступенчатая проверка — от сырья до готового продукта,
-                  гарантирует чистоту и эффективность.
+                  Многоступенчатая проверка — от сырья до готового продукта, гарантирует чистоту и эффективность.
                 </p>
               </motion.div>
             </motion.div>
@@ -218,9 +196,7 @@ const ProductsPage: React.FC = () => {
                 variants={cardVariants}
               >
                 <Icons.Shield className="h-12 w-12 text-blue-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Иммунитет и Общее Здоровье
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Иммунитет и Общее Здоровье</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   Базовая поддержка иммунной системы и жизненной энергии.
                 </p>
@@ -232,12 +208,8 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.2 }}
               >
                 <Icons.HeartPulse className="h-12 w-12 text-red-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Целевая Поддержка
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Решения для сердца, печени, мозга и других систем.
-                </p>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Целевая Поддержка</h3>
+                <p className="text-gray-600 dark:text-gray-400">Решения для сердца, печени, мозга и других систем.</p>
               </motion.div>
               {/* Категория 3 */}
               <motion.div
@@ -246,12 +218,8 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.4 }}
               >
                 <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Управление Весом
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Продукты для контроля массы тела и метаболизма.
-                </p>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Управление Весом</h3>
+                <p className="text-gray-600 dark:text-gray-400">Продукты для контроля массы тела и метаболизма.</p>
               </motion.div>
               {/* Категория 4 */}
               <motion.div
@@ -260,18 +228,12 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.6 }}
               >
                 <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Красота и Уход
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Коллаген и другие решения для кожи, волос и ногтей.
-                </p>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Красота и Уход</h3>
+                <p className="text-gray-600 dark:text-gray-400">Коллаген и другие решения для кожи, волос и ногтей.</p>
               </motion.div>
             </motion.div>
           </div>
         </section>
-
-
 
         {/* Why Choose Section */}
         <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
@@ -303,12 +265,9 @@ const ProductsPage: React.FC = () => {
                 variants={cardVariants}
               >
                 <Icons.Lightbulb className="h-12 w-12 text-yellow-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Инновации и Наука
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Инновации и Наука</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Постоянные исследования и запатентованные технологии для
-                  максимальной эффективности.
+                  Постоянные исследования и запатентованные технологии для максимальной эффективности.
                 </p>
               </motion.div>
               {/* Quality & Safety */}
@@ -318,9 +277,7 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.2 }}
               >
                 <Icons.CheckCircle className="h-12 w-12 text-teal-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Качество и Безопасность
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Качество и Безопасность</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   Многоступенчатый контроль качества и сырьё премиум-класса.
                 </p>
@@ -332,12 +289,9 @@ const ProductsPage: React.FC = () => {
                 transition={{ delay: 0.4 }}
               >
                 <Icons.Globe className="h-12 w-12 text-indigo-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Глобальное Сообщество
-                </h3>
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">Глобальное Сообщество</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Миллионы довольных клиентов и дистрибьюторов в 70+ странах
-                  мира.
+                  Миллионы довольных клиентов и дистрибьюторов в 70+ странах мира.
                 </p>
               </motion.div>
             </motion.div>
@@ -354,8 +308,7 @@ const ProductsPage: React.FC = () => {
           secondaryButtonLink="/partnership"
         />
       </div>
-
-    </>
+    </motion.div>
   );
 };
 

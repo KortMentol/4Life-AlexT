@@ -59,9 +59,11 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
   }
 
   return (
-    // Контейнер для центрирования карусели по вертикали и горизонтали
-    // Внешние отступы убраны и должны задаваться на родительской странице
-    <div className="w-full flex justify-center">
+    // Контейнер, который скрывает карусель на больших экранах (lg и выше)
+    <div className="lg:hidden">
+      {/* Контейнер для центрирования карусели по вертикали и горизонтали */}
+      {/* Внешние отступы убраны и должны задаваться на родительской странице */}
+      <div className="w-full flex justify-center">
       <Swiper
         effect={"cube"}
         grabCursor={true}
@@ -88,6 +90,7 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
           </SwiperSlide>
         ))}
       </Swiper>
+    </div>
     </div>
   );
 };

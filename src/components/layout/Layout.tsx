@@ -18,19 +18,19 @@
  *   </Route>
  * </Routes>
  */
+import { FluidProvider } from "@/context/FluidProvider";
+import { updateScroll } from "@/lib/lenis";
+import { AnimatePresence } from "framer-motion"; // <-- ДОБАВЛЕН ИМПОРТ
 import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import FluidEffect from "../effects/FluidEffect";
+import ScrollToTopButton from "../ui/ScrollToTopButton";
 import Footer from "./Footer";
 import Header from "./Header";
-import ScrollToTopButton from "../ui/ScrollToTopButton";
-import { updateScroll } from "@/lib/lenis";
-import { FluidProvider } from "@/context/FluidProvider";
-
 
 const Layout: React.FC = () => {
   const location = useLocation();
-  
+
   // Обновляем Lenis при изменении маршрута и после рендеринга контента
 
   // Обновляем Lenis при изменении маршрута и после рендеринга контента
@@ -61,7 +61,10 @@ const Layout: React.FC = () => {
         <Header />
 
         <main id="main-content" className="flex-grow">
-          <Outlet />
+          <AnimatePresence mode="wait">
+            {/* Ключ `location.pathname` необходим, чтобы AnimatePresence отслеживала смену страниц */}
+            <Outlet key={location.pathname} />
+          </AnimatePresence>
         </main>
         <Footer />
         <ScrollToTopButton />

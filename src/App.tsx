@@ -1,18 +1,18 @@
 import { ProductListProvider } from "@/context/ProductListProvider";
-import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link, Route, Routes } from "react-router-dom";
+import PerformanceDebug from "./components/debug/PerformanceDebug";
+import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
 import Layout from "./components/layout/Layout";
 import RouteChangeHandler from "./components/utils/RouteChangeHandler";
+import { FluidProvider } from "./context/FluidProvider";
 import { useMobileMenuState } from "./hooks/useMobileMenuState";
 import useResetScrollOnNavigation from "./hooks/useResetScrollOnNavigation";
 import useScrollRestoration from "./hooks/useScrollRestoration";
 import { lenis, updateScroll } from "./lib/lenis";
-import PerformanceDebug from "./components/debug/PerformanceDebug";
-import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
 
-// Ленивая загрузка страниц
+// Ленивая загрузка страниц, но управление предзагрузкой происходит в компонентах
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProductsPage = lazy(() => import("./pages/ProductsPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
@@ -20,25 +20,6 @@ const AboutMePage = lazy(() => import("./pages/AboutMePage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PartnershipPage = lazy(() => import("./pages/PartnershipPage"));
 const HowToBuyPage = lazy(() => import("./pages/HowToBuyPage"));
-
-// Компонент загрузки для других страниц
-const LoadingScreen = () => (
-  <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
-    <div className="flex flex-col items-center">
-      <div className="relative">
-        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <img
-          src="/src/assets/images/brand/4life-logo.svg"
-          alt="4Life Logo"
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8"
-        />
-      </div>
-      <p className="mt-4 text-lg font-medium animate-pulse">
-        Загрузка сайта 4Life...
-      </p>
-    </div>
-  </div>
-);
 
 function App() {
   const { closeMobileMenu } = useMobileMenuState();
@@ -50,47 +31,46 @@ function App() {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Хуки для скролла
   useScrollRestoration();
   useResetScrollOnNavigation();
-  
-  // Логика для скрытия статического прелоадера
+
   useEffect(() => {
     const isMobileDevice = window.innerWidth < 768;
     const heroImage = isMobileDevice
       ? "/src/assets/images/backgrounds/bg-hero-Mobile.webp"
       : "/src/assets/images/backgrounds/bg-hero-PC.webp";
-    
-    const imagesToPreload = [heroImage]; 
+
+    const imagesToPreload = [heroImage];
     let loadedCount = 0;
 
     const onAssetsLoaded = () => {
-      const preloader = document.getElementById('preloader');
+      const preloader = document.getElementById("preloader");
       if (preloader) {
-        preloader.classList.add('hidden');
+        preloader.classList.add("hidden");
         setTimeout(() => {
           preloader.remove();
-        }, 500); // Совпадает с transition в CSS
+        }, 500);
       }
     };
 
-    imagesToPreload.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === imagesToPreload.length) {
-          setTimeout(onAssetsLoaded, 300);
-        }
-      };
-    });
-    
-    if (imagesToPreload.length === 0) {
+    if (imagesToPreload.length > 0) {
+      imagesToPreload.forEach((src) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = img.onerror = () => {
+          loadedCount++;
+          if (loadedCount === imagesToPreload.length) {
+            setTimeout(onAssetsLoaded, 300);
+          }
+        };
+      });
+    } else {
       onAssetsLoaded();
     }
   }, []);
 
-  // Глобальное решение для блокировки скролла
+  const wasHorizontalSwipe = useRef(false);
+
   useEffect(() => {
     let touchStartX = 0;
     let touchStartY = 0;
@@ -102,19 +82,24 @@ function App() {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       scrollDirectionDetermined = false;
+      wasHorizontalSwipe.current = false; // Сбрасываем флаг в начале каждого касания
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       const touch = e.touches[0];
       if (!touch || scrollDirectionDetermined) return;
+
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
       const sensitivityThreshold = 5;
 
       if (deltaX > sensitivityThreshold || deltaY > sensitivityThreshold) {
         if (deltaX > deltaY) {
+          // Это горизонтальный свайп
           lenis.stop();
+          wasHorizontalSwipe.current = true; // Устанавливаем флаг
         } else {
+          // Это вертикальный скролл
           lenis.start();
         }
         scrollDirectionDetermined = true;
@@ -122,23 +107,33 @@ function App() {
     };
 
     const handleTouchEnd = () => {
-      lenis.start();
+      // Если предыдущий свайп был горизонтальным, мы даем микро-задержку
+      // перед тем, как снова включить скролл. Этого достаточно, чтобы
+      // "погасить" остаточный импульс по оси Y.
+      if (wasHorizontalSwipe.current) {
+        setTimeout(() => {
+          lenis.start();
+        }, 50); // 50мс - небольшая, но эффективная задержка
+      } else {
+        // Для обычного вертикального скролла включаем сразу
+        lenis.start();
+      }
     };
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: true });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-    document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+    document.addEventListener("touchcancel", handleTouchEnd, { passive: true });
 
     return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      document.removeEventListener('touchcancel', handleTouchEnd);
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, []);
+  // --- КОНЕЦ ИЗМЕНЕНИЯ 2 ---
 
-  // Обновление Lenis
   useEffect(() => {
     window.addEventListener("load", updateScroll);
     window.addEventListener("resize", updateScroll);
@@ -153,7 +148,7 @@ function App() {
     <ThemeProvider>
       <ProductListProvider>
         <RouteChangeHandler onRouteChange={closeMobileMenu} />
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route
@@ -176,12 +171,8 @@ function App() {
               element={
                 <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
                   <div className="card-modern p-12 text-center max-w-lg">
-                    <h1 className="text-8xl font-bold mb-4 gradient-heading">
-                      404
-                    </h1>
-                    <p className="text-xl mb-8">
-                      Страница не найдена. Возможно, вы ошиблись адресом.
-                    </p>
+                    <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>
+                    <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>
                     <Link
                       to="/"
                       className="btn-modern btn-primary-modern px-8 py-4 rounded-lg inline-flex items-center gap-2"

@@ -2,20 +2,22 @@ import { motion } from "framer-motion";
 import React, { lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { AuroraText } from "../components/magicui/aurora-text";
 import ParallaxSection from "../components/ui/ParallaxSection";
 import SectionHeading from "../components/ui/SectionHeading";
-import { AuroraText } from "../components/magicui/aurora-text";
 import { Icons } from "../utils/icons";
 
 // --- LAZY LOADED COMPONENTS ---
-// Для максимальной производительности загружаем компоненты "ниже сгиба" только когда они нужны.
 const StaticFeature = lazy(() => import("../components/ui/StaticFeature"));
-const KineticProductCarousel = lazy(
-  () => import("../components/ui/KineticProductCarousel")
-);
-const InteractiveProductCard = lazy(
-  () => import("../components/ui/InteractiveProductCard")
-);
+const KineticProductCarousel = lazy(() => import("../components/ui/KineticProductCarousel"));
+const InteractiveProductCard = lazy(() => import("../components/ui/InteractiveProductCard"));
+
+// Варианты анимации для страницы
+const pageVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
+  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+};
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
@@ -27,8 +29,7 @@ const HomePage: React.FC = () => {
     {
       icon: Icons.FlaskConical,
       title: "Научная основа",
-      description:
-        "Более 20 патентов и команда врачей и ученых, которые создают продукты, меняющие жизнь.",
+      description: "Более 20 патентов и команда врачей и ученых, которые создают продукты, меняющие жизнь.",
     },
     {
       icon: Icons.ShieldCheck,
@@ -49,20 +50,17 @@ const HomePage: React.FC = () => {
     {
       icon: Icons.DollarSign,
       title: "Гибкий доход",
-      description:
-        "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени",
+      description: "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени",
     },
     {
       icon: Icons.Users,
       title: "Обучение и поддержка",
-      description:
-        "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса",
+      description: "Полное обучение от экспертов и готовые инструменты для старта и развития бизнеса",
     },
     {
       icon: Icons.Globe,
       title: "Глобальные возможности",
-      description:
-        "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний",
+      description: "Развивайте бизнес в более чем 50 странах мира с одной из самых надежных МЛМ-компаний",
     },
   ];
 
@@ -95,29 +93,21 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <>
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <Helmet>
-        <title>
-          4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес
-        </title>
+        <title>4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес</title>
         <meta
           name="description"
           content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
         />
-        <meta
-          property="og:title"
-          content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес"
-        />
+        <meta property="og:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
         <meta
           property="og:description"
           content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
         />
         <meta property="og:image" content="/src/assets/images/og-home.jpg" />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:url"
-          content="https://alexander-toshchev-4life.ru/"
-        />
+        <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
@@ -150,29 +140,21 @@ const HomePage: React.FC = () => {
           </motion.div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0">
+            <span className="block mb-1 md:mb-2">Раскройте потенциал своего здоровья</span>
             <span className="block mb-1 md:mb-2">
-              Раскройте потенциал своего здоровья
-            </span>
-            <span className="block mb-1 md:mb-2">
-              <AuroraText
-                colors={["#007BFF", "#60A5FA", "#FFFFFF", "#38BDF8"]}
-                speed={1.5}
-              >
+              <AuroraText colors={["#007BFF", "#60A5FA", "#FFFFFF", "#38BDF8"]} speed={1.5}>
                 с научным подходом4Life
               </AuroraText>
             </span>
           </h1>
 
           <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto">
-            Трансфер Факторы 4Life — это не просто добавка. Это интеллект для
-            вашей иммунной системы, который помогает ей работать эффективнее.
+            Трансфер Факторы 4Life — это не просто добавка. Это интеллект для вашей иммунной системы, который помогает
+            ей работать эффективнее.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center items-center">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Link
                 to="/products"
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition-all duration-300 shadow-lg"
@@ -183,10 +165,7 @@ const HomePage: React.FC = () => {
               </Link>
             </motion.div>
 
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Link
                 to="/how-to-buy"
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg overflow-hidden bg-white/10 border border-white/30 text-white font-medium transition-all duration-300"
@@ -206,9 +185,7 @@ const HomePage: React.FC = () => {
             transition={{ delay: 0.8, duration: 0.6 }}
           >
             <Icons.Microscope className="w-4 h-4 md:w-5 md:h-5 text-blue-300 mt-0.5 mr-0.5 md:mr-1" />
-            <span className="text-xs md:text-sm">
-              Научно доказанная эффективность с 1998 года
-            </span>
+            <span className="text-xs md:text-sm">Научно доказанная эффективность с 1998 года</span>
           </motion.div>
         </motion.div>
       </ParallaxSection>
@@ -218,10 +195,6 @@ const HomePage: React.FC = () => {
         {/* Белый фон (z-index: -20) */}
         <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
 
-        {/* Fluid эффект (z-index: -10) */}
-        <div className="absolute inset-0 -z-10">
-          {/* Здесь будет ваш fluid эффект */}
-        </div>
 
         {/* Контент секции (z-index: 10) */}
         <div className="relative z-10">
@@ -261,7 +234,7 @@ const HomePage: React.FC = () => {
           parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
           skipPreload={true} // Указываем, что изображение уже предварительно загружено
         >
-          <div className="py-12 sm:py-16 bg-gray-50/10 dark:bg-gray-900/50">
+          <div className="py-12 sm:py-16">
             <div className="container max-w-7xl mx-auto px-6">
               <div className="opacity-100">
                 {/* Декоративный элемент - полоска */}
@@ -273,18 +246,14 @@ const HomePage: React.FC = () => {
                   <span className="block mb-2 text-lg md:text-xl font-medium text-white">
                     Научный подход к здоровью
                   </span>
-                  <AuroraText
-                    colors={["#007BFF", "#FFFFFF", "#3B82F6", "#60A5FA"]}
-                    speed={1.3}
-                  >
+                  <AuroraText colors={["#007BFF", "#FFFFFF", "#3B82F6", "#60A5FA"]} speed={1.3}>
                     Инновационные продукты для иммунитета
                   </AuroraText>
                 </h2>
 
                 <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto text-center">
-                  Продукты 4Life создаются на основе запатентованной технологии
-                  Трансфер Факторов — молекул, передающих иммунологическую память
-                  и поддерживающих здоровую работу иммунной системы.
+                  Продукты 4Life создаются на основе запатентованной технологии Трансфер Факторов — молекул, передающих
+                  иммунологическую память и поддерживающих здоровую работу иммунной системы.
                 </p>
               </div>
             </div>
@@ -326,11 +295,7 @@ const HomePage: React.FC = () => {
                 </div>
               </Suspense>
 
-              <motion.div
-                className="mt-12 text-center px-6"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div className="mt-12 text-center px-6" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/products"
                   className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-lg overflow-hidden border border-white/30 bg-white/20 md:backdrop-blur-sm text-white font-medium shadow-lg transition-all duration-300"
@@ -362,10 +327,6 @@ const HomePage: React.FC = () => {
         {/* Белый фон (z-index: -20) */}
         <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
 
-        {/* Fluid эффект (z-index: -10) */}
-        <div className="absolute inset-0 -z-10">
-          {/* Здесь будет ваш fluid эффект */}
-        </div>
 
         <div className="container max-w-7xl mx-auto px-6 relative z-10">
           <div className="opacity-100">
@@ -418,13 +379,10 @@ const HomePage: React.FC = () => {
               <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
               <div>
                 <p className="text-gray-700 dark:text-gray-300 italic mb-4">
-                  &quot;В наши дни люди всему знают цену, но ничего не умеют
-                  ценить. Инвестируйте в своё здоровье сегодня, чтобы
-                  наслаждаться каждым днём полноценно и счастливо!&quot;
+                  "В наши дни люди всему знают цену, но ничего не умеют ценить. Инвестируйте в своё здоровье сегодня,
+                  чтобы наслаждаться каждым днём полноценно и счастливо!"
                 </p>
-                <p className="text-right text-gray-500 dark:text-gray-400 font-medium">
-                  — Оскар Уайльд
-                </p>
+                <p className="text-right text-gray-500 dark:text-gray-400 font-medium">— Оскар Уайльд</p>
               </div>
             </div>
           </div>
@@ -448,25 +406,18 @@ const HomePage: React.FC = () => {
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               <span className="block mb-2">Готовы инвестировать</span>
-              <AuroraText
-                colors={["#007BFF", "#FFFFFF", "#38BDF8", "#60A5FA"]}
-                speed={1.4}
-              >
+              <AuroraText colors={["#007BFF", "#FFFFFF", "#38BDF8", "#60A5FA"]} speed={1.4}>
                 в своё здоровье и будущее?
               </AuroraText>
             </h2>
 
             <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto">
-              Присоединяйтесь к нашей команде сегодня и получите персональную
-              консультацию по продуктам и бизнес-возможностям 4Life. Сделайте
-              первый шаг к здоровью и финансовой независимости.
+              Присоединяйтесь к нашей команде сегодня и получите персональную консультацию по продуктам и
+              бизнес-возможностям 4Life. Сделайте первый шаг к здоровью и финансовой независимости.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <a
                   href="https://russia.4life.com/12299550"
                   target="_blank"
@@ -480,10 +431,7 @@ const HomePage: React.FC = () => {
                 </a>
               </motion.div>
 
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <a
                   href="https://russia.4life.com/12299550/signup/PC"
                   target="_blank"
@@ -503,16 +451,14 @@ const HomePage: React.FC = () => {
               <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
                 <Icons.Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
                 <span className="text-white/80 text-sm sm:text-base ml-2 sm:ml-3">
-                  Используйте ID{" "}
-                  <span className="text-blue-300 font-medium">12299550</span>{" "}
-                  для получения скидки
+                  Используйте ID <span className="text-blue-300 font-medium">12299550</span> для получения скидки
                 </span>
               </div>
             </div>
           </div>
         </div>
       </ParallaxSection>
-    </>
+    </motion.div>
   );
 };
 

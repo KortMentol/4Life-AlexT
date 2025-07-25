@@ -2,20 +2,21 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
+import { buttonVariants, containerVariants, itemVariants } from "@/animations/variants";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import Accordion, { AccordionItem } from "@/components/ui/Accordion";
 import { Icons } from "@/utils/icons";
 import SectionHeading from "../components/ui/SectionHeading";
-import {
-  buttonVariants,
-  containerVariants,
-  itemVariants,
-} from "@/animations/variants";
+
+// Варианты анимации для страницы
+const pageVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
+  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+};
 
 // Страница описывает процесс покупки 4Life в 2 шага и преимущества ПК
 const HowToBuyPage = () => {
-
-
   // Преимущества для Приоритетного Клиента
   const pcBenefits = [
     {
@@ -37,7 +38,7 @@ const HowToBuyPage = () => {
 
   // 4. JSX-разметка компонента
   return (
-    <>
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       {/* 5. Настройка мета-тегов страницы для SEO с помощью Helmet */}
       <Helmet>
         <title>Как приобрести продукцию 4Life - Александр Тощев</title>
@@ -45,38 +46,25 @@ const HowToBuyPage = () => {
           name="description"
           content="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
         />
-        <meta
-          property="og:title"
-          content="Как приобрести продукцию 4Life - Александр Тощев"
-        />
+        <meta property="og:title" content="Как приобрести продукцию 4Life - Александр Тощев" />
         <meta
           property="og:description"
           content="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
         />
-        <meta
-          property="og:image"
-          content="https://ВАШ_ДОМЕН.ru/images/og-purchase.jpg"
-        />{" "}
+        <meta property="og:image" content="https://ВАШ_ДОМЕН.ru/images/og-purchase.jpg" />{" "}
         {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://ВАШ_ДОМЕН.ru/purchase" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="Как приобрести продукцию 4Life - Александр Тощев"
-        />
+        <meta name="twitter:title" content="Как приобрести продукцию 4Life - Александр Тощев" />
         <meta
           name="twitter:description"
           content="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
         />
-        <meta
-          name="twitter:image"
-          content="https://ВАШ_ДОМЕН.ru/images/og-purchase.jpg"
-        />{" "}
+        <meta name="twitter:image" content="https://ВАШ_ДОМЕН.ru/images/og-purchase.jpg" />{" "}
         {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://ВАШ_ДОМЕН.ru/purchase" />{" "}
-        {/* ЗАМЕНИТЬ НА РЕАЛЬНЫЙ ДОМЕН */}
+        <link rel="canonical" href="https://ВАШ_ДОМЕН.ru/purchase" /> {/* ЗАМЕНИТЬ НА РЕАЛЬНЫЙ ДОМЕН */}
       </Helmet>
 
       {/* Hero */}
@@ -90,10 +78,7 @@ const HowToBuyPage = () => {
             transition={{ duration: 0.7 }}
             className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
           >
-            <TextShineEffect
-              text="Как Приобрести Продукты 4Life"
-              duration={8}
-            />
+            <TextShineEffect text="Как Приобрести Продукты 4Life" duration={8} />
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -102,8 +87,7 @@ const HowToBuyPage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
           >
-            Получите лучшие условия и экспертную поддержку, следуя простым
-            шагам.
+            Получите лучшие условия и экспертную поддержку, следуя простым шагам.
           </motion.p>
         </div>
       </section>
@@ -135,19 +119,14 @@ const HowToBuyPage = () => {
                 className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl relative z-10"
               >
                 <p className="mb-4">
-                  Для максимально выгодного приобретения продукции 4Life и
-                  получения доступа к специальным ценам, я рекомендую
-                  зарегистрироваться в статусе **Приоритетного Клиента**. Это
-                  бесплатная регистрация, которая позволит вам покупать напрямую
-                  у компании, используя мой дистрибьюторский ID.
+                  Для максимально выгодного приобретения продукции 4Life и получения доступа к специальным ценам, я
+                  рекомендую зарегистрироваться в статусе **Приоритетного Клиента**. Это бесплатная регистрация, которая
+                  позволит вам покупать напрямую у компании, используя мой дистрибьюторский ID.
                 </p>
-                <p className="mb-4 font-semibold text-blue-600 dark:text-blue-400">
-                  Мой ID: 12299550
-                </p>
+                <p className="mb-4 font-semibold text-blue-600 dark:text-blue-400">Мой ID: 12299550</p>
                 <p>
-                  Вы можете зарегистрироваться, перейдя по прямой ссылке, или
-                  связаться со мной для получения подробной консультации и
-                  помощи с регистрацией.
+                  Вы можете зарегистрироваться, перейдя по прямой ссылке, или связаться со мной для получения подробной
+                  консультации и помощи с регистрацией.
                 </p>
               </motion.div>
 
@@ -191,9 +170,8 @@ const HowToBuyPage = () => {
                 className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mt-8 relative z-10"
               >
                 <p className="mb-4">
-                  Если у вас возникнут вопросы по выбору продукции, процессу
-                  регистрации или вы захотите обсудить преимущества продуктов
-                  более подробно, не стесняйтесь связаться со мной.
+                  Если у вас возникнут вопросы по выбору продукции, процессу регистрации или вы захотите обсудить
+                  преимущества продуктов более подробно, не стесняйтесь связаться со мной.
                 </p>
                 <motion.a
                   href="/contact"
@@ -225,9 +203,7 @@ const HowToBuyPage = () => {
                 <card.icon className="w-8 h-8 text-purple-600 flex-shrink-0 mr-4" />
                 <div>
                   <h3 className="font-bold text-lg mb-1">{card.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    {card.desc}
-                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{card.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -272,9 +248,8 @@ const HowToBuyPage = () => {
                     title: "1. Добавьте продукты в корзину",
                     content: (
                       <p>
-                        На странице «Продукты» нажмите «Добавить в корзину» на
-                        интересующих позициях. Количество можно изменить в любое
-                        время.
+                        На странице «Продукты» нажмите «Добавить в корзину» на интересующих позициях. Количество можно
+                        изменить в любое время.
                       </p>
                     ),
                   },
@@ -283,9 +258,8 @@ const HowToBuyPage = () => {
                     title: "2. Укажите мой ID 12299550",
                     content: (
                       <p>
-                        В форме оформления заказа введите мой ID дистрибьютора,
-                        чтобы сохранить скидку и получить персональную
-                        поддержку.
+                        В форме оформления заказа введите мой ID дистрибьютора, чтобы сохранить скидку и получить
+                        персональную поддержку.
                       </p>
                     ),
                   },
@@ -294,20 +268,16 @@ const HowToBuyPage = () => {
                     title: "3. Выберите способ доставки и оплаты",
                     content: (
                       <p>
-                        Доступны карта, СБП и другие методы оплаты. Доставка
-                        курьером или в пункт выдачи Boxberry / СДЭК.
+                        Доступны карта, СБП и другие методы оплаты. Доставка курьером или в пункт выдачи Boxberry /
+                        СДЭК.
                       </p>
                     ),
                   },
                   {
                     id: 4,
-                    title:
-                      "4. Получите подтверждение и наслаждайтесь результатом",
+                    title: "4. Получите подтверждение и наслаждайтесь результатом",
                     content: (
-                      <p>
-                        После оплаты вы получите трек-номер. Я буду на связи,
-                        чтобы ответить на любые вопросы.
-                      </p>
+                      <p>После оплаты вы получите трек-номер. Я буду на связи, чтобы ответить на любые вопросы.</p>
                     ),
                   },
                 ] as AccordionItem[]
@@ -316,7 +286,7 @@ const HowToBuyPage = () => {
           </motion.div>
         </div>
       </section>
-    </>
+    </motion.div>
   );
 };
 

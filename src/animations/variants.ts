@@ -2,7 +2,7 @@
  * @module src/animations/variants.ts
  * @description Определяет набор стандартных вариантов анимации для Framer Motion.
  * @author Kort
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 import { Variants } from "framer-motion";
@@ -99,12 +99,7 @@ export const staggerContainer = {
  * @example
  * <motion.div variants={fadeIn('up', 'spring', 0.5, 0.75)} />
  */
-export const fadeIn = (
-  direction: "up" | "down" | "left" | "right",
-  type: string,
-  delay: number,
-  duration: number,
-) => ({
+export const fadeIn = (direction: "up" | "down" | "left" | "right", type: string, delay: number, duration: number) => ({
   hidden: {
     x: direction === "left" ? 100 : direction === "right" ? -100 : 0,
     y: direction === "up" ? 100 : direction === "down" ? -100 : 0,
