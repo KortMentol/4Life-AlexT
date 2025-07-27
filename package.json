@@ -19,7 +19,7 @@
     "@emotion/styled": "^11.14.0",
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.0.18",
-    "@studio-freight/lenis": "^1.0.42", 
+    "@studio-freight/lenis": "^1.0.42",
     "@use-gesture/react": "^10.3.1",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.344.0",

@@ -1,41 +1,26 @@
-/**
- * @module src/components/layout/Header.tsx
- * @description Адаптивный компонент шапки сайта с нативным скроллом. Реализует эффект следования за скроллом, плавно появляясь и исчезая в зависимости от направления прокрутки. Содержит логотип, навигацию, переключатель темы и иконку списка продуктов с эффектами гласморфизма.
- * @author Kort
- * @version 2.1.0
- * @see MobileMenu - Используется для отображения навигации на мобильных устройствах.
- * @see DynamicLogo - Отображает логотип сайта.
- * @see HamburgerButton - Кнопка для открытия/закрытия мобильного меню.
- * @see TextShineEffect - Применяется к имени дистрибьютора для визуального эффекта.
- * @usage
- * 1. `src/components/layout/Layout.tsx`: Вставляется вверху основного макета, чтобы присутствовать на всех страницах сайта.
- * @example
- * <Layout>
- *   <Header />
- *   <main>...</main>
- *   <Footer />
- * </Layout>
- */
+// === START OF FILE: src/components/layout/Header.tsx ===
+
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import React, { useState, useRef, useLayoutEffect } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import HeaderComets from "../effects/HeaderComets";
 
+import TextShineEffect from "../effects/TextShineEffect";
 import HamburgerButton from "../ui/HamburgerButton";
 import ProductListIcon from "../ui/ProductListIcon";
-import TextShineEffect from "../effects/TextShineEffect";
 import MobileMenu from "./MobileMenu";
 
 import { useTheme } from "../../hooks/useTheme";
+// --- ИЗМЕНЕНИЕ: Используем наш исправленный хук ---
 import { useNativeScroll } from "../../hooks/useNativeScroll";
 
+import { headerVariants, logoVariants, navItemVariants } from "../../animations/headerAnimations";
 import { useGlassmorphism } from "../../hooks/useGlassmorphism";
 import { mainNav, siteConfig } from "../../site-config/site";
-import { headerVariants, navItemVariants, logoVariants } from "../../animations/headerAnimations";
 import { isMobileDevice } from "../../utils/deviceUtils";
-import { scrollToTop, handleLinkClick } from "../../utils/navigationUtils";
+import { handleLinkClick, scrollToTop } from "../../utils/navigationUtils";
 
 const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,14 +38,13 @@ const Header: React.FC = () => {
     }
   }, []);
 
-  const { headerY, headerOpacity } = useNativeScroll({ headerHeight, topOffset: 8 });
+  // --- ИЗМЕНЕНИЕ: Используем наш исправленный хук ---
+  const { headerY, headerOpacity } = useNativeScroll({ 
+    headerHeight, 
+    topOffset: 8,
+    disabled: mobileMenuOpen // Отключаем скрытие хедера когда меню открыто
+  });
   const { style: glassmorphismStyle } = useGlassmorphism();
-
-  // Обработка прокрутки для глассморфизма происходит в хуке useGlassmorphism
-
-
-
-
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
@@ -87,58 +71,60 @@ const Header: React.FC = () => {
         initial="visible"
         animate="visible"
         style={{
-          y: headerY,
+          y: headerY, // Это значение теперь анимируется плавно
           ...glassmorphismStyle,
         }}
-        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full glassmorphism header-glow-effect header-modern}`}>
+        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full glassmorphism header-glow-effect header-modern}`}
+      >
         <div className="header-gradient-move absolute inset-0 rounded-full"></div>
         <HeaderComets />
         <div className="container max-w-7xl mx-auto px-4 relative z-10">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             {/* Left Section: Hamburger on Mobile, Logo + Name on Desktop */}
-            <div className="flex items-center">
-              <div className="md:hidden relative z-[100] no-highlight -ml-1 flex items-center">
-                <HamburgerButton
-                  isOpen={mobileMenuOpen}
-                  toggle={handleHamburgerClick}
-                />
+            <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
+              <div className="md:hidden relative z-[100] no-highlight flex items-center">
+                <HamburgerButton isOpen={mobileMenuOpen} toggle={handleHamburgerClick} />
               </div>
               <button
                 onClick={handleLogoClick}
-                className="hidden md:flex items-center space-x-4 group"
+                className="hidden md:flex items-center space-x-3 group"
                 aria-label="Главная страница"
               >
-                {/* Обертка для применения адаптивного цвета */}
-                <div>
-                  <motion.div 
-                    className="relative z-10 transition-transform duration-300 group-hover:scale-105"
-                    style={{ opacity: headerOpacity }}
-                    variants={logoVariants}
-                    initial="initial"
-                    animate="animate"
-                    whileHover="hover"
-                  >
-                    {/* Используем разные версии логотипа в зависимости от темы */}
-                    <img 
-                      src={isDark ? "/src/assets/images/brand/4life-logo-light.svg" : "/src/assets/images/brand/4life-logo.svg"} 
-                      alt="4Life Logo" 
-                      className="h-9 w-auto" />
-                  </motion.div>
-                </div>
-                <motion.div style={{ 
-                  opacity: headerOpacity, 
-                  color: isDark ? "white" : "#1e293b",
-                  textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)" 
-                }} className="header-adaptive-text font-bold">
-                  <TextShineEffect
-                    text={siteConfig.distributor.name}
-                    className="font-bold text-base leading-tight"
+                <motion.div
+                  className="relative z-10 transition-transform duration-300 group-hover:scale-105"
+                  style={{ opacity: headerOpacity }}
+                  variants={logoVariants}
+                  initial="initial"
+                  animate="animate"
+                  whileHover="hover"
+                >
+                  <img
+                    src={
+                      isDark
+                        ? "/src/assets/images/brand/4life-logo-light.svg"
+                        : "/src/assets/images/brand/4life-logo.svg"
+                    }
+                    alt="4Life Logo"
+                    className="h-8 w-auto"
                   />
-                  <div className="text-sm font-medium" style={{ 
-                    color: "#e6b800", 
-                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
-                    fontWeight: "600"
-                  }}>
+                </motion.div>
+                <motion.div
+                  style={{
+                    opacity: headerOpacity,
+                    color: isDark ? "white" : "#1e293b",
+                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                  }}
+                  className="flex flex-col items-center"
+                >
+                  <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
+                  <div
+                    className="text-xs font-medium mt-0.5"
+                    style={{
+                      color: "#e6b800",
+                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
+                      fontWeight: "500",
+                    }}
+                  >
                     Builder Elite
                   </div>
                 </motion.div>
@@ -146,7 +132,7 @@ const Header: React.FC = () => {
             </div>
 
             {/* Center Section: Logo on Mobile, Nav on Desktop */}
-            <div className="flex-1 flex justify-center items-center">
+            <div className="absolute left-1/2 transform -translate-x-1/2 md:relative md:left-auto md:transform-none md:flex-1 md:flex md:justify-center">
               {/* Name and Status for Mobile */}
               <div className="md:hidden">
                 <button
@@ -155,26 +141,28 @@ const Header: React.FC = () => {
                       scrollToTop({ immediate: isMobileDevice() });
                     } else {
                       handleLogoClick();
-                    } 
+                    }
                   }}
                   className="flex flex-col items-center group"
-                  aria-label="Главная страница">
+                  aria-label="Главная страница"
+                >
                   <motion.div
-                    className="text-center header-adaptive-text font-bold"
-                    style={{ 
-                      opacity: headerOpacity, 
+                    className="text-center flex flex-col items-center"
+                    style={{
+                      opacity: headerOpacity,
                       color: isDark ? "white" : "#1e293b",
-                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)" 
-                    }}>
-                    <TextShineEffect
-                      text={siteConfig.distributor.name}
-                      className="font-bold text-sm leading-tight"
-                    />
-                    <div className="text-xs font-medium" style={{ 
-                      color: "#e6b800", 
-                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
-                      fontWeight: "600"
-                    }}>
+                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
+                    <div
+                      className="text-xs font-medium mt-0.5"
+                      style={{
+                        color: "#e6b800",
+                        textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
+                        fontWeight: "500",
+                      }}
+                    >
                       Builder Elite
                     </div>
                   </motion.div>
@@ -184,8 +172,9 @@ const Header: React.FC = () => {
               {/* Navigation for Desktop */}
               <motion.nav
                 role="navigation"
-                className="hidden md:flex items-center space-x-1 h-full"
-                style={{ opacity: headerOpacity }}>
+                className="hidden md:flex items-center justify-center space-x-1 h-full"
+                style={{ opacity: headerOpacity, marginLeft: '4rem' }}
+              >
                 {mainNav.map((item, index) => (
                   <motion.div
                     key={item.href}
@@ -195,7 +184,8 @@ const Header: React.FC = () => {
                     animate="animate"
                     whileHover="hover"
                     whileTap="tap"
-                    custom={index}>
+                    custom={index}
+                  >
                     <NavLink
                       to={item.href}
                       onClick={(e) =>
@@ -203,15 +193,17 @@ const Header: React.FC = () => {
                           immediate: isMobileDevice(),
                         })
                       }
-                      className="flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative">
+                      className="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative whitespace-nowrap"
+                    >
                       {({ isActive }) => (
                         <>
                           <span
                             className={`header-adaptive-text transition-opacity duration-300 ${isActive ? "font-semibold opacity-100" : "opacity-80 hover:opacity-100"}`}
-                            style={{ 
+                            style={{
                               color: isDark ? "white" : "#1e293b",
-                              textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)" 
-                            }}>
+                              textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                            }}
+                          >
                             {item.title}
                           </span>
                           {isActive && (
@@ -233,11 +225,9 @@ const Header: React.FC = () => {
             </div>
 
             {/* Right Section: Icons */}
-            <motion.div
-              className="flex items-center justify-end"
-              style={{ opacity: headerOpacity }}>
-              <motion.div 
-                className="hidden md:flex items-center space-x-2"
+            <motion.div className="flex items-center justify-end w-full md:w-auto md:flex-1" style={{ opacity: headerOpacity }}>
+              <motion.div
+                className="hidden md:flex items-center space-x-3"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
@@ -251,11 +241,14 @@ const Header: React.FC = () => {
                 >
                   <ProductListIcon />
                 </motion.div>
-                <div className="w-px h-6 mx-1" style={{ opacity: 0.7, backgroundColor: isDark ? "white" : "#1e293b" }}></div>
+                <div
+                  className="w-px h-6 mx-1"
+                  style={{ opacity: 0.7, backgroundColor: isDark ? "white" : "#1e293b" }}
+                ></div>
                 <motion.button
                   type="button"
                   onClick={toggleTheme}
-                  className="p-2 rounded-full transition-colors duration-300 header-adaptive-text"
+                  className="p-2 rounded-full transition-colors duration-300"
                   aria-label="Переключить тему"
                   whileHover={{ scale: 1.1, rotate: 15 }}
                   whileTap={{ scale: 0.95 }}
@@ -271,7 +264,8 @@ const Header: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                style={{ color: isDark ? "white" : "#1e293b" }}>
+                style={{ color: isDark ? "white" : "#1e293b" }}
+              >
                 <ProductListIcon />
               </motion.div>
             </motion.div>
@@ -279,12 +273,10 @@ const Header: React.FC = () => {
         </div>
       </motion.header>
 
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      />
+      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </>
   );
 };
 
 export default Header;
+// === END OF FILE: src/components/layout/Header.tsx ===

@@ -16,12 +16,7 @@
 /* Global styles */
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
   font-family:
     "Inter",
     -apple-system,
@@ -124,13 +119,15 @@ html {
 .container-preload {
   opacity: 1;
   transform: translateY(0);
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 /* Aurora Text Animation */
 @theme inline {
   --animate-aurora: aurora 8s ease-in-out infinite alternate;
- 
+
   @keyframes aurora {
     0% {
       background-position: 0% 50%;
@@ -153,4 +150,27 @@ html {
       transform: rotate(-5deg) scale(0.9);
     }
   }
+}
+
+body,
+main,
+header,
+footer,
+section,
+div,
+button,
+a {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease;
+}
+
+/* 
+  Этот селектор отменяет transition для элементов Framer Motion, 
+  чтобы не конфликтовать с их собственными анимациями.
+*/
+[style*="--framer-will-change"],
+[style*="transform:"] {
+  transition: none;
 }

@@ -1,43 +1,14 @@
-/**
- * @module src/components/layout/MobileMenu.tsx
- * @description Полноэкранное мобильное меню с эффектом "glassmorphism". Появляется с плавной анимацией, блокируя прокрутку основного контента. Содержит навигационные ссылки, логотип, переключатель темы и кнопку закрытия. Анимации реализованы с помощью `framer-motion`, включая поддержку закрытия меню свайпом и нативным скроллом.
- * @author Kort
- * @version 2.0.0
- * @param {boolean} isOpen - Флаг, определяющий, открыто ли меню.
- * @param {() => void} onClose - Функция обратного вызова для закрытия меню.
- * @see Header - Компонент, который управляет состоянием и отображением MobileMenu.
- * @usage
- * 1. `src/components/layout/Header.tsx`: Рендерится внутри Header, который передает ему пропсы `isOpen` и `onClose` для управления видимостью.
- * @example
- * const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
- * <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
- */
-import { useTheme } from "../../hooks/useTheme";
 import { lenis } from "@/lib/lenis";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Home,
-  Info,
-  Moon,
-  Phone,
-  ShoppingBag,
-  ShoppingCart,
-  Sun,
-  User,
-  Users,
-} from "lucide-react";
-import { mobileMenuVariants, overlayVariants } from "../../animations/headerAnimations";
+import { Home, Info, Phone, ShoppingBag, ShoppingCart, User, Users, X } from "lucide-react";
+import React, { useEffect, useRef, useCallback } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "../../hooks/useTheme";
 import { isMobileDevice } from "../../utils/deviceUtils";
 import { lockScroll } from "../../utils/domUtils";
-import { useGlassmorphism } from "../../hooks/useGlassmorphism";
 import { scrollToTop } from "../../utils/navigationUtils";
-
-import React, { useEffect, useRef } from "react";
-
 import DynamicLogo from "../ui/DynamicLogo";
-
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import "../../styles/mobile-menu.css";
+import SciFiThemeToggle from "../ui/SciFiThemeToggle";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -45,46 +16,48 @@ interface MobileMenuProps {
 }
 
 const navLinks = [
-  { title: "Главная", href: "/", icon: <Home size={22} /> },
-  { title: "Продукты", href: "/products", icon: <ShoppingBag size={22} /> },
-  {
-    title: "Как приобрести?",
-    href: "/how-to-buy",
-    icon: <ShoppingCart size={22} />,
-  },
-  { title: "О 4Life", href: "/about", icon: <Info size={22} /> },
-  { title: "Обо Мне", href: "/about-me", icon: <User size={22} /> },
-  { title: "Партнерство", href: "/partnership", icon: <Users size={22} /> },
-  { title: "Контакты", href: "/contact", icon: <Phone size={22} /> },
+  { title: "Главная", href: "/", icon: <Home size={20} /> },
+  { title: "Продукты", href: "/products", icon: <ShoppingBag size={20} /> },
+  { title: "Как приобрести?", href: "/how-to-buy", icon: <ShoppingCart size={20} /> },
+  { title: "О 4Life", href: "/about", icon: <Info size={20} /> },
+  { title: "Обо Мне", href: "/about-me", icon: <User size={20} /> },
+  { title: "Партнерство", href: "/partnership", icon: <Users size={20} /> },
+  { title: "Контакты", href: "/contact", icon: <Phone size={20} /> },
 ];
 
-
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === "dark";
   
-  // Используем хук для создания эффекта гласморфизма в sci-fi стиле
-  useGlassmorphism({
-    blur: 16,
-    saturation: 200,
-    brightness: isDark ? 0.95 : 1.05,
-    intensity: 'strong'
-  });
-  
-  // Для нативного скролла
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  
-  // Убираем обработку свайпа вниз, оставляем только горизонтальный свайп
-
-  const dragConstraints = React.useMemo(
-    () => ({ left: -window.innerWidth, right: 0 }),
-    [],
-  );
   const navigate = useNavigate();
   const location = useLocation();
   const [pendingRoute, setPendingRoute] = React.useState<string | null>(null);
   const [locked, setLocked] = React.useState(false);
+  const unlockScrollRef = useRef<(() => void) | null>(null);
+  
+  // Pure CSS Transform System - No Conflicts
+  const menuRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = React.useState(false);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [canInteract, setCanInteract] = React.useState(false);
+  
+  // Advanced touch state with physics
+  const touchState = useRef({
+    startX: 0,
+    currentX: 0,
+    lastX: 0,
+    velocity: 0,
+    lastTime: 0,
+    isActive: false,
+    velocityHistory: [] as { v: number; t: number }[],
+    momentum: 0
+  });
+
+  // Animation frame for smooth updates
+  const animationFrame = useRef<number | null>(null);
+  const isAnimating = useRef(false);
+
   React.useEffect(() => {
     if (!isOpen && pendingRoute) {
       navigate(pendingRoute);
@@ -93,318 +66,485 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen, pendingRoute, navigate]);
 
-  // Используем ref для хранения функции разблокировки скролла
-  const unlockScrollRef = useRef<(() => void) | null>(null);
-
   useEffect(() => {
     if (isOpen) {
       lenis.stop();
       unlockScrollRef.current = lockScroll();
-      document.body.classList.add('menu-open');
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
+      setIsClosing(false);
+      setIsDragging(false);
+      touchState.current.isActive = false;
+      
+      // Reset animation state
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+        animationFrame.current = null;
+      }
+      isAnimating.current = false;
+      
+      // Smooth opening animation
+      if (menuRef.current && overlayRef.current) {
+        const premiumEasing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        // Start from closed position
+        menuRef.current.style.transform = 'translate3d(-100%, 0, 0)';
+        overlayRef.current.style.opacity = '0';
+        
+        requestAnimationFrame(() => {
+          if (menuRef.current && overlayRef.current) {
+            menuRef.current.style.transition = `transform 0.6s ${premiumEasing}`;
+            overlayRef.current.style.transition = `opacity 0.6s ${premiumEasing}`;
+            
+            menuRef.current.style.transform = 'translate3d(0, 0, 0)';
+            overlayRef.current.style.opacity = '1';
+          }
+        });
+      }
+      
+      // Enable interaction after smooth opening
+      setTimeout(() => setCanInteract(true), 400);
+      
+      const canvas = document.querySelector('canvas');
+      if (canvas) canvas.style.visibility = 'hidden';
     } else {
+      setCanInteract(false);
+      setIsDragging(false);
+      touchState.current.isActive = false;
+      
+      // Cleanup animations
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+        animationFrame.current = null;
+      }
+      isAnimating.current = false;
+      
       lenis.start();
       if (unlockScrollRef.current) {
         unlockScrollRef.current();
         unlockScrollRef.current = null;
       }
-      document.body.classList.remove('menu-open');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      
+      const canvas = document.querySelector('canvas');
+      if (canvas) {
+        setTimeout(() => canvas.style.visibility = 'visible', 600);
+      }
     }
     
     return () => {
+      // Cleanup on unmount
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+      }
+      
       lenis.start();
       if (unlockScrollRef.current) {
         unlockScrollRef.current();
         unlockScrollRef.current = null;
       }
-      document.body.classList.remove('menu-open');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      
+      const canvas = document.querySelector('canvas');
+      if (canvas) canvas.style.visibility = 'visible';
     };
   }, [isOpen]);
 
-  const handleMobileMenuLinkClick = (e: React.MouseEvent, href: string) => {
+  const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (locked) return;
+    if (locked || isClosing) return;
     
     if (location.pathname === href) {
-      // Если мы уже на этой странице, закрываем меню и скроллим к верху
+      setIsClosing(true);
       onClose();
-      setTimeout(() => {
-        scrollToTop({ immediate: isMobileDevice() });
-      }, 10);
+      setTimeout(() => scrollToTop({ immediate: isMobileDevice() }), 10);
     } else {
-      // Если мы переходим на другую страницу, сначала закрываем меню, а потом переходим
       setLocked(true);
       setPendingRoute(href);
+      setIsClosing(true);
       onClose();
     }
-  };
+  }, [locked, isClosing, location.pathname, onClose]);
 
-  const borderColor = isDark ? "border-gray-700" : "border-white/30";
-  
-  // Используем хук для создания эффекта гласморфизма для оверлея
-  const { style: overlayStyle } = useGlassmorphism({
-    blur: 28,
-    saturation: isDark ? 160 : 180,
-    brightness: isDark ? 0.8 : 1.05,
-    opacity: isDark ? 0.9 : 0.8,
-    intensity: 'strong'
-  });
+  // Smooth transform with easing
+  const updateTransform = useCallback((x: number, immediate = false) => {
+    if (!menuRef.current || !overlayRef.current) return;
+    
+    const clampedX = Math.min(0, Math.max(-window.innerWidth, x));
+    const progress = Math.abs(clampedX) / window.innerWidth;
+    const opacity = Math.max(0, 1 - progress * 1.2);
+    
+    if (immediate) {
+      menuRef.current.style.transform = `translate3d(${clampedX}px, 0, 0)`;
+      overlayRef.current.style.opacity = opacity.toString();
+    } else {
+      requestAnimationFrame(() => {
+        if (menuRef.current && overlayRef.current) {
+          menuRef.current.style.transform = `translate3d(${clampedX}px, 0, 0)`;
+          overlayRef.current.style.opacity = opacity.toString();
+        }
+      });
+    }
+  }, []);
 
-  // Функция для безопасного вызова onClose при свайпе - улучшенная версия
-  const handleDragEnd = (_: any, info: any) => {
-    if (info && 
-        typeof info.offset === 'object' && 
-        typeof info.velocity === 'object' && 
-        typeof info.offset?.x === 'number' && 
-        typeof info.velocity?.x === 'number') {
-      // Закрываем меню даже при небольшом свайпе влево
-      if (info.offset.x < -50 || info.velocity.x < -200) {
-        onClose();
+  // Ultra-smooth close with advanced easing
+  const closeMenu = useCallback(() => {
+    if (isClosing || !menuRef.current) return;
+    
+    setIsClosing(true);
+    setCanInteract(false);
+    
+    // Cancel any ongoing animation
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
+      isAnimating.current = false;
+    }
+    
+    // Premium easing curve for awwwards feel
+    const premiumEasing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    
+    if (menuRef.current) {
+      menuRef.current.style.transition = `transform 0.6s ${premiumEasing}`;
+      menuRef.current.style.transform = 'translate3d(-100%, 0, 0)';
+    }
+    
+    if (overlayRef.current) {
+      overlayRef.current.style.transition = `opacity 0.6s ${premiumEasing}`;
+      overlayRef.current.style.opacity = '0';
+    }
+    
+    setTimeout(() => {
+      onClose();
+    }, 600);
+  }, [isClosing, onClose]);
+
+  // Advanced momentum animation
+  const animateWithMomentum = useCallback((startX: number, targetX: number) => {
+    if (isAnimating.current) return;
+    
+    isAnimating.current = true;
+    const startTime = performance.now();
+    const distance = targetX - startX;
+    const duration = Math.min(800, Math.max(300, Math.abs(distance) * 2));
+    
+    // Custom easing for natural feel
+    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+    const easeOutExpo = (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Blend easing functions for ultra-smooth feel
+      const easedProgress = progress < 0.5 
+        ? easeOutQuart(progress * 2) * 0.5
+        : 0.5 + easeOutExpo((progress - 0.5) * 2) * 0.5;
+      
+      const currentX = startX + distance * easedProgress;
+      updateTransform(currentX, true);
+      
+      if (progress < 1) {
+        animationFrame.current = requestAnimationFrame(animate);
+      } else {
+        isAnimating.current = false;
+        if (targetX <= -window.innerWidth * 0.7) {
+          closeMenu();
+        }
+      }
+    };
+    
+    animationFrame.current = requestAnimationFrame(animate);
+  }, [updateTransform, closeMenu]);
+
+  // Calculate smart velocity with history
+  const calculateVelocity = useCallback((currentX: number, currentTime: number) => {
+    const history = touchState.current.velocityHistory;
+    const deltaTime = currentTime - touchState.current.lastTime;
+    const deltaX = currentX - touchState.current.lastX;
+    
+    if (deltaTime > 0) {
+      const currentVelocity = deltaX / deltaTime;
+      history.push({ v: currentVelocity, t: currentTime });
+      
+      // Keep only recent history (last 100ms)
+      const cutoff = currentTime - 100;
+      touchState.current.velocityHistory = history.filter(h => h.t > cutoff);
+      
+      // Calculate weighted average velocity
+      if (history.length > 0) {
+        const totalWeight = history.reduce((sum, h) => sum + (h.t - cutoff), 0);
+        const weightedVelocity = history.reduce((sum, h) => {
+          const weight = (h.t - cutoff) / totalWeight;
+          return sum + h.v * weight;
+        }, 0);
+        
+        touchState.current.velocity = weightedVelocity;
       }
     }
-  };
-  
-  // Обработка свайпа в процессе движения
-  const handleDrag = (_: any, info: any) => {
-    if (info && 
-        typeof info.offset === 'object' && 
-        typeof info.offset?.x === 'number' && 
-        info.offset.x < -150) {
-      onClose();
+    
+    touchState.current.lastX = currentX;
+    touchState.current.lastTime = currentTime;
+  }, []);
+
+  // Advanced touch start with momentum preparation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!canInteract || isClosing || !e.touches[0]) return;
+    
+    e.preventDefault();
+    
+    // Cancel any ongoing animations
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
+      isAnimating.current = false;
     }
-  };
+    
+    const touch = e.touches[0];
+    const now = performance.now();
+    
+    touchState.current = {
+      startX: touch.clientX,
+      currentX: touch.clientX,
+      lastX: touch.clientX,
+      velocity: 0,
+      lastTime: now,
+      isActive: true,
+      velocityHistory: [],
+      momentum: 0
+    };
+    
+    setIsDragging(true);
+    
+    // Remove transitions for immediate response
+    if (menuRef.current) {
+      menuRef.current.style.transition = 'none';
+      menuRef.current.style.willChange = 'transform';
+    }
+    if (overlayRef.current) {
+      overlayRef.current.style.transition = 'none';
+      overlayRef.current.style.willChange = 'opacity';
+    }
+  }, [canInteract, isClosing]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging || !touchState.current.isActive || !e.touches[0]) return;
+    
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const now = performance.now();
+    const deltaX = touch.clientX - touchState.current.startX;
+    
+    // Enhanced resistance for natural feel
+    let x = Math.min(0, deltaX);
+    
+    // Add subtle resistance when dragging beyond natural range
+    if (x < -window.innerWidth * 0.8) {
+      const excess = Math.abs(x) - window.innerWidth * 0.8;
+      const resistance = Math.pow(excess / (window.innerWidth * 0.2), 0.7);
+      x = -(window.innerWidth * 0.8 + excess * (1 - resistance * 0.8));
+    }
+    
+    // Calculate advanced velocity with history
+    calculateVelocity(touch.clientX, now);
+    touchState.current.currentX = touch.clientX;
+    
+    updateTransform(x, true);
+  }, [isDragging, updateTransform, calculateVelocity]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging || !touchState.current.isActive) return;
+    
+    setIsDragging(false);
+    touchState.current.isActive = false;
+    
+    const deltaX = touchState.current.currentX - touchState.current.startX;
+    const velocity = touchState.current.velocity;
+    const currentX = Math.min(0, deltaX);
+    
+    // Advanced decision logic with momentum
+    const distanceThreshold = window.innerWidth * 0.3;
+    const velocityThreshold = -0.3; // More sensitive
+    const momentumFactor = Math.abs(velocity) * 200; // Convert to pixels
+    
+    // Smart close detection
+    const shouldClose = 
+      deltaX < -distanceThreshold || // Distance threshold
+      (velocity < velocityThreshold && deltaX < -50) || // Fast swipe
+      (deltaX < -100 && velocity < -0.1); // Medium swipe with some velocity
+    
+    // Clean up will-change
+    if (menuRef.current) menuRef.current.style.willChange = 'auto';
+    if (overlayRef.current) overlayRef.current.style.willChange = 'auto';
+    
+    if (shouldClose) {
+      // Animate to close with momentum
+      const targetX = -window.innerWidth - momentumFactor;
+      animateWithMomentum(currentX, targetX);
+    } else {
+      // Smooth return with momentum consideration
+      const returnEasing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      const returnDuration = Math.min(600, Math.max(300, Math.abs(currentX) * 1.5));
+      
+      if (menuRef.current) {
+        menuRef.current.style.transition = `transform ${returnDuration}ms ${returnEasing}`;
+        menuRef.current.style.transform = 'translate3d(0, 0, 0)';
+      }
+      if (overlayRef.current) {
+        overlayRef.current.style.transition = `opacity ${returnDuration}ms ${returnEasing}`;
+        overlayRef.current.style.opacity = '1';
+      }
+    }
+  }, [isDragging, closeMenu, animateWithMomentum]);
+
+  const handleCloseClick = useCallback(() => {
+    if (isClosing) return;
+    closeMenu();
+  }, [isClosing, closeMenu]);
 
   return (
     <AnimatePresence mode="wait">
-      {isOpen && [
-        <motion.div
-          key="overlay"
-          className="fixed inset-0 z-40"
-          variants={overlayVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          style={{ ...overlayStyle, willChange: "opacity, backdrop-filter" }}
-          onClick={onClose}
-        />,
-        <motion.nav
-          key="menu"
-          ref={menuRef}
-          className="mobile-menu__nav fixed top-0 left-0 h-full w-screen max-w-none z-50 p-6 pt-safe flex flex-col justify-between overflow-y-auto glassmorphism"
-          style={{
-            willChange: "transform, opacity",
-            opacity: 1,
-            boxShadow: isDark ? "0 4px 30px rgba(0, 255, 255, 0.2)" : "0 4px 30px rgba(59, 130, 246, 0.2)"
-          }}
-          role="navigation"
-          aria-label="Мобильное меню"
-          variants={mobileMenuVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          drag="x"
-          dragConstraints={dragConstraints}
-          dragElastic={0.1}
-          dragTransition={{
-            power: 0.2,
-            timeConstant: 200,
-            modifyTarget: (v) => Math.min(0, v),
-            bounceStiffness: 300,
-            bounceDamping: 40,
-          }}
-          onUpdate={(latest: any) => {
-            if (latest && typeof latest.x !== "undefined" && Number(latest.x) > 0) {
-              latest.x = 0;
-            }
-          }}
-          onClick={(e) => e.stopPropagation()}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-        >
+      {isOpen && (
+        <div className="fixed inset-0 z-50">
+          {/* Overlay */}
           <div
-            className={`relative flex flex-col items-center pt-3 pb-3 border-b ${borderColor}`}
+            ref={overlayRef}
+            className="absolute inset-0 bg-gradient-to-br from-black/60 via-slate-900/40 to-black/60"
+            style={{ 
+              backdropFilter: 'blur(8px)',
+              opacity: 1
+            }}
+            onClick={handleCloseClick}
+          />
+
+          {/* Menu */}
+          <div
+            ref={menuRef}
+            className="absolute top-0 left-0 w-full h-full flex flex-col"
+            style={{
+              transform: 'translate3d(0, 0, 0)',
+              touchAction: 'pan-x',
+              background: isDark 
+                ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
+                : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%)',
+              boxShadow: isDark
+                ? '0 0 50px rgba(6, 182, 212, 0.3), inset 0 1px 0 rgba(148, 163, 184, 0.1)'
+                : '0 0 50px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(148, 163, 184, 0.2)',
+              borderRight: isDark 
+                ? '1px solid rgba(6, 182, 212, 0.3)' 
+                : '1px solid rgba(59, 130, 246, 0.2)'
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
-            <motion.button
-              onClick={onClose}
-              className="absolute -left-2 -top-2 p-3 rounded-2xl backdrop-blur-md shadow-glow border overflow-hidden group"
+            {/* Header */}
+            <motion.div
+              className="flex items-center p-6 border-b"
               style={{
-                background: `var(--gradient)`,
-                borderColor: `var(--border)`,
-                color: `var(--primary)`,
-                boxShadow: `var(--glow)`
+                borderColor: isDark ? 'rgba(6, 182, 212, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                background: isDark
+                  ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.05) 0%, transparent 100%)'
+                  : 'linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%)'
               }}
-              aria-label="Закрыть меню"
-              whileHover={{
-                scale: 1.05,
-                transition: { type: "spring", stiffness: 400, damping: 25 },
-              }}
-              whileTap={{
-                scale: 0.95,
-                transition: { type: "spring", stiffness: 600, damping: 30 },
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                transition: {
-                  delay: 0.3,
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 20,
-                },
-              }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
             >
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 28 28"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <motion.path
-                  d="M7 7L21 21"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 1 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                />
-                <motion.path
-                  d="M7 21L21 7"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 1 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                />
-              </svg>
-            </motion.button>
-
-            <div className="flex flex-col items-center">
-              <DynamicLogo alt="4Life Logo" size="md" />
-            </div>
-          </div>
-          <ul className="flex flex-col gap-3 mt-4 flex-grow">
-            {navLinks.map((link, index) => (
-              <motion.li 
-                key={link.href}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ 
-                  opacity: 1, 
-                  x: 0,
-                  transition: { 
-                    delay: 0.05 * index + 0.1,
-                    duration: 0.5,
-                    ease: [0.22, 1, 0.36, 1]
-                  }
-                }}
-              >
-                <NavLink
-                  to={link.href}
-                  onClick={(e) => handleMobileMenuLinkClick(e, link.href)}
-                >
-                  {({ isActive }) => (
-                    <div
-                      className={`sci-fi-link group relative flex items-center gap-4 px-4 py-3.5 rounded-xl text-lg font-semibold transition-all duration-300 select-none [-webkit-tap-highlight-color:transparent] overflow-hidden backdrop-blur-md ${
-                        isActive
-                          ? "text-white bg-white/20 dark:bg-white/15 border border-white/30 dark:border-white/20 shadow-lg"
-                          : "text-gray-800 dark:text-white/80 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-transparent"
-                      }`}
-                    >
-                      <span className={`relative z-10 transition-colors duration-300 ${isActive ? "text-white" : "text-gray-700 dark:text-white/80"}`}>
-                        {link.icon}
-                      </span>
-                      <span className={`relative z-10 transition-colors duration-300 ${isActive ? "text-white" : "text-gray-800 dark:text-white"}`}>
-                        {link.title}
-                      </span>
-                    </div>
-                  )}
-                </NavLink>
-              </motion.li>
-            ))}
-          </ul>
-
-          <div className="mt-6 mb-4 flex flex-col items-center gap-4">
-            <div
-              className="relative w-16 h-8 mb-2 group"
-              onClick={() => toggleTheme()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  toggleTheme();
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label="Переключить тему"
-            >
-              <motion.div
-                className="absolute inset-0 rounded-2xl border-2 backdrop-blur-md"
+              <button
+                onClick={handleCloseClick}
+                disabled={isClosing}
+                className={`p-2 rounded-full transition-all duration-200 mr-4 ${
+                  isDark 
+                    ? 'bg-slate-800/50 text-cyan-400 hover:bg-slate-700/50 hover:text-cyan-300' 
+                    : 'bg-blue-50/50 text-blue-600 hover:bg-blue-100/50 hover:text-blue-700'
+                } ${isClosing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={{
-                  background: `var(--gradient)`,
-                  borderColor: `var(--border)`
+                  boxShadow: isDark 
+                    ? '0 0 20px rgba(6, 182, 212, 0.2)' 
+                    : '0 0 20px rgba(59, 130, 246, 0.2)'
                 }}
-                initial={false}
-                animate={{
-                  boxShadow: `var(--glow), inset 0 1px 0 ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.7)'}`,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 25,
-                  mass: 0.8,
-                }}
-              />
-
-              <div className="absolute inset-0 flex items-center justify-between px-1.5">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center">
-                  {/* Иконка Луны */}
-                  <Moon size={16} className="text-white/80" />
-                </div>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center">
-                  {/* Иконка Солнца */}
-                  <Sun size={16} className="text-yellow-400" />
+              >
+                <X size={24} />
+              </button>
+              
+              <div className="flex-1 flex justify-center items-center">
+                <div className="absolute left-1/2 transform -translate-x-1/2">
+                  <DynamicLogo alt="4Life Logo" size="lg" />
                 </div>
               </div>
+            </motion.div>
 
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto p-6" style={{ scrollbarWidth: 'none' }}>
               <motion.div
-                className="absolute top-1 w-6 h-6 rounded-full flex items-center justify-center z-10 border backdrop-blur-sm"
-                style={{
-                  background: isDark
-                    ? `var(--gradient)`
-                    : `linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%)`,
-                  borderColor: isDark
-                    ? `var(--border)`
-                    : `rgba(255,255,255,0.6)`,
-                }}
-                initial={false}
-                animate={{
-                  right: isDark ? "auto" : "0.25rem",
-                  left: isDark ? "0.25rem" : "auto",
-                  boxShadow: `var(--glow), 0 4px 12px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(59,130,246,0.3)'}`,
-                  rotate: isDark ? 180 : 0,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 180,
-                  damping: 22,
-                  mass: 1.2,
-                }}
+                className="space-y-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
               >
-                {isDark ? (
-                  <Moon size={16} className="text-primary" />
-                ) : (
-                  <Sun size={16} className="text-secondary" />
-                )}
+                {navLinks.map((link, index) => (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.25 + index * 0.03, duration: 0.3 }}
+                  >
+                    <NavLink to={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
+                      {({ isActive }) => (
+                        <div
+                          className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-200 ${
+                            isActive
+                              ? (isDark 
+                                  ? "bg-gradient-to-r from-cyan-600/20 to-blue-600/20 text-cyan-300 shadow-lg shadow-cyan-500/20" 
+                                  : "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-700 shadow-lg shadow-blue-500/20")
+                              : (isDark 
+                                  ? "text-slate-300 hover:bg-slate-800/30 hover:text-cyan-400" 
+                                  : "text-gray-700 hover:bg-blue-50/30 hover:text-blue-600")
+                          } ${locked || isClosing ? 'pointer-events-none opacity-50' : ''}`}
+                          style={{
+                            border: isActive 
+                              ? (isDark ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
+                              : '1px solid transparent'
+                          }}
+                        >
+                          <span className={isActive ? (isDark ? "text-cyan-400" : "text-blue-600") : (isDark ? "text-slate-400" : "text-gray-500")}>
+                            {link.icon}
+                          </span>
+                          <span className="font-medium">{link.title}</span>
+                        </div>
+                      )}
+                    </NavLink>
+                  </motion.div>
+                ))}
               </motion.div>
             </div>
-            <div className="text-xs text-center text-gray-500 dark:text-gray-400 select-none">
-              {new Date().getFullYear()} 4Life. Все права защищены.
-            </div>
+
+            {/* Footer */}
+            <motion.div 
+              className="p-6 border-t"
+              style={{
+                borderColor: isDark ? 'rgba(6, 182, 212, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                background: isDark
+                  ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.05) 0%, transparent 100%)'
+                  : 'linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%)'
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+            >
+              <div className="flex justify-center">
+                <SciFiThemeToggle />
+              </div>
+            </motion.div>
           </div>
-        </motion.nav>
-      ]}
+        </div>
+      )}
     </AnimatePresence>
   );
 };

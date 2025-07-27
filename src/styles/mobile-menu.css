@@ -1,117 +1,77 @@
-/* Стили для мобильного меню */
+/* Профессиональная оптимизация мобильного меню для стабильных 60fps */
 
-/* Предотвращаем скролл основного контента при открытом меню */
-body.menu-open {
-  overflow: hidden;
-  touch-action: none;
+/* Критическая оптимизация производительности */
+.mobile-menu__nav,
+.mobile-menu__nav * {
+  will-change: auto;
+  contain: layout style;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* Стили для навигации */
+/* Полное скрытие скроллбара */
+.mobile-menu__nav::-webkit-scrollbar,
+.mobile-menu__nav *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.mobile-menu__nav,
+.mobile-menu__nav * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Оптимизация для touch устройств */
 .mobile-menu__nav {
-  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
 }
 
-/* Стили для sci-fi ссылок */
-.sci-fi-link {
-  position: relative;
-  overflow: hidden;
+/* Адаптивные размеры */
+@media (max-width: 480px) {
+  .mobile-menu__nav { font-size: 1rem; }
 }
 
-.sci-fi-link::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.7s ease;
+@media (min-width: 481px) and (max-width: 768px) {
+  .mobile-menu__nav { font-size: 1.1rem; }
 }
 
-.sci-fi-link:active::before {
-  left: 100%;
-}
-
-/* Эффект свечения для активных ссылок в темной теме */
-.dark .sci-fi-link.active {
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-}
-
-/* Эффект свечения для активных ссылок в светлой теме */
-.light .sci-fi-link.active {
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-}
-
-/* Улучшенный эффект нажатия */
-.sci-fi-link:active {
-  transform: scale(0.98);
-  transition: transform 0.2s ease;
-}
-
-/* Стили для скроллбара в меню */
-.mobile-menu__nav::-webkit-scrollbar {
-  width: 4px;
-}
-
-.mobile-menu__nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.mobile-menu__nav::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-}
-
-.dark .mobile-menu__nav::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 255, 255, 0.3);
-}
-
-.light .mobile-menu__nav::-webkit-scrollbar-thumb {
-  background-color: rgba(59, 130, 246, 0.3);
-}
-
-/* Анимация появления элементов меню */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mobile-menu__nav { 
+    font-size: 1.2rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .mobile-menu__nav .gap-3 { gap: 1rem; }
+  .mobile-menu__nav .px-5 { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .mobile-menu__nav .py-4 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+}
+
+/* Критическая оптимизация для слабых устройств */
+@media (max-width: 480px) and (max-height: 600px) {
+  .mobile-menu__nav {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
   }
 }
 
-/* Эффект свечения для кнопок */
-.glow-effect {
-  position: relative;
+/* Отключение анимаций при низкой производительности */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu__nav * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
-.glow-effect::after {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.dark .glow-effect:hover::after {
-  opacity: 1;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-}
-
-.light .glow-effect:hover::after {
-  opacity: 1;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+/* Принудительное GPU ускорение */
+.mobile-menu__nav > div,
+.mobile-menu__nav nav,
+.mobile-menu__nav ul,
+.mobile-menu__nav li,
+.mobile-menu__nav button {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
