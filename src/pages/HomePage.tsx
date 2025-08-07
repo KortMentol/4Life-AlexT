@@ -143,7 +143,7 @@ const HomePage: React.FC = () => {
             <span className="block mb-1 md:mb-2">Раскройте потенциал своего здоровья</span>
             <span className="block mb-1 md:mb-2">
               <AuroraText colors={["#007BFF", "#60A5FA", "#FFFFFF", "#38BDF8"]} speed={1.5}>
-                с научным подходом4Life
+                с научным подходом 4Life
               </AuroraText>
             </span>
           </h1>

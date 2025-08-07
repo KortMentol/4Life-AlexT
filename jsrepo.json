@@ -7,10 +7,11 @@
   "formatter": "prettier",
   "configFiles": {},
   "paths": {
-    "*": "./src/blocks",
-    "Animations": "./src/Animations",
-    "Backgrounds": "./src/Backgrounds",
-    "Components": "./src/Components",
-    "TextAnimations": "./src/TextAnimations"
+    "*": "./src/components/ui",
+    "Animations": "./src/components/animations",
+    "Backgrounds": "./src/components/backgrounds",
+    "TextAnimations": "./src/components/text-animations",
+    "Layouts": "./src/components/layouts",
+    "Sections": "./src/components/sections"
   }
 }

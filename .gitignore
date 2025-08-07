@@ -1,9 +1,14 @@
-#Temporary
+#Временные файлы
 
-Theodore-main
 
-# Logs
 
+#Исключения для проекта
+mcp_memory/
+_mcp_scripts/
+ask_mcp.py
+mcp_indexer.py
+
+#Логи
 logs
 *.log
 npm-debug.log*
@@ -16,8 +21,7 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
-
+#Файлы и папки редактора
 project_contents.txt
 .vscode/*
 !.vscode/extensions.json
@@ -38,8 +42,7 @@ project_contents.txt
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# Environment variables
-
+#Переменные окружения
 .env
 .env.local
 .env.development.local
@@ -48,17 +51,14 @@ project_contents.txt
 .env.production.local
 
 
-# Build files
-
+#Файлы сборки
 build/
 out/
 .cache/
 
-# Coverage reports
-
+#Отчеты о покрытии
 coverage/
 
-# Misc
-
+#Прочее
 .vercel
 .netlify

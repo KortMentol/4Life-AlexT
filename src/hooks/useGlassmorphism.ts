@@ -13,7 +13,7 @@
  * @example
  * // Базовое использование
  * const { style } = useGlassmorphism();
- * 
+ *
  * // Использование с настройками
  * const { style } = useGlassmorphism({
  *   blur: 16,
@@ -22,15 +22,15 @@
  *   opacity: 0.8,
  *   intensity: 'strong'
  * });
- * 
+ *
  * // Применение стилей к компоненту
  * <div style={style} className="rounded-xl p-6">
  *   Контент с эффектом гласморфизма
  * </div>
  */
-import { useMemo } from 'react';
-import { useTheme } from './useTheme';
-import { useThemeColors } from './useThemeColors';
+import { useMemo } from "react";
+import { useTheme } from "./useTheme";
+import { useThemeColors } from "./useThemeColors";
 
 /**
  * Параметры для настройки эффекта гласморфизма
@@ -50,7 +50,7 @@ interface GlassmorphismOptions {
   /** Добавлять ли тень (по умолчанию: true) */
   shadow?: boolean;
   /** Интенсивность эффекта (по умолчанию: 'medium') */
-  intensity?: 'light' | 'medium' | 'strong';
+  intensity?: "light" | "medium" | "strong";
 }
 
 /**
@@ -71,89 +71,93 @@ interface GlassmorphismReturn {
  */
 export const useGlassmorphism = (options: GlassmorphismOptions = {}): GlassmorphismReturn => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
   const { primaryColor, secondaryColor, borderColor, shadow } = useThemeColors();
-  
+
   // Применяем значения по умолчанию к опциям
   const {
-    blur = isDark ? 6 : 0, // Убираем размытие для светлой темы
+    blur = isDark ? 30 : 30,
     saturation = 120, // Уменьшаем насыщенность
     brightness = isDark ? 0.95 : 1.2, // Увеличиваем яркость для светлой темы
     opacity = isDark ? 0.95 : 1, // Полная непрозрачность для светлой темы
     border = true,
     shadow: showShadow = true,
-    intensity = 'medium'
+    intensity = "medium",
   } = options;
-  
+
   /**
    * Определяет значения параметров в зависимости от выбранной интенсивности
    * @returns Объект с рассчитанными значениями для эффекта
    */
   const getIntensityValues = () => {
     switch (intensity) {
-      case 'light':
+      case "light":
         return {
           blurValue: blur * 0.7,
           saturationValue: saturation * 0.7,
           brightnessValue: isDark ? brightness * 1.1 : brightness * 0.95,
-          opacityValue: opacity * 0.7
+          opacityValue: opacity * 0.7,
         };
-      case 'strong':
+      case "strong":
         return {
           blurValue: blur * 1.3,
           saturationValue: saturation * 1.3,
           brightnessValue: isDark ? brightness * 0.9 : brightness * 1.1,
-          opacityValue: opacity * 1.3
+          opacityValue: opacity * 1.3,
         };
-      case 'medium':
+      case "medium":
       default:
         return {
           blurValue: blur,
           saturationValue: saturation,
           brightnessValue: brightness,
-          opacityValue: opacity
+          opacityValue: opacity,
         };
     }
   };
-  
+
   // Получаем значения в зависимости от интенсивности
   const { blurValue, saturationValue, brightnessValue, opacityValue } = getIntensityValues();
-  
+
   // Мемоизируем результат для предотвращения лишних перерендеров
   return useMemo(() => {
     // Создаем стили для эффекта гласморфизма
     const style: React.CSSProperties = {
-      backdropFilter: isDark ? `blur(${blurValue}px) saturate(${saturationValue}%) brightness(${brightnessValue})` : 'none',
-      WebkitBackdropFilter: isDark ? `blur(${blurValue}px) saturate(${saturationValue}%) brightness(${brightnessValue})` : 'none',
+      backdropFilter: isDark
+        ? `blur(${blurValue}px) saturate(${saturationValue}%) brightness(${brightnessValue})`
+        : "none",
+      WebkitBackdropFilter: isDark
+        ? `blur(${blurValue}px) saturate(${saturationValue}%) brightness(${brightnessValue})`
+        : "none",
       background: isDark
         ? `linear-gradient(135deg, rgba(15, 23, 42, 1) 0%, rgba(30, 41, 59, 1) 100%)`
         : `linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)`,
     };
-    
+
     // Всегда добавляем границы для лучшей видимости хедера
-    style.borderTop = isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(59, 130, 246, 0.15)';
-    style.borderBottom = isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(59, 130, 246, 0.15)';
-    
+    style.borderTop = isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(59, 130, 246, 0.15)";
+    style.borderBottom = isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(59, 130, 246, 0.15)";
+
     // Всегда добавляем улучшенную тень для лучшей видимости хедера
-    style.boxShadow = isDark 
-      ? '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 255, 255, 0.1)' 
-      : '0 4px 12px rgba(0, 0, 0, 0.05)';
-    
+    style.boxShadow = isDark
+      ? "0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 255, 255, 0.1)"
+      : "0 4px 12px rgba(0, 0, 0, 0.05)";
+
     return {
       style,
-      className: 'glassmorphism'
+      className: "glassmorphism",
     };
   }, [
-    isDark, 
-    blurValue, 
-    saturationValue, 
-    brightnessValue, 
-    opacityValue, 
-    border, 
-    showShadow, 
-    primaryColor, 
-    secondaryColor, 
-    borderColor, 
-    shadow
+    isDark,
+    blurValue,
+    saturationValue,
+    brightnessValue,
+    opacityValue,
+    border,
+    showShadow,
+    primaryColor,
+    secondaryColor,
+    borderColor,
+    shadow,
   ]);
 };

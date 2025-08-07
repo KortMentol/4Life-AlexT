@@ -1,4 +1,13 @@
 /* src/styles/globals.css */
+/**
+ * @module src/styles/globals.css
+ * @description Определяет глобальные стили и переменные для всего приложения. Включает базовые стили для `body`, настройки цветовой схемы (light/dark), основной шрифт и плавные переходы.
+ * @author Kort
+ * @version 1.0.0
+ * @usage
+ * 1. `src/main.tsx`: Импортируется сразу после `base.css` для применения глобальных стилей ко всему сайту.
+ */
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

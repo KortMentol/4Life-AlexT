@@ -1,9 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import styles from './PerformanceDebugMobile.module.css';
-import { DeviceSpecs, detectDeviceSpecs, calculatePerformanceScore } from '@/utils/devicePerformance';
-import { Gauge, Smartphone, Wifi, Monitor, ChevronDown, ChevronUp, X, HardDrive, Cpu, PieChart, Clock, Star, Zap, Bug, Info } from 'lucide-react';
-
-
+import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
+import {
+  Bug,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Cpu,
+  Gauge,
+  HardDrive,
+  Info,
+  Monitor,
+  PieChart,
+  Smartphone,
+  Star,
+  Wifi,
+  X,
+  Zap,
+} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import styles from "./PerformanceDebugMobile.module.css";
 
 /**
  * @module components/debug/PerformanceDebugMobile
@@ -29,17 +43,17 @@ const PerformanceDebugMobile: React.FC = () => {
 
   const [frameTime, setFrameTime] = useState(0);
   const [staticScore, setStaticScore] = useState(0);
-  const [tier, setTier] = useState<'low' | 'medium' | 'high'>('medium');
+  const [tier, setTier] = useState<"low" | "medium" | "high">("medium");
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpecs>({
-    ram: 'Unknown',
+    ram: "Unknown",
     cpuCores: 0,
-    cpuFrequency: 'Unknown',
-    gpu: 'Unknown',
-    webglVersion: 'Unknown',
-    screenResolution: 'Unknown',
+    cpuFrequency: "Unknown",
+    gpu: "Unknown",
+    webglVersion: "Unknown",
+    screenResolution: "Unknown",
     pixelRatio: 1,
     touchSupport: false,
-    connectionType: 'Unknown'
+    connectionType: "Unknown",
   });
 
   useEffect(() => {
@@ -56,7 +70,7 @@ const PerformanceDebugMobile: React.FC = () => {
       setStaticScore(score);
       setTier(detectedTier);
     } catch (error) {
-      console.error('❌ Error initializing PerformanceDebug:', error);
+      console.error("❌ Error initializing PerformanceDebug:", error);
     }
 
     const performanceLoop = () => {
@@ -83,7 +97,7 @@ const PerformanceDebugMobile: React.FC = () => {
   }, []);
 
   const toggleCompactMode = useCallback(() => {
-    setIsCompact(prev => !prev);
+    setIsCompact((prev) => !prev);
   }, []);
 
   const getValueColor = (value: number) => {
@@ -100,7 +114,7 @@ const PerformanceDebugMobile: React.FC = () => {
 
   if (!isVisible) return null;
 
-  const containerClasses = `${styles.debugContainer} ${isCompact ? styles.compactMode : ''}`;
+  const containerClasses = `${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`;
 
   return (
     <div className={containerClasses}>
@@ -118,28 +132,54 @@ const PerformanceDebugMobile: React.FC = () => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              <button onClick={(e) => { e.stopPropagation(); toggleCompactMode(); }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCompactMode();
+                }}
+              >
                 {isCompact ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
-              <button onClick={(e) => { e.stopPropagation(); setIsVisible(false); }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsVisible(false);
+                }}
+              >
                 <X size={20} />
               </button>
             </div>
           </>
         ) : (
           <>
-            <div className={styles.headerTitle} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className={styles.metricIcon}><Bug size={18} /></span>
+            <div className={styles.headerTitle} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className={styles.metricIcon}>
+                <Bug size={18} />
+              </span>
               <span>Performance Debug</span>
             </div>
             <div className={styles.headerActions}>
-              <button onClick={(e) => { e.stopPropagation(); /* TODO: setShowInfo(true) */ }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); /* TODO: setShowInfo(true) */
+                }}
+              >
                 <Info size={18} />
               </button>
-              <button onClick={(e) => { e.stopPropagation(); toggleCompactMode(); }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCompactMode();
+                }}
+              >
                 {isCompact ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
-              <button onClick={(e) => { e.stopPropagation(); setIsVisible(false); }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsVisible(false);
+                }}
+              >
                 <X size={20} />
               </button>
             </div>
@@ -150,21 +190,85 @@ const PerformanceDebugMobile: React.FC = () => {
       {!isCompact && (
         <div className={styles.debugBody}>
           <div className={styles.metricsGrid}>
-            <div className={styles.metricItem}><div className={styles.metricIcon}><Gauge size={16} /></div><span className={styles.metricLabel}>FPS</span><span className={`${styles.metricValue} ${getValueColor(fps)}`}>{fps}</span></div>
-            <div className={styles.metricItem}><div className={styles.metricIcon}><Clock size={16} /></div><span className={styles.metricLabel}>Frame</span><span className={styles.metricValue}>{frameTime}ms</span></div>
-            <div className={styles.metricItem}><div className={styles.metricIcon}><Star size={16} /></div><span className={styles.metricLabel}>Score</span><span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>{staticScore} ({tier.toUpperCase()})</span></div>
+            <div className={styles.metricItem}>
+              <div className={styles.metricIcon}>
+                <Gauge size={16} />
+              </div>
+              <span className={styles.metricLabel}>FPS</span>
+              <span className={`${styles.metricValue} ${getValueColor(fps)}`}>{fps}</span>
+            </div>
+            <div className={styles.metricItem}>
+              <div className={styles.metricIcon}>
+                <Clock size={16} />
+              </div>
+              <span className={styles.metricLabel}>Frame</span>
+              <span className={styles.metricValue}>{frameTime}ms</span>
+            </div>
+            <div className={styles.metricItem}>
+              <div className={styles.metricIcon}>
+                <Star size={16} />
+              </div>
+              <span className={styles.metricLabel}>Score</span>
+              <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>
+                {staticScore} ({tier.toUpperCase()})
+              </span>
+            </div>
           </div>
 
           <div className={styles.sectionDivider} />
 
           <div className={styles.deviceInfoSection}>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><HardDrive size={16} /></div><strong>RAM:</strong><span className={styles.infoValue}>{deviceSpecs.ram}</span></div>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><Cpu size={16} /></div><strong>CPU:</strong><span className={styles.infoValue}>{deviceSpecs.cpuCores}c @ {deviceSpecs.cpuFrequency}</span></div>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><PieChart size={16} /></div><strong>GPU:</strong><span className={styles.infoValue}>{deviceSpecs.gpu}</span></div>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><Zap size={16} /></div><strong>WebGL:</strong><span className={styles.infoValue}>{deviceSpecs.webglVersion}</span></div>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><Monitor size={16} /></div><strong>Screen:</strong><span className={styles.infoValue}>{deviceSpecs.screenResolution}</span></div>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><Smartphone size={16} /></div><strong>Touch:</strong><span className={styles.infoValue}>{deviceSpecs.touchSupport ? 'Yes' : 'No'}</span></div>
-            <div className={styles.infoRow}><div className={styles.infoIcon}><Wifi size={16} /></div><strong>Network:</strong><span className={styles.infoValue}>{deviceSpecs.connectionType}</span></div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <HardDrive size={16} />
+              </div>
+              <strong>RAM:</strong>
+              <span className={styles.infoValue}>{deviceSpecs.ram}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <Cpu size={16} />
+              </div>
+              <strong>CPU:</strong>
+              <span className={styles.infoValue}>
+                {deviceSpecs.cpuCores}c @ {deviceSpecs.cpuFrequency}
+              </span>
+            </div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <PieChart size={16} />
+              </div>
+              <strong>GPU:</strong>
+              <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <Zap size={16} />
+              </div>
+              <strong>WebGL:</strong>
+              <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <Monitor size={16} />
+              </div>
+              <strong>Screen:</strong>
+              <span className={styles.infoValue}>{deviceSpecs.screenResolution}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <Smartphone size={16} />
+              </div>
+              <strong>Touch:</strong>
+              <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <div className={styles.infoIcon}>
+                <Wifi size={16} />
+              </div>
+              <strong>Network:</strong>
+              <span className={styles.infoValue}>{deviceSpecs.connectionType}</span>
+            </div>
           </div>
         </div>
       )}

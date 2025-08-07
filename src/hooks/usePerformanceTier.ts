@@ -1,5 +1,9 @@
+import {
+  PerformanceTier,
+  calculatePerformanceScore,
+  detectDeviceSpecs,
+} from "@/utils/devicePerformance/devicePerformance";
 import { useEffect, useState } from "react";
-import { PerformanceTier, detectDeviceSpecs, calculatePerformanceScore } from "@/utils/devicePerformance";
 
 /**
  * @module src/hooks/usePerformanceTier.ts
@@ -12,7 +16,7 @@ import { PerformanceTier, detectDeviceSpecs, calculatePerformanceScore } from "@
  * 1. `src/components/effects/FluidEffect.tsx`: Используется для выбора подходящей конфигурации WebGL-эффекта в зависимости от мощности устройства.
  * @example
  * const tier = usePerformanceTier();
- * 
+ *
  * useEffect(() => {
  *   if (tier === 'low') {
  *     // Отключить сложные анимации
@@ -31,19 +35,19 @@ export const usePerformanceTier = (): PerformanceTier => {
     try {
       // Определяем характеристики устройства
       const specs = detectDeviceSpecs();
-      
+
       // Рассчитываем производительность по единой системе
       const { score, tier: detectedTier } = calculatePerformanceScore(specs);
-      
+
       setTier(detectedTier);
-      
-      console.log('🚀 Performance tier detected:', {
+
+      console.log("🚀 Performance tier detected:", {
         tier: detectedTier,
         score,
-        specs
+        specs,
       });
     } catch (error) {
-      console.error('❌ Error detecting performance tier:', error);
+      console.error("❌ Error detecting performance tier:", error);
       setTier("medium"); // Fallback на средний уровень
     }
   }, []);

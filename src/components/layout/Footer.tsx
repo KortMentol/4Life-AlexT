@@ -1,37 +1,16 @@
-/**
- * @module src/components/layout/Footer.tsx
- * @description Компонент подвала сайта. Содержит информацию о компании, ссылки на социальные сети, блок быстрой навигации, контактные данные и юридическую информацию (копирайт, дисклеймеры). Элементы футера анимируются при появлении в области видимости.
- * @author Kort
- * @version 1.0.0
- * @see DynamicLogo - Используется для отображения логотипа в футере.
- * @usage
- * 1. `src/components/layout/Layout.tsx`: Вставляется внизу основного макета, чтобы присутствовать на всех страницах сайта.
- * @example
- * <Layout>
- *   <Header />
- *   <main>...</main>
- *   <Footer />
- * </Layout>
- */
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { motion } from "framer-motion";
-import {
-  Facebook,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-  Twitter,
-  Youtube,
-} from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../../site-config/site";
+import DarkVeil from "../effects/DarkVeil";
 import DynamicLogo from "../ui/DynamicLogo";
 
 const Footer: React.FC = () => {
+  const isMobile = useIsMobile();
   const currentYear = new Date().getFullYear();
 
-  // Анимация для элементов
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -41,7 +20,6 @@ const Footer: React.FC = () => {
     },
   };
 
-  // Анимация для контейнера
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -54,12 +32,25 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 pt-16 pb-8 relative overflow-hidden">
-      {/* Декоративные элементы */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500"></div>
-      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 dark:bg-blue-400/5 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/4"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400/10 dark:bg-blue-400/5 rounded-full filter blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+    <footer className="pt-16 pb-8 relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
+      {/* Динамический фон Dark Veil с параметрами со скриншота */}
+      <div className="absolute inset-0 w-full h-full z-1">
+        <DarkVeil
+          speed={0.8}
+          hueShift={isMobile ? 340 : 360}
+          noiseIntensity={0}
+          scanlineFrequency={0}
+          scanlineIntensity={0}
+          warpAmount={5}
+          resolutionScale={1}
+          isMobile={isMobile}
+        />
+      </div>
 
+      {/* Декоративная линия */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 z-10"></div>
+
+      {/* Контейнер с контентом */}
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* О компании */}
@@ -74,9 +65,8 @@ const Footer: React.FC = () => {
                 <DynamicLogo alt="4Life Logo" className="" size="lg" />
               </Link>
               <p className="text-gray-600 dark:text-gray-400 mb-6 text-pretty">
-                4Life Research – глобальная компания в области велнеса,
-                специализирующаяся на научных разработках для поддержки иммунной
-                системы.
+                4Life Research – глобальная компания в области велнеса, специализирующаяся на научных разработках для
+                поддержки иммунной системы.
               </p>
               <div className="flex space-x-4">
                 <a
@@ -126,10 +116,7 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3
-              variants={itemVariants}
-              className="text-lg font-bold mb-6 text-gray-900 dark:text-white"
-            >
+            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-gray-900 dark:text-white">
               Быстрые ссылки
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-3">
@@ -183,10 +170,7 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3
-              variants={itemVariants}
-              className="text-lg font-bold mb-6 text-gray-900 dark:text-white"
-            >
+            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-gray-900 dark:text-white">
               Контакты
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-4">
@@ -210,24 +194,21 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-gray-600 dark:text-gray-400">
-                  {siteConfig.contact.address}
-                </span>
+                <span className="text-gray-600 dark:text-gray-400">{siteConfig.contact.address}</span>
               </li>
             </motion.ul>
           </motion.div>
         </div>
 
         {/* Нижняя часть футера */}
-        <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-8 border-t border-gray-200/20 dark:border-gray-700/50">
           <div className="text-center">
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               © {currentYear} Александр Тощев. Все права защищены.
             </p>
 
             <p className="text-xs text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
-              Информация, представленная на этом вебсайте, относится
-              исключительно к рынку Евразии.
+              Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-2">
               БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.

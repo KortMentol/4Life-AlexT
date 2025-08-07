@@ -1,29 +1,28 @@
-// === START OF FILE: src/components/layout/Header.tsx ===
-
 import { motion } from "framer-motion";
+import { gsap } from "gsap";
 import { Moon, Sun } from "lucide-react";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
-import HeaderComets from "../effects/HeaderComets";
-
-import TextShineEffect from "../effects/TextShineEffect";
-import HamburgerButton from "../ui/HamburgerButton";
-import ProductListIcon from "../ui/ProductListIcon";
-import MobileMenu from "./MobileMenu";
-
-import { useTheme } from "../../hooks/useTheme";
-// --- ИЗМЕНЕНИЕ: Используем наш исправленный хук ---
-import { useNativeScroll } from "../../hooks/useNativeScroll";
-
 import { headerVariants, logoVariants, navItemVariants } from "../../animations/headerAnimations";
-import { useGlassmorphism } from "../../hooks/useGlassmorphism";
+
+import { useNativeScroll } from "../../hooks/useNativeScroll"; // <-- ПРАВИЛЬНЫЙ ИМПОРТ
+import { useTheme } from "../../hooks/useTheme";
 import { mainNav, siteConfig } from "../../site-config/site";
 import { isMobileDevice } from "../../utils/deviceUtils";
 import { handleLinkClick, scrollToTop } from "../../utils/navigationUtils";
+import HeaderComets from "../effects/HeaderComets";
+import TextShineEffect from "../effects/TextShineEffect";
+import HamburgerButton from "../ui/HamburgerButton";
+import ProductListIcon from "../ui/ProductListIcon";
 
-const Header: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface HeaderProps {
+  isMenuOpen: boolean;
+  setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
+  const headerTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
@@ -38,20 +37,38 @@ const Header: React.FC = () => {
     }
   }, []);
 
-  // --- ИЗМЕНЕНИЕ: Используем наш исправленный хук ---
-  const { headerY, headerOpacity } = useNativeScroll({ 
-    headerHeight, 
+  const { headerY } = useNativeScroll({
+    // <-- ИСПОЛЬЗУЕМ ПРАВИЛЬНЫЙ ХУК
+    headerHeight,
     topOffset: 8,
-    disabled: mobileMenuOpen // Отключаем скрытие хедера когда меню открыто
+    disabled: isMenuOpen,
   });
-  const { style: glassmorphismStyle } = useGlassmorphism();
+ 
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    headerTimelineRef.current = gsap.timeline({ paused: true }).to(headerRef.current, {
+      y: "-110%",
+      duration: 0.8,
+      ease: "power4.inOut",
+    });
+
+    return () => {
+      headerTimelineRef.current?.kill();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      headerTimelineRef.current?.play();
+    } else {
+      headerTimelineRef.current?.reverse();
+    }
+  }, [isMenuOpen]);
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
-  };
-
-  const handleHamburgerClick = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const handleLogoClick = () => {
@@ -71,19 +88,18 @@ const Header: React.FC = () => {
         initial="visible"
         animate="visible"
         style={{
-          y: headerY, // Это значение теперь анимируется плавно
-          ...glassmorphismStyle,
+          y: headerY,
+          
         }}
-        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full glassmorphism header-glow-effect header-modern}`}
+        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full glassmorphism`}
       >
         <div className="header-gradient-move absolute inset-0 rounded-full"></div>
         <HeaderComets />
         <div className="container max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex items-center justify-between w-full">
-            {/* Left Section: Hamburger on Mobile, Logo + Name on Desktop */}
             <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
               <div className="md:hidden relative z-[100] no-highlight flex items-center">
-                <HamburgerButton isOpen={mobileMenuOpen} toggle={handleHamburgerClick} />
+                <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen((prev) => !prev)} />
               </div>
               <button
                 onClick={handleLogoClick}
@@ -92,7 +108,6 @@ const Header: React.FC = () => {
               >
                 <motion.div
                   className="relative z-10 transition-transform duration-300 group-hover:scale-105"
-                  style={{ opacity: headerOpacity }}
                   variants={logoVariants}
                   initial="initial"
                   animate="animate"
@@ -110,7 +125,6 @@ const Header: React.FC = () => {
                 </motion.div>
                 <motion.div
                   style={{
-                    opacity: headerOpacity,
                     color: isDark ? "white" : "#1e293b",
                     textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                   }}
@@ -130,10 +144,7 @@ const Header: React.FC = () => {
                 </motion.div>
               </button>
             </div>
-
-            {/* Center Section: Logo on Mobile, Nav on Desktop */}
             <div className="absolute left-1/2 transform -translate-x-1/2 md:relative md:left-auto md:transform-none md:flex-1 md:flex md:justify-center">
-              {/* Name and Status for Mobile */}
               <div className="md:hidden">
                 <button
                   onClick={() => {
@@ -149,12 +160,14 @@ const Header: React.FC = () => {
                   <motion.div
                     className="text-center flex flex-col items-center"
                     style={{
-                      opacity: headerOpacity,
                       color: isDark ? "white" : "#1e293b",
                       textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                     }}
                   >
-                    <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
+                    <TextShineEffect
+                      text={siteConfig.distributor.name}
+                      className="font-semibold text-sm leading-tight"
+                    />
                     <div
                       className="text-xs font-medium mt-0.5"
                       style={{
@@ -168,12 +181,10 @@ const Header: React.FC = () => {
                   </motion.div>
                 </button>
               </div>
-
-              {/* Navigation for Desktop */}
               <motion.nav
                 role="navigation"
                 className="hidden md:flex items-center justify-center space-x-1 h-full"
-                style={{ opacity: headerOpacity, marginLeft: '4rem' }}
+                style={{ marginLeft: "4rem" }}
               >
                 {mainNav.map((item, index) => (
                   <motion.div
@@ -189,9 +200,7 @@ const Header: React.FC = () => {
                     <NavLink
                       to={item.href}
                       onClick={(e) =>
-                        handleLinkClick(e, navigate, item.href, location.pathname, {
-                          immediate: isMobileDevice(),
-                        })
+                        handleLinkClick(e, navigate, item.href, location.pathname, { immediate: isMobileDevice() })
                       }
                       className="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative whitespace-nowrap"
                     >
@@ -208,7 +217,7 @@ const Header: React.FC = () => {
                           </span>
                           {isActive && (
                             <motion.span
-                              className="absolute bottom-1 left-0 right-0 h-0.5" // Подчеркивание тоже будет адаптивным
+                              className="absolute bottom-1 left-0 right-0 h-px"
                               style={{ backgroundColor: isDark ? "white" : "#1e293b" }}
                               layoutId="underline"
                               initial={{ width: 0 }}
@@ -223,9 +232,7 @@ const Header: React.FC = () => {
                 ))}
               </motion.nav>
             </div>
-
-            {/* Right Section: Icons */}
-            <motion.div className="flex items-center justify-end w-full md:w-auto md:flex-1" style={{ opacity: headerOpacity }}>
+            <motion.div className="flex items-center justify-end w-full md:w-auto md:flex-1">
               <motion.div
                 className="hidden md:flex items-center space-x-3"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -272,11 +279,8 @@ const Header: React.FC = () => {
           </div>
         </div>
       </motion.header>
-
-      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </>
   );
 };
 
 export default Header;
-// === END OF FILE: src/components/layout/Header.tsx ===

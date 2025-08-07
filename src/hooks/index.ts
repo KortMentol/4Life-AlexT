@@ -1,5 +1,4 @@
 export { useFluid } from "./useFluid";
-export { useMobileMenuState } from "./useMobileMenuState";
 export { usePerformanceTier } from "./usePerformanceTier";
 export { useProductList } from "./useProductList";
 export { useResetScrollOnNavigation } from "./useResetScrollOnNavigation";

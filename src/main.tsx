@@ -21,10 +21,9 @@ import "./styles/globals.css";
 import "./styles/fixes.css";
 // Modern design system and animations
 import "./styles/modern-design.css";
-// Mobile menu styles
-import "./styles/mobile-menu.css";
-// Стили для хедера
-import "./styles/header-glow.css";
+// Переменные темы и глобальные анимации
+import "./styles/theme-variables.css";
+import "./styles/animations.css";
 
 // Lenis инициализируется автоматически. Простого импорта любого компонента из ./lib/lenis достаточно.
 

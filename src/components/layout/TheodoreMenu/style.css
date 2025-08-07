@@ -1,0 +1,187 @@
+:root {
+  --color-bg-menu: #000;
+  --color-menu-item: #fff;
+  --color-menu-item-hover: #7ec59d;
+  --color-neon-arrow: #00f0ff;
+}
+
+.theodore-menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.menu-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg-menu);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* Изначально невидимо, управляется GSAP */
+  opacity: 0;
+  visibility: hidden;
+  /* z-index ниже, чем у оверлея */
+  z-index: 1900;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* Самый высокий z-index, чтобы быть поверх всего */
+  z-index: 2000;
+}
+
+.overlay__path {
+  fill: var(--color-bg-menu);
+}
+
+.menu-header,
+.menu-footer {
+  position: relative;
+  z-index: 1100;
+  display: flex;
+  width: 100%;
+  padding: 1.5rem;
+}
+
+.menu-header {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.menu-logo-container {
+  position: absolute;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%) scale(1.3);
+  width: auto;
+  z-index: 1100;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.menu-logo-container:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+.menu-footer {
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.menu {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1100;
+}
+
+.menu__item {
+  font-size: 8vw;
+  color: var(--color-menu-item);
+  cursor: pointer;
+  line-height: 1.2;
+  font-weight: 400;
+  text-align: center;
+  position: relative;
+  will-change: opacity, transform;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+  padding: 0.5rem 0;
+}
+
+.menu__item:hover {
+  color: var(--color-menu-item-hover);
+  transform: scale(1.05);
+}
+
+.tiles {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 150vh;
+  display: flex;
+  opacity: 0.5;
+  flex-direction: column;
+  justify-content: center;
+  transform: translate3d(-50%, -50%, 0) rotate(22.5deg);
+  /* z-index ниже, чем у меню, но выше фона */
+  z-index: 1050;
+}
+
+.tiles__line {
+  display: flex;
+  transform: translateX(25%);
+  animation: slide 10s linear infinite;
+}
+
+.tiles__line:nth-child(2) {
+  animation-duration: 16s;
+}
+
+.tiles__line:nth-child(3) {
+  animation-duration: 22s;
+}
+
+@keyframes slide {
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+.tiles__line-img {
+  --tile-margin: 3vw;
+  flex: none;
+  width: 30vh;
+  height: 30vh;
+  margin: var(--tile-margin);
+  background-size: cover;
+  background-position: 50% 50%;
+  border-radius: 50%;
+}
+
+.tiles__line-img--large {
+  width: 100vh;
+  border-radius: 20vh;
+}
+
+.unbutton {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+}
+
+.unbutton.button-close {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  transform: translateY(-15px);
+}
+
+.unbutton.button-close:hover {
+  transform: scale(1.15);
+}
+
+.neon-arrow-path {
+  transition: stroke 0.3s ease;
+}
+
+.unbutton.button-close:hover .neon-arrow-path {
+  stroke: #fff;
+}

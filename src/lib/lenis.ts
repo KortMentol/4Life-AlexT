@@ -17,12 +17,12 @@ export const lenis = new Lenis({
   // ... все ваши детальные настройки ...
   orientation: "vertical",
   lerp: 0.08,
-  duration: 1.2,
+  duration: 1.0,
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   smooth: true,
   wheelMultiplier: 0.9,
   smoothWheel: true,
-  touchMultiplier: 1.0,
+  touchMultiplier: 0.9,
   smoothTouch: false,
   syncTouch: true,
   syncTouchLerp: 0.075,
@@ -39,11 +39,11 @@ export const lenis = new Lenis({
 
 // 2. Запускаем цикл анимации СРАЗУ ЖЕ при загрузке этого модуля
 // Это гарантирует, что `lenis` всегда будет 'живым'
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   const raf = (time: number) => {
     lenis.raf(time);
     requestAnimationFrame(raf);
-  }
+  };
   requestAnimationFrame(raf);
 }
 

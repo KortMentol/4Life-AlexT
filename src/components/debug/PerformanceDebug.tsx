@@ -1,8 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import styles from './PerformanceDebug.module.css';
-import { DeviceSpecs, detectDeviceSpecs, calculatePerformanceScore } from '@/utils/devicePerformance';
-import { Gauge, Smartphone, Wifi, Monitor, Info, ChevronDown, ChevronUp, X, Move, HardDrive, Bug, Cpu } from 'lucide-react';
-import { PieChart, Clock, Star, Zap } from 'lucide-react';
+import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
+import {
+  Bug,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Cpu,
+  Gauge,
+  HardDrive,
+  Info,
+  Monitor,
+  Move,
+  PieChart,
+  Smartphone,
+  Star,
+  Wifi,
+  X,
+  Zap,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import styles from "./PerformanceDebug.module.css";
 
 // Используем DeviceSpecs из единой системы
 
@@ -31,17 +47,17 @@ const PerformanceDebug: React.FC = () => {
   const [fps, setFps] = useState(0);
   const [frameTime, setFrameTime] = useState(0);
   const [staticScore, setStaticScore] = useState(0);
-  const [tier, setTier] = useState<'low' | 'medium' | 'high'>('medium');
+  const [tier, setTier] = useState<"low" | "medium" | "high">("medium");
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpecs>({
-    ram: 'Unknown',
+    ram: "Unknown",
     cpuCores: 0,
-    cpuFrequency: 'Unknown',
-    gpu: 'Unknown',
-    webglVersion: 'Unknown',
-    screenResolution: 'Unknown',
+    cpuFrequency: "Unknown",
+    gpu: "Unknown",
+    webglVersion: "Unknown",
+    screenResolution: "Unknown",
     pixelRatio: 1,
     touchSupport: false,
-    connectionType: 'Unknown'
+    connectionType: "Unknown",
   });
 
   useEffect(() => {
@@ -60,13 +76,13 @@ const PerformanceDebug: React.FC = () => {
       setStaticScore(score);
       setTier(detectedTier);
 
-      console.log('📱 PerformanceDebug initialized:', {
+      console.log("📱 PerformanceDebug initialized:", {
         score,
         tier: detectedTier,
-        specs
+        specs,
       });
     } catch (error) {
-      console.error('❌ Error initializing PerformanceDebug:', error);
+      console.error("❌ Error initializing PerformanceDebug:", error);
     }
 
     const performanceLoop = () => {
@@ -104,7 +120,7 @@ const PerformanceDebug: React.FC = () => {
       return;
     }
 
-    setIsCompact(prev => !prev);
+    setIsCompact((prev) => !prev);
   };
 
   const dragRef = React.useRef<HTMLDivElement>(null);
@@ -118,8 +134,8 @@ const PerformanceDebug: React.FC = () => {
     const element = dragRef.current;
     if (!element) return;
 
-    const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
+    const clientX = "touches" in e ? e.touches[0]?.clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0]?.clientY : e.clientY;
 
     if (clientX === undefined || clientY === undefined) return;
 
@@ -131,18 +147,18 @@ const PerformanceDebug: React.FC = () => {
     isDragging.current = true;
     hasDragged.current = false;
 
-    element.classList.add('dragging');
+    element.classList.add("dragging");
 
-    element.style.position = 'fixed';
+    element.style.position = "fixed";
     element.style.left = `${rect.left}px`;
     element.style.top = `${rect.top}px`;
-    element.style.right = 'auto';
-    element.style.transform = 'none';
+    element.style.right = "auto";
+    element.style.transform = "none";
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('touchmove', handleMouseMove, { passive: false });
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('touchend', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("touchmove", handleMouseMove, { passive: false });
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchend", handleMouseUp);
 
     e.preventDefault();
     e.stopPropagation();
@@ -156,8 +172,8 @@ const PerformanceDebug: React.FC = () => {
     const element = dragRef.current;
     if (!element) return;
 
-    const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
+    const clientX = "touches" in e ? e.touches[0]?.clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0]?.clientY : e.clientY;
 
     if (clientX === undefined || clientY === undefined) return;
 
@@ -167,58 +183,61 @@ const PerformanceDebug: React.FC = () => {
     const newX = elementPos.current.x + deltaX;
     const newY = elementPos.current.y + deltaY;
 
-    element.style.position = 'fixed';
+    element.style.position = "fixed";
     element.style.left = `${newX}px`;
     element.style.top = `${newY}px`;
-    element.style.right = 'auto';
-    element.style.transform = 'none';
+    element.style.right = "auto";
+    element.style.transform = "none";
 
     startPos.current = { x: clientX, y: clientY };
     elementPos.current = { x: newX, y: newY };
   }, []);
 
-  const handleMouseUp = React.useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isDragging.current) return;
+  const handleMouseUp = React.useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging.current) return;
 
-    const element = dragRef.current;
-    if (element) {
-      element.classList.remove('dragging');
+      const element = dragRef.current;
+      if (element) {
+        element.classList.remove("dragging");
 
-      const rect = element.getBoundingClientRect();
-      elementPos.current = { x: rect.left, y: rect.top };
-    }
+        const rect = element.getBoundingClientRect();
+        elementPos.current = { x: rect.left, y: rect.top };
+      }
 
-    if (hasDragged.current) {
-      wasDragging.current = true;
-      setTimeout(() => {
-        wasDragging.current = false;
-      }, 0);
-    }
+      if (hasDragged.current) {
+        wasDragging.current = true;
+        setTimeout(() => {
+          wasDragging.current = false;
+        }, 0);
+      }
 
-    isDragging.current = false;
+      isDragging.current = false;
 
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('touchmove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-    document.removeEventListener('touchend', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchend", handleMouseUp);
 
-    e.preventDefault();
-    e.stopPropagation();
-  }, [handleMouseMove]);
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    [handleMouseMove]
+  );
 
   React.useEffect(() => {
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('touchmove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-    document.removeEventListener('touchend', handleMouseUp);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("touchmove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+    document.removeEventListener("touchend", handleMouseUp);
   }, [handleMouseMove, handleMouseUp]);
 
   React.useEffect(() => {
     const element = dragRef.current;
     if (element) {
-      element.style.position = 'fixed';
-      element.style.top = '4rem';
-      element.style.right = '1rem';
+      element.style.position = "fixed";
+      element.style.top = "4rem";
+      element.style.right = "1rem";
     }
   }, []);
 
@@ -232,23 +251,23 @@ const PerformanceDebug: React.FC = () => {
 
   if (!isVisible) return null;
   return (
-    <div 
+    <div
       ref={dragRef}
-      className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ''}`}
+      className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`}
       onClick={toggleCompactMode}
     >
-      <div 
-        className={styles.debugHeader}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleMouseDown}
-      >
+      <div className={styles.debugHeader} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
         <div className={styles.dragHandle} data-drag-handle>
           <Move size={16} className={styles.dragIcon} />
         </div>
         {isCompact ? (
           <div className={styles.headerMetricsCompact}>
-            <div className={styles.metricItem} title={`FPS: ${fps}`}><span>FPS:</span> <span className={getValueColor(fps)}>{fps}</span></div>
-            <div className={styles.metricItem} title={`Frame Time: ${frameTime}ms`}><span>Frame:</span> <span>{frameTime}ms</span></div>
+            <div className={styles.metricItem} title={`FPS: ${fps}`}>
+              <span>FPS:</span> <span className={getValueColor(fps)}>{fps}</span>
+            </div>
+            <div className={styles.metricItem} title={`Frame Time: ${frameTime}ms`}>
+              <span>Frame:</span> <span>{frameTime}ms</span>
+            </div>
           </div>
         ) : (
           <div className={styles.headerTitle}>
@@ -262,7 +281,12 @@ const PerformanceDebug: React.FC = () => {
               <Info size={18} />
             </button>
           )}
-          <button onClick={(e) => { e.stopPropagation(); setIsCompact(p => !p); }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCompact((p) => !p);
+            }}
+          >
             {isCompact ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
           <button onClick={() => setIsVisible(false)} title="Закрыть дебаггер">
@@ -275,68 +299,110 @@ const PerformanceDebug: React.FC = () => {
         <div className={styles.debugBody}>
           <div className={styles.metricsGrid}>
             <div className={styles.metricItem} title={`Frames Per Second: ${fps}`}>
-              <div className={styles.metricIcon}><Gauge size={14} /></div>
+              <div className={styles.metricIcon}>
+                <Gauge size={14} />
+              </div>
               <span className={styles.metricLabel}>FPS:</span>
               <span className={`${styles.metricValue} ${getValueColor(fps)}`}>{fps}</span>
             </div>
             <div className={styles.metricItem} title={`Frame Time: ${frameTime}ms`}>
-              <div className={styles.metricIcon}><Clock size={14} /></div>
+              <div className={styles.metricIcon}>
+                <Clock size={14} />
+              </div>
               <span className={styles.metricLabel}>Frame:</span>
               <span className={styles.metricValue}>{frameTime}ms</span>
             </div>
-            <div className={styles.metricItem} title={`Static Performance Score: ${staticScore} (${tier.toUpperCase()})`}>
-              <div className={styles.metricIcon}><Star size={14} /></div>
+            <div
+              className={styles.metricItem}
+              title={`Static Performance Score: ${staticScore} (${tier.toUpperCase()})`}
+            >
+              <div className={styles.metricIcon}>
+                <Star size={14} />
+              </div>
               <span className={styles.metricLabel}>Score:</span>
-              <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>{staticScore} ({tier.toUpperCase()})</span>
+              <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>
+                {staticScore} ({tier.toUpperCase()})
+              </span>
             </div>
           </div>
           <div className={styles.sectionDivider} />
           <div className={styles.deviceInfoSection}>
             <div className={styles.infoRow} title={`RAM: ${deviceSpecs.ram}`}>
-              <div className={styles.infoIcon}><HardDrive size={14} /></div>
+              <div className={styles.infoIcon}>
+                <HardDrive size={14} />
+              </div>
               <strong>RAM:</strong>
               <span className={styles.infoValue}>{deviceSpecs.ram}</span>
             </div>
             <div className={styles.infoRow} title={`CPU: ${deviceSpecs.cpuCores} cores @ ${deviceSpecs.cpuFrequency}`}>
-              <div className={styles.infoIcon}><Cpu size={14} /></div>
+              <div className={styles.infoIcon}>
+                <Cpu size={14} />
+              </div>
               <strong>CPU:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.cpuCores} cores @ {deviceSpecs.cpuFrequency}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.cpuCores} cores @ {deviceSpecs.cpuFrequency}
+              </span>
             </div>
             <div className={styles.infoRow} title={`GPU: ${deviceSpecs.gpu}`}>
-              <div className={styles.infoIcon}><PieChart size={14} /></div>
+              <div className={styles.infoIcon}>
+                <PieChart size={14} />
+              </div>
               <strong>GPU:</strong>
               <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
             </div>
             <div className={styles.infoRow} title={`WebGL: ${deviceSpecs.webglVersion}`}>
-              <div className={styles.infoIcon}><Zap size={14} /></div>
+              <div className={styles.infoIcon}>
+                <Zap size={14} />
+              </div>
               <strong>WebGL:</strong>
               <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
             </div>
             <div className={styles.infoRow} title={`Screen: ${deviceSpecs.screenResolution}`}>
-              <div className={styles.infoIcon}><Monitor size={14} /></div>
+              <div className={styles.infoIcon}>
+                <Monitor size={14} />
+              </div>
               <strong>Screen:</strong>
               <span className={styles.infoValue}>{deviceSpecs.screenResolution}</span>
             </div>
-            <div className={styles.infoRow} title={`Touch Support: ${deviceSpecs.touchSupport ? 'Yes' : 'No'}`}>
-              <div className={styles.infoIcon}><Smartphone size={14} /></div>
+            <div className={styles.infoRow} title={`Touch Support: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}>
+              <div className={styles.infoIcon}>
+                <Smartphone size={14} />
+              </div>
               <strong>Touch:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.touchSupport ? 'Yes' : 'No'}</span>
+              <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>
             </div>
             <div className={styles.infoRow} title={`Connection: ${deviceSpecs.connectionType}`}>
-              <div className={styles.infoIcon}><Wifi size={14} /></div>
+              <div className={styles.infoIcon}>
+                <Wifi size={14} />
+              </div>
               <strong>Connection:</strong>
               <span className={styles.infoValue}>{deviceSpecs.connectionType}</span>
             </div>
           </div>
-          
+
           {showInfo && (
             <div className={styles.infoModal}>
               <div className={styles.infoContent}>
                 <h4>Performance Metrics Explained</h4>
-                <p><strong><Gauge size={14} /> FPS:</strong> Frames per second. Higher is better.</p>
-                <p><strong><Clock size={14} /> Frame:</strong> Time to render a frame. Lower is better.</p>
-                
-                <p><strong><Star size={14} /> Score:</strong> Overall performance score based on device specs.</p>
+                <p>
+                  <strong>
+                    <Gauge size={14} /> FPS:
+                  </strong>{" "}
+                  Frames per second. Higher is better.
+                </p>
+                <p>
+                  <strong>
+                    <Clock size={14} /> Frame:
+                  </strong>{" "}
+                  Time to render a frame. Lower is better.
+                </p>
+
+                <p>
+                  <strong>
+                    <Star size={14} /> Score:
+                  </strong>{" "}
+                  Overall performance score based on device specs.
+                </p>
                 <button onClick={() => setShowInfo(false)}>Close</button>
               </div>
             </div>

@@ -1,3 +1,14 @@
+/**
+ * @module src/styles/base.css
+ * @description Этот файл подключает базовые слои Tailwind CSS, которые необходимы для работы всего фреймворка.
+ * Он сбрасывает стили браузера по умолчанию и закладывает фундамент для утилит Tailwind.
+ * @author Kort
+ * @version 1.0.0
+ * @see https://tailwindcss.com/docs/functions-and-directives#tailwind
+ * @usage
+ * 1. `src/main.tsx`: Импортируется самым первым из всех стилей, чтобы гарантировать правильный каскад и работу Tailwind.
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

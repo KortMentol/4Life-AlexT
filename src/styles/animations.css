@@ -1,19 +1,16 @@
 /**
- * Глобальные CSS-анимации для сайта
+ * @module src/styles/animations.css
+ * @description Глобальная библиотека готовых CSS-анимаций и утилитарных классов для их применения.
+ * Содержит эффекты появления, затухания, градиентные переливы и другие, которые можно легко подключить к любому элементу.
+ * @author Kort
+ * @version 1.2.0
+ * @usage
+ * 1. `src/main.tsx`: Импортируется глобально, что делает все анимации доступными в проекте.
+ * 2. Утилитарные классы: Применяются напрямую к JSX-элементам для активации анимации.
+ *    - `.animate-aurora`: Используется в `src/components/magicui/aurora-text.tsx` для создания эффекта северного сияния на тексте.
+ *    - Другие классы (например, `.animate-fade-in`, `.animate-slide-in-bottom`) готовы к использованию в любых компонентах.
+ * @see src/components/magicui/aurora-text.tsx
  */
-
-/* Анимация пульсации свечения */
-@keyframes glow-pulse {
-  0% {
-    box-shadow: 0 0 5px var(--primary);
-  }
-  50% {
-    box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary);
-  }
-  100% {
-    box-shadow: 0 0 5px var(--primary);
-  }
-}
 
 /* Анимация появления элементов */
 @keyframes fade-in {
@@ -109,7 +106,8 @@
 
 /* Анимация пульсации */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -119,20 +117,29 @@
 
 /* Анимация дрожания */
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-5px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(5px);
   }
 }
 
 /* Анимация волны */
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   25% {
@@ -148,7 +155,8 @@
 
 /* Анимация мерцания */
 @keyframes blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -223,12 +231,7 @@
 }
 
 .animate-shine {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.2) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shine 2s infinite;
 }
@@ -250,23 +253,13 @@
 }
 
 .animate-gradient {
-  background: linear-gradient(
-    90deg,
-    var(--primary) 0%,
-    var(--secondary) 50%,
-    var(--primary) 100%
-  );
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 50%, var(--primary) 100%);
   background-size: 200% 100%;
   animation: gradient 5s ease infinite;
 }
 
 .animate-aurora {
-  background: linear-gradient(
-    90deg,
-    var(--primary) 0%,
-    var(--secondary) 50%,
-    var(--primary) 100%
-  );
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 50%, var(--primary) 100%);
   background-size: 200% 200%;
   animation: aurora 8s ease-in-out infinite alternate;
 }

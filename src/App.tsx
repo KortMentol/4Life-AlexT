@@ -1,18 +1,20 @@
+// === Файл: src/App.tsx (ФИНАЛЬНАЯ ВЕРСИЯ С УЛУЧШЕННОЙ ЛОГИКОЙ СКРОЛЛА) ===
+
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import PerformanceDebug from "./components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
+import Header from "./components/layout/Header";
 import Layout from "./components/layout/Layout";
+import TheodoreMenu from "./components/layout/TheodoreMenu";
 import RouteChangeHandler from "./components/utils/RouteChangeHandler";
 import { FluidProvider } from "./context/FluidProvider";
-import { useMobileMenuState } from "./hooks/useMobileMenuState";
-import useResetScrollOnNavigation from "./hooks/useResetScrollOnNavigation";
+
 import useScrollRestoration from "./hooks/useScrollRestoration";
 import { lenis, updateScroll } from "./lib/lenis";
 
-// Ленивая загрузка страниц, но управление предзагрузкой происходит в компонентах
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProductsPage = lazy(() => import("./pages/ProductsPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
@@ -22,8 +24,14 @@ const PartnershipPage = lazy(() => import("./pages/PartnershipPage"));
 const HowToBuyPage = lazy(() => import("./pages/HowToBuyPage"));
 
 function App() {
-  const { closeMobileMenu } = useMobileMenuState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("app-mounted"));
+  }, []);
 
   useEffect(() => {
     const checkDevice = () => setIsMobile(window.innerWidth < 768);
@@ -32,74 +40,64 @@ function App() {
   }, []);
 
   useScrollRestoration();
-  useResetScrollOnNavigation();
 
   useEffect(() => {
-    const isMobileDevice = window.innerWidth < 768;
-    const heroImage = isMobileDevice
-      ? "/src/assets/images/backgrounds/bg-hero-Mobile.webp"
-      : "/src/assets/images/backgrounds/bg-hero-PC.webp";
-
-    const imagesToPreload = [heroImage];
-    let loadedCount = 0;
-
-    const onAssetsLoaded = () => {
-      const preloader = document.getElementById("preloader");
-      if (preloader) {
-        preloader.classList.add("hidden");
-        setTimeout(() => {
-          preloader.remove();
-        }, 500);
-      }
-    };
-
-    if (imagesToPreload.length > 0) {
-      imagesToPreload.forEach((src) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = img.onerror = () => {
-          loadedCount++;
-          if (loadedCount === imagesToPreload.length) {
-            setTimeout(onAssetsLoaded, 300);
-          }
-        };
-      });
-    } else {
-      onAssetsLoaded();
+    if (location.key !== "default") {
+      lenis.scrollTo(0, { immediate: true });
     }
-  }, []);
+  }, [location.pathname]);
 
   const wasHorizontalSwipe = useRef(false);
 
+  // ▼▼▼ НАЧАЛО ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▼▼▼
   useEffect(() => {
+    if (isMenuOpen) {
+      lenis.stop();
+      return;
+    } else {
+      lenis.start();
+    }
+
     let touchStartX = 0;
     let touchStartY = 0;
     let scrollDirectionDetermined = false;
 
+    // --- НАСТРОЙКИ ЧУВСТВИТЕЛЬНОСТИ ---
+    // Порог, после которого начинаем определять свайп (в пикселях)
+    const SENSITIVITY_THRESHOLD = 5;
+    // Коэффициент смещения в пользу вертикального скролла.
+    // 1.0 = строгие 45°.
+    // 1.7 = скролл заблокируется, только если горизонтальный свайп в 1.7 раза длиннее вертикального.
+    const HORIZONTAL_SWIPE_BIAS = 1.7;
+
     const handleTouchStart = (e: TouchEvent) => {
+      if (isMenuOpen) return;
       const touch = e.touches[0];
       if (!touch) return;
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       scrollDirectionDetermined = false;
-      wasHorizontalSwipe.current = false; // Сбрасываем флаг в начале каждого касания
+      wasHorizontalSwipe.current = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (isMenuOpen) return;
       const touch = e.touches[0];
       if (!touch || scrollDirectionDetermined) return;
 
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
-      const sensitivityThreshold = 5;
 
-      if (deltaX > sensitivityThreshold || deltaY > sensitivityThreshold) {
-        if (deltaX > deltaY) {
-          // Это горизонтальный свайп
+      if (deltaX > SENSITIVITY_THRESHOLD || deltaY > SENSITIVITY_THRESHOLD) {
+        // УЛУЧШЕННОЕ УСЛОВИЕ:
+        // Блокируем вертикальный скролл, только если горизонтальное движение
+        // ЗНАЧИТЕЛЬНО превышает вертикальное.
+        if (deltaX > deltaY * HORIZONTAL_SWIPE_BIAS) {
+          // Это точно горизонтальный свайп
           lenis.stop();
-          wasHorizontalSwipe.current = true; // Устанавливаем флаг
+          wasHorizontalSwipe.current = true;
         } else {
-          // Это вертикальный скролл
+          // Это вертикальный скролл (или диагональный, но ближе к вертикальному)
           lenis.start();
         }
         scrollDirectionDetermined = true;
@@ -107,15 +105,11 @@ function App() {
     };
 
     const handleTouchEnd = () => {
-      // Если предыдущий свайп был горизонтальным, мы даем микро-задержку
-      // перед тем, как снова включить скролл. Этого достаточно, чтобы
-      // "погасить" остаточный импульс по оси Y.
+      if (isMenuOpen) return;
+      // Используем небольшую задержку, чтобы избежать конфликтов с кликами
       if (wasHorizontalSwipe.current) {
-        setTimeout(() => {
-          lenis.start();
-        }, 50); // 50мс - небольшая, но эффективная задержка
+        setTimeout(() => lenis.start(), 50);
       } else {
-        // Для обычного вертикального скролла включаем сразу
         lenis.start();
       }
     };
@@ -131,8 +125,8 @@ function App() {
       document.removeEventListener("touchend", handleTouchEnd);
       document.removeEventListener("touchcancel", handleTouchEnd);
     };
-  }, []);
-  // --- КОНЕЦ ИЗМЕНЕНИЯ 2 ---
+  }, [isMenuOpen]);
+  // ▲▲▲ КОНЕЦ ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▲▲▲
 
   useEffect(() => {
     window.addEventListener("load", updateScroll);
@@ -147,8 +141,14 @@ function App() {
   return (
     <ThemeProvider>
       <ProductListProvider>
-        <RouteChangeHandler onRouteChange={closeMobileMenu} />
+        <RouteChangeHandler />
         <Suspense fallback={null}>
+          <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          <TheodoreMenu
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            navigate={navigate} // Передаем функцию navigate напрямую
+          />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route
