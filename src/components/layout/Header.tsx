@@ -19,9 +19,10 @@ import ProductListIcon from "../ui/ProductListIcon";
 interface HeaderProps {
   isMenuOpen: boolean;
   setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isScrollingLocked: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
+const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingLocked }) => {
   const headerTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,12 +39,10 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   }, []);
 
   const { headerY } = useNativeScroll({
-    // <-- ИСПОЛЬЗУЕМ ПРАВИЛЬНЫЙ ХУК
     headerHeight,
     topOffset: 8,
-    disabled: isMenuOpen,
+    disabled: isMenuOpen || isScrollingLocked,
   });
- 
 
   useEffect(() => {
     if (!headerRef.current) return;

@@ -27,25 +27,10 @@
  *   </header>
  * );
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { lenis } from '../lib/lenis'; // Импортируем экземпляр lenis
 
-/**
- * Параметры для настройки хука useScrollDirection
- * @interface UseScrollDirectionOptions
- */
-interface UseScrollDirectionOptions {
-  /** 
-   * Минимальное изменение позиции скролла (в пикселях) для определения направления
-   * Помогает избежать ложных срабатываний при небольших колебаниях скролла
-   * @default 10
-   */
-  threshold?: number;
-  /** 
-   * Начальное направление скролла
-   * @default null
-   */
-  initialDirection?: 'up' | 'down' | null;
-}
+
 
 /**
  * Результат работы хука useScrollDirection
@@ -71,70 +56,52 @@ interface UseScrollDirectionReturn {
  * @param options - Объект с настройками
  * @returns Объект с информацией о текущем состоянии прокрутки
  */
-export const useScrollDirection = ({
-  threshold = 10,
-  initialDirection = null
-}: UseScrollDirectionOptions = {}): UseScrollDirectionReturn => {
+export const useScrollDirection = (): UseScrollDirectionReturn => {
   // Состояния для хранения информации о скролле
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(initialDirection);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>('down');
   const [scrollY, setScrollY] = useState<number>(0);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
-  
-  // Сохраняем предыдущую позицию скролла для определения направления
-  const lastScrollY = useRef<number>(0);
-  
+
   useEffect(() => {
-    /**
-     * Обновляет информацию о скролле при прокрутке страницы
-     */
-    const updateScrollDirection = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Проверяем, превышает ли изменение скролла пороговое значение
-      if (Math.abs(currentScrollY - lastScrollY.current) < threshold) {
-        return;
-      }
-      
+    if (!lenis) return;
+
+    // Функция-обработчик, которую будет вызывать lenis
+    const handleScroll = (e: any) => {
+      const currentScrollY = e.scroll;
+
       // Обновляем направление скролла
-      setScrollDirection(currentScrollY > lastScrollY.current ? 'down' : 'up');
+      setScrollDirection(e.direction === 1 ? 'down' : 'up');
       // Обновляем текущую позицию скролла
       setScrollY(currentScrollY);
       // Определяем, прокручена ли страница ниже порога
       setIsScrolled(currentScrollY > 50);
       // Определяем, находимся ли мы в самом верху страницы
-      setIsAtTop(currentScrollY <= 0);
+      setIsAtTop(currentScrollY <= 1); // Небольшой допуск для lenis
       
-      // Определяем, находимся ли мы внизу страницы
-      // Добавляем небольшой запас (5px) для компенсации погрешностей округления
-      const isBottom = 
-        window.innerHeight + currentScrollY >= 
-        document.documentElement.scrollHeight - 5;
-      
+      // Определяем, находимся ли мы внизу страницы, используя данные lenis
+      const isBottom = currentScrollY >= e.limit - 1; // e.limit - максимальная позиция скролла
       setIsAtBottom(isBottom);
       
-      // Вычисляем прогресс скролла (0 - верх, 1 - низ)
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = scrollHeight > 0 ? currentScrollY / scrollHeight : 0;
-      setScrollProgress(progress);
-      
-      // Сохраняем текущую позицию для следующего вызова
-      lastScrollY.current = currentScrollY;
+      // Используем прогресс напрямую из lenis
+      setScrollProgress(e.progress);
     };
-    
-    // Добавляем слушатель события скролла
-    window.addEventListener('scroll', updateScrollDirection, { passive: true });
-    
-    // Вызываем функцию один раз для инициализации
-    updateScrollDirection();
-    
-    // Удаляем слушатель при размонтировании
+
+    // Подписываемся на событие 'scroll' от lenis
+    lenis.on('scroll', handleScroll);
+
+    // Принудительно вызываем обработчик для инициализации начального состояния
+    if (lenis.scroll) {
+      handleScroll(lenis);
+    }
+
+    // Отписываемся от события при размонтировании компонента
     return () => {
-      window.removeEventListener('scroll', updateScrollDirection);
+      lenis.off('scroll', handleScroll);
     };
-  }, [threshold]);
+  }, []); // Пустой массив зависимостей, т.к. lenis - синглтон
   
   return { 
     scrollDirection, 

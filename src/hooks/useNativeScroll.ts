@@ -1,6 +1,7 @@
-import { useScroll, useSpring } from "framer-motion";
+import { useScroll, useSpring, useMotionValue } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
+import { scrollLockState } from "../lib/scrollLockState"; // <-- ИМПОРТ
 
 interface UseNativeScrollOptions {
   headerHeight: number;
@@ -21,13 +22,26 @@ export type { UseNativeScrollOptions };
  */
 export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false }: UseNativeScrollOptions) {
   const { scrollY } = useScroll();
-  const headerY = useSpring(0, { stiffness: 400, damping: 40 });
+  // --- ИЗМЕНЕНИЕ: Создаем MotionValue и Spring только ОДИН РАЗ ---
+  const headerY = useMotionValue(0);
+  const headerYSmooth = useSpring(headerY, { stiffness: 400, damping: 40 });
 
-  const startY = useRef(0);
+
   const downScrollCount = useRef(0);
   const downScrollTimer = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
   const isTouching = useRef(false);
+  const prevY = useRef(0);
+  const disabledRef = useRef(disabled);
+
+  useEffect(() => {
+    disabledRef.current = disabled;
+    if (disabled) {
+      // Если выключено, просто останавливаем любую текущую анимацию
+      headerY.stop();
+      headerYSmooth.stop();
+    }
+  }, [disabled, headerY, headerYSmooth]);
 
   const totalHeaderHeight = headerHeight + topOffset * 2;
 
@@ -36,6 +50,7 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
     if (isMobile || disabled) return;
 
     const handleWheel = (event: WheelEvent) => {
+      if (disabledRef.current) return;
       const direction = event.deltaY > 0 ? "down" : "up";
 
       if (direction === "down") {
@@ -45,7 +60,7 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
 
         // Скрываем, если сделано 2+ скролла и мы не вверху страницы
         if (downScrollCount.current >= 2 && window.scrollY > totalHeaderHeight) {
-          headerY.set(-totalHeaderHeight);
+          headerYSmooth.set(-totalHeaderHeight);
         }
 
         // Устанавливаем таймер для сброса счетчика, если будет пауза
@@ -57,7 +72,7 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
         // При скролле вверх немедленно показываем хедер и сбрасываем счетчик
         if (downScrollTimer.current) clearTimeout(downScrollTimer.current);
         downScrollCount.current = 0;
-        headerY.set(0);
+        headerYSmooth.set(0);
       }
     };
 
@@ -73,38 +88,51 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
   useEffect(() => {
     if (!isMobile || disabled) return;
 
-    let startHeaderY = 0;
-
     const handleTouchStart = (event: TouchEvent) => {
+      if (disabledRef.current) return;
       const touch = event.touches[0];
       if (!touch) return;
 
       isTouching.current = true;
-      startY.current = touch.clientY;
-      startHeaderY = headerY.get();
+      prevY.current = touch.clientY;
       headerY.stop();
     };
 
-    const handleTouchMove = (event: TouchEvent) => {
+            const handleTouchMove = (event: TouchEvent) => {
+      // Если скролл заблокирован ИЛИ хук отключен, ничего не делаем
+      if (disabledRef.current || scrollLockState.isLocked) return;
       const touch = event.touches[0];
       if (!isTouching.current || !touch) return;
 
-      const deltaY = touch.clientY - startY.current;
-      const newY = startHeaderY + deltaY;
-      headerY.set(Math.max(-totalHeaderHeight, Math.min(0, newY)));
+      const deltaY = touch.clientY - prevY.current;
+      prevY.current = touch.clientY;
+
+      const currentY = headerY.get();
+      const newY = currentY + deltaY;
+
+      // Жестко ограничиваем позицию в пределах от 0 до -totalHeaderHeight
+      const clampedY = Math.max(-totalHeaderHeight, Math.min(0, newY));
+
+      headerY.set(clampedY);
     };
 
     const handleTouchEnd = () => {
+      if (disabledRef.current) return;
       isTouching.current = false;
       const velocity = scrollY.getVelocity();
       const currentY = headerY.get();
 
-      // Логика "прилипания" к краям после отпускания пальца
-      // velocity > 0: скролл вниз (палец вверх), velocity < 0: скролл вверх (палец вниз)
-      if (velocity > 500 || (velocity >= 0 && currentY < -totalHeaderHeight / 2)) {
-        headerY.set(-totalHeaderHeight);
+      // Ограничиваем Y в пределах от 0 до -totalHeaderHeight
+      const clampedY = Math.max(-totalHeaderHeight, Math.min(0, currentY));
+      headerY.set(clampedY);
+
+      // Логика "прилипания" к краям
+      if (Math.abs(velocity) < 100) {
+        // Если скорость низкая, прилипаем к ближайшему краю
+        headerY.set(clampedY < -totalHeaderHeight / 2 ? -totalHeaderHeight : 0);
       } else {
-        headerY.set(0);
+        // Если скорость высокая, анимируем в направлении движения
+        headerY.set(velocity > 0 ? -totalHeaderHeight : 0);
       }
     };
 
@@ -121,12 +149,7 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
     };
   }, [isMobile, disabled, headerY, scrollY, totalHeaderHeight]);
 
-  // Возвращаем хедер в исходное положение, если хук отключается
-  useEffect(() => {
-    if (disabled) {
-      headerY.set(0);
-    }
-  }, [disabled, headerY]);
 
-  return { headerY };
+
+  return { headerY: headerYSmooth };
 }

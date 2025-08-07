@@ -6,8 +6,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import FluidEffect from "../effects/FluidEffect";
 import ScrollToTopButton from "../ui/ScrollToTopButton";
 import Footer from "./Footer";
-// Header больше не импортируется здесь
-
 const Layout: React.FC = () => {
   const location = useLocation();
 

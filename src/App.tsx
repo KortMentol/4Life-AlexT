@@ -2,7 +2,7 @@
 
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useState, useEffect, useRef } from "react";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import PerformanceDebug from "./components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
@@ -14,18 +14,22 @@ import { FluidProvider } from "./context/FluidProvider";
 
 import useScrollRestoration from "./hooks/useScrollRestoration";
 import { lenis, updateScroll } from "./lib/lenis";
+import { scrollLockState } from "./lib/scrollLockState"; // <-- ИМПОРТ
 
-const HomePage = lazy(() => import("./pages/HomePage"));
-const ProductsPage = lazy(() => import("./pages/ProductsPage"));
-const AboutPage = lazy(() => import("./pages/AboutPage"));
-const AboutMePage = lazy(() => import("./pages/AboutMePage"));
-const ContactPage = lazy(() => import("./pages/ContactPage"));
-const PartnershipPage = lazy(() => import("./pages/PartnershipPage"));
-const HowToBuyPage = lazy(() => import("./pages/HowToBuyPage"));
+const HomePage = React.lazy(() => import("./pages/HomePage"));
+const ProductsPage = React.lazy(() => import("./pages/ProductsPage"));
+const AboutPage = React.lazy(() => import("./pages/AboutPage"));
+const AboutMePage = React.lazy(() => import("./pages/AboutMePage"));
+const ContactPage = React.lazy(() => import("./pages/ContactPage"));
+const PartnershipPage = React.lazy(() => import("./pages/PartnershipPage"));
+const HowToBuyPage = React.lazy(() => import("./pages/HowToBuyPage"));
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrollingLocked, setIsScrollingLocked] = useState(false);
+  const isScrollingLockedRef = useRef(isScrollingLocked);
+  isScrollingLockedRef.current = isScrollingLocked;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -47,7 +51,7 @@ function App() {
     }
   }, [location.pathname]);
 
-  const wasHorizontalSwipe = useRef(false);
+
 
   // ▼▼▼ НАЧАЛО ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▼▼▼
   useEffect(() => {
@@ -77,7 +81,6 @@ function App() {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       scrollDirectionDetermined = false;
-      wasHorizontalSwipe.current = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -94,11 +97,18 @@ function App() {
         // ЗНАЧИТЕЛЬНО превышает вертикальное.
         if (deltaX > deltaY * HORIZONTAL_SWIPE_BIAS) {
           // Это точно горизонтальный свайп
-          lenis.stop();
-          wasHorizontalSwipe.current = true;
+                    if (!isScrollingLockedRef.current) {
+            lenis.stop();
+            scrollLockState.isLocked = true; // <-- МГНОВЕННАЯ БЛОКИРОВКА
+            setIsScrollingLocked(true);
+          }
         } else {
           // Это вертикальный скролл (или диагональный, но ближе к вертикальному)
-          lenis.start();
+                    if (isScrollingLockedRef.current) {
+            lenis.start();
+            scrollLockState.isLocked = false; // <-- МГНОВЕННАЯ РАЗБЛОКИРОВКА
+            setIsScrollingLocked(false);
+          }
         }
         scrollDirectionDetermined = true;
       }
@@ -106,11 +116,13 @@ function App() {
 
     const handleTouchEnd = () => {
       if (isMenuOpen) return;
-      // Используем небольшую задержку, чтобы избежать конфликтов с кликами
-      if (wasHorizontalSwipe.current) {
-        setTimeout(() => lenis.start(), 50);
-      } else {
-        lenis.start();
+
+            if (isScrollingLockedRef.current) {
+        setTimeout(() => {
+          lenis.start();
+          scrollLockState.isLocked = false; // <-- МГНОВЕННАЯ РАЗБЛОКИРОВКА
+          setIsScrollingLocked(false);
+        }, 50); // Небольшая задержка для завершения свайпа
       }
     };
 
@@ -143,7 +155,11 @@ function App() {
       <ProductListProvider>
         <RouteChangeHandler />
         <Suspense fallback={null}>
-          <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          <Header
+            isMenuOpen={isMenuOpen}
+            setIsMenuOpen={setIsMenuOpen}
+            isScrollingLocked={isScrollingLocked}
+          />
           <TheodoreMenu
             isOpen={isMenuOpen}
             onClose={() => setIsMenuOpen(false)}
