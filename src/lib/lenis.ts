@@ -9,28 +9,14 @@
  * Этот модуль теперь автоматически запускает цикл анимации. Просто импортируйте `lenis` или любую утилиту.
  * import { lenis, scrollTo } from '@/lib/lenis';
  */
-import Lenis from "@studio-freight/lenis";
+import Lenis from "lenis";
 import { LenisOptions, Lenis as LenisType } from "./lenis.types";
 
 // 1. Создаем и экспортируем ЕДИНСТВЕННЫЙ экземпляр Lenis
 export const lenis = new Lenis({
-  // ... все ваши детальные настройки ...
-  orientation: "vertical",
-  lerp: 0.08,
-  duration: 1.0,
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  smooth: true,
-  wheelMultiplier: 0.9,
-  smoothWheel: true,
-  touchMultiplier: 0.9,
-  smoothTouch: false,
+
   syncTouch: true,
-  syncTouchLerp: 0.075,
-  touchInertiaMultiplier: 25,
-  prevent: false,
-  normalizeWheel: true,
-  infinite: false,
-  autoResize: true,
+
 } as LenisOptions) as any as LenisType;
 
 // Добавляем кастомное свойство, если оно нужно для вашего типа

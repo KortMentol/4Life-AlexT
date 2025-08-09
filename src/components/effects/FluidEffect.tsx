@@ -5,6 +5,16 @@ import { useTheme } from "@/hooks/useTheme";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import WebGLFluidEnhanced from "webgl-fluid-enhanced";
 
+const TRANSITION_START = "menu-transition-start";
+const TRANSITION_COMPLETE = "menu-transition-complete";
+const runIdle = (cb: () => void) => {
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(cb);
+  } else {
+    setTimeout(cb, 0);
+  }
+};
+
 // --- РУБИЛЬНИК ЭФФЕКТА ---
 // Если true = эффект выключен, если false = эффект включен.
 const DISABLE_FLUID_EFFECT = false;
@@ -315,6 +325,25 @@ const FluidEffect: React.FC = () => {
       mainElement.removeEventListener("mousemove", throttledMouseMoveHandler as EventListener);
     };
   }, [startAnimation, scheduleStopAnimation]);
+
+  // Пауза/возобновление симуляции на время перехода меню
+  useEffect(() => {
+    const onStart = () => {
+      if (simulationRef.current && isRunningRef.current) {
+        simulationRef.current.stop();
+        isRunningRef.current = false;
+      }
+    };
+    const onComplete = () => {
+      runIdle(() => startAnimation());
+    };
+    window.addEventListener(TRANSITION_START, onStart as EventListener);
+    window.addEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+    return () => {
+      window.removeEventListener(TRANSITION_START, onStart as EventListener);
+      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+    };
+  }, [startAnimation]);
 
   return (
     <div

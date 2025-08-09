@@ -18,6 +18,18 @@ import img7 from "../../../assets/images/MobileMenu/7.jpg";
 import img8 from "../../../assets/images/MobileMenu/8.jpg";
 import img9 from "../../../assets/images/MobileMenu/9.jpg";
 
+// === Константы таймингов анимации волн (секунды) ===
+// Используются для метки "чёрного" кадра и синхронизации префетча.
+const WAVE_OPEN_DOWN_1 = 0.8; // вниз до полуэкрана (открытие)
+const WAVE_OPEN_DOWN_2 = 0.3; // вниз до полного чёрного (открытие)
+const WAVE_OPEN_UP_1 = 0.3;   // вверх до полуэкрана (открытие)
+const WAVE_OPEN_UP_2 = 0.8;   // вверх до исчезновения (открытие)
+
+const NAVIGATION_EPS = 0.06; // небольшой буфер, чтобы навигация началась строго «на чёрном»
+
+// Полное время анимации открытия меню (для старта префетча после завершения)
+const OPEN_TOTAL = WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2 + WAVE_OPEN_UP_1 + WAVE_OPEN_UP_2; // 2.2с
+
 interface TheodoreMenuProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,20 +67,14 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigate }
   const menuWrapRef = useRef<HTMLDivElement>(null);
   const overlayPathRef = useRef<SVGPathElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  // Путь, на который пользователь кликнул. Если null — закрытие по стрелке.
+  const pendingHrefRef = useRef<string | null>(null);
 
   const handleMobileLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    const isCurrentPage = location.pathname === href;
-
-    gsap.delayedCall(0.9, () => {
-      if (isCurrentPage) {
-        scrollToTop({ duration: 1.5, immediate: false });
-      } else {
-        navigate(href);
-      }
-    });
-
-    onClose();
+    // Сохраняем целевой путь для координации закрытия и навигации на «чёрном» кадре
+    pendingHrefRef.current = href;
+    onClose(); // запустит закрытие меню (ниже перехватим в useEffect)
   };
 
   useEffect(() => {
@@ -88,6 +94,9 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigate }
       onReverseComplete: () => {
         gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
         lenis.start();
+        // Сообщаем глобально, что переход завершён (включая случай закрытия по стрелке)
+        window.dispatchEvent(new CustomEvent("menu-transition-complete"));
+        (window as any).__menuTransitionInProgress = false;
       },
     });
 
@@ -96,6 +105,8 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigate }
     tl.set(overlayPath, { attr: { d: "M 0 100 V 100 Q 50 100 100 100 V 100 z" } });
     tl.to(overlayPath, { duration: 0.8, ease: "power4.in", attr: { d: "M 0 100 V 50 Q 50 0 100 50 V 100 z" } }, 0);
     tl.to(overlayPath, { duration: 0.3, ease: "power2", attr: { d: "M 0 100 V 0 Q 50 0 100 0 V 100 z" } });
+    // Момент полного чёрного экрана
+    tl.addLabel("fullBlack");
     tl.set(menuWrap, { autoAlpha: 1, pointerEvents: "auto" });
     tl.set(overlayPath, { attr: { d: "M 0 0 V 100 Q 50 100 100 100 V 0 z" } })
       .to(overlayPath, { duration: 0.3, ease: "power2.in", attr: { d: "M 0 0 V 50 Q 50 0 100 50 V 0 z" } })
@@ -113,14 +124,101 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigate }
   }, []);
 
   useEffect(() => {
-    if (timelineRef.current) {
-      if (isOpen) {
-        timelineRef.current.play();
-      } else {
-        timelineRef.current.reverse();
-      }
+    const tl = timelineRef.current;
+    if (!tl) return;
+
+    if (isOpen) {
+      tl.play();
+      return;
     }
-  }, [isOpen]);
+
+    // Меню закрывается. Если пользователь кликнул пункт (есть pendingHref) —
+    // идём в reverse() и ставим паузу ровно на 'fullBlack', где делаем навигацию.
+    if (!pendingHrefRef.current) {
+      tl.reverse();
+      return;
+    }
+
+    // Безопасно остановим внешние твины и запустим обратное проигрывание
+    gsap.killTweensOf(tl);
+    const labelTime = tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2; // запасной расчёт
+    let lastTime = tl.time();
+    const prevUpdate = tl.eventCallback("onUpdate") as gsap.Callback | null;
+    const targetHref = pendingHrefRef.current;
+
+    const atBlack = () => {
+      // Пауза на чёрном кадре и навигация
+      tl.pause(labelTime);
+      const href = targetHref!;
+      const isSame = location.pathname === href;
+      (window as any).__menuTransitionInProgress = true;
+      window.dispatchEvent(new CustomEvent("menu-transition-start"));
+      if (isSame) {
+        scrollToTop({ duration: 1.2, immediate: false });
+      } else {
+        navigate(href);
+      }
+
+      // Небольшой буфер, чтобы чёрный кадр гарантированно попал на экран и DOM успел обновиться
+      gsap.delayedCall(NAVIGATION_EPS, () => {
+        // Снятие обработчика onUpdate, чтобы не триггериться снова
+        tl.eventCallback("onUpdate", prevUpdate || null);
+        // Продолжаем обратное проигрывание (2-я волна) после навигации
+        tl.resume();
+        pendingHrefRef.current = null;
+      });
+    };
+
+    const onUpdate = () => {
+      const t = tl.time();
+      if (lastTime > labelTime && t <= labelTime) {
+        atBlack();
+      }
+      lastTime = t;
+    };
+    tl.eventCallback("onUpdate", onUpdate);
+    tl.reverse();
+
+    return () => {
+      // Очистка onUpdate, если эффект размонтируется или зависимость изменится
+      if (tl.eventCallback("onUpdate") === onUpdate) {
+        tl.eventCallback("onUpdate", prevUpdate || null);
+      }
+    };
+  }, [isOpen, navigate, location.pathname]);
+
+  // --- Префетч модулей страниц, когда меню полностью открылось ---
+  // Стартуем после завершения анимации открытия, чтобы не мешать ей.
+  useEffect(() => {
+    if (!isOpen) return;
+    const current = location.pathname;
+    const tl = timelineRef.current;
+    const delay = (tl?.totalDuration?.() ?? OPEN_TOTAL) + 0.15;
+    const delayed = gsap.delayedCall(delay, () => {
+      prefetchAllRoutesExcept(current);
+    });
+    return () => {
+      delayed.kill();
+    };
+  }, [isOpen, location.pathname]);
+
+  // --- Утилиты префетча ---
+  const routePrefetchers: Record<string, () => Promise<unknown>> = {
+    "/": () => import("@/pages/HomePage"),
+    "/products": () => import("@/pages/ProductsPage"),
+    "/about": () => import("@/pages/AboutPage"),
+    "/about-me": () => import("@/pages/AboutMePage"),
+    "/contact": () => import("@/pages/ContactPage"),
+    "/partnership": () => import("@/pages/PartnershipPage"),
+    "/how-to-buy": () => import("@/pages/HowToBuyPage"),
+  };
+
+  function prefetchAllRoutesExcept(currentPath: string) {
+    const entries = Object.entries(routePrefetchers).filter(([path]) => path !== currentPath);
+    entries.forEach(([, loader]) => {
+      loader().catch(() => {});
+    });
+  }
 
   return (
     <div className="theodore-menu-container">

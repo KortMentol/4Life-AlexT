@@ -2,7 +2,7 @@
 
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import React, { Suspense, useState, useEffect, useRef } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import PerformanceDebug from "./components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
@@ -16,13 +16,13 @@ import useScrollRestoration from "./hooks/useScrollRestoration";
 import { lenis, updateScroll } from "./lib/lenis";
 import { scrollLockState } from "./lib/scrollLockState"; // <-- ИМПОРТ
 
-const HomePage = React.lazy(() => import("./pages/HomePage"));
-const ProductsPage = React.lazy(() => import("./pages/ProductsPage"));
-const AboutPage = React.lazy(() => import("./pages/AboutPage"));
-const AboutMePage = React.lazy(() => import("./pages/AboutMePage"));
-const ContactPage = React.lazy(() => import("./pages/ContactPage"));
-const PartnershipPage = React.lazy(() => import("./pages/PartnershipPage"));
-const HowToBuyPage = React.lazy(() => import("./pages/HowToBuyPage"));
+const HomePage = React.lazy(() => import("@/pages/HomePage"));
+const ProductsPage = React.lazy(() => import("@/pages/ProductsPage"));
+const AboutPage = React.lazy(() => import("@/pages/AboutPage"));
+const AboutMePage = React.lazy(() => import("@/pages/AboutMePage"));
+const ContactPage = React.lazy(() => import("@/pages/ContactPage"));
+const PartnershipPage = React.lazy(() => import("@/pages/PartnershipPage"));
+const HowToBuyPage = React.lazy(() => import("@/pages/HowToBuyPage"));
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -50,8 +50,6 @@ function App() {
       lenis.scrollTo(0, { immediate: true });
     }
   }, [location.pathname]);
-
-
 
   // ▼▼▼ НАЧАЛО ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▼▼▼
   useEffect(() => {
@@ -97,14 +95,14 @@ function App() {
         // ЗНАЧИТЕЛЬНО превышает вертикальное.
         if (deltaX > deltaY * HORIZONTAL_SWIPE_BIAS) {
           // Это точно горизонтальный свайп
-                    if (!isScrollingLockedRef.current) {
+          if (!isScrollingLockedRef.current) {
             lenis.stop();
             scrollLockState.isLocked = true; // <-- МГНОВЕННАЯ БЛОКИРОВКА
             setIsScrollingLocked(true);
           }
         } else {
           // Это вертикальный скролл (или диагональный, но ближе к вертикальному)
-                    if (isScrollingLockedRef.current) {
+          if (isScrollingLockedRef.current) {
             lenis.start();
             scrollLockState.isLocked = false; // <-- МГНОВЕННАЯ РАЗБЛОКИРОВКА
             setIsScrollingLocked(false);
@@ -117,7 +115,7 @@ function App() {
     const handleTouchEnd = () => {
       if (isMenuOpen) return;
 
-            if (isScrollingLockedRef.current) {
+      if (isScrollingLockedRef.current) {
         setTimeout(() => {
           lenis.start();
           scrollLockState.isLocked = false; // <-- МГНОВЕННАЯ РАЗБЛОКИРОВКА
@@ -155,11 +153,7 @@ function App() {
       <ProductListProvider>
         <RouteChangeHandler />
         <Suspense fallback={null}>
-          <Header
-            isMenuOpen={isMenuOpen}
-            setIsMenuOpen={setIsMenuOpen}
-            isScrollingLocked={isScrollingLocked}
-          />
+          <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isScrollingLocked={isScrollingLocked} />
           <TheodoreMenu
             isOpen={isMenuOpen}
             onClose={() => setIsMenuOpen(false)}

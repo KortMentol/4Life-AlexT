@@ -2,6 +2,16 @@ import { useInView } from "framer-motion"; // <-- 1. Импортируем ху
 import { Mesh, Program, Renderer, Triangle, Vec2 } from "ogl";
 import { useEffect, useRef } from "react";
 
+const TRANSITION_START = "menu-transition-start";
+const TRANSITION_COMPLETE = "menu-transition-complete";
+const runIdle = (cb: () => void) => {
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(cb);
+  } else {
+    setTimeout(cb, 0);
+  }
+};
+
 const vertex = `
 attribute vec2 position;
 void main(){gl_Position=vec4(position,0.0,1.0);}
@@ -199,7 +209,27 @@ export default function DarkVeil({
       }
     }
 
+    // Пауза/возобновление рендера на время переходов меню
+    const onStart = () => {
+      if (frameId.current) {
+        cancelAnimationFrame(frameId.current);
+        frameId.current = null;
+      }
+    };
+    const onComplete = () => {
+      if (isInView && !frameId.current) {
+        runIdle(() => {
+          // Перезапускаем петлю только если WebGL ещё инициализирован
+          if (glObjects.current) frameId.current = requestAnimationFrame(loop);
+        });
+      }
+    };
+    window.addEventListener(TRANSITION_START, onStart as EventListener);
+    window.addEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+
     return () => {
+      window.removeEventListener(TRANSITION_START, onStart as EventListener);
+      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
       }
