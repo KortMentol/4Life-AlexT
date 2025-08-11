@@ -3,7 +3,7 @@
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import React, { Suspense, useEffect, useRef, useState } from "react";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import PerformanceDebug from "./components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
 import Header from "./components/layout/Header";
@@ -30,7 +30,6 @@ function App() {
   const [isScrollingLocked, setIsScrollingLocked] = useState(false);
   const isScrollingLockedRef = useRef(isScrollingLocked);
   isScrollingLockedRef.current = isScrollingLocked;
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,12 +43,6 @@ function App() {
   }, []);
 
   useScrollRestoration();
-
-  useEffect(() => {
-    if (location.key !== "default") {
-      lenis.scrollTo(0, { immediate: true });
-    }
-  }, [location.pathname]);
 
   // ▼▼▼ НАЧАЛО ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▼▼▼
   useEffect(() => {

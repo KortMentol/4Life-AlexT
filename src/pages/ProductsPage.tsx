@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 import { cardVariants, containerVariants, itemVariants } from "../animations/variants";
 import { GlowEffect } from "../components/layout/GlowEffect";
 import CallToAction from "../components/ui/CallToAction";
@@ -16,28 +16,12 @@ const pageVariants = {
 const ProductsPage: React.FC = () => {
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <Helmet>
-        <title>Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым</title>
-        <meta
-          name="description"
-          content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
-        />
-        <meta property="og:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
-        <meta
-          property="og:description"
-          content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
-        />
-        <meta property="og:image" content="/images/og-products.jpg" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/products" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым" />
-        <meta
-          name="twitter:description"
-          content="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
-        />
-        <meta name="twitter:image" content="/images/og-products.jpg" />
-      </Helmet>
+      <SEO
+        title="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
+        description="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
+        path="/products"
+        type="website"
+      />
       <div className="min-h-screen text-gray-800 dark:text-gray-200">
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100/0 to-teal-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">

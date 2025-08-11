@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { FlaskConical, Headphones, TrendingUp } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 import { containerVariants, itemVariants } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
@@ -15,28 +15,12 @@ const pageVariants = {
 const AboutPage: React.FC = () => {
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <Helmet>
-        <title>О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым</title>
-        <meta
-          name="description"
-          content="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
-        />
-        <meta property="og:title" content="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым" />
-        <meta
-          property="og:description"
-          content="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
-        />
-        <meta property="og:image" content="/images/og-about.jpg" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/about" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым" />
-        <meta
-          name="twitter:description"
-          content="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
-        />
-        <meta name="twitter:image" content="/images/og-about.jpg" />
-      </Helmet>
+      <SEO
+        title="О 4Life - Наука, Миссия и Ваше Будущее с Александром Тощевым"
+        description="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета."
+        path="/about"
+        type="website"
+      />
       <div className="min-h-screen text-gray-800 dark:text-gray-200 relative">
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-100/0 to-indigo-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">

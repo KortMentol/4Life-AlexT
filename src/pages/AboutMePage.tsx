@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Award, BookOpen, Heart, Users } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 import { containerVariants, itemVariants } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
 import SectionHeading from "../components/ui/SectionHeading";
@@ -15,22 +15,12 @@ const pageVariants = {
 const AboutMePage: React.FC = () => {
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <Helmet>
-        <title>Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life</title>
-        <meta
-          name="description"
-          content="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни с помощью продуктов 4Life."
-        />
-        <meta property="og:title" content="Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life" />
-        <meta
-          property="og:description"
-          content="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни."
-        />
-        <meta property="og:image" content="/images/og-about-me.jpg" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/about-me" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO
+        title="Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life"
+        description="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни с помощью продуктов 4Life."
+        path="/about-me"
+        type="website"
+      />
 
       <div className="min-h-screen text-gray-800 dark:text-gray-200 relative">
         {/* Hero Section */}

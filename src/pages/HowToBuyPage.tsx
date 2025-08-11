@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 
 import { buttonVariants, containerVariants, itemVariants } from "@/animations/variants";
 import TextShineEffect from "@/components/effects/TextShineEffect";
@@ -39,33 +39,12 @@ const HowToBuyPage = () => {
   // 4. JSX-разметка компонента
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      {/* 5. Настройка мета-тегов страницы для SEO с помощью Helmet */}
-      <Helmet>
-        <title>Как приобрести продукцию 4Life - Александр Тощев</title>
-        <meta
-          name="description"
-          content="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
-        />
-        <meta property="og:title" content="Как приобрести продукцию 4Life - Александр Тощев" />
-        <meta
-          property="og:description"
-          content="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
-        />
-        <meta property="og:image" content="https://ВАШ_ДОМЕН.ru/images/og-purchase.jpg" />{" "}
-        {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ВАШ_ДОМЕН.ru/purchase" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Как приобрести продукцию 4Life - Александр Тощев" />
-        <meta
-          name="twitter:description"
-          content="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
-        />
-        <meta name="twitter:image" content="https://ВАШ_ДОМЕН.ru/images/og-purchase.jpg" />{" "}
-        {/* ЗАМЕНИТЬ НА РЕАЛЬНУЮ КАРТИНКУ */}
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://ВАШ_ДОМЕН.ru/purchase" /> {/* ЗАМЕНИТЬ НА РЕАЛЬНЫЙ ДОМЕН */}
-      </Helmet>
+      <SEO
+        title="Как приобрести продукцию 4Life - Александр Тощев"
+        description="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
+        path="/how-to-buy"
+        type="website"
+      />
 
       {/* Hero */}
       <section className="relative py-28 md:py-40 bg-gradient-to-br from-blue-50/40 to-purple-100/20 dark:from-gray-800/50 dark:to-gray-900/20 overflow-hidden">

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import React from "react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 import { FaPhone, FaTelegram, FaWhatsapp } from "react-icons/fa";
 import { fadeIn, headingVariants, itemVariants } from "../animations/variants";
 
@@ -35,21 +35,12 @@ const ContactPage: React.FC = () => {
 
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <Helmet>
-        <title>Свяжитесь с Александром Тощевым - 4Life | Контакты</title>
-        <meta
-          name="description"
-          content="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. Прямые ссылки на WhatsApp, Telegram, Email."
-        />
-        <meta property="og:title" content="Свяжитесь с Александром Тощевым - 4Life | Контакты" />
-        <meta
-          property="og:description"
-          content="Прямые контакты для связи с Александром Тощевым по вопросам 4Life: WhatsApp, Telegram, Email."
-        />
-        <meta property="og:image" content="/images/og-contact.jpg" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/contact" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO
+        title="Свяжитесь с Александром Тощевым - 4Life | Контакты"
+        description="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. Прямые ссылки на WhatsApp, Telegram, Email."
+        path="/contact"
+        type="website"
+      />
 
       <section className="min-h-screen py-16 md:py-24 bg-gradient-to-br from-blue-50/0 to-indigo-100/0 dark:from-gray-900/0 dark:to-gray-800/0 text-gray-800 dark:text-gray-200 flex items-center">
         <div className="container mx-auto px-4 text-center">

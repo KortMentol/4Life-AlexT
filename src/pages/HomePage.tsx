@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import React, { lazy, Suspense } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 import { Link } from "react-router-dom";
 import { AuroraText } from "../components/magicui/aurora-text";
 import ParallaxSection from "../components/ui/ParallaxSection";
@@ -94,22 +94,14 @@ const HomePage: React.FC = () => {
 
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <Helmet>
-        <title>4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес</title>
-        <meta
-          name="description"
-          content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
-        />
-        <meta property="og:title" content="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес" />
-        <meta
-          property="og:description"
-          content="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
-        />
-        <meta property="og:image" content="/src/assets/images/og-home.jpg" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO
+        title="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес"
+        description="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
+        path="/"
+        type="website"
+        includeOrganizationAndPerson
+        includeWebSiteSearch
+      />
 
       {/* Главная секция с параллаксом и видео фоном */}
       <ParallaxSection

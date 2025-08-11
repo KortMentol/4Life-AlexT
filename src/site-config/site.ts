@@ -6,7 +6,7 @@ export const siteConfig = {
   description:
     "Официальный представитель 4Life. Инвестируйте в свое здоровье и будущее с продукцией для иммунной системы, энергией и возможностями партнерства.",
   url: import.meta.env.VITE_SITE_URL || "https://example.com",
-  ogImage: import.meta.env.VITE_OG_IMAGE || "src/assets/images/og-image.jpg",
+  ogImage: import.meta.env.VITE_OG_IMAGE || "/favicon.svg",
   links: {
     telegram: import.meta.env.VITE_TELEGRAM_URL || "https://t.me/username",
     whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",

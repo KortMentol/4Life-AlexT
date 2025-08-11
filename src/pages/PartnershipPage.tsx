@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Award, Clock, DollarSign, Lightbulb } from "lucide-react";
 import { FC } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/seo/SEO";
 import { Tilt } from "react-tilt";
 import { headingVariants, itemVariants, staggerContainer } from "../animations/variants";
 import CallToAction from "../components/ui/CallToAction";
@@ -19,28 +19,12 @@ type PartnershipPageProps = object;
 const PartnershipPage: FC<PartnershipPageProps> = () => {
   return (
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <Helmet>
-        <title>Партнерство 4Life - Стать частью команды Александра Тощева</title>
-        <meta
-          name="description"
-          content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
-        />
-        <meta property="og:title" content="Партнерство 4Life - Стать частью команды Александра Тощева" />
-        <meta
-          property="og:description"
-          content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
-        />
-        <meta property="og:image" content="/images/og-partnership.jpg" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://alexander-toshchev-4life.ru/partnership" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Партнерство 4Life - Стать частью команды Александра Тощева" />
-        <meta
-          name="twitter:description"
-          content="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
-        />
-        <meta name="twitter:image" content="/images/og-partnership.jpg" />
-      </Helmet>
+      <SEO
+        title="Партнерство 4Life - Стать частью команды Александра Тощева"
+        description="Узнайте о возможностях партнерства с 4Life и Александром Тощевым. Стабильный доход, профессиональный рост и поддержка опытного лидера."
+        path="/partnership"
+        type="website"
+      />
       <div className="min-h-screen text-gray-800 dark:text-gray-200">
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 bg-gradient-to-br from-purple-100/0 to-pink-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">

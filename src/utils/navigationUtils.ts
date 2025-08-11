@@ -81,22 +81,17 @@ export const navigateTo = (
     immediate?: boolean;
   } = {}
 ): void => {
-  const { scrollToTop: shouldScrollToTop = true, immediate = false } = options;
-  
-  // Останавливаем Lenis перед навигацией
-  lenis.stop();
-  lenis.velocity = 0;
-  
-  // Выполняем навигацию
+  // помечаем options как использованный (централизация скролла перенесена в RouteChangeHandler)
+  void options;
+  // Централизованная логика скролла теперь в RouteChangeHandler.
+  // Здесь только безопасно прерываем текущую анимацию и выполняем навигацию.
+  try {
+    lenis.stop();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (lenis as any).velocity = 0;
+  } catch {}
+
   navigate(path);
-  
-  // Скроллим к верху страницы, если нужно
-  if (shouldScrollToTop) {
-    scrollToTop({ immediate });
-  }
-  
-  // Запускаем Lenis после навигации
-  setTimeout(() => lenis.start(), 50);
 };
 
 /**
@@ -133,7 +128,7 @@ export const handleLinkClick = (
   if (currentPath === path) {
     scrollToTop({ immediate });
   } else {
-    // Иначе выполняем навигацию
+    // Иначе выполняем навигацию, скролл выполнит RouteChangeHandler
     navigateTo(navigate, path, { scrollToTop: shouldScrollToTop, immediate });
   }
 };
