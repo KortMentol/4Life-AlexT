@@ -17,7 +17,7 @@
  *   ['#3b82f6', '#8b5cf6'], // цвета
  *   [0, 1] // позиции (0-1)
  * );
- * 
+ *
  * // Создание радиального градиента
  * const radialGradient = createRadialGradient(
  *   'circle',
@@ -25,7 +25,7 @@
  *   ['rgba(59, 130, 246, 0.8)', 'rgba(59, 130, 246, 0)'],
  *   [0, 1]
  * );
- * 
+ *
  * // Создание градиента с прозрачностью
  * const transparentGradient = createGradientWithAlpha(
  *   'linear',
@@ -35,7 +35,7 @@
  * );
  */
 
-import { hexToRgba } from './colorUtils';
+import { hexToRgba } from "./colorUtils";
 
 /**
  * Функция для создания линейного градиента
@@ -47,10 +47,10 @@ import { hexToRgba } from './colorUtils';
 export const createLinearGradient = (
   angle: number,
   colors: string[],
-  positions?: number[]
+  positions?: number[],
 ): string => {
   if (colors.length < 2) {
-    throw new Error('Gradient must have at least 2 colors');
+    throw new Error("Gradient must have at least 2 colors");
   }
 
   const colorStops = colors.map((color, index) => {
@@ -60,7 +60,7 @@ export const createLinearGradient = (
     return color;
   });
 
-  return `linear-gradient(${angle}deg, ${colorStops.join(', ')})`;
+  return `linear-gradient(${angle}deg, ${colorStops.join(", ")})`;
 };
 
 /**
@@ -72,13 +72,13 @@ export const createLinearGradient = (
  * @returns CSS-строка с радиальным градиентом
  */
 export const createRadialGradient = (
-  shape: 'circle' | 'ellipse',
+  shape: "circle" | "ellipse",
   position: string,
   colors: string[],
-  positions?: number[]
+  positions?: number[],
 ): string => {
   if (colors.length < 2) {
-    throw new Error('Gradient must have at least 2 colors');
+    throw new Error("Gradient must have at least 2 colors");
   }
 
   const colorStops = colors.map((color, index) => {
@@ -88,7 +88,7 @@ export const createRadialGradient = (
     return color;
   });
 
-  return `radial-gradient(${shape} at ${position}, ${colorStops.join(', ')})`;
+  return `radial-gradient(${shape} at ${position}, ${colorStops.join(", ")})`;
 };
 
 /**
@@ -103,10 +103,10 @@ export const createConicGradient = (
   angle: number,
   position: string,
   colors: string[],
-  positions?: number[]
+  positions?: number[],
 ): string => {
   if (colors.length < 2) {
-    throw new Error('Gradient must have at least 2 colors');
+    throw new Error("Gradient must have at least 2 colors");
   }
 
   const colorStops = colors.map((color, index) => {
@@ -116,7 +116,7 @@ export const createConicGradient = (
     return color;
   });
 
-  return `conic-gradient(from ${angle}deg at ${position}, ${colorStops.join(', ')})`;
+  return `conic-gradient(from ${angle}deg at ${position}, ${colorStops.join(", ")})`;
 };
 
 /**
@@ -128,15 +128,15 @@ export const createConicGradient = (
  * @returns CSS-строка с градиентом
  */
 export const createGradientWithAlpha = (
-  type: 'linear' | 'radial' | 'conic',
+  type: "linear" | "radial" | "conic",
   colors: string[],
   alphas: number[],
   options: {
     angle?: number;
-    shape?: 'circle' | 'ellipse';
+    shape?: "circle" | "ellipse";
     position?: string;
     positions?: number[];
-  } = {}
+  } = {},
 ): string => {
   const colorsWithAlpha = colors.map((color, index) => {
     return hexToRgba(color, alphas[index] || 1);
@@ -144,17 +144,17 @@ export const createGradientWithAlpha = (
 
   const {
     angle = 135,
-    shape = 'circle',
-    position = 'center',
+    shape = "circle",
+    position = "center",
     positions,
   } = options;
 
   switch (type) {
-    case 'linear':
+    case "linear":
       return createLinearGradient(angle, colorsWithAlpha, positions);
-    case 'radial':
+    case "radial":
       return createRadialGradient(shape, position, colorsWithAlpha, positions);
-    case 'conic':
+    case "conic":
       return createConicGradient(angle, position, colorsWithAlpha, positions);
     default:
       throw new Error(`Unknown gradient type: ${type}`);

@@ -13,7 +13,7 @@
  * @example
  * // Использование fadeInVariants для анимации появления элемента снизу вверх
  * import { fadeInVariants } from "@/utils/framerUtils";
- * 
+ *
  * <motion.div
  *   variants={fadeInVariants("up", 0.5, 0.2)}
  *   initial="hidden"
@@ -35,14 +35,14 @@ import { Variants } from "framer-motion";
 export const fadeInVariants = (
   direction: "up" | "down" | "left" | "right" | "none" = "none",
   duration: number = 0.5,
-  delay: number = 0
+  delay: number = 0,
 ): Variants => {
   const directionOffset = {
     up: { y: 20 },
     down: { y: -20 },
     left: { x: 20 },
     right: { x: -20 },
-    none: {}
+    none: {},
   };
 
   return {
@@ -57,9 +57,9 @@ export const fadeInVariants = (
       transition: {
         duration,
         delay,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 };
 
@@ -71,12 +71,12 @@ export const fadeInVariants = (
  */
 export const scaleVariants = (
   duration: number = 0.5,
-  delay: number = 0
+  delay: number = 0,
 ): Variants => {
   return {
     hidden: {
       opacity: 0,
-      scale: 0.8
+      scale: 0.8,
     },
     visible: {
       opacity: 1,
@@ -84,9 +84,9 @@ export const scaleVariants = (
       transition: {
         duration,
         delay,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 };
 
@@ -98,7 +98,7 @@ export const scaleVariants = (
  */
 export const staggerVariants = (
   staggerChildren: number = 0.1,
-  delayChildren: number = 0
+  delayChildren: number = 0,
 ): Variants => {
   return {
     hidden: { opacity: 0 },
@@ -106,9 +106,9 @@ export const staggerVariants = (
       opacity: 1,
       transition: {
         staggerChildren,
-        delayChildren
-      }
-    }
+        delayChildren,
+      },
+    },
   };
 };
 
@@ -120,7 +120,7 @@ export const staggerVariants = (
  */
 export const hoverVariants = (
   scale: number = 1.05,
-  duration: number = 0.3
+  duration: number = 0.3,
 ): Variants => {
   return {
     initial: { scale: 1 },
@@ -128,16 +128,16 @@ export const hoverVariants = (
       scale,
       transition: {
         duration,
-        ease: [0.22, 1, 0.36, 1]
-      }
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
     tap: {
       scale: 0.95,
       transition: {
         duration: 0.1,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 };
 
@@ -149,7 +149,7 @@ export const hoverVariants = (
  */
 export const listVariants = (
   staggerChildren: number = 0.1,
-  delayChildren: number = 0
+  delayChildren: number = 0,
 ): Variants => {
   return {
     hidden: { opacity: 0 },
@@ -158,9 +158,9 @@ export const listVariants = (
       transition: {
         when: "beforeChildren",
         staggerChildren,
-        delayChildren
-      }
-    }
+        delayChildren,
+      },
+    },
   };
 };
 
@@ -172,14 +172,14 @@ export const listVariants = (
  */
 export const listItemVariants = (
   direction: "up" | "down" | "left" | "right" | "none" = "up",
-  duration: number = 0.5
+  duration: number = 0.5,
 ): Variants => {
   const directionOffset = {
     up: { y: 20 },
     down: { y: -20 },
     left: { x: 20 },
     right: { x: -20 },
-    none: {}
+    none: {},
   };
 
   return {
@@ -193,9 +193,9 @@ export const listItemVariants = (
       y: 0,
       transition: {
         duration,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 };
 
@@ -208,24 +208,24 @@ export const pageVariants = (duration: number = 0.5): Variants => {
   return {
     initial: {
       opacity: 0,
-      y: 20
+      y: 20,
     },
     animate: {
       opacity: 1,
       y: 0,
       transition: {
         duration,
-        ease: [0.22, 1, 0.36, 1]
-      }
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
     exit: {
       opacity: 0,
       y: -20,
       transition: {
         duration: 0.3,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 };
 
@@ -239,7 +239,7 @@ export const modalVariants = (duration: number = 0.5): Variants => {
     hidden: {
       opacity: 0,
       scale: 0.8,
-      y: 20
+      y: 20,
     },
     visible: {
       opacity: 1,
@@ -247,8 +247,8 @@ export const modalVariants = (duration: number = 0.5): Variants => {
       y: 0,
       transition: {
         duration,
-        ease: [0.22, 1, 0.36, 1]
-      }
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
     exit: {
       opacity: 0,
@@ -256,9 +256,9 @@ export const modalVariants = (duration: number = 0.5): Variants => {
       y: 20,
       transition: {
         duration: 0.3,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 };
 
@@ -270,21 +270,21 @@ export const modalVariants = (duration: number = 0.5): Variants => {
 export const overlayVariants = (duration: number = 0.3): Variants => {
   return {
     hidden: {
-      opacity: 0
+      opacity: 0,
     },
     visible: {
       opacity: 1,
       transition: {
         duration,
-        ease: "easeInOut"
-      }
+        ease: "easeInOut",
+      },
     },
     exit: {
       opacity: 0,
       transition: {
         duration: 0.2,
-        ease: "easeInOut"
-      }
-    }
+        ease: "easeInOut",
+      },
+    },
   };
 };

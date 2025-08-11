@@ -39,15 +39,12 @@ export interface ProductCardProps {
  *   image: '/path/to/image.jpg',
  *   link: '/products/1'
  * };
- * 
+ *
  * const handleQuickView = (p) => console.log('Quick view for:', p.name);
- * 
+ *
  * <ProductCard product={product} onQuickView={handleQuickView} delay={0.2} />
  */
-const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  onQuickView,
-}) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
   const { image, name, shortDescription, link } = product;
   const { addToList } = useProductList();
 
@@ -55,7 +52,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div className="card-modern group h-full flex flex-col">
-
       {/* Изображение с оверлеем */}
       <div className="relative overflow-hidden rounded-t-lg">
         {/* Кнопка Quick View */}

@@ -13,7 +13,7 @@ import { updateScroll } from "@/lib/lenis";
  * @example
  * // В корневом компоненте приложения (например, App.tsx)
  * useScrollRestoration();
- * 
+ *
  * return (
  *   // ... JSX разметка
  * );

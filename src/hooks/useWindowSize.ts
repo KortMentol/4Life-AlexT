@@ -13,7 +13,7 @@
  * @example
  * // Базовое использование
  * const { width, height, isMobile } = useWindowSize();
- * 
+ *
  * // Использование для условного рендеринга
  * return (
  *   <div>
@@ -24,14 +24,14 @@
  *     ) : (
  *       <DesktopComponent />
  *     )}
- *     
+ *
  *     <div style={{ maxWidth: width * 0.8 }}>
  *       Контент с адаптивной шириной
  *     </div>
  *   </div>
  * );
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * Интерфейс для данных о размере окна и типе устройства
@@ -49,7 +49,7 @@ interface WindowSize {
   /** Флаг, указывающий, что устройство десктопное (ширина >= 1024px) */
   isDesktop: boolean;
   /** Ориентация экрана: 'portrait' (вертикальная) или 'landscape' (горизонтальная) */
-  orientation: 'portrait' | 'landscape';
+  orientation: "portrait" | "landscape";
 }
 
 /**
@@ -59,14 +59,14 @@ interface WindowSize {
 export const useWindowSize = (): WindowSize => {
   // Инициализируем с размерами окна или с нулями, если window не определен (для SSR)
   const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
     isMobile: false,
     isTablet: false,
     isDesktop: false,
-    orientation: 'portrait'
+    orientation: "portrait",
   });
-  
+
   useEffect(() => {
     /**
      * Обновляет состояние с текущими размерами окна и определяет тип устройства
@@ -74,35 +74,35 @@ export const useWindowSize = (): WindowSize => {
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      
+
       // Определяем тип устройства на основе ширины экрана
       // Эти пороговые значения соответствуют стандартным брейкпоинтам в CSS
-      const isMobile = width < 768;  // Мобильные устройства (до 767px)
-      const isTablet = width >= 768 && width < 1024;  // Планшеты (768px - 1023px)
-      const isDesktop = width >= 1024;  // Десктопы (от 1024px)
-      
+      const isMobile = width < 768; // Мобильные устройства (до 767px)
+      const isTablet = width >= 768 && width < 1024; // Планшеты (768px - 1023px)
+      const isDesktop = width >= 1024; // Десктопы (от 1024px)
+
       // Определяем ориентацию экрана
-      const orientation = width > height ? 'landscape' : 'portrait';
-      
+      const orientation = width > height ? "landscape" : "portrait";
+
       setWindowSize({
         width,
         height,
         isMobile,
         isTablet,
         isDesktop,
-        orientation
+        orientation,
       });
     };
-    
+
     // Добавляем обработчик события resize
-    window.addEventListener('resize', handleResize);
-    
+    window.addEventListener("resize", handleResize);
+
     // Вызываем функцию один раз для инициализации
     handleResize();
-    
+
     // Удаляем обработчик при размонтировании компонента
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
+
   return windowSize;
 };

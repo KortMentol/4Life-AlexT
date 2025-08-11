@@ -1,6 +1,14 @@
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { motion } from "framer-motion";
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+  Twitter,
+  Youtube,
+} from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../../site-config/site";
@@ -62,18 +70,24 @@ const Footer: React.FC = () => {
           >
             <motion.div variants={itemVariants}>
               <Link to="/" className="inline-block mb-6">
-                <DynamicLogo alt="4Life Logo" className="" size="lg" />
+                <DynamicLogo
+                  alt="4Life Logo"
+                  className=""
+                  size="lg"
+                  themeOverride="dark"
+                />
               </Link>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-pretty">
-                4Life Research – глобальная компания в области велнеса, специализирующаяся на научных разработках для
-                поддержки иммунной системы.
+              <p className="text-gray-300 mb-6 text-pretty">
+                4Life Research – глобальная компания в области велнеса,
+                специализирующаяся на научных разработках для поддержки иммунной
+                системы.
               </p>
               <div className="flex space-x-4">
                 <a
                   href={siteConfig.socialLinks.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                  className="text-white/80 hover:text-white transition-colors"
                   aria-label="Facebook"
                 >
                   <Facebook size={20} />
@@ -82,7 +96,7 @@ const Footer: React.FC = () => {
                   href={siteConfig.socialLinks.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-pink-600 dark:text-gray-400 dark:hover:text-pink-400 transition-colors"
+                  className="text-white/80 hover:text-white transition-colors"
                   aria-label="Instagram"
                 >
                   <Instagram size={20} />
@@ -91,7 +105,7 @@ const Footer: React.FC = () => {
                   href={siteConfig.socialLinks.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-blue-400 dark:text-gray-400 dark:hover:text-blue-300 transition-colors"
+                  className="text-white/80 hover:text-white transition-colors"
                   aria-label="Twitter"
                 >
                   <Twitter size={20} />
@@ -100,7 +114,7 @@ const Footer: React.FC = () => {
                   href={siteConfig.socialLinks.youtube}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                  className="text-white/80 hover:text-white transition-colors"
                   aria-label="YouTube"
                 >
                   <Youtube size={20} />
@@ -116,14 +130,17 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-gray-900 dark:text-white">
+            <motion.h3
+              variants={itemVariants}
+              className="text-lg font-bold mb-6 text-white"
+            >
               Быстрые ссылки
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-3">
               <li>
                 <Link
                   to="/products"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Продукты
                 </Link>
@@ -131,7 +148,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/about"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   О компании
                 </Link>
@@ -139,7 +156,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/about-me"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Обо мне
                 </Link>
@@ -147,7 +164,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/partnership"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Партнерство
                 </Link>
@@ -155,7 +172,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Контакты
                 </Link>
@@ -170,31 +187,36 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-gray-900 dark:text-white">
+            <motion.h3
+              variants={itemVariants}
+              className="text-lg font-bold mb-6 text-white"
+            >
               Контакты
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-4">
               <li className="flex items-start">
-                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
+                <Mail className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   {siteConfig.contact.email}
                 </a>
               </li>
               <li className="flex items-start">
-                <Phone className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
+                <Phone className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
                 <a
-                  href={`tel:${siteConfig.contact.phone.replace(/\\s/g, "")}`}
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
+                  className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   {siteConfig.contact.phone}
                 </a>
               </li>
               <li className="flex items-start">
-                <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-gray-600 dark:text-gray-400">{siteConfig.contact.address}</span>
+                <MapPin className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
+                <span className="text-gray-300">
+                  {siteConfig.contact.address}
+                </span>
               </li>
             </motion.ul>
           </motion.div>
@@ -203,14 +225,15 @@ const Footer: React.FC = () => {
         {/* Нижняя часть футера */}
         <div className="pt-8 border-t border-gray-200/20 dark:border-gray-700/50">
           <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+            <p className="text-gray-300 text-sm">
               © {currentYear} Александр Тощев. Все права защищены.
             </p>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
-              Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
+            <p className="text-xs text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
+              Информация, представленная на этом вебсайте, относится
+              исключительно к рынку Евразии.
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-2">
+            <p className="text-xs text-gray-400 font-medium mt-2">
               БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.
             </p>
           </div>

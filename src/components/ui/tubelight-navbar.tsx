@@ -1,77 +1,154 @@
-// "use client" // Not needed in Vite, kept for parity
-
+/**
+ * @module src/components/ui/tubelight-navbar
+ * @description
+ * Независимый навигационный компонент с эффектом "неоновой лампы" (Tubelight).
+ * Воссоздает и улучшает визуальный эффект из концепта "21st.dev", адаптируя его под Sci-Fi стилистику проекта.
+ * Использует многослойные размытые элементы для создания реалистичного свечения (в темной теме) и тени (в светлой).
+ * @author Kort (адаптация и улучшение), Ayush (оригинальная концепция)
+ * @version 2.1.0
+ */
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "../../hooks/useTheme";
+import { mainNav } from "../../site-config/site";
+import { handleLinkClick } from "../../utils/navigationUtils";
 
-// Minimal cn util to merge classes without shadcn setup
-function cn(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
+export const TubelightNavbar: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
-interface NavItem {
-  name: string;
-  url: string;
-  icon: LucideIcon;
-}
-
-interface NavBarProps {
-  items: NavItem[];
-  className?: string;
-}
-
-export function NavBar({ items, className }: NavBarProps) {
-  const [activeTab, setActiveTab] = useState(items[0]?.name ?? "");
-
-  useEffect(() => {
-    // no-op here; component relies on Tailwind responsive utilities (md:hidden etc.)
-    // kept effect to mirror original behavior without extra listeners
-    return () => {};
-  }, []);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
 
   return (
-    <div className={cn("fixed bottom-0 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6", className)}>
-      <div className="flex items-center gap-3 bg-bg/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
-        {items.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.name;
+    <motion.nav
+      role="navigation"
+      className="hidden md:flex items-center justify-center h-full"
+      style={{ marginLeft: "4rem" }}
+      onMouseLeave={() => setHoveredIndex(null)}
+      onMouseMove={(e) => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => {
+          const OVERLAP = 14;
+          let bestMatch = {
+            index: -1,
+            edgeDistance: Infinity,
+            centerDistance: Infinity,
+          };
 
-          return (
+          itemRefs.current.forEach((el, idx) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const center = rect.left + rect.width / 2;
+            const edgeDistance = Math.max(
+              0,
+              e.clientX - (rect.right + OVERLAP),
+              rect.left - OVERLAP - e.clientX,
+            );
+            const centerDistance = Math.abs(center - e.clientX);
+
+            if (
+              edgeDistance < bestMatch.edgeDistance ||
+              (edgeDistance === bestMatch.edgeDistance &&
+                centerDistance < bestMatch.centerDistance)
+            ) {
+              bestMatch = { index: idx, edgeDistance, centerDistance };
+            }
+          });
+
+          if (bestMatch.index !== -1 && bestMatch.index !== hoveredIndex) {
+            setHoveredIndex(bestMatch.index);
+          }
+        });
+      }}
+    >
+      <div className="relative flex items-center gap-2">
+        {mainNav.map((item, index) => (
+          <motion.div
+            key={item.href}
+            ref={(el) => (itemRefs.current[index] = el)}
+            className="relative flex items-center h-full"
+          >
             <NavLink
-              key={item.name}
-              to={item.url}
-              onClick={() => setActiveTab(item.name)}
-              className={({ isActive: isRouteActive }) =>
-                cn(
-                  "relative cursor-pointer text-sm font-semibold px-6 py-2 rounded-full transition-colors",
-                  "text-text/80 hover:text-primary",
-                  (isActive || isRouteActive) && "bg-bg-muted text-primary"
-                )
+              to={item.href}
+              onClick={(e) =>
+                handleLinkClick(e, navigate, item.href, location.pathname, {
+                  immediate: false,
+                })
+              }
+              onMouseEnter={() => setHoveredIndex(index)}
+              className={({ isActive }) =>
+                `flex items-center px-3 py-1.5 rounded-xl text-[14px] font-medium relative whitespace-nowrap tracking-tight transition-colors duration-300 ${
+                  isActive
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300"
+                }`
               }
             >
-              <span className="hidden md:inline">{item.name}</span>
-              <span className="md:hidden">
-                <Icon size={18} strokeWidth={2.5} />
-              </span>
-              {isActive && (
-                <motion.div
-                  layoutId="lamp"
-                  className="absolute inset-0 w-full bg-primary/5 rounded-full -z-10"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-t-full">
-                    <div className="absolute w-12 h-6 bg-primary/20 rounded-full blur-md -top-2 -left-2" />
-                    <div className="absolute w-8 h-6 bg-primary/20 rounded-full blur-md -top-1" />
-                    <div className="absolute w-4 h-4 bg-primary/20 rounded-full blur-sm top-0 left-2" />
-                  </div>
-                </motion.div>
-              )}
+              {({ isActive }) => {
+                const showLamp =
+                  hoveredIndex === index || (hoveredIndex === null && isActive);
+                return (
+                  <>
+                    <span className="relative z-10">{item.title}</span>
+                    {showLamp && (
+                      <motion.div
+                        layoutId="lamp"
+                        className={`absolute inset-0 w-full rounded-xl -z-10 ${isDark ? "bg-slate-700/50" : "bg-slate-200"}`}
+                        initial={false}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                        }}
+                      >
+                        {/* --- ▼▼▼ БЛОК СВЕТА И ТЕНИ, КАК В ОРИГИНАЛЕ ▼▼▼ --- */}
+                        <div
+                          className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full"
+                          style={{
+                            background: isDark
+                              ? "linear-gradient(90deg, #00ffff, #00aaff)"
+                              : "#f8fafc",
+                          }}
+                        >
+                          <div
+                            className="absolute w-12 h-6 rounded-full blur-md -top-2 -left-2"
+                            style={{
+                              background: isDark
+                                ? "rgba(0, 255, 255, 0.2)"
+                                : "rgba(0,0,0,0.08)",
+                            }}
+                          />
+                          <div
+                            className="absolute w-8 h-6 rounded-full blur-md -top-1"
+                            style={{
+                              background: isDark
+                                ? "rgba(0, 255, 255, 0.2)"
+                                : "rgba(0,0,0,0.08)",
+                            }}
+                          />
+                          <div
+                            className="absolute w-4 h-4 rounded-full blur-sm top-0 left-2"
+                            style={{
+                              background: isDark
+                                ? "rgba(0, 255, 255, 0.2)"
+                                : "rgba(0,0,0,0.08)",
+                            }}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </>
+                );
+              }}
             </NavLink>
-          );
-        })}
+          </motion.div>
+        ))}
       </div>
-    </div>
+    </motion.nav>
   );
-}
+};

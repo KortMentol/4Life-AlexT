@@ -30,7 +30,7 @@
  */
 import { useMemo } from "react";
 import { useTheme } from "./useTheme";
-import { useThemeColors } from "./useThemeColors";
+// useThemeColors не требуется для текущей реализации
 
 /**
  * Параметры для настройки эффекта гласморфизма
@@ -69,10 +69,12 @@ interface GlassmorphismReturn {
  * @param options - Объект с настройками эффекта
  * @returns Объект со стилями и CSS-классом для применения эффекта
  */
-export const useGlassmorphism = (options: GlassmorphismOptions = {}): GlassmorphismReturn => {
+export const useGlassmorphism = (
+  options: GlassmorphismOptions = {},
+): GlassmorphismReturn => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { primaryColor, secondaryColor, borderColor, shadow } = useThemeColors();
+  // Цвета темы не используются в данной реализации
 
   // Применяем значения по умолчанию к опциям
   const {
@@ -80,8 +82,6 @@ export const useGlassmorphism = (options: GlassmorphismOptions = {}): Glassmorph
     saturation = 120, // Уменьшаем насыщенность
     brightness = isDark ? 0.95 : 1.2, // Увеличиваем яркость для светлой темы
     opacity = isDark ? 0.95 : 1, // Полная непрозрачность для светлой темы
-    border = true,
-    shadow: showShadow = true,
     intensity = "medium",
   } = options;
 
@@ -117,7 +117,7 @@ export const useGlassmorphism = (options: GlassmorphismOptions = {}): Glassmorph
   };
 
   // Получаем значения в зависимости от интенсивности
-  const { blurValue, saturationValue, brightnessValue, opacityValue } = getIntensityValues();
+  const { blurValue, saturationValue, brightnessValue } = getIntensityValues();
 
   // Мемоизируем результат для предотвращения лишних перерендеров
   return useMemo(() => {
@@ -135,8 +135,12 @@ export const useGlassmorphism = (options: GlassmorphismOptions = {}): Glassmorph
     };
 
     // Всегда добавляем границы для лучшей видимости хедера
-    style.borderTop = isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(59, 130, 246, 0.15)";
-    style.borderBottom = isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(59, 130, 246, 0.15)";
+    style.borderTop = isDark
+      ? "1px solid rgba(255, 255, 255, 0.1)"
+      : "1px solid rgba(59, 130, 246, 0.15)";
+    style.borderBottom = isDark
+      ? "1px solid rgba(255, 255, 255, 0.1)"
+      : "1px solid rgba(59, 130, 246, 0.15)";
 
     // Всегда добавляем улучшенную тень для лучшей видимости хедера
     style.boxShadow = isDark
@@ -147,17 +151,5 @@ export const useGlassmorphism = (options: GlassmorphismOptions = {}): Glassmorph
       style,
       className: "glassmorphism",
     };
-  }, [
-    isDark,
-    blurValue,
-    saturationValue,
-    brightnessValue,
-    opacityValue,
-    border,
-    showShadow,
-    primaryColor,
-    secondaryColor,
-    borderColor,
-    shadow,
-  ]);
+  }, [isDark, blurValue, saturationValue, brightnessValue]);
 };

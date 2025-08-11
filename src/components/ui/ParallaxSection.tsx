@@ -87,7 +87,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     offset: ["start end", "end start"],
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], [`-${parallaxStrength / 2}vh`, `${parallaxStrength / 2}vh`]);
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [`-${parallaxStrength / 2}vh`, `${parallaxStrength / 2}vh`],
+  );
 
   const finalBackgroundImage = isMobile
     ? backgroundImageMobile || backgroundImage
@@ -115,7 +119,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
           top: `-${parallaxStrength / 2}vh`,
         }}
       >
-        <motion.div className={`relative w-full h-full ${imageBrightness}`} style={{ y, willChange: "transform" }}>
+        <motion.div
+          className={`relative w-full h-full ${imageBrightness}`}
+          style={{ y, willChange: "transform" }}
+        >
           {backgroundVideo ? (
             <video
               key={inView ? "video-loaded" : "video-unloaded"} // 🔥 ИЗМЕНЕНИЕ 1: Добавляем key для перерисовки видео
@@ -132,7 +139,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               {inView && (
                 <>
                   <source src={backgroundVideo} type="video/webm" />
-                  <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
+                  <source
+                    src={backgroundVideo.replace(".webm", ".mp4")}
+                    type="video/mp4"
+                  />
                 </>
               )}
             </video>

@@ -15,7 +15,7 @@ import { ProductListContext } from "@/context/ProductListContext.helpers";
  * 3. `src/components/ui/ProductListIcon.tsx`: Для отображения и управления содержимым списка.
  * @example
  * const { addToList, items } = useProductList();
- * 
+ *
  * const handleAdd = (product) => {
  *   addToList(product, 1);
  * };

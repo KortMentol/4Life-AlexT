@@ -1,4 +1,8 @@
-import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
+import {
+  DeviceSpecs,
+  calculatePerformanceScore,
+  detectDeviceSpecs,
+} from "@/utils/devicePerformance/devicePerformance";
 import {
   Bug,
   ChevronDown,
@@ -64,8 +68,6 @@ const PerformanceDebug: React.FC = () => {
     let animationId: number;
     let lastTime = performance.now();
     let lastFrameTime = performance.now();
-
-    let frameCount = 0;
     const frameTimeHistory: number[] = [];
 
     try {
@@ -88,18 +90,15 @@ const PerformanceDebug: React.FC = () => {
     const performanceLoop = () => {
       const currentTime = performance.now();
       const deltaTime = currentTime - lastFrameTime;
-
-      frameCount++;
       frameTimeHistory.push(deltaTime);
       if (frameTimeHistory.length > 10) frameTimeHistory.shift();
 
       if (currentTime - lastTime >= 500) {
-        const avgFrameTime = frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
+        const avgFrameTime =
+          frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
         setFps(Math.round(1000 / avgFrameTime));
         setFrameTime(Math.round(avgFrameTime * 100) / 100);
-
         lastTime = currentTime;
-        frameCount = 0;
       }
 
       lastFrameTime = currentTime;
@@ -113,7 +112,9 @@ const PerformanceDebug: React.FC = () => {
     };
   }, []);
 
-  const toggleCompactMode = (e?: React.MouseEvent | React.TouchEvent) => {
+  const toggleCompactMode = (
+    e?: React.MouseEvent | React.TouchEvent | React.KeyboardEvent,
+  ) => {
     if (wasDragging.current) {
       e?.preventDefault();
       e?.stopPropagation();
@@ -130,7 +131,9 @@ const PerformanceDebug: React.FC = () => {
   const wasDragging = React.useRef(false);
   const hasDragged = React.useRef(false);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+  const handleMouseDown = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+  ) => {
     const element = dragRef.current;
     if (!element) return;
 
@@ -222,7 +225,7 @@ const PerformanceDebug: React.FC = () => {
       e.preventDefault();
       e.stopPropagation();
     },
-    [handleMouseMove]
+    [handleMouseMove],
   );
 
   React.useEffect(() => {
@@ -242,11 +245,19 @@ const PerformanceDebug: React.FC = () => {
   }, []);
 
   const getValueColor = (value: number) => {
-    return value >= 50 ? styles.valueGood : value >= 30 ? styles.valueWarning : styles.valueBad;
+    return value >= 50
+      ? styles.valueGood
+      : value >= 30
+        ? styles.valueWarning
+        : styles.valueBad;
   };
 
   const getScoreColor = (score: number) => {
-    return score >= 80 ? styles.valueGood : score >= 55 ? styles.valueWarning : styles.valueBad;
+    return score >= 80
+      ? styles.valueGood
+      : score >= 55
+        ? styles.valueWarning
+        : styles.valueBad;
   };
 
   if (!isVisible) return null;
@@ -254,18 +265,44 @@ const PerformanceDebug: React.FC = () => {
     <div
       ref={dragRef}
       className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`}
+      role="button"
+      tabIndex={0}
       onClick={toggleCompactMode}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleCompactMode(e);
+        }
+      }}
+      aria-expanded={!isCompact}
     >
-      <div className={styles.debugHeader} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
+      <div
+        className={styles.debugHeader}
+        role="button"
+        tabIndex={0}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleMouseDown}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleCompactMode(e);
+          }
+        }}
+      >
         <div className={styles.dragHandle} data-drag-handle>
           <Move size={16} className={styles.dragIcon} />
         </div>
         {isCompact ? (
           <div className={styles.headerMetricsCompact}>
             <div className={styles.metricItem} title={`FPS: ${fps}`}>
-              <span>FPS:</span> <span className={getValueColor(fps)}>{fps}</span>
+              <span>FPS:</span>{" "}
+              <span className={getValueColor(fps)}>{fps}</span>
             </div>
-            <div className={styles.metricItem} title={`Frame Time: ${frameTime}ms`}>
+            <div
+              className={styles.metricItem}
+              title={`Frame Time: ${frameTime}ms`}
+            >
               <span>Frame:</span> <span>{frameTime}ms</span>
             </div>
           </div>
@@ -277,7 +314,10 @@ const PerformanceDebug: React.FC = () => {
         )}
         <div className={styles.headerActions}>
           {!isCompact && (
-            <button onClick={() => setShowInfo(true)} title="Подробнее о метриках">
+            <button
+              onClick={() => setShowInfo(true)}
+              title="Подробнее о метриках"
+            >
               <Info size={18} />
             </button>
           )}
@@ -298,14 +338,22 @@ const PerformanceDebug: React.FC = () => {
       {!isCompact && (
         <div className={styles.debugBody}>
           <div className={styles.metricsGrid}>
-            <div className={styles.metricItem} title={`Frames Per Second: ${fps}`}>
+            <div
+              className={styles.metricItem}
+              title={`Frames Per Second: ${fps}`}
+            >
               <div className={styles.metricIcon}>
                 <Gauge size={14} />
               </div>
               <span className={styles.metricLabel}>FPS:</span>
-              <span className={`${styles.metricValue} ${getValueColor(fps)}`}>{fps}</span>
+              <span className={`${styles.metricValue} ${getValueColor(fps)}`}>
+                {fps}
+              </span>
             </div>
-            <div className={styles.metricItem} title={`Frame Time: ${frameTime}ms`}>
+            <div
+              className={styles.metricItem}
+              title={`Frame Time: ${frameTime}ms`}
+            >
               <div className={styles.metricIcon}>
                 <Clock size={14} />
               </div>
@@ -320,7 +368,9 @@ const PerformanceDebug: React.FC = () => {
                 <Star size={14} />
               </div>
               <span className={styles.metricLabel}>Score:</span>
-              <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>
+              <span
+                className={`${styles.metricValue} ${getScoreColor(staticScore)}`}
+              >
                 {staticScore} ({tier.toUpperCase()})
               </span>
             </div>
@@ -334,7 +384,10 @@ const PerformanceDebug: React.FC = () => {
               <strong>RAM:</strong>
               <span className={styles.infoValue}>{deviceSpecs.ram}</span>
             </div>
-            <div className={styles.infoRow} title={`CPU: ${deviceSpecs.cpuCores} cores @ ${deviceSpecs.cpuFrequency}`}>
+            <div
+              className={styles.infoRow}
+              title={`CPU: ${deviceSpecs.cpuCores} cores @ ${deviceSpecs.cpuFrequency}`}
+            >
               <div className={styles.infoIcon}>
                 <Cpu size={14} />
               </div>
@@ -350,33 +403,53 @@ const PerformanceDebug: React.FC = () => {
               <strong>GPU:</strong>
               <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
             </div>
-            <div className={styles.infoRow} title={`WebGL: ${deviceSpecs.webglVersion}`}>
+            <div
+              className={styles.infoRow}
+              title={`WebGL: ${deviceSpecs.webglVersion}`}
+            >
               <div className={styles.infoIcon}>
                 <Zap size={14} />
               </div>
               <strong>WebGL:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.webglVersion}
+              </span>
             </div>
-            <div className={styles.infoRow} title={`Screen: ${deviceSpecs.screenResolution}`}>
+            <div
+              className={styles.infoRow}
+              title={`Screen: ${deviceSpecs.screenResolution}`}
+            >
               <div className={styles.infoIcon}>
                 <Monitor size={14} />
               </div>
               <strong>Screen:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.screenResolution}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.screenResolution}
+              </span>
             </div>
-            <div className={styles.infoRow} title={`Touch Support: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}>
+            <div
+              className={styles.infoRow}
+              title={`Touch Support: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}
+            >
               <div className={styles.infoIcon}>
                 <Smartphone size={14} />
               </div>
               <strong>Touch:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.touchSupport ? "Yes" : "No"}
+              </span>
             </div>
-            <div className={styles.infoRow} title={`Connection: ${deviceSpecs.connectionType}`}>
+            <div
+              className={styles.infoRow}
+              title={`Connection: ${deviceSpecs.connectionType}`}
+            >
               <div className={styles.infoIcon}>
                 <Wifi size={14} />
               </div>
               <strong>Connection:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.connectionType}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.connectionType}
+              </span>
             </div>
           </div>
 

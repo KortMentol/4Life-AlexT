@@ -10,18 +10,19 @@
  * import { lenis, scrollTo } from '@/lib/lenis';
  */
 import Lenis from "lenis";
-import { LenisOptions, Lenis as LenisType } from "./lenis.types";
+import {
+  LenisOptions,
+  Lenis as LenisType,
+  LenisScrollToOptions,
+} from "./lenis.types";
 
 // 1. Создаем и экспортируем ЕДИНСТВЕННЫЙ экземпляр Lenis
 export const lenis = new Lenis({
-
   syncTouch: true,
-
-} as LenisOptions) as any as LenisType;
+} as LenisOptions) as unknown as LenisType;
 
 // Добавляем кастомное свойство, если оно нужно для вашего типа
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(lenis as any).velocity = 0;
+lenis.velocity = 0;
 
 // 2. Запускаем цикл анимации СРАЗУ ЖЕ при загрузке этого модуля
 // Это гарантирует, что `lenis` всегда будет 'живым'
@@ -38,19 +39,16 @@ if (typeof window !== "undefined") {
 /**
  * @description Плавно прокручивает страницу к указанной цели.
  */
-export const scrollTo = (target: string | HTMLElement | number, options = {}) => {
-  const isMobileDevice = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  if (isMobileDevice && typeof target === "number" && target === 0) {
-    window.scrollTo({ top: 0, behavior: "auto" });
-    return;
-  }
-
+export const scrollTo = (
+  target: string | HTMLElement | number,
+  options: LenisScrollToOptions = {},
+) => {
   lenis.scrollTo(target, {
     offset: 0,
     immediate: false,
     duration: 1.5,
-    easing: (t: number) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2),
+    easing: (t: number) =>
+      t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2,
     ...options,
   });
 };

@@ -72,7 +72,8 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
     const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
     if (debugInfo) {
       // Получаем информацию о рендерере и производителе
-      const rendererInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || "Unknown";
+      const rendererInfo =
+        gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || "Unknown";
       // const vendorInfo = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || "Unknown";
 
       // Используем полученную информацию напрямую
@@ -86,11 +87,15 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
   // Пытаемся получить информацию о RAM через современные API
   try {
     // Проверяем наличие API для определения памяти
-    if ((navigator as any).deviceMemory) {
-      const memoryGB = (navigator as any).deviceMemory;
+    const navWithMem = navigator as Navigator & { deviceMemory?: number };
+    if (typeof navWithMem.deviceMemory === "number") {
+      const memoryGB = navWithMem.deviceMemory;
 
       // Для десктопов уточняем информацию
-      const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isDesktop =
+        !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        );
       if (isDesktop) {
         // На десктопах обычно больше RAM, чем показывает API
         if (memoryGB >= 8) {
@@ -105,9 +110,12 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
       }
     } else {
       // Используем более точный алгоритм определения RAM по характеристикам устройства
-      const cores = navigator.hardwareConcurrency || 4;
+      const cores = navigator.hardwareConcurrency ?? 4;
       const ua = navigator.userAgent.toLowerCase();
-      const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isDesktop =
+        !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        );
 
       if (isDesktop) {
         // Определение RAM для десктопов
@@ -147,9 +155,9 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // Fallback при ошибке
-    const cores = navigator.hardwareConcurrency || 4;
+    const cores = navigator.hardwareConcurrency ?? 4;
     if (cores >= 8) {
       ram = "8 GB";
     } else if (cores >= 6) {
@@ -161,7 +169,7 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
     }
   }
 
-  const cpuCores = navigator.hardwareConcurrency || 0;
+  const cpuCores = navigator.hardwareConcurrency ?? 0;
 
   /**
    * Определение типа сетевого подключения
@@ -170,8 +178,17 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
 
   try {
     // Проверяем наличие Network Information API
+    type NetworkInformationLike = {
+      type?: string;
+      effectiveType?: string;
+    };
+    const navNI = navigator as Navigator & {
+      connection?: NetworkInformationLike;
+      mozConnection?: NetworkInformationLike;
+      webkitConnection?: NetworkInformationLike;
+    };
     const connection =
-      (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      navNI.connection ?? navNI.mozConnection ?? navNI.webkitConnection;
 
     if (connection) {
       // Используем стандартный API для определения типа соединения
@@ -179,7 +196,10 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
         connectionType = "WiFi";
       } else if (connection.type === "ethernet") {
         connectionType = "Ethernet";
-      } else if (connection.effectiveType === "4g" && connection.type !== "cellular") {
+      } else if (
+        connection.effectiveType === "4g" &&
+        connection.type !== "cellular"
+      ) {
         // Часто WiFi определяется как 4g
         connectionType = "WiFi";
       } else if (connection.effectiveType) {
@@ -191,7 +211,10 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
       }
     } else {
       // Если API недоступен, определяем по скорости загрузки ресурсов
-      const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isDesktop =
+        !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        );
 
       if ("performance" in window && "getEntriesByType" in performance) {
         // Анализируем скорость загрузки ресурсов
@@ -240,9 +263,12 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
         connectionType = isDesktop ? "WiFi" : "4G";
       }
     }
-  } catch (e) {
+  } catch {
     // Фоллбэк при ошибке - используем значение по умолчанию
-    const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isDesktop =
+      !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
     connectionType = isDesktop ? "WiFi" : "4G";
   }
 
@@ -251,13 +277,19 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
    */
   let cpuFrequency = "Variable";
   const ua = navigator.userAgent.toLowerCase();
-  const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isDesktop =
+    !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
 
   try {
     // Проверяем наличие современных API для форматирования
-    if (typeof (window as any).Intl !== "undefined" && typeof (window as any).Intl.NumberFormat !== "undefined") {
+    if (
+      typeof Intl !== "undefined" &&
+      typeof Intl.NumberFormat !== "undefined"
+    ) {
       // Создаем форматтер для частоты
-      const formatter = new (window as any).Intl.NumberFormat(undefined, {
+      const formatter = new Intl.NumberFormat(undefined, {
         style: "unit",
         unit: "hertz",
         unitDisplay: "short",
@@ -269,7 +301,8 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
 
       if (isDesktop) {
         // Пытаемся найти частоту в User Agent для десктопов
-        const cpuRegex = /(?:CPU|Processor)(?:[^@]+)?(?:@\s*)?(\d+(?:\.\d+)?\s*[GM]Hz)/i;
+        const cpuRegex =
+          /(?:CPU|Processor)(?:[^@]+)?(?:@\s*)?(\d+(?:\.\d+)?\s*[GM]Hz)/i;
         const cpuMatch = ua.match(cpuRegex);
 
         if (cpuMatch && cpuMatch[1]) {
@@ -336,7 +369,7 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // Фоллбэк при ошибке - стандартные значения по количеству ядер
     if (isDesktop) {
       if (cpuCores >= 12) {
@@ -385,14 +418,17 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
  * @param {DeviceSpecs} specs - Объект с характеристиками устройства, полученный от `detectDeviceSpecs`.
  * @returns {{score: number, tier: PerformanceTier}} Объект с итоговым баллом и уровнем производительности.
  */
-export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; tier: PerformanceTier } => {
+export const calculatePerformanceScore = (
+  specs: DeviceSpecs,
+): { score: number; tier: PerformanceTier } => {
   let score = 0;
 
   /**
    * Определение типа устройства
    */
   const ua = navigator.userAgent.toLowerCase();
-  const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+  const isMobile =
+    /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
   const isTablet = /ipad|android.*tablet/i.test(ua);
   const isIOS = /iphone|ipad|ipod/i.test(ua);
   const isDesktop = !isMobile && !isTablet;
@@ -415,7 +451,8 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
    * Анализ оперативной памяти (RAM)
    * Больше RAM = выше производительность
    */
-  const memory = (navigator as any).deviceMemory;
+  const navWithMem = navigator as Navigator & { deviceMemory?: number };
+  const memory = navWithMem.deviceMemory;
   if (memory) {
     // Используем API deviceMemory, если доступен
     if (memory >= 16)
@@ -479,8 +516,12 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     // Получаем дополнительную информацию о GPU
     const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
     if (debugInfo) {
-      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL).toLowerCase();
-      const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL).toLowerCase();
+      const renderer = gl
+        .getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+        .toLowerCase();
+      const vendor = gl
+        .getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)
+        .toLowerCase();
 
       // Определение типа GPU по производителю
       let gpuTypeScore = 0;
@@ -564,11 +605,21 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
       }
       // Общие признаки для неопределенных GPU
       else {
-        if (renderer.includes("high") || renderer.includes("discrete") || renderer.includes("dedicated")) {
+        if (
+          renderer.includes("high") ||
+          renderer.includes("discrete") ||
+          renderer.includes("dedicated")
+        ) {
           gpuTypeScore = 20; // Высокопроизводительные GPU
-        } else if (renderer.includes("integrated") || renderer.includes("graphics")) {
+        } else if (
+          renderer.includes("integrated") ||
+          renderer.includes("graphics")
+        ) {
           gpuTypeScore = 10; // Интегрированные GPU
-        } else if (renderer.includes("mobile") || renderer.includes("embedded")) {
+        } else if (
+          renderer.includes("mobile") ||
+          renderer.includes("embedded")
+        ) {
           gpuTypeScore = 15; // Мобильные GPU
         } else {
           // Если не удалось определить тип, даем базовые очки
@@ -625,8 +676,16 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
             }
           }
           // Современные AMD поддерживают DirectX 12 и Vulkan
-          else if (vendor.includes("amd") || renderer.includes("amd") || renderer.includes("radeon")) {
-            if (renderer.includes("rx") || renderer.includes("vega") || renderer.includes("navi")) {
+          else if (
+            vendor.includes("amd") ||
+            renderer.includes("amd") ||
+            renderer.includes("radeon")
+          ) {
+            if (
+              renderer.includes("rx") ||
+              renderer.includes("vega") ||
+              renderer.includes("navi")
+            ) {
               apiScore = 10; // Современные AMD поддерживают DX12/Vulkan
             } else {
               apiScore = 5; // Старые AMD поддерживают современные API

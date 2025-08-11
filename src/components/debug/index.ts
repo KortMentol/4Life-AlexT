@@ -1,1 +1,1 @@
-export { default as PerformanceDebug } from './PerformanceDebug';
+export { default as PerformanceDebug } from "./PerformanceDebug";

@@ -13,5 +13,4 @@ export * from "./magicui";
 // Debug components
 export * from "./debug";
 
-// Utils
-export * from "./utils";
+export { default as RouteChangeHandler } from "./RouteChangeHandler";

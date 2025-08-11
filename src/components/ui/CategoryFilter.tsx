@@ -31,25 +31,25 @@ const chipVariants = {
  *
  * @usage
  * Используется на странице продуктов для фильтрации списка товаров.
- * 
+ *
  * 1. **На странице "Продукты" (`src/pages/ProductsPage.tsx`):**
  *    - Позволяет пользователям легко отсортировать каталог по интересующим их категориям.
  *
  * @example
  * const allCategories = ['Здоровье', 'Красота', 'Спорт'];
  * const [selected, setSelected] = useState(['Здоровье']);
- * 
+ *
  * const toggle = (cat) => {
- *   setSelected(prev => 
+ *   setSelected(prev =>
  *     prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
  *   );
  * };
- * 
- * <CategoryFilter 
- *   categories={allCategories} 
- *   selected={selected} 
- *   toggleCategory={toggle} 
- *   clearSelection={() => setSelected([])} 
+ *
+ * <CategoryFilter
+ *   categories={allCategories}
+ *   selected={selected}
+ *   toggleCategory={toggle}
+ *   clearSelection={() => setSelected([])}
  * />
  */
 const CategoryFilter: React.FC<CategoryFilterProps> = ({

@@ -5,8 +5,16 @@ import { useEffect, useRef } from "react";
 const TRANSITION_START = "menu-transition-start";
 const TRANSITION_COMPLETE = "menu-transition-complete";
 const runIdle = (cb: () => void) => {
-  if (typeof (window as any).requestIdleCallback === "function") {
-    (window as any).requestIdleCallback(cb);
+  if (
+    typeof window !== "undefined" &&
+    "requestIdleCallback" in window &&
+    typeof (
+      window as Window & { requestIdleCallback?: (cb: () => void) => number }
+    ).requestIdleCallback === "function"
+  ) {
+    (
+      window as Window & { requestIdleCallback: (cb: () => void) => number }
+    ).requestIdleCallback(cb);
   } else {
     setTimeout(cb, 0);
   }
@@ -119,7 +127,14 @@ export default function DarkVeil({
   const isInView = useInView(wrapperRef, { once: false, margin: "400px" });
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const glObjects = useRef<any>(null);
+  type GlObjects = {
+    renderer: Renderer;
+    program: Program;
+    mesh: Mesh;
+    start: number;
+    resize: () => void;
+  };
+  const glObjects = useRef<GlObjects | null>(null);
   const frameId = useRef<number | null>(null);
 
   // Инициализация WebGL. Выполняется один раз при монтировании.
@@ -167,7 +182,7 @@ export default function DarkVeil({
     resize();
 
     return () => {
-      window.removeEventListener("resize", glObjects.current.resize);
+      window.removeEventListener("resize", resize);
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
       }
@@ -229,12 +244,23 @@ export default function DarkVeil({
 
     return () => {
       window.removeEventListener(TRANSITION_START, onStart as EventListener);
-      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+      window.removeEventListener(
+        TRANSITION_COMPLETE,
+        onComplete as EventListener,
+      );
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
       }
     };
-  }, [isInView, hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount]);
+  }, [
+    isInView,
+    hueShift,
+    noiseIntensity,
+    scanlineIntensity,
+    speed,
+    scanlineFrequency,
+    warpAmount,
+  ]);
 
   return (
     <div ref={wrapperRef} className="w-full h-full">

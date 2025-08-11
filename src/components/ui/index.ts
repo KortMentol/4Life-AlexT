@@ -15,4 +15,4 @@ export { default as ScrollToTopButton } from "./ScrollToTopButton";
 export { default as Section } from "./Section";
 export { default as SectionHeading } from "./SectionHeading";
 export { default as StaticFeature } from "./StaticFeature";
-export { NavBar } from "./tubelight-navbar";
+export { TubelightNavbar } from "./tubelight-navbar";

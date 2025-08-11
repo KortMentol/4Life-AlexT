@@ -13,17 +13,17 @@
  * @example
  * // Получение цвета в зависимости от темы
  * const textColor = getThemeColor('#1f2937', '#f9fafb', theme);
- * 
+ *
  * // Получение класса в зависимости от темы
  * const bgClass = getThemeClass('bg-white', 'bg-gray-900', theme);
- * 
+ *
  * // Получение стиля в зависимости от темы
  * const buttonStyle = getThemeStyle(
  *   { backgroundColor: '#3b82f6', color: '#ffffff' },
  *   { backgroundColor: '#1e40af', color: '#f9fafb' },
  *   theme
  * );
- * 
+ *
  * // Получение градиента и тени в зависимости от темы
  * const gradient = getThemeGradient(theme);
  * const shadow = getThemeShadow(theme);
@@ -38,7 +38,11 @@ import { Theme } from "../context/ThemeContext.types";
  * @param currentTheme Текущая тема
  * @returns Цвет в зависимости от темы
  */
-export const getThemeColor = (lightColor: string, darkColor: string, currentTheme: Theme): string => {
+export const getThemeColor = (
+  lightColor: string,
+  darkColor: string,
+  currentTheme: Theme,
+): string => {
   return currentTheme === "light" ? lightColor : darkColor;
 };
 
@@ -49,7 +53,11 @@ export const getThemeColor = (lightColor: string, darkColor: string, currentThem
  * @param currentTheme Текущая тема
  * @returns Класс в зависимости от темы
  */
-export const getThemeClass = (lightClass: string, darkClass: string, currentTheme: Theme): string => {
+export const getThemeClass = (
+  lightClass: string,
+  darkClass: string,
+  currentTheme: Theme,
+): string => {
   return currentTheme === "light" ? lightClass : darkClass;
 };
 
@@ -60,7 +68,11 @@ export const getThemeClass = (lightClass: string, darkClass: string, currentThem
  * @param currentTheme Текущая тема
  * @returns Стиль в зависимости от темы
  */
-export const getThemeStyle = <T>(lightStyle: T, darkStyle: T, currentTheme: Theme): T => {
+export const getThemeStyle = <T>(
+  lightStyle: T,
+  darkStyle: T,
+  currentTheme: Theme,
+): T => {
   return currentTheme === "light" ? lightStyle : darkStyle;
 };
 

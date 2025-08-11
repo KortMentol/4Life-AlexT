@@ -13,13 +13,13 @@
  * @example
  * // Блокировка скролла при открытии модального окна
  * const unlockScroll = lockScroll();
- * 
+ *
  * // Разблокировка скролла при закрытии модального окна
  * unlockScroll();
- * 
+ *
  * // Плавный скролл к элементу
  * scrollToElement('section-id', 80); // 80px отступ от верха
- * 
+ *
  * // Проверка видимости элемента
  * if (isElementInViewport(element)) {
  *   // Элемент виден в области просмотра
@@ -30,30 +30,30 @@
  * Функция для блокировки скролла на странице
  * @returns Функция для разблокировки скролла
  */
-export const lockScroll = (): () => void => {
+export const lockScroll = (): (() => void) => {
   // Сохраняем текущую позицию скролла
   const scrollY = window.scrollY;
-  
+
   // Добавляем стили для блокировки скролла
-  document.body.style.position = 'fixed';
+  document.body.style.position = "fixed";
   document.body.style.top = `-${scrollY}px`;
-  document.body.style.width = '100%';
-  document.body.style.overflowY = 'scroll';
-  
+  document.body.style.width = "100%";
+  document.body.style.overflowY = "scroll";
+
   // Добавляем класс для блокировки скролла
-  document.body.classList.add('scroll-locked');
-  
+  document.body.classList.add("scroll-locked");
+
   // Возвращаем функцию для разблокировки скролла
   return () => {
     // Удаляем стили для блокировки скролла
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.overflowY = '';
-    
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+    document.body.style.overflowY = "";
+
     // Удаляем класс для блокировки скролла
-    document.body.classList.remove('scroll-locked');
-    
+    document.body.classList.remove("scroll-locked");
+
     // Восстанавливаем позицию скролла
     window.scrollTo(0, scrollY);
   };
@@ -65,16 +65,19 @@ export const lockScroll = (): () => void => {
  * @param offset Отступ от верха элемента
  * @param duration Длительность анимации
  */
-export const scrollToElement = (elementId: string, offset: number = 0): void => {
+export const scrollToElement = (
+  elementId: string,
+  offset: number = 0,
+): void => {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
+
   const elementPosition = element.getBoundingClientRect().top + window.scrollY;
   const offsetPosition = elementPosition - offset;
-  
+
   window.scrollTo({
     top: offsetPosition,
-    behavior: 'smooth'
+    behavior: "smooth",
   });
 };
 
@@ -84,19 +87,23 @@ export const scrollToElement = (elementId: string, offset: number = 0): void => 
  * @param partiallyVisible Флаг, определяющий, должен ли элемент быть полностью виден или частично
  * @returns true, если элемент виден, иначе false
  */
-export const isElementInViewport = (element: HTMLElement, partiallyVisible: boolean = false): boolean => {
+export const isElementInViewport = (
+  element: HTMLElement,
+  partiallyVisible: boolean = false,
+): boolean => {
   const rect = element.getBoundingClientRect();
-  const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+  const windowHeight =
+    window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-  
+
   const vertInView = partiallyVisible
     ? rect.top <= windowHeight && rect.bottom >= 0
     : rect.top >= 0 && rect.bottom <= windowHeight;
-    
+
   const horInView = partiallyVisible
     ? rect.left <= windowWidth && rect.right >= 0
     : rect.left >= 0 && rect.right <= windowWidth;
-    
+
   return vertInView && horInView;
 };
 
@@ -106,10 +113,14 @@ export const isElementInViewport = (element: HTMLElement, partiallyVisible: bool
  * @param className Класс, который нужно добавить
  * @param threshold Порог скролла, при котором нужно добавить класс
  */
-export const addClassOnScroll = (elementId: string, className: string, threshold: number = 100): void => {
+export const addClassOnScroll = (
+  elementId: string,
+  className: string,
+  threshold: number = 100,
+): void => {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
+
   const handleScroll = () => {
     if (window.scrollY > threshold) {
       element.classList.add(className);
@@ -117,9 +128,9 @@ export const addClassOnScroll = (elementId: string, className: string, threshold
       element.classList.remove(className);
     }
   };
-  
-  window.addEventListener('scroll', handleScroll);
-  
+
+  window.addEventListener("scroll", handleScroll);
+
   // Вызываем функцию один раз для инициализации
   handleScroll();
 };
@@ -129,11 +140,13 @@ export const addClassOnScroll = (elementId: string, className: string, threshold
  * @param element Элемент, размеры которого нужно получить
  * @returns Объект с размерами элемента
  */
-export const getElementDimensions = (element: HTMLElement): { width: number; height: number } => {
+export const getElementDimensions = (
+  element: HTMLElement,
+): { width: number; height: number } => {
   const rect = element.getBoundingClientRect();
   return {
     width: rect.width,
-    height: rect.height
+    height: rect.height,
   };
 };
 
@@ -142,13 +155,15 @@ export const getElementDimensions = (element: HTMLElement): { width: number; hei
  * @param element Элемент, позицию которого нужно получить
  * @returns Объект с позицией элемента
  */
-export const getElementPosition = (element: HTMLElement): { top: number; left: number } => {
+export const getElementPosition = (
+  element: HTMLElement,
+): { top: number; left: number } => {
   const rect = element.getBoundingClientRect();
   const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
   const scrollTop = window.scrollY || document.documentElement.scrollTop;
-  
+
   return {
     top: rect.top + scrollTop,
-    left: rect.left + scrollLeft
+    left: rect.left + scrollLeft,
   };
 };

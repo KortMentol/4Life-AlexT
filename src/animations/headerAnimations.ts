@@ -11,7 +11,7 @@
  * @example
  * // Использование в компоненте с Framer Motion
  * import { headerVariants } from "../../animations/headerAnimations";
- * 
+ *
  * <motion.header
  *   variants={headerVariants}
  *   initial="hidden"
@@ -22,33 +22,38 @@
  */
 
 import { Variants } from "framer-motion";
-import { fadeInVariants, scaleVariants, hoverVariants, overlayVariants as createOverlayVariants } from "../utils/framerUtils";
+import {
+  fadeInVariants,
+  scaleVariants,
+  hoverVariants,
+  overlayVariants as createOverlayVariants,
+} from "../utils/framerUtils";
 
 /**
  * Анимации для хедера - определяет поведение при появлении и скрытии
  * Использует пружинную анимацию для естественного движения
  */
 export const headerVariants: Variants = {
-  visible: { 
+  visible: {
     y: 0,
     opacity: 1,
     transition: {
       type: "spring",
       stiffness: 300,
       damping: 30,
-      mass: 0.8
-    }
+      mass: 0.8,
+    },
   },
-  hidden: { 
+  hidden: {
     y: "-100%",
     opacity: 0,
     transition: {
       type: "spring",
       stiffness: 300,
       damping: 30,
-      mass: 0.8
-    }
-  }
+      mass: 0.8,
+    },
+  },
 };
 
 /**
@@ -57,7 +62,7 @@ export const headerVariants: Variants = {
  */
 export const navItemVariants: Variants = {
   ...fadeInVariants("up", 0.5),
-  ...hoverVariants(1.05, 0.3)
+  ...hoverVariants(1.05, 0.3),
 };
 
 /**
@@ -65,19 +70,19 @@ export const navItemVariants: Variants = {
  * Плавно расширяется от 0 до 100% ширины
  */
 export const underlineVariants: Variants = {
-  initial: { 
+  initial: {
     width: 0,
-    opacity: 0
+    opacity: 0,
   },
-  animate: { 
+  animate: {
     width: "100%",
     opacity: 1,
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 30
-    }
-  }
+      damping: 30,
+    },
+  },
 };
 
 /**
@@ -86,7 +91,7 @@ export const underlineVariants: Variants = {
  */
 export const iconVariants: Variants = {
   ...scaleVariants(0.5),
-  ...hoverVariants(1.1, 0.3)
+  ...hoverVariants(1.1, 0.3),
 };
 
 /**
@@ -100,9 +105,9 @@ export const logoVariants: Variants = {
     transition: {
       type: "spring",
       stiffness: 400,
-      damping: 10
-    }
-  }
+      damping: 10,
+    },
+  },
 };
 
 /**
@@ -117,8 +122,8 @@ export const mobileMenuVariants: Variants = {
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 30
-    }
+      damping: 30,
+    },
   },
   visible: {
     x: 0,
@@ -126,8 +131,8 @@ export const mobileMenuVariants: Variants = {
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 30
-    }
+      damping: 30,
+    },
   },
   exit: {
     x: "-100%",
@@ -135,9 +140,9 @@ export const mobileMenuVariants: Variants = {
     transition: {
       type: "spring",
       stiffness: 400,
-      damping: 40
-    }
-  }
+      damping: 40,
+    },
+  },
 };
 
 /**

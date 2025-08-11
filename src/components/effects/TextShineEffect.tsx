@@ -79,7 +79,12 @@ const ShineTextContainer = styled.span<ShineTextContainerProps>`
  * @example
  * <TextShineEffect text="Важный заголовок" duration={3} />
  */
-const TextShineEffect: React.FC<ShineTextProps> = ({ text, className = "", duration = 3, color }) => {
+const TextShineEffect: React.FC<ShineTextProps> = ({
+  text,
+  className = "",
+  duration = 3,
+  color,
+}) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 

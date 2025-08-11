@@ -6,7 +6,10 @@ interface SciFiMenuButtonProps {
   toggle: () => void;
 }
 
-const SciFiMenuButton: React.FC<SciFiMenuButtonProps> = ({ isOpen, toggle }) => {
+const SciFiMenuButton: React.FC<SciFiMenuButtonProps> = ({
+  isOpen,
+  toggle,
+}) => {
   return (
     <motion.button
       onClick={toggle}
@@ -17,12 +20,17 @@ const SciFiMenuButton: React.FC<SciFiMenuButtonProps> = ({ isOpen, toggle }) => 
     >
       {/* Неоновое свечение */}
       <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-cyan-400/10 to-blue-500/10 blur-sm" />
-      
+
       {/* Иконка */}
       <div className="relative z-10 flex items-center justify-center w-full h-full">
         {isOpen ? (
           // Крестик
-          <svg width="18" height="18" viewBox="0 0 24 24" className="text-cyan-300">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            className="text-cyan-300"
+          >
             <path
               d="M18 6L6 18M6 6l12 12"
               stroke="currentColor"
@@ -33,7 +41,12 @@ const SciFiMenuButton: React.FC<SciFiMenuButtonProps> = ({ isOpen, toggle }) => 
           </svg>
         ) : (
           // Гамбургер
-          <svg width="18" height="18" viewBox="0 0 24 24" className="text-cyan-300">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            className="text-cyan-300"
+          >
             <path
               d="M3 12h18M3 6h18M3 18h18"
               stroke="currentColor"
@@ -44,7 +57,7 @@ const SciFiMenuButton: React.FC<SciFiMenuButtonProps> = ({ isOpen, toggle }) => 
           </svg>
         )}
       </div>
-      
+
       {/* Дополнительное свечение при hover */}
       <div className="absolute inset-0 rounded-lg bg-cyan-400/5 opacity-0 hover:opacity-100 transition-opacity duration-200" />
     </motion.button>

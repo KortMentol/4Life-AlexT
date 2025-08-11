@@ -5,6 +5,12 @@ interface DynamicLogoProps {
   alt?: string;
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
+  /**
+   * Принудительная тема для подбора варианта логотипа.
+   * "dark" отдаёт белый логотип, "light" — синий брендовый.
+   * Если не задано, используется текущая тема приложения.
+   */
+  themeOverride?: "light" | "dark";
 }
 
 /**
@@ -18,12 +24,13 @@ interface DynamicLogoProps {
  * @param {string} [alt='4Life Logo'] - Альтернативный текст для тега `<img>`.
  * @param {string} [className] - Дополнительные CSS-классы для стилизации.
  * @param {'sm' | 'md' | 'lg' | 'xl'} [size='md'] - Предустановленный размер логотипа.
+ * @param {'light' | 'dark'} [themeOverride] - Принудительная тема для выбора варианта логотипа.
  *
  * @see useTheme - Хук для получения текущей темы приложения.
  *
  * @usage
  * Используется как основной элемент брендинга в ключевых частях интерфейса.
- * 
+ *
  * 1. **В шапке сайта (`src/components/layout/Header.tsx`):**
  *    - Для отображения логотипа в навигационной панели.
  * 2. **В подвале сайта (`src/components/layout/Footer.tsx`):**
@@ -32,7 +39,7 @@ interface DynamicLogoProps {
  * @example
  * // Использование логотипа среднего размера
  * <DynamicLogo size="md" />
- * 
+ *
  * // Использование большого логотипа с дополнительным классом
  * <DynamicLogo size="lg" className="mx-auto" />
  */
@@ -40,6 +47,7 @@ const DynamicLogo: React.FC<DynamicLogoProps> = ({
   alt = "4Life Logo",
   className = "",
   size = "md",
+  themeOverride,
 }) => {
   const { theme } = useTheme();
 
@@ -51,11 +59,12 @@ const DynamicLogo: React.FC<DynamicLogoProps> = ({
     xl: "h-16 w-auto",
   };
 
-  // Выбираем логотип в зависимости от темы
+  // Выбираем логотип в зависимости от темы (c возможностью принудительного выбора)
+  const effectiveTheme = themeOverride ?? theme;
   const logoSrc =
-    theme === "dark"
-      ? "/src/assets/images/brand/4life-logo-light.svg" // Белый логотип для темной темы
-      : "/src/assets/images/brand/4life-logo.svg"; // Синий логотип для светлой темы
+    effectiveTheme === "dark"
+      ? "/src/assets/images/brand/4life-logo-light.svg" // Белый логотип
+      : "/src/assets/images/brand/4life-logo.svg"; // Синий логотип
 
   return (
     <img

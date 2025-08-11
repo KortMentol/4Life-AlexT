@@ -1,6 +1,6 @@
+import { siteConfig } from "@/site-config/site";
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import { siteConfig } from "@/site-config/site";
 
 export type BreadcrumbItem = {
   name: string;
@@ -21,7 +21,8 @@ export type SEOProps = {
 
 const toAbsoluteUrl = (maybeUrl?: string): string | undefined => {
   if (!maybeUrl) return undefined;
-  if (maybeUrl.startsWith("http://") || maybeUrl.startsWith("https://")) return maybeUrl;
+  if (maybeUrl.startsWith("http://") || maybeUrl.startsWith("https://"))
+    return maybeUrl;
   const base = siteConfig.url.replace(/\/$/, "");
   const rel = maybeUrl.startsWith("/") ? maybeUrl : `/${maybeUrl}`;
   return `${base}${rel}`;
@@ -61,7 +62,9 @@ const buildWebSiteSearchJSONLD = () => ({
 const buildOrganizationJSONLD = () => ({
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: siteConfig.distributor?.name ? `4Life с ${siteConfig.distributor.name}` : siteConfig.name,
+  name: siteConfig.distributor?.name
+    ? `4Life с ${siteConfig.distributor.name}`
+    : siteConfig.name,
   url: siteConfig.url,
   logo: toAbsoluteUrl("/favicon.svg") || toAbsoluteUrl(siteConfig.ogImage),
   sameAs: [
@@ -103,7 +106,8 @@ export const SEO: React.FC<SEOProps> = ({
   const absoluteImage = toAbsoluteUrl(image || siteConfig.ogImage);
   const finalTitle = mergeTitle(title);
 
-  const jsonLd: any[] = [];
+  type JsonLdObject = Record<string, unknown>;
+  const jsonLd: JsonLdObject[] = [];
   const bc = buildBreadcrumbsJSONLD(breadcrumbs);
   if (bc) jsonLd.push(bc);
   if (includeWebSiteSearch) jsonLd.push(buildWebSiteSearchJSONLD());
@@ -116,7 +120,10 @@ export const SEO: React.FC<SEOProps> = ({
     <Helmet>
       <title>{finalTitle}</title>
       <meta name="description" content={description} />
-      <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
+      <meta
+        name="robots"
+        content={noIndex ? "noindex, nofollow" : "index, follow"}
+      />
 
       <link rel="canonical" href={url} />
 

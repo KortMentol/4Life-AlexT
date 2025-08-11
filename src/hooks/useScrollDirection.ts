@@ -13,13 +13,13 @@
  * @example
  * // Базовое использование
  * const { scrollDirection, isScrolled } = useScrollDirection();
- * 
+ *
  * // Использование с настройками
  * const { scrollDirection, scrollY, isAtBottom, scrollProgress } = useScrollDirection({
  *   threshold: 20,
  *   initialDirection: 'down'
  * });
- * 
+ *
  * // Применение в компоненте
  * return (
  *   <header className={`sticky-header ${scrollDirection === 'down' && !isAtTop ? 'hidden' : ''}`}>
@@ -27,10 +27,9 @@
  *   </header>
  * );
  */
-import { useState, useEffect } from 'react';
-import { lenis } from '../lib/lenis'; // Импортируем экземпляр lenis
-
-
+import { useState, useEffect } from "react";
+import { lenis } from "../lib/lenis"; // Импортируем экземпляр lenis
+import type { LenisScrollCallback } from "../lib/lenis.types";
 
 /**
  * Результат работы хука useScrollDirection
@@ -38,7 +37,7 @@ import { lenis } from '../lib/lenis'; // Импортируем экземпля
  */
 interface UseScrollDirectionReturn {
   /** Текущее направление скролла: 'up' (вверх), 'down' (вниз) или null (не определено) */
-  scrollDirection: 'up' | 'down' | null;
+  scrollDirection: "up" | "down" | null;
   /** Текущая позиция скролла в пикселях от верха страницы */
   scrollY: number;
   /** Флаг, указывающий, прокручена ли страница ниже порогового значения (50px) */
@@ -58,7 +57,9 @@ interface UseScrollDirectionReturn {
  */
 export const useScrollDirection = (): UseScrollDirectionReturn => {
   // Состояния для хранения информации о скролле
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>('down');
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down" | null>(
+    "down",
+  );
   const [scrollY, setScrollY] = useState<number>(0);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
@@ -69,46 +70,57 @@ export const useScrollDirection = (): UseScrollDirectionReturn => {
     if (!lenis) return;
 
     // Функция-обработчик, которую будет вызывать lenis
-    const handleScroll = (e: any) => {
+    type ScrollInfo = Parameters<LenisScrollCallback>[0];
+    const handleScroll = (e: ScrollInfo) => {
       const currentScrollY = e.scroll;
 
       // Обновляем направление скролла
-      setScrollDirection(e.direction === 1 ? 'down' : 'up');
+      setScrollDirection(e.direction === 1 ? "down" : "up");
       // Обновляем текущую позицию скролла
       setScrollY(currentScrollY);
       // Определяем, прокручена ли страница ниже порога
       setIsScrolled(currentScrollY > 50);
       // Определяем, находимся ли мы в самом верху страницы
       setIsAtTop(currentScrollY <= 1); // Небольшой допуск для lenis
-      
+
       // Определяем, находимся ли мы внизу страницы, используя данные lenis
       const isBottom = currentScrollY >= e.limit - 1; // e.limit - максимальная позиция скролла
       setIsAtBottom(isBottom);
-      
+
       // Используем прогресс напрямую из lenis
       setScrollProgress(e.progress);
     };
 
     // Подписываемся на событие 'scroll' от lenis
-    lenis.on('scroll', handleScroll);
+    lenis.on("scroll", handleScroll);
 
-    // Принудительно вызываем обработчик для инициализации начального состояния
-    if (lenis.scroll) {
-      handleScroll(lenis);
-    }
+    // Инициализируем состояние без обращения к приватным свойствам lenis
+    const initialY = typeof window !== "undefined" ? window.scrollY : 0;
+    const limit =
+      typeof document !== "undefined"
+        ? Math.max(
+            0,
+            document.documentElement.scrollHeight - window.innerHeight,
+          )
+        : 0;
+    setScrollY(initialY);
+    setIsScrolled(initialY > 50);
+    setIsAtTop(initialY <= 1);
+    setIsAtBottom(initialY >= Math.max(0, limit - 1));
+    setScrollProgress(limit > 0 ? initialY / limit : 0);
 
     // Отписываемся от события при размонтировании компонента
     return () => {
-      lenis.off('scroll', handleScroll);
+      lenis.off("scroll", handleScroll);
     };
   }, []); // Пустой массив зависимостей, т.к. lenis - синглтон
-  
-  return { 
-    scrollDirection, 
-    scrollY, 
-    isScrolled, 
-    isAtTop, 
-    isAtBottom, 
-    scrollProgress 
+
+  return {
+    scrollDirection,
+    scrollY,
+    isScrolled,
+    isAtTop,
+    isAtBottom,
+    scrollProgress,
   };
 };

@@ -35,14 +35,14 @@ interface ProductDetailModalProps {
  * @example
  * const [isModalOpen, setIsModalOpen] = useState(false);
  * const [selectedProduct, setSelectedProduct] = useState(null);
- * 
+ *
  * const handleQuickView = (product) => {
  *   setSelectedProduct(product);
  *   setIsModalOpen(true);
  * };
- * 
+ *
  * const closeModal = () => setIsModalOpen(false);
- * 
+ *
  * // ... в рендере
  * {selectedProduct && (
  *   <ProductDetailModal

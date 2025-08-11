@@ -96,8 +96,12 @@ export const useThemeColors = (): ThemeColors => {
     const backgroundMutedColor = isDark ? "#1e293b" : "#f1f5f9"; // Синий / Светло-серый
 
     // Составные стили
-    const borderColor = isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(59, 130, 246, 0.2)";
-    const glowColor = isDark ? "0 0 20px rgba(0, 255, 255, 0.4)" : "0 0 20px rgba(59, 130, 246, 0.4)";
+    const borderColor = isDark
+      ? "rgba(0, 255, 255, 0.2)"
+      : "rgba(59, 130, 246, 0.2)";
+    const glowColor = isDark
+      ? "0 0 20px rgba(0, 255, 255, 0.4)"
+      : "0 0 20px rgba(59, 130, 246, 0.4)";
     const gradient = isDark
       ? "linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%)"
       : "linear-gradient(135deg, rgba(59, 130, 246, 0.5) 0%, rgba(168, 85, 247, 0.5) 100%)";
@@ -106,13 +110,16 @@ export const useThemeColors = (): ThemeColors => {
       : "0 4px 12px rgba(59, 130, 246, 0.15)";
 
     // Новые переменные для тени текста в хедере
-    const headerTextShadow = '0px 1px 3px rgba(0, 0, 0, 0.4)';
+    const headerTextShadow = "0px 1px 3px rgba(0, 0, 0, 0.4)";
 
     // Функции для работы с прозрачностью цветов
-    const getPrimaryWithAlpha = (alpha: number) => hexToRgba(primaryColor, alpha);
-    const getSecondaryWithAlpha = (alpha: number) => hexToRgba(secondaryColor, alpha);
+    const getPrimaryWithAlpha = (alpha: number) =>
+      hexToRgba(primaryColor, alpha);
+    const getSecondaryWithAlpha = (alpha: number) =>
+      hexToRgba(secondaryColor, alpha);
     const getTextWithAlpha = (alpha: number) => hexToRgba(textColor, alpha);
-    const getBackgroundWithAlpha = (alpha: number) => hexToRgba(backgroundColor, alpha);
+    const getBackgroundWithAlpha = (alpha: number) =>
+      hexToRgba(backgroundColor, alpha);
 
     return {
       primaryColor,
@@ -133,5 +140,5 @@ export const useThemeColors = (): ThemeColors => {
       getTextWithAlpha,
       getBackgroundWithAlpha,
     };
-  }, [theme, isDark]);
+  }, [isDark]);
 };

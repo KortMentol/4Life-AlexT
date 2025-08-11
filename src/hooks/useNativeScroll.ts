@@ -20,12 +20,15 @@ export type { UseNativeScrollOptions };
  * - **На ПК**: Хедер плавно скрывается после двух последовательных скроллов вниз и появляется после одного скролла вверх. Используется пружинная анимация для премиального ощущения.
  * - **На Мобильных**: Позиция хедера напрямую следует за пальцем. После отпускания, он плавно "прилипает" к ближайшему состоянию (открыт/закрыт).
  */
-export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false }: UseNativeScrollOptions) {
+export function useNativeScroll({
+  headerHeight,
+  topOffset = 8,
+  disabled = false,
+}: UseNativeScrollOptions) {
   const { scrollY } = useScroll();
   // --- ИЗМЕНЕНИЕ: Создаем MotionValue и Spring только ОДИН РАЗ ---
   const headerY = useMotionValue(0);
   const headerYSmooth = useSpring(headerY, { stiffness: 400, damping: 40 });
-
 
   const downScrollCount = useRef(0);
   const downScrollTimer = useRef<NodeJS.Timeout | null>(null);
@@ -59,7 +62,10 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
         downScrollCount.current++;
 
         // Скрываем, если сделано 2+ скролла и мы не вверху страницы
-        if (downScrollCount.current >= 2 && window.scrollY > totalHeaderHeight) {
+        if (
+          downScrollCount.current >= 2 &&
+          window.scrollY > totalHeaderHeight
+        ) {
           headerYSmooth.set(-totalHeaderHeight);
         }
 
@@ -67,7 +73,6 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
         downScrollTimer.current = setTimeout(() => {
           downScrollCount.current = 0;
         }, 350);
-
       } else if (direction === "up") {
         // При скролле вверх немедленно показываем хедер и сбрасываем счетчик
         if (downScrollTimer.current) clearTimeout(downScrollTimer.current);
@@ -82,7 +87,7 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
       window.removeEventListener("wheel", handleWheel);
       if (downScrollTimer.current) clearTimeout(downScrollTimer.current);
     };
-  }, [isMobile, disabled, headerY, totalHeaderHeight]);
+  }, [isMobile, disabled, headerY, headerYSmooth, totalHeaderHeight]);
 
   // --- ЛОГИКА ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ---
   useEffect(() => {
@@ -98,7 +103,7 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
       headerY.stop();
     };
 
-            const handleTouchMove = (event: TouchEvent) => {
+    const handleTouchMove = (event: TouchEvent) => {
       // Если скролл заблокирован ИЛИ хук отключен, ничего не делаем
       if (disabledRef.current || scrollLockState.isLocked) return;
       const touch = event.touches[0];
@@ -148,8 +153,6 @@ export function useNativeScroll({ headerHeight, topOffset = 8, disabled = false 
       window.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [isMobile, disabled, headerY, scrollY, totalHeaderHeight]);
-
-
 
   return { headerY: headerYSmooth };
 }

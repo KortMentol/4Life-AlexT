@@ -27,8 +27,9 @@ const glowLight = keyframes`
 const GlowContainer = styled.div<{ isDark: boolean }>`
   position: relative;
   display: inline-block;
-  animation: ${({ isDark }) => (isDark ? glowDark : glowLight)} var(--animation-duration, 3s) ease-in-out
-    var(--animation-delay, 0s) infinite;
+  animation: ${({ isDark }) => (isDark ? glowDark : glowLight)}
+    var(--animation-duration, 3s) ease-in-out var(--animation-delay, 0s)
+    infinite;
 `;
 
 interface GlowEffectProps {
@@ -57,7 +58,7 @@ interface GlowEffectProps {
  *
  * @usage
  * Используется для акцентирования внимания на ключевых заголовках или элементах интерфейса.
- * 
+ *
  * 1. **На странице "Продукты" (`src/pages/ProductsPage.tsx`):**
  *    - Для главного заголовка "Каталог Продукции 4Life".
  *
@@ -66,7 +67,11 @@ interface GlowEffectProps {
  *   <h1>Важный заголовок</h1>
  * </GlowEffect>
  */
-export const GlowEffect: React.FC<GlowEffectProps> = ({ children, duration = 3, delay = 0 }) => {
+export const GlowEffect: React.FC<GlowEffectProps> = ({
+  children,
+  duration = 3,
+  delay = 0,
+}) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 

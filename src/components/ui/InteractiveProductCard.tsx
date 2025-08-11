@@ -35,7 +35,7 @@ interface InteractiveProductCardProps {
  *
  * @usage
  * Используется для эффектного представления продуктов.
- * 
+ *
  * 1. **На главной странице (`src/pages/HomePage.tsx`):**
  *    - Для отображения избранных товаров.
  * 2. **В карусели (`src/components/ui/KineticProductCarousel.tsx`):**
@@ -49,7 +49,7 @@ interface InteractiveProductCardProps {
  *   image: '/path/to/image.jpg',
  *   link: '/products/1'
  * };
- * 
+ *
  * <InteractiveProductCard product={product} />
  */
 const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
@@ -60,7 +60,9 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
   return (
     <motion.div
       className="h-full transform-gpu" // Добавляем transform-gpu для аппаратного ускорения
-      whileHover={isHoverEffectDisabled ? {} : { y: -5, rotateY: 5, scale: 1.02 }}
+      whileHover={
+        isHoverEffectDisabled ? {} : { y: -5, rotateY: 5, scale: 1.02 }
+      }
       transition={{ duration: 0.3 }}
       style={{
         transformPerspective: 1000,
@@ -79,8 +81,12 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
           />
         </Link>
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">{product.title}</h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">{product.description}</p>
+          <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
+            {product.title}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+            {product.description}
+          </p>
           <Link
             to={product.link}
             className="inline-flex items-center text-primary hover:text-blue-700 font-semibold transition-colors group text-sm mt-auto"

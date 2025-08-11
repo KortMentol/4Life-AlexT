@@ -1,18 +1,25 @@
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { lenis } from "@/lib/lenis";
+import { scrollTo as lenisScrollTo } from "@/lib/lenis";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "../../hooks/useTheme";
 
 const ScrollToTopButton: React.FC = () => {
+  // --- ШАГ 1: ВСЕ ХУКИ ОБЪЯВЛЯЮТСЯ ЗДЕСЬ, НА ВЕРХНЕМ УРОВНЕ ---
   const [isVisible, setIsVisible] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const prevScrollPos = useRef(0);
-
   const isMobile = useIsMobile();
 
+  // Хуки, которые раньше были "спрятаны" в условии, теперь здесь
+  const [isActivated, setIsActivated] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const particlesRef = useRef<HTMLDivElement>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+
+  // Эффект для отслеживания скролла (без изменений)
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
@@ -31,49 +38,20 @@ const ScrollToTopButton: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Эффект для очистки интервала (теперь он тоже на верхнем уровне)
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // --- ШАГ 2: ВСЕ ФУНКЦИИ ОСТАЮТСЯ КАК ЕСТЬ ---
+
   const handleClick = () => {
-    if (isMobile) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      lenis.scrollTo(0, {
-        duration: 1.5,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      });
-    }
+    lenisScrollTo(0, { duration: 1.5 });
   };
-
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.8 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 400, damping: 15 } },
-    tap: { scale: 0.92, transition: { type: "spring", stiffness: 600 } },
-    hover: { scale: 1.08, transition: { type: "spring", stiffness: 400, damping: 8 } },
-  };
-
-  if (isMobile) {
-    return (
-      <AnimatePresence>
-        {isVisible && (
-          <motion.button
-            onClick={handleClick}
-            className={`fixed z-50 bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800"}`}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            whileTap="tap"
-            variants={buttonVariants}
-            aria-label="Прокрутить вверх"
-          >
-            <ArrowUp size={24} strokeWidth={2.5} />
-          </motion.button>
-        )}
-      </AnimatePresence>
-    );
-  }
-
-  const [isActivated, setIsActivated] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const particlesRef = useRef<HTMLDivElement>(null);
-  const progressIntervalRef = useRef<number | null>(null);
 
   const createParticles = () => {
     if (!particlesRef.current) return;
@@ -102,19 +80,16 @@ const ScrollToTopButton: React.FC = () => {
           { transform: `translate(${xPos}px, 0px)`, opacity: 0.8 },
           { transform: `translate(${xPos * 1.5}px, -${yPos}px)`, opacity: 0 },
         ],
-        { duration: duration * 1000, delay: delay * 1000, easing: "cubic-bezier(0.25, 1, 0.5, 1)", fill: "forwards" }
+        {
+          duration: duration * 1000,
+          delay: delay * 1000,
+          easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+          fill: "forwards",
+        },
       );
       container.appendChild(particle);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, []);
 
   const handleDesktopClick = () => {
     if (progressIntervalRef.current) {
@@ -124,7 +99,7 @@ const ScrollToTopButton: React.FC = () => {
     setIsActivated(true);
     setScrollProgress(0);
     createParticles();
-    const scrollDuration = 1800;
+    const scrollDuration = 1500;
     const startTime = performance.now();
     progressIntervalRef.current = window.setInterval(() => {
       const elapsed = performance.now() - startTime;
@@ -137,10 +112,23 @@ const ScrollToTopButton: React.FC = () => {
         setIsActivated(false);
       }
     }, 16);
-    lenis.scrollTo(0, {
-      duration: scrollDuration / 1000,
-      easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
-    });
+    lenisScrollTo(0, { duration: scrollDuration / 1000 });
+  };
+
+  // Варианты анимации (без изменений)
+  const buttonVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 400, damping: 15 },
+    },
+    tap: { scale: 0.92, transition: { type: "spring", stiffness: 600 } },
+    hover: {
+      scale: 1.08,
+      transition: { type: "spring", stiffness: 400, damping: 8 },
+    },
   };
 
   const pulseVariants = {
@@ -152,6 +140,30 @@ const ScrollToTopButton: React.FC = () => {
     },
   };
 
+  // --- ШАГ 3: УСЛОВНЫЙ РЕНДЕРИНГ JSX ---
+  // Теперь условие `if` обертывает только возвращаемую разметку, а не хуки.
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.button
+            onClick={handleClick}
+            className={`fixed z-50 bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800"}`}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            whileTap="tap"
+            variants={buttonVariants}
+            aria-label="Прокрутить вверх"
+          >
+            <ArrowUp size={24} strokeWidth={2.5} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // Рендер для десктопа (без изменений, т.к. хуки уже наверху)
   return (
     <AnimatePresence>
       {isVisible && (
@@ -186,14 +198,21 @@ const ScrollToTopButton: React.FC = () => {
             </div>
             <div className="absolute inset-0 rounded-full border border-white/20" />
             {isActivated && (
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+              <svg
+                className="absolute inset-0 w-full h-full"
+                viewBox="0 0 100 100"
+              >
                 <circle
                   cx="50"
                   cy="50"
                   r="48"
                   fill="none"
                   strokeWidth="2"
-                  stroke={isDark ? "rgba(139, 92, 246, 0.8)" : "rgba(59, 130, 246, 0.8)"}
+                  stroke={
+                    isDark
+                      ? "rgba(139, 92, 246, 0.8)"
+                      : "rgba(59, 130, 246, 0.8)"
+                  }
                   strokeLinecap="round"
                   strokeDasharray={`${scrollProgress * 302} 302`}
                   className="transform -rotate-90 origin-center"
@@ -203,7 +222,10 @@ const ScrollToTopButton: React.FC = () => {
                 />
               </svg>
             )}
-            <div ref={particlesRef} className="absolute inset-0 overflow-hidden rounded-full" />
+            <div
+              ref={particlesRef}
+              className="absolute inset-0 overflow-hidden rounded-full"
+            />
           </div>
           <div className="relative z-10 flex items-center justify-center">
             <motion.div

@@ -22,7 +22,7 @@
  *     {item.content}
  *   </motion.div>
  * ))}
- * 
+ *
  * // Использование готовой анимации
  * <motion.div {...fadeInAnimation(0.2)}>
  *   Контент с анимацией появления
@@ -35,7 +35,10 @@
  * @param baseDelay Базовая задержка между элементами в секундах (по умолчанию: 0.05)
  * @returns Задержка в секундах для конкретного элемента
  */
-export const getStaggerDelay = (index: number, baseDelay: number = 0.05): number => {
+export const getStaggerDelay = (
+  index: number,
+  baseDelay: number = 0.05,
+): number => {
   return baseDelay * index;
 };
 
@@ -46,12 +49,16 @@ export const getStaggerDelay = (index: number, baseDelay: number = 0.05): number
  * @param mass Масса объекта - чем выше, тем медленнее и тяжелее движение (по умолчанию: 1)
  * @returns Объект конфигурации для пружинной анимации
  */
-export const springTransition = (stiffness: number = 300, damping: number = 30, mass: number = 1) => {
+export const springTransition = (
+  stiffness: number = 300,
+  damping: number = 30,
+  mass: number = 1,
+) => {
   return {
     type: "spring",
     stiffness,
     damping,
-    mass
+    mass,
   };
 };
 
@@ -61,11 +68,14 @@ export const springTransition = (stiffness: number = 300, damping: number = 30, 
  * @param ease Функция плавности ("linear", "easeIn", "easeOut", "easeInOut" или массив кубических точек Безье)
  * @returns Объект конфигурации для плавной анимации
  */
-export const easeTransition = (duration: number = 0.3, ease: string = "easeInOut") => {
+export const easeTransition = (
+  duration: number = 0.3,
+  ease: string = "easeInOut",
+) => {
   return {
     type: "tween",
     duration,
-    ease
+    ease,
   };
 };
 
@@ -77,19 +87,19 @@ export const easeTransition = (duration: number = 0.3, ease: string = "easeInOut
 export const fadeInAnimation = (delay: number = 0) => {
   return {
     initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       y: 0,
       transition: {
         ...springTransition(),
-        delay
-      }
+        delay,
+      },
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       y: 20,
-      transition: easeTransition(0.2)
-    }
+      transition: easeTransition(0.2),
+    },
   };
 };
 
@@ -101,19 +111,19 @@ export const fadeInAnimation = (delay: number = 0) => {
 export const fadeInLeftAnimation = (delay: number = 0) => {
   return {
     initial: { opacity: 0, x: -50 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       x: 0,
       transition: {
         ...springTransition(),
-        delay
-      }
+        delay,
+      },
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       x: -50,
-      transition: easeTransition(0.2)
-    }
+      transition: easeTransition(0.2),
+    },
   };
 };
 
@@ -125,19 +135,19 @@ export const fadeInLeftAnimation = (delay: number = 0) => {
 export const fadeInRightAnimation = (delay: number = 0) => {
   return {
     initial: { opacity: 0, x: 50 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       x: 0,
       transition: {
         ...springTransition(),
-        delay
-      }
+        delay,
+      },
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       x: 50,
-      transition: easeTransition(0.2)
-    }
+      transition: easeTransition(0.2),
+    },
   };
 };
 
@@ -149,18 +159,18 @@ export const fadeInRightAnimation = (delay: number = 0) => {
 export const scaleAnimation = (delay: number = 0) => {
   return {
     initial: { opacity: 0, scale: 0.8 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       scale: 1,
       transition: {
         ...springTransition(),
-        delay
-      }
+        delay,
+      },
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       scale: 0.8,
-      transition: easeTransition(0.2)
-    }
+      transition: easeTransition(0.2),
+    },
   };
 };

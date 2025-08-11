@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-
 interface ButtonProps {
   children: React.ReactNode;
   to?: string;
@@ -44,7 +43,7 @@ interface ButtonProps {
  *
  * @usage
  * Является основным интерактивным элементом на всем сайте.
- * 
+ *
  * 1. **В шапке (`src/components/layout/Header.tsx`):**
  *    - Используется для навигационных ссылок и кнопки связи.
  * 2. **В блоках призыва к действию (`src/components/ui/CallToAction.tsx`):**
@@ -55,7 +54,7 @@ interface ButtonProps {
  * @example
  * // Стандартная кнопка с действием
  * <Button variant="primary" onClick={() => alert('Clicked!')}>Нажми меня</Button>
- * 
+ *
  * // Кнопка-ссылка для внутренней навигации с иконкой
  * <Button to="/products" variant="secondary" icon={<ArrowRight />}>Продукты</Button>
  */

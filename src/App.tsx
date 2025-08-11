@@ -1,21 +1,20 @@
-// === Файл: src/App.tsx (ФИНАЛЬНАЯ ВЕРСИЯ С УЛУЧШЕННОЙ ЛОГИКОЙ СКРОЛЛА) ===
-
+import PerformanceDebug from "@/components/debug/PerformanceDebug";
+import PerformanceDebugMobile from "@/components/debug/PerformanceDebugMobile";
+import Header from "@/components/layout/Header";
+import Layout from "@/components/layout/Layout";
+import TheodoreMenu from "@/components/layout/TheodoreMenu";
+import RouteChangeHandler from "@/components/RouteChangeHandler";
+import { FluidProvider } from "@/context/FluidProvider";
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { lenis, updateScroll } from "@/lib/lenis";
+import { scrollLockState } from "@/lib/scrollLockState";
+import { AnimatePresence, motion } from "framer-motion"; // <-- ВАЖНО: Импорты для анимации
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Route, Routes, useNavigate } from "react-router-dom";
-import PerformanceDebug from "./components/debug/PerformanceDebug";
-import PerformanceDebugMobile from "./components/debug/PerformanceDebugMobile";
-import Header from "./components/layout/Header";
-import Layout from "./components/layout/Layout";
-import TheodoreMenu from "./components/layout/TheodoreMenu";
-import RouteChangeHandler from "./components/utils/RouteChangeHandler";
-import { FluidProvider } from "./context/FluidProvider";
 
-import useScrollRestoration from "./hooks/useScrollRestoration";
-import { lenis, updateScroll } from "./lib/lenis";
-import { scrollLockState } from "./lib/scrollLockState"; // <-- ИМПОРТ
-
+// Lazy-loaded компоненты страниц (без изменений)
 const HomePage = React.lazy(() => import("@/pages/HomePage"));
 const ProductsPage = React.lazy(() => import("@/pages/ProductsPage"));
 const AboutPage = React.lazy(() => import("@/pages/AboutPage"));
@@ -32,6 +31,9 @@ function App() {
   isScrollingLockedRef.current = isScrollingLocked;
   const navigate = useNavigate();
 
+  // ▼▼▼ НОВОЕ: Состояние для управления "занавесом" перехода ▼▼▼
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("app-mounted"));
   }, []);
@@ -44,7 +46,7 @@ function App() {
 
   useScrollRestoration();
 
-  // ▼▼▼ НАЧАЛО ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▼▼▼
+  // Логика блокировки скролла для свайпов (остается без изменений)
   useEffect(() => {
     if (isMenuOpen) {
       lenis.stop();
@@ -56,13 +58,7 @@ function App() {
     let touchStartX = 0;
     let touchStartY = 0;
     let scrollDirectionDetermined = false;
-
-    // --- НАСТРОЙКИ ЧУВСТВИТЕЛЬНОСТИ ---
-    // Порог, после которого начинаем определять свайп (в пикселях)
     const SENSITIVITY_THRESHOLD = 5;
-    // Коэффициент смещения в пользу вертикального скролла.
-    // 1.0 = строгие 45°.
-    // 1.7 = скролл заблокируется, только если горизонтальный свайп в 1.7 раза длиннее вертикального.
     const HORIZONTAL_SWIPE_BIAS = 1.7;
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -78,26 +74,19 @@ function App() {
       if (isMenuOpen) return;
       const touch = e.touches[0];
       if (!touch || scrollDirectionDetermined) return;
-
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
-
       if (deltaX > SENSITIVITY_THRESHOLD || deltaY > SENSITIVITY_THRESHOLD) {
-        // УЛУЧШЕННОЕ УСЛОВИЕ:
-        // Блокируем вертикальный скролл, только если горизонтальное движение
-        // ЗНАЧИТЕЛЬНО превышает вертикальное.
         if (deltaX > deltaY * HORIZONTAL_SWIPE_BIAS) {
-          // Это точно горизонтальный свайп
           if (!isScrollingLockedRef.current) {
             lenis.stop();
-            scrollLockState.isLocked = true; // <-- МГНОВЕННАЯ БЛОКИРОВКА
+            scrollLockState.isLocked = true;
             setIsScrollingLocked(true);
           }
         } else {
-          // Это вертикальный скролл (или диагональный, но ближе к вертикальному)
           if (isScrollingLockedRef.current) {
             lenis.start();
-            scrollLockState.isLocked = false; // <-- МГНОВЕННАЯ РАЗБЛОКИРОВКА
+            scrollLockState.isLocked = false;
             setIsScrollingLocked(false);
           }
         }
@@ -107,13 +96,12 @@ function App() {
 
     const handleTouchEnd = () => {
       if (isMenuOpen) return;
-
       if (isScrollingLockedRef.current) {
         setTimeout(() => {
           lenis.start();
-          scrollLockState.isLocked = false; // <-- МГНОВЕННАЯ РАЗБЛОКИРОВКА
+          scrollLockState.isLocked = false;
           setIsScrollingLocked(false);
-        }, 50); // Небольшая задержка для завершения свайпа
+        }, 50);
       }
     };
 
@@ -129,7 +117,6 @@ function App() {
       document.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [isMenuOpen]);
-  // ▲▲▲ КОНЕЦ ОБНОВЛЕННОГО БЛОКА ЛОГИКИ СКРОЛЛА ▲▲▲
 
   useEffect(() => {
     window.addEventListener("load", updateScroll);
@@ -144,14 +131,14 @@ function App() {
   return (
     <ThemeProvider>
       <ProductListProvider>
-        <RouteChangeHandler />
+        {/* ▼▼▼ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Вызываем RouteChangeHandler С НУЖНЫМИ PROPS ▼▼▼ */}
+        <RouteChangeHandler
+          onTransitionStart={() => setIsTransitioning(true)}
+          onTransitionEnd={() => setIsTransitioning(false)}
+        />
         <Suspense fallback={null}>
           <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isScrollingLocked={isScrollingLocked} />
-          <TheodoreMenu
-            isOpen={isMenuOpen}
-            onClose={() => setIsMenuOpen(false)}
-            navigate={navigate} // Передаем функцию navigate напрямую
-          />
+          <TheodoreMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} navigate={navigate} />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route
@@ -202,6 +189,20 @@ function App() {
           </Routes>
         </Suspense>
         {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
+
+        {/* ▼▼▼ НОВОЕ: Анимированный "занавес" для бесшовных переходов ▼▼▼ */}
+        <AnimatePresence>
+          {isTransitioning && (
+            <motion.div
+              key="transition-overlay"
+              className="fixed inset-0 bg-gray-900 z-[99999]" // Очень высокий z-index
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }} // Плавное появление и исчезновение
+            />
+          )}
+        </AnimatePresence>
       </ProductListProvider>
     </ThemeProvider>
   );

@@ -13,7 +13,7 @@ import { FluidContext } from "@/context/FluidContext.helpers";
  * 1. `src/components/effects/FluidEffect.tsx`: Используется для получения функции `setFluidInstance` и передачи инстанса эффекта в контекст.
  * @example
  * const { setFluidBrightness } = useFluid();
- * 
+ *
  * const handleButtonClick = () => {
  *   setFluidBrightness(0.8);
  * };

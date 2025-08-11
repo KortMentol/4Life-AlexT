@@ -1,4 +1,8 @@
-import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
+import {
+  DeviceSpecs,
+  calculatePerformanceScore,
+  detectDeviceSpecs,
+} from "@/utils/devicePerformance/devicePerformance";
 import {
   Bug,
   ChevronDown,
@@ -60,7 +64,6 @@ const PerformanceDebugMobile: React.FC = () => {
     let animationId: number;
     let lastTime = performance.now();
     let lastFrameTime = performance.now();
-    let frameCount = 0;
     const frameTimeHistory: number[] = [];
 
     try {
@@ -76,16 +79,15 @@ const PerformanceDebugMobile: React.FC = () => {
     const performanceLoop = () => {
       const currentTime = performance.now();
       const deltaTime = currentTime - lastFrameTime;
-      frameCount++;
       frameTimeHistory.push(deltaTime);
       if (frameTimeHistory.length > 10) frameTimeHistory.shift();
 
       if (currentTime - lastTime >= 500) {
-        const avgFrameTime = frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
+        const avgFrameTime =
+          frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
         setFps(Math.round(1000 / avgFrameTime));
         setFrameTime(Math.round(avgFrameTime * 100) / 100);
         lastTime = currentTime;
-        frameCount = 0;
       }
       lastFrameTime = currentTime;
       animationId = requestAnimationFrame(performanceLoop);
@@ -118,13 +120,28 @@ const PerformanceDebugMobile: React.FC = () => {
 
   return (
     <div className={containerClasses}>
-      <div className={styles.debugHeader} onClick={toggleCompactMode}>
+      <div
+        className={styles.debugHeader}
+        onClick={toggleCompactMode}
+        role="button"
+        tabIndex={0}
+        aria-expanded={!isCompact}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleCompactMode();
+          }
+        }}
+      >
         {isCompact ? (
           <>
             <div className={styles.headerMetrics}>
               <div className={styles.metricItemCompact}>
                 <span className={styles.label}>FPS:</span>
-                <span className={`${styles.value} ${getValueColor(fps)}`}>{fps}</span>
+                <span className={`${styles.value} ${getValueColor(fps)}`}>
+                  {fps}
+                </span>
               </div>
               <div className={styles.metricItemCompact}>
                 <span className={styles.label}>Frame:</span>
@@ -138,7 +155,11 @@ const PerformanceDebugMobile: React.FC = () => {
                   toggleCompactMode();
                 }}
               >
-                {isCompact ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                {isCompact ? (
+                  <ChevronUp size={20} />
+                ) : (
+                  <ChevronDown size={20} />
+                )}
               </button>
               <button
                 onClick={(e) => {
@@ -152,7 +173,10 @@ const PerformanceDebugMobile: React.FC = () => {
           </>
         ) : (
           <>
-            <div className={styles.headerTitle} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div
+              className={styles.headerTitle}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
               <span className={styles.metricIcon}>
                 <Bug size={18} />
               </span>
@@ -172,7 +196,11 @@ const PerformanceDebugMobile: React.FC = () => {
                   toggleCompactMode();
                 }}
               >
-                {isCompact ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                {isCompact ? (
+                  <ChevronUp size={20} />
+                ) : (
+                  <ChevronDown size={20} />
+                )}
               </button>
               <button
                 onClick={(e) => {
@@ -195,7 +223,9 @@ const PerformanceDebugMobile: React.FC = () => {
                 <Gauge size={16} />
               </div>
               <span className={styles.metricLabel}>FPS</span>
-              <span className={`${styles.metricValue} ${getValueColor(fps)}`}>{fps}</span>
+              <span className={`${styles.metricValue} ${getValueColor(fps)}`}>
+                {fps}
+              </span>
             </div>
             <div className={styles.metricItem}>
               <div className={styles.metricIcon}>
@@ -209,7 +239,9 @@ const PerformanceDebugMobile: React.FC = () => {
                 <Star size={16} />
               </div>
               <span className={styles.metricLabel}>Score</span>
-              <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>
+              <span
+                className={`${styles.metricValue} ${getScoreColor(staticScore)}`}
+              >
                 {staticScore} ({tier.toUpperCase()})
               </span>
             </div>
@@ -246,28 +278,36 @@ const PerformanceDebugMobile: React.FC = () => {
                 <Zap size={16} />
               </div>
               <strong>WebGL:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.webglVersion}
+              </span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
                 <Monitor size={16} />
               </div>
               <strong>Screen:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.screenResolution}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.screenResolution}
+              </span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
                 <Smartphone size={16} />
               </div>
               <strong>Touch:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.touchSupport ? "Yes" : "No"}
+              </span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
                 <Wifi size={16} />
               </div>
               <strong>Network:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.connectionType}</span>
+              <span className={styles.infoValue}>
+                {deviceSpecs.connectionType}
+              </span>
             </div>
           </div>
         </div>

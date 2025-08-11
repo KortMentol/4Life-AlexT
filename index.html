@@ -38,7 +38,8 @@
       #preloader {
         position: fixed;
         inset: 0;
-        z-index: 99999;
+        /* Поднимаем прелоадер выше любых оверлеев приложения */
+        z-index: 2147483647; /* max safe z-index */
         display: grid;
         place-items: center;
         background: var(--preloader-bg-light);
@@ -214,7 +215,7 @@
     <script>
       (function () {
         const logoImg = document.querySelector(".preloader-logo");
-        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
+        if (logoImg && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
           logoImg.src = "/src/assets/images/brand/4life-logo.svg";
         }
 

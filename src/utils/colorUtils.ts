@@ -14,15 +14,15 @@
  * // Преобразование HEX в RGB
  * const rgb = hexToRgb('#3b82f6');
  * console.log(rgb); // { r: 59, g: 130, b: 246 }
- * 
+ *
  * // Создание цвета с прозрачностью
  * const buttonBg = hexToRgba('#3b82f6', 0.2);
  * console.log(buttonBg); // rgba(59, 130, 246, 0.2)
- * 
+ *
  * // Осветление и затемнение цветов
  * const lighterBlue = lightenColor('#3b82f6', 0.2);
  * const darkerBlue = darkenColor('#3b82f6', 0.2);
- * 
+ *
  * // Определение контрастного цвета для фона
  * const textColor = getContrastColor('#3b82f6'); // #FFFFFF
  */
@@ -32,17 +32,19 @@
  * @param hex HEX-цвет в формате #RRGGBB или #RGB (с # или без)
  * @returns Объект с RGB-компонентами {r, g, b} или null при некорректном входном значении
  */
-export const hexToRgb = (hex: string | undefined): { r: number; g: number; b: number } | null => {
+export const hexToRgb = (
+  hex: string | undefined,
+): { r: number; g: number; b: number } | null => {
   if (!hex) return null;
-  
+
   // Используем явное приведение типов для результатов регулярного выражения
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!result || !result[1] || !result[2] || !result[3]) return null;
-  
+
   const r = parseInt(result[1] as string, 16);
   const g = parseInt(result[2] as string, 16);
   const b = parseInt(result[3] as string, 16);
-  
+
   return { r, g, b };
 };
 
@@ -64,7 +66,11 @@ export const rgbToHex = (r: number, g: number, b: number): string => {
  * @param b Синий компонент (0-255)
  * @returns Объект с HSL-компонентами {h, s, l}, где h: 0-1, s: 0-1, l: 0-1
  */
-export const rgbToHsl = (r: number, g: number, b: number): { h: number; s: number; l: number } => {
+export const rgbToHsl = (
+  r: number,
+  g: number,
+  b: number,
+): { h: number; s: number; l: number } => {
   // Нормализуем RGB значения в диапазон 0-1
   r /= 255;
   g /= 255;
@@ -108,7 +114,11 @@ export const rgbToHsl = (r: number, g: number, b: number): { h: number; s: numbe
  * @param l Яркость (0-1)
  * @returns Объект с RGB-компонентами {r, g, b}, где r, g, b: 0-255
  */
-export const hslToRgb = (h: number, s: number, l: number): { r: number; g: number; b: number } => {
+export const hslToRgb = (
+  h: number,
+  s: number,
+  l: number,
+): { r: number; g: number; b: number } => {
   let r, g, b;
 
   // Если насыщенность равна 0, то цвет ахроматический (серый)
@@ -149,9 +159,12 @@ export const hslToRgb = (h: number, s: number, l: number): { r: number; g: numbe
  * @param amount Величина осветления в диапазоне 0-1
  * @returns Осветленный HEX-цвет
  */
-export const lightenColor = (hex: string | undefined, amount: number): string => {
-  if (!hex) return '#000000';
-  
+export const lightenColor = (
+  hex: string | undefined,
+  amount: number,
+): string => {
+  if (!hex) return "#000000";
+
   // Используем безопасное преобразование
   const safeHex = hex;
   const rgb = hexToRgb(safeHex);
@@ -171,9 +184,12 @@ export const lightenColor = (hex: string | undefined, amount: number): string =>
  * @param amount Величина затемнения в диапазоне 0-1
  * @returns Затемненный HEX-цвет
  */
-export const darkenColor = (hex: string | undefined, amount: number): string => {
-  if (!hex) return '#000000';
-  
+export const darkenColor = (
+  hex: string | undefined,
+  amount: number,
+): string => {
+  if (!hex) return "#000000";
+
   // Используем безопасное преобразование
   const safeHex = hex;
   const rgb = hexToRgb(safeHex);
@@ -194,7 +210,7 @@ export const darkenColor = (hex: string | undefined, amount: number): string => 
  * @returns RGBA-цвет в формате rgba(r, g, b, a)
  */
 export const hexToRgba = (hex: string | undefined, alpha: number): string => {
-  const safeHex = hex || '#000000';
+  const safeHex = hex || "#000000";
   const rgb = hexToRgb(safeHex);
   if (!rgb) return safeHex;
 
@@ -207,14 +223,14 @@ export const hexToRgba = (hex: string | undefined, alpha: number): string => {
  * @returns Контрастный цвет (#000000 для светлого фона или #FFFFFF для темного)
  */
 export const getContrastColor = (hex: string | undefined): string => {
-  const safeHex = hex || '#000000';
+  const safeHex = hex || "#000000";
   const rgb = hexToRgb(safeHex);
-  if (!rgb) return '#000000';
+  if (!rgb) return "#000000";
 
   // Формула для определения яркости цвета по стандарту WCAG
   // Учитывает разную чувствительность человеческого глаза к разным цветам
   const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
 
   // Возвращаем черный для светлых цветов и белый для темных
-  return brightness > 128 ? '#000000' : '#FFFFFF';
+  return brightness > 128 ? "#000000" : "#FFFFFF";
 };

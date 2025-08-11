@@ -52,7 +52,7 @@ interface HeroProps {
  *
  * @usage
  * Используется как главный визуальный элемент на большинстве страниц для привлечения внимания.
- * 
+ *
  * 1. **На главной странице (`src/pages/HomePage.tsx`):**
  *    - Для представления компании и основного предложения.
  * 2. **На странице "О нас" (`src/pages/AboutPage.tsx`):**
@@ -141,7 +141,9 @@ const Hero: React.FC<HeroProps> = ({
       id="hero-section"
       className={`relative flex items-center justify-center overflow-hidden ${heightClasses[height]}`}
       style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+        backgroundImage: backgroundImage
+          ? `url(${backgroundImage})`
+          : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

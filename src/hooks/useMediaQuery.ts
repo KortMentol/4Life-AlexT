@@ -13,12 +13,12 @@
  * @example
  * // Использование базового хука
  * const isMobile = useMediaQuery('(max-width: 768px)');
- * 
+ *
  * // Использование предопределенных хуков
  * const isMobile = useIsMobile();
  * const isDesktop = useIsDesktop();
  * const prefersReducedMotion = useReducedMotion();
- * 
+ *
  * // Применение в компоненте
  * return (
  *   <div className={isMobile ? "mobile-layout" : "desktop-layout"}>
@@ -27,8 +27,8 @@
  *   </div>
  * );
  */
-import { useEffect, useState } from 'react';
-import { debounce } from '../utils/performanceUtils';
+import { useCallback, useEffect, useState } from "react";
+import { debounce } from "../utils/performanceUtils";
 
 /**
  * Основной хук для работы с медиа-запросами
@@ -37,12 +37,12 @@ import { debounce } from '../utils/performanceUtils';
  */
 export const useMediaQuery = (query: string): boolean => {
   // Проверяем, доступно ли window (для SSR)
-  const getMatches = (): boolean => {
-    if (typeof window !== 'undefined') {
+  const getMatches = useCallback((): boolean => {
+    if (typeof window !== "undefined") {
       return window.matchMedia(query).matches;
     }
     return false;
-  };
+  }, [query]);
 
   const [matches, setMatches] = useState<boolean>(getMatches());
 
@@ -60,7 +60,7 @@ export const useMediaQuery = (query: string): boolean => {
 
     // Добавляем слушатель событий с учетом кроссбраузерности
     if (matchMedia.addEventListener) {
-      matchMedia.addEventListener('change', debouncedHandleChange);
+      matchMedia.addEventListener("change", debouncedHandleChange);
     } else {
       // Для старых браузеров
       matchMedia.addListener(debouncedHandleChange);
@@ -72,13 +72,13 @@ export const useMediaQuery = (query: string): boolean => {
     // Удаляем слушатель событий при размонтировании
     return () => {
       if (matchMedia.removeEventListener) {
-        matchMedia.removeEventListener('change', debouncedHandleChange);
+        matchMedia.removeEventListener("change", debouncedHandleChange);
       } else {
         // Для старых браузеров
         matchMedia.removeListener(debouncedHandleChange);
       }
     };
-  }, [query]);
+  }, [getMatches, query]);
 
   return matches;
 };
@@ -87,39 +87,42 @@ export const useMediaQuery = (query: string): boolean => {
  * Хук для определения мобильных устройств (ширина экрана до 767px)
  * @returns true для мобильных устройств, иначе false
  */
-export const useIsMobile = (): boolean => useMediaQuery('(max-width: 767px)');
+export const useIsMobile = (): boolean => useMediaQuery("(max-width: 767px)");
 
 /**
  * Хук для определения планшетов (ширина экрана от 768px до 1023px)
  * @returns true для планшетов, иначе false
  */
-export const useIsTablet = (): boolean => useMediaQuery('(min-width: 768px) and (max-width: 1023px)');
+export const useIsTablet = (): boolean =>
+  useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
 
 /**
  * Хук для определения десктопных устройств (ширина экрана от 1024px)
  * @returns true для десктопных устройств, иначе false
  */
-export const useIsDesktop = (): boolean => useMediaQuery('(min-width: 1024px)');
+export const useIsDesktop = (): boolean => useMediaQuery("(min-width: 1024px)");
 
 /**
  * Хук для определения больших десктопных экранов (ширина от 1280px)
  * @returns true для больших десктопных экранов, иначе false
  */
-export const useIsLargeDesktop = (): boolean => useMediaQuery('(min-width: 1280px)');
+export const useIsLargeDesktop = (): boolean =>
+  useMediaQuery("(min-width: 1280px)");
 
 /**
  * Хук для определения очень больших десктопных экранов (ширина от 1536px)
  * @returns true для очень больших десктопных экранов, иначе false
  */
-export const useIsXLargeDesktop = (): boolean => useMediaQuery('(min-width: 1536px)');
+export const useIsXLargeDesktop = (): boolean =>
+  useMediaQuery("(min-width: 1536px)");
 
 /**
  * Хук для определения ориентации устройства
  * @returns 'portrait' для вертикальной ориентации, 'landscape' для горизонтальной
  */
-export const useOrientation = (): 'portrait' | 'landscape' => {
-  const isPortrait = useMediaQuery('(orientation: portrait)');
-  return isPortrait ? 'portrait' : 'landscape';
+export const useOrientation = (): "portrait" | "landscape" => {
+  const isPortrait = useMediaQuery("(orientation: portrait)");
+  return isPortrait ? "portrait" : "landscape";
 };
 
 /**
@@ -127,7 +130,7 @@ export const useOrientation = (): 'portrait' | 'landscape' => {
  * @returns true, если устройство поддерживает hover (обычно десктопы), иначе false (обычно тачскрины)
  */
 export const useHoverSupport = (): boolean => {
-  return useMediaQuery('(hover: hover)');
+  return useMediaQuery("(hover: hover)");
 };
 
 /**
@@ -136,7 +139,7 @@ export const useHoverSupport = (): boolean => {
  * @returns true, если пользователь предпочитает уменьшенное движение, иначе false
  */
 export const useReducedMotion = (): boolean => {
-  return useMediaQuery('(prefers-reduced-motion: reduce)');
+  return useMediaQuery("(prefers-reduced-motion: reduce)");
 };
 
 /**
@@ -145,7 +148,7 @@ export const useReducedMotion = (): boolean => {
  * @returns true, если пользователь предпочитает высокую контрастность, иначе false
  */
 export const useHighContrast = (): boolean => {
-  return useMediaQuery('(prefers-contrast: more)');
+  return useMediaQuery("(prefers-contrast: more)");
 };
 
 /**
@@ -154,5 +157,5 @@ export const useHighContrast = (): boolean => {
  * @returns true, если пользователь предпочитает уменьшенную прозрачность, иначе false
  */
 export const useReducedTransparency = (): boolean => {
-  return useMediaQuery('(prefers-reduced-transparency: reduce)');
+  return useMediaQuery("(prefers-reduced-transparency: reduce)");
 };

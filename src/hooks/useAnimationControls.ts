@@ -12,42 +12,48 @@
  * @example
  * // Базовое использование
  * const { controls, animate, isAnimating } = useAnimationControls();
- * 
+ *
  * // Запуск анимации
  * const handleClick = async () => {
  *   await animate({ scale: 1.2, opacity: 1 });
  *   console.log("Анимация завершена");
  * };
- * 
+ *
  * // Применение к компоненту
  * <motion.div animate={controls}>
  *   {isAnimating ? "Анимация идет..." : "Нажми для анимации"}
  * </motion.div>
  */
-import { useRef } from 'react';
-import { AnimationControls, useAnimationControls as useFramerAnimationControls } from 'framer-motion';
+import { useRef } from "react";
+import {
+  AnimationControls,
+  useAnimationControls as useFramerAnimationControls,
+} from "framer-motion";
 
 /**
  * Интерфейс возвращаемого значения хука useAnimationControls
  * @interface UseAnimationControlsReturn
  */
+type StartParams = Parameters<AnimationControls["start"]>;
+type StartReturn = ReturnType<AnimationControls["start"]>;
+
 interface UseAnimationControlsReturn {
   /** Оригинальный объект AnimationControls из Framer Motion */
   controls: AnimationControls;
-  /** 
+  /**
    * Функция для запуска анимации с отслеживанием состояния
    * @param target - Целевое состояние анимации (объект свойств или имя варианта)
    * @param options - Дополнительные опции анимации
    * @returns Promise, который разрешается по завершении анимации
    */
-  animate: (target: any, options?: object) => Promise<any>;
+  animate: (...args: StartParams) => StartReturn;
   /** Функция для остановки текущей анимации */
   stop: () => void;
   /** Функция для сброса анимации в начальное состояние */
   reset: () => void;
   /** Флаг, указывающий, выполняется ли анимация в данный момент */
   isAnimating: boolean;
-  /** 
+  /**
    * Функция для ручной установки состояния анимации
    * @param isAnimating - Новое состояние анимации
    */
@@ -63,20 +69,20 @@ export const useAnimationControls = (): UseAnimationControlsReturn => {
   const controls = useFramerAnimationControls();
   // Храним состояние анимации в ref для избежания перерендеров
   const isAnimatingRef = useRef<boolean>(false);
-  
+
   /**
    * Запускает анимацию и отслеживает её состояние
    * @param target - Целевое состояние анимации
    * @param options - Дополнительные опции анимации
    * @returns Promise с результатом анимации
    */
-  const animate = async (target: any, options?: object) => {
+  const animate = async (...args: StartParams) => {
     isAnimatingRef.current = true;
-    const result = await controls.start(target, options);
+    const result = await controls.start(...args);
     isAnimatingRef.current = false;
     return result;
   };
-  
+
   /**
    * Останавливает текущую анимацию
    */
@@ -84,7 +90,7 @@ export const useAnimationControls = (): UseAnimationControlsReturn => {
     controls.stop();
     isAnimatingRef.current = false;
   };
-  
+
   /**
    * Сбрасывает анимацию в начальное состояние
    */
@@ -92,7 +98,7 @@ export const useAnimationControls = (): UseAnimationControlsReturn => {
     controls.set({});
     isAnimatingRef.current = false;
   };
-  
+
   /**
    * Вручную устанавливает состояние анимации
    * @param isAnimating - Новое состояние анимации
@@ -100,7 +106,7 @@ export const useAnimationControls = (): UseAnimationControlsReturn => {
   const setAnimating = (isAnimating: boolean) => {
     isAnimatingRef.current = isAnimating;
   };
-  
+
   return {
     controls,
     animate,
@@ -110,6 +116,6 @@ export const useAnimationControls = (): UseAnimationControlsReturn => {
     get isAnimating() {
       return isAnimatingRef.current;
     },
-    setAnimating
+    setAnimating,
   };
 };

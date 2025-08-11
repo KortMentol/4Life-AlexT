@@ -12,7 +12,6 @@ import App from "./App";
 
 import { ThemeProvider } from "./context/ThemeProvider";
 
-
 // Base styles (Tailwind directives)
 import "./styles/base.css";
 // Global styles (resets, typography, etc.)

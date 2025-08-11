@@ -16,7 +16,7 @@ import { ThemeContextType } from "../context/ThemeContext.types";
  * 3. `src/components/effects/FluidEffect.tsx`: Для изменения цветов эффекта.
  * @example
  * const { theme, toggleTheme } = useTheme();
- * 
+ *
  * return (
  *   <button onClick={toggleTheme}>
  *     Current theme: {theme}
