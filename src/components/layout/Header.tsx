@@ -44,6 +44,14 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
     disabled: isMenuOpen || isScrollingLocked,
   });
 
+  // Наведение для tubelight: при hover лампа переезжает на пункт, при уходе — возвращается к активному
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
+  
+
+  
+
   useEffect(() => {
     if (!headerRef.current) return;
 
@@ -90,9 +98,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
           y: headerY,
           
         }}
-        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full glassmorphism`}
+        className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full border shadow-lg ${isDark ? "bg-neutral-900 border-neutral-800" : "bg-white border-slate-200"}`}
       >
-        <div className="header-gradient-move absolute inset-0 rounded-full"></div>
         <HeaderComets />
         <div className="container max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex items-center justify-between w-full">
@@ -129,13 +136,18 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
                   }}
                   className="flex flex-col items-center"
                 >
-                  <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
+                  <TextShineEffect
+                    text={siteConfig.distributor.name}
+                    className="font-semibold text-sm leading-tight"
+                  />
                   <div
-                    className="text-xs font-medium mt-0.5"
+                    className={`text-xs font-medium mt-0.5 ${isDark ? "" : "px-1.5 py-0.5 rounded-md bg-black/5"}`}
                     style={{
-                      color: "#e6b800",
-                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
-                      fontWeight: "500",
+                      color: isDark ? "#e6b800" : "#b38600",
+                      textShadow: isDark
+                        ? "0 1px 2px rgba(0,0,0,0.5)"
+                        : "0 1px 1px rgba(0,0,0,0.25)",
+                      fontWeight: 500,
                     }}
                   >
                     Builder Elite
@@ -182,53 +194,114 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
               </div>
               <motion.nav
                 role="navigation"
-                className="hidden md:flex items-center justify-center space-x-1 h-full"
+                className="hidden md:flex items-center justify-center h-full"
                 style={{ marginLeft: "4rem" }}
-              >
-                {mainNav.map((item, index) => (
-                  <motion.div
-                    key={item.href}
-                    className="relative flex items-center h-full"
-                    variants={navItemVariants}
-                    initial="initial"
-                    animate="animate"
-                    whileHover="hover"
-                    whileTap="tap"
-                    custom={index}
-                  >
-                    <NavLink
-                      to={item.href}
-                      onClick={(e) =>
-                        handleLinkClick(e, navigate, item.href, location.pathname, { immediate: isMobileDevice() })
+                onMouseLeave={() => setHoveredIndex(null)}
+                onMouseMove={(e) => {
+                  const x = e.clientX;
+                  if (rafRef.current) cancelAnimationFrame(rafRef.current);
+                  rafRef.current = requestAnimationFrame(() => {
+                    const OVERLAP = 14; // px: лёгкое наслоение hitbox соседних пунктов
+                    let best = -1;
+                    let bestEdge = Infinity;
+                    let bestCenter = Infinity;
+                    itemRefs.current.forEach((el, idx) => {
+                      if (!el) return;
+                      const rect = el.getBoundingClientRect();
+                      const center = rect.left + rect.width / 2;
+                      const left = rect.left - OVERLAP;
+                      const right = rect.right + OVERLAP;
+                      let distEdge = 0;
+                      if (x < left) distEdge = left - x;
+                      else if (x > right) distEdge = x - right;
+
+                      const distCenter = Math.abs(center - x);
+                      if (distEdge < bestEdge || (distEdge === bestEdge && distCenter < bestCenter)) {
+                        bestEdge = distEdge;
+                        bestCenter = distCenter;
+                        best = idx;
                       }
-                      className="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative whitespace-nowrap"
+                    });
+                    if (best !== -1 && best !== hoveredIndex) {
+                      setHoveredIndex(best);
+                    }
+                  });
+                }}
+              >
+                <div className="relative flex items-center gap-2">
+                  
+                  {mainNav.map((item, index) => (
+                    <motion.div
+                      key={item.href}
+                      ref={(el) => (itemRefs.current[index] = el)}
+                      className="relative flex items-center h-full"
+                      variants={navItemVariants}
+                      initial="initial"
+                      animate="animate"
+                      whileTap="tap"
+                      custom={index}
                     >
-                      {({ isActive }) => (
-                        <>
-                          <span
-                            className={`header-adaptive-text transition-opacity duration-300 ${isActive ? "font-semibold opacity-100" : "opacity-80 hover:opacity-100"}`}
-                            style={{
-                              color: isDark ? "white" : "#1e293b",
-                              textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
-                            }}
-                          >
-                            {item.title}
-                          </span>
-                          {isActive && (
-                            <motion.span
-                              className="absolute bottom-1 left-0 right-0 h-px"
-                              style={{ backgroundColor: isDark ? "white" : "#1e293b" }}
-                              layoutId="underline"
-                              initial={{ width: 0 }}
-                              animate={{ width: "100%" }}
-                              transition={{ duration: 0.3 }}
-                            />
-                          )}
-                        </>
-                      )}
-                    </NavLink>
-                  </motion.div>
-                ))}
+                      <NavLink
+                        to={item.href}
+                        onClick={(e) =>
+                          handleLinkClick(e, navigate, item.href, location.pathname, { immediate: isMobileDevice() })
+                        }
+                        onMouseEnter={() => setHoveredIndex(index)}
+                        className="flex items-center px-3 py-1.5 rounded-xl text-[14px] font-medium relative whitespace-nowrap tracking-tight"
+                      >
+                        {({ isActive }) => {
+                          const showLamp = hoveredIndex === index || (hoveredIndex === null && isActive);
+                          return (
+                            <>
+                              <span
+                                className={`relative z-10 header-adaptive-text ${
+                                  isActive ? "font-semibold" : "opacity-90"
+                                }`}
+                                style={{
+                                  color: isDark ? "white" : "#1e293b",
+                                  textShadow: isDark
+                                    ? "0 1px 2px rgba(0,0,0,0.3)"
+                                    : "0 1px 1px rgba(0,0,0,0.1)",
+                                }}
+                              >
+                                {item.title}
+                              </span>
+                              {showLamp && (
+                                <motion.div
+                                  layoutId="lamp"
+                                  className={`absolute inset-0 w-full rounded-xl z-0 shadow-sm ${
+                                    isDark
+                                      ? "bg-neutral-700/90"
+                                      : "bg-slate-300/90"
+                                  }`}
+                                  initial={false}
+                                  transition={{ type: "spring", stiffness: 150, damping: 30, mass: 1.1 }}
+                                >
+                                  <div
+                                    className={`absolute -top-2 left-1/2 -translate-x-1/2 w-7 h-1 rounded-t-full drop-shadow ${
+                                      isDark ? "bg-white/90" : "bg-[#0a0a0a]/90"
+                                    }`}
+                                  >
+                                    <div
+                                      className={`absolute w-10 h-5 rounded-full blur-md -top-2 -left-2 ${
+                                        isDark ? "bg-white/20" : "bg-black/20"
+                                      }`}
+                                    />
+                                    <div
+                                      className={`absolute w-7 h-5 rounded-full blur-md -top-1 ${
+                                        isDark ? "bg-white/15" : "bg-black/15"
+                                      }`}
+                                    />
+                                  </div>
+                                </motion.div>
+                              )}
+                            </>
+                          );
+                        }}
+                      </NavLink>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.nav>
             </div>
             <motion.div className="flex items-center justify-end w-full md:w-auto md:flex-1">
