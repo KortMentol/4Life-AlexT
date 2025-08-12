@@ -1,9 +1,8 @@
 import { mainNav } from "@/site-config/site";
 import { gsap } from "gsap";
-import { useEffect, useRef } from "react";
-import { Link, NavigateFunction, useLocation } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { lenis } from "../../../lib/lenis";
-import { scrollToTop } from "../../../utils/navigationUtils";
 import DynamicLogo from "../../ui/DynamicLogo";
 import SciFiThemeToggle from "../../ui/SciFiThemeToggle";
 import "./style.css";
@@ -35,6 +34,7 @@ const OPEN_TOTAL =
 declare global {
   interface Window {
     __menuTransitionInProgress?: boolean;
+    __menuSentinelActive?: boolean;
   }
 }
 
@@ -61,7 +61,7 @@ function prefetchAllRoutesExcept(currentPath: string) {
 interface TheodoreMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  navigate: NavigateFunction;
+  navigateFromMenu: (href: string, isSame: boolean) => void;
 }
 
 const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
@@ -93,7 +93,7 @@ const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
   isOpen,
   onClose,
-  navigate,
+  navigateFromMenu,
 }) => {
   const location = useLocation();
   const menuWrapRef = useRef<HTMLDivElement>(null);
@@ -101,6 +101,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   // Путь, на который пользователь кликнул. Если null — закрытие по стрелке.
   const pendingHrefRef = useRef<string | null>(null);
+  // Историей управляет App через централизованный sentinel
 
   const handleMobileLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -108,6 +109,16 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
     pendingHrefRef.current = href;
     onClose(); // запустит закрытие меню (ниже перехватим в useEffect)
   };
+
+  // POP перехват больше не нужен — обработка централизована в App
+  useEffect(() => {
+    // no-op
+  }, [isOpen, onClose]);
+
+  // Sentinel устанавливается/снимается в App — здесь ничего не делаем
+  useLayoutEffect(() => {
+    // no-op
+  }, [isOpen]);
 
   useEffect(() => {
     if (!menuWrapRef.current || !overlayPathRef.current) return;
@@ -208,11 +219,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
       const isSame = location.pathname === href;
       window.__menuTransitionInProgress = true;
       window.dispatchEvent(new CustomEvent("menu-transition-start"));
-      if (isSame) {
-        scrollToTop({ immediate: false });
-      } else {
-        navigate(href);
-      }
+      navigateFromMenu(href, isSame);
 
       // Небольшой буфер, чтобы чёрный кадр гарантированно попал на экран и DOM успел обновиться
       gsap.delayedCall(NAVIGATION_EPS, () => {
@@ -240,7 +247,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
         tl.eventCallback("onUpdate", prevUpdate || null);
       }
     };
-  }, [isOpen, navigate, location.pathname]);
+  }, [isOpen, navigateFromMenu, location.pathname]);
 
   // --- Префетч модулей страниц, когда меню полностью открылось ---
   // Стартуем после завершения анимации открытия, чтобы не мешать ей.

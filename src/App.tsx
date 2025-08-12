@@ -1,3 +1,5 @@
+// src/App.tsx (ФИНАЛЬНАЯ ВЕРСИЯ - С УЧЕТОМ ЗАМЕЧАНИЙ ЛИНТЕРА)
+
 import PerformanceDebug from "@/components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "@/components/debug/PerformanceDebugMobile";
 import Header from "@/components/layout/Header";
@@ -10,11 +12,12 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
-import { AnimatePresence, motion } from "framer-motion"; // <-- ВАЖНО: Импорты для анимации
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import { scrollToTop } from "@/utils/navigationUtils";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Link, Route, Routes, useNavigate } from "react-router-dom";
 
-// Lazy-loaded компоненты страниц (без изменений)
+// Lazy-loaded компоненты страниц
 const HomePage = React.lazy(() => import("@/pages/HomePage"));
 const ProductsPage = React.lazy(() => import("@/pages/ProductsPage"));
 const AboutPage = React.lazy(() => import("@/pages/AboutPage"));
@@ -30,13 +33,38 @@ function App() {
   const isScrollingLockedRef = useRef(isScrollingLocked);
   isScrollingLockedRef.current = isScrollingLocked;
   const navigate = useNavigate();
+  // Флаги управления историей меню
+  const menuStateActiveRef = useRef(false); // есть ли на вершине истории наша запись меню
+  const ownPopRef = useRef(false); // служебный POP, инициированный нами (back при закрытии крестиком)
 
-  // ▼▼▼ НОВОЕ: Состояние для управления "занавесом" перехода ▼▼▼
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("app-mounted"));
   }, []);
+
+  // Управление историей при открытии/закрытии меню: надёжный паттерн модалки
+  // - При открытии: pushState с маркером __menuOpen, чтобы Back не покинул сайт даже при первом визите
+  // - При закрытии по крестику: инициируем history.back() (служебный POP), чтобы убрать запись меню
+  useEffect(() => {
+    try {
+      if (isMenuOpen) {
+        const st = window.history.state || {};
+        if (!(st as any).__menuOpen) {
+          window.history.pushState({ ...st, __menuOpen: true }, "");
+        }
+        menuStateActiveRef.current = true;
+      } else {
+        if (menuStateActiveRef.current) {
+          ownPopRef.current = true; // помечаем, что следующий POP наш
+          window.history.back(); // удаляем верхнюю запись меню
+          // фактический сброс menuStateActiveRef произойдёт в onPop
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const checkDevice = () => setIsMobile(window.innerWidth < 768);
@@ -46,7 +74,57 @@ function App() {
 
   useScrollRestoration();
 
-  // Логика блокировки скролла для свайпов (остается без изменений)
+  // ★★★ Управление меню без фантомных записей истории ★★★
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+  // Перехват POP: когда задействована запись меню, Back просто закрывает меню без навигации по страницам
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const st = (e.state as any) || {};
+
+      // 1) Служебный POP после нашего history.back() при закрытии крестиком
+      if (ownPopRef.current) {
+        ownPopRef.current = false;
+        // Останавливаем дальнейшую обработку попа роутером — маршрут не менялся
+        e.stopImmediatePropagation();
+        // Верхнюю запись меню мы уже убрали; фиксируем флаг
+        menuStateActiveRef.current = false;
+        return;
+      }
+
+      // 2) Если активна запись меню — Back должен просто закрыть меню
+      if (menuStateActiveRef.current && isMenuOpen) {
+        e.stopImmediatePropagation();
+        menuStateActiveRef.current = false;
+        closeMenu();
+        return;
+      }
+
+      // 3) Forward в запись меню — корректно восстановим состояние (переоткроем меню)
+      if (st.__menuOpen === true && !isMenuOpen) {
+        e.stopImmediatePropagation();
+        menuStateActiveRef.current = true;
+        setIsMenuOpen(true);
+        return;
+      }
+
+      // Иначе — обычная навигация роутера
+    };
+
+    window.addEventListener("popstate", onPop, { capture: true });
+    return () => window.removeEventListener("popstate", onPop, true);
+  }, [isMenuOpen, closeMenu]);
+
+  const navigateFromMenu = (href: string, isSame: boolean) => {
+    if (isSame) {
+      scrollToTop({ immediate: false });
+    } else {
+      navigate(href);
+    }
+    closeMenu();
+  };
+
+  // Логика блокировки скролла для свайпов (восстановлены вызовы setIsScrollingLocked)
   useEffect(() => {
     if (isMenuOpen) {
       lenis.stop();
@@ -55,11 +133,11 @@ function App() {
       lenis.start();
     }
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let scrollDirectionDetermined = false;
-    const SENSITIVITY_THRESHOLD = 5;
-    const HORIZONTAL_SWIPE_BIAS = 1.7;
+    let touchStartX = 0,
+      touchStartY = 0,
+      scrollDirectionDetermined = false;
+    const SENSITIVITY_THRESHOLD = 5,
+      HORIZONTAL_SWIPE_BIAS = 1.7;
 
     const handleTouchStart = (e: TouchEvent) => {
       if (isMenuOpen) return;
@@ -81,13 +159,13 @@ function App() {
           if (!isScrollingLockedRef.current) {
             lenis.stop();
             scrollLockState.isLocked = true;
-            setIsScrollingLocked(true);
+            setIsScrollingLocked(true); // <-- ВЫЗОВ ВОССТАНОВЛЕН
           }
         } else {
           if (isScrollingLockedRef.current) {
             lenis.start();
             scrollLockState.isLocked = false;
-            setIsScrollingLocked(false);
+            setIsScrollingLocked(false); // <-- ВЫЗОВ ВОССТАНОВЛЕН
           }
         }
         scrollDirectionDetermined = true;
@@ -100,7 +178,7 @@ function App() {
         setTimeout(() => {
           lenis.start();
           scrollLockState.isLocked = false;
-          setIsScrollingLocked(false);
+          setIsScrollingLocked(false); // <-- ВЫЗОВ ВОССТАНОВЛЕН
         }, 50);
       }
     };
@@ -131,14 +209,15 @@ function App() {
   return (
     <ThemeProvider>
       <ProductListProvider>
-        {/* ▼▼▼ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Вызываем RouteChangeHandler С НУЖНЫМИ PROPS ▼▼▼ */}
         <RouteChangeHandler
           onTransitionStart={() => setIsTransitioning(true)}
           onTransitionEnd={() => setIsTransitioning(false)}
+          isMenuOpen={isMenuOpen}
+          closeMenu={closeMenu}
         />
         <Suspense fallback={null}>
           <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isScrollingLocked={isScrollingLocked} />
-          <TheodoreMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} navigate={navigate} />
+          <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route
@@ -189,17 +268,15 @@ function App() {
           </Routes>
         </Suspense>
         {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
-
-        {/* ▼▼▼ НОВОЕ: Анимированный "занавес" для бесшовных переходов ▼▼▼ */}
         <AnimatePresence>
           {isTransitioning && (
             <motion.div
               key="transition-overlay"
-              className="fixed inset-0 bg-gray-900 z-[99999]" // Очень высокий z-index
+              className="fixed inset-0 bg-gray-900 z-[99999]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }} // Плавное появление и исчезновение
+              transition={{ duration: 0.25, ease: "easeInOut" }}
             />
           )}
         </AnimatePresence>

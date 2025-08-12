@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({
     }
   }, []);
 
-  const { headerY } = useNativeScroll({
+  const { headerY, forceShowHeader } = useNativeScroll({
     headerHeight,
     topOffset: 8,
     disabled: isMenuOpen || isScrollingLocked,
@@ -71,6 +71,11 @@ const Header: React.FC<HeaderProps> = ({
       headerTimelineRef.current?.reverse();
     }
   }, [isMenuOpen]);
+
+  // Принудительно показываем хедер на каждом изменении маршрута
+  useEffect(() => {
+    forceShowHeader();
+  }, [location.pathname, location.search, location.hash]);
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");

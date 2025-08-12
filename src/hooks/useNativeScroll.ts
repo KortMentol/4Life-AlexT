@@ -36,6 +36,8 @@ export function useNativeScroll({
   const isTouching = useRef(false);
   const prevY = useRef(0);
   const disabledRef = useRef(disabled);
+  // Кулдаун для игнорирования wheel сразу после переходов (ПК)
+  const wheelCooldownUntilRef = useRef<number>(0);
 
   useEffect(() => {
     disabledRef.current = disabled;
@@ -54,6 +56,10 @@ export function useNativeScroll({
 
     const handleWheel = (event: WheelEvent) => {
       if (disabledRef.current) return;
+      // Не прячем хедер сразу после перехода по истории/ссылке
+      if (Date.now() < wheelCooldownUntilRef.current) {
+        return;
+      }
       const direction = event.deltaY > 0 ? "down" : "up";
 
       if (direction === "down") {
@@ -81,10 +87,17 @@ export function useNativeScroll({
       }
     };
 
+    const handleRouteTransitionDone = () => {
+      wheelCooldownUntilRef.current = Date.now() + 1000;
+      forceShowHeader();
+    };
+
     window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("route-transition-done", handleRouteTransitionDone);
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("route-transition-done", handleRouteTransitionDone);
       if (downScrollTimer.current) clearTimeout(downScrollTimer.current);
     };
   }, [isMobile, disabled, headerY, headerYSmooth, totalHeaderHeight]);
@@ -154,5 +167,17 @@ export function useNativeScroll({
     };
   }, [isMobile, disabled, headerY, scrollY, totalHeaderHeight]);
 
-  return { headerY: headerYSmooth };
+  const forceShowHeader = () => {
+    // Принудительно показываем хедер без дерганий
+    try {
+      headerY.stop();
+      headerYSmooth.stop();
+    } catch {}
+    headerY.set(0);
+    // На всякий случай выставим и значение пружины напрямую,
+    // чтобы на ПК моментально отобразилось без ожидания синхронизации
+    headerYSmooth.set(0);
+  };
+
+  return { headerY: headerYSmooth, forceShowHeader };
 }

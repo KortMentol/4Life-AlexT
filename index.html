@@ -9,7 +9,6 @@
       name="description"
       content="Инвестируйте в свое здоровье и будущее с 4Life. Узнайте о продуктах для иммунной системы, энергии и возможностях партнерства. Ваш наставник в мире 4Life."
     />
-    
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,6 +16,22 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Early sentinel: ensures first Back stays within this page so we can close the menu instead of leaving the site -->
+    <script>
+      (function () {
+        try {
+          var st = window.history.state || {};
+          if (!st || !st.__sentinel) {
+            // mark current entry and create a duplicate on top
+            window.history.replaceState(Object.assign({}, st, { __sentinel: true }), document.title);
+            window.history.pushState(Object.assign({}, st, { __sentinel: true }), document.title);
+          }
+        } catch (e) {
+          /* noop */
+        }
+      })();
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
