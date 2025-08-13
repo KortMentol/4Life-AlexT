@@ -2,12 +2,10 @@ import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { Moon, Sun } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-import {
-  headerVariants,
-  logoVariants,
-} from "../../animations/headerAnimations";
+import { headerVariants, logoVariants } from "../../animations/headerAnimations";
+import { useTransition } from "../../context/TransitionProvider"; // <-- 1. ДОБАВИТЬ ЭТОТ ИМПОРТ
 import { useNativeScroll } from "../../hooks/useNativeScroll";
 import { useTheme } from "../../hooks/useTheme";
 import { siteConfig } from "../../site-config/site";
@@ -24,16 +22,12 @@ interface HeaderProps {
   isScrollingLocked: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  isMenuOpen,
-  setIsMenuOpen,
-  isScrollingLocked,
-}) => {
+const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingLocked }) => {
   const headerTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
+  const { transitionTo } = useTransition(); // <-- 2. ПОЛУЧИТЬ ФУНКЦИЮ ПЕРЕХОДА
 
   const headerRef = useRef<HTMLElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -52,13 +46,11 @@ const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     if (!headerRef.current) return;
-    headerTimelineRef.current = gsap
-      .timeline({ paused: true })
-      .to(headerRef.current, {
-        y: "-110%",
-        duration: 0.8,
-        ease: "power4.inOut",
-      });
+    headerTimelineRef.current = gsap.timeline({ paused: true }).to(headerRef.current, {
+      y: "-110%",
+      duration: 0.8,
+      ease: "power4.inOut",
+    });
     return () => {
       headerTimelineRef.current?.kill();
     };
@@ -72,7 +64,6 @@ const Header: React.FC<HeaderProps> = ({
     }
   }, [isMenuOpen]);
 
-  // Принудительно показываем хедер на каждом изменении маршрута
   useEffect(() => {
     forceShowHeader();
   }, [location.pathname, location.search, location.hash]);
@@ -81,11 +72,12 @@ const Header: React.FC<HeaderProps> = ({
     setTheme(isDark ? "light" : "dark");
   };
 
+  // ▼▼▼ 3. ИЗМЕНИТЬ ЭТУ ФУНКЦИЮ ▼▼▼
   const handleLogoClick = () => {
     if (location.pathname === "/") {
       scrollToTop({ immediate: false });
     } else {
-      navigate("/");
+      transitionTo("/"); // Заменяем navigate("/") на transitionTo("/")
     }
   };
 
@@ -102,13 +94,9 @@ const Header: React.FC<HeaderProps> = ({
       <HeaderComets />
       <div className="container max-w-7xl mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between w-full">
-          {/* Левая часть: лого и кнопка мобильного меню */}
           <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
             <div className="md:hidden relative z-[100] no-highlight flex items-center">
-              <HamburgerButton
-                isOpen={isMenuOpen}
-                toggle={() => setIsMenuOpen((prev) => !prev)}
-              />
+              <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen((prev) => !prev)} />
             </div>
             <button
               onClick={handleLogoClick}
@@ -124,9 +112,7 @@ const Header: React.FC<HeaderProps> = ({
               >
                 <img
                   src={
-                    isDark
-                      ? "/src/assets/images/brand/4life-logo-light.svg"
-                      : "/src/assets/images/brand/4life-logo.svg"
+                    isDark ? "/src/assets/images/brand/4life-logo-light.svg" : "/src/assets/images/brand/4life-logo.svg"
                   }
                   alt="4Life Logo"
                   className="h-8 w-auto"
@@ -135,23 +121,16 @@ const Header: React.FC<HeaderProps> = ({
               <motion.div
                 style={{
                   color: isDark ? "white" : "#1e293b",
-                  textShadow: isDark
-                    ? "0 1px 2px rgba(0,0,0,0.3)"
-                    : "0 1px 1px rgba(0,0,0,0.1)",
+                  textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                 }}
                 className="flex flex-col items-center"
               >
-                <TextShineEffect
-                  text={siteConfig.distributor.name}
-                  className="font-semibold text-sm leading-tight"
-                />
+                <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
                 <div
                   className={"text-xs font-medium mt-0.5"}
                   style={{
                     color: isDark ? "#e6b800" : "#b38600",
-                    textShadow: isDark
-                      ? "0 1px 2px rgba(0,0,0,0.5)"
-                      : "0 1px 1px rgba(0,0,0,0.25)",
+                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 1px rgba(0,0,0,0.25)",
                     fontWeight: 500,
                   }}
                 >
@@ -161,7 +140,6 @@ const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
 
-          {/* Центральная часть: навигация */}
           <div className="absolute left-1/2 transform -translate-x-1/2 md:relative md:left-auto md:transform-none md:flex-1 md:flex md:justify-center">
             <div className="md:hidden">
               <button
@@ -173,22 +151,15 @@ const Header: React.FC<HeaderProps> = ({
                   className="text-center flex flex-col items-center"
                   style={{
                     color: isDark ? "white" : "#1e293b",
-                    textShadow: isDark
-                      ? "0 1px 2px rgba(0,0,0,0.3)"
-                      : "0 1px 1px rgba(0,0,0,0.1)",
+                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <TextShineEffect
-                    text={siteConfig.distributor.name}
-                    className="font-semibold text-sm leading-tight"
-                  />
+                  <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
                   <div
                     className="text-xs font-medium mt-0.5"
                     style={{
                       color: "#e6b800",
-                      textShadow: isDark
-                        ? "0 1px 2px rgba(0,0,0,0.5)"
-                        : "0 1px 2px rgba(0,0,0,0.3)",
+                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
                       fontWeight: "500",
                     }}
                   >
@@ -201,7 +172,6 @@ const Header: React.FC<HeaderProps> = ({
             <TubelightNavbar />
           </div>
 
-          {/* Правая часть: иконки */}
           <div className="flex items-center justify-end w-full md:w-auto md:flex-1">
             <motion.div
               className="hidden md:flex items-center space-x-3"
@@ -213,7 +183,7 @@ const Header: React.FC<HeaderProps> = ({
                 damping: 25,
                 delay: 0.2,
               }}
-              style={{ color: isDark ? "white" : "#1e293b" }} // <--- ВОТ ИСПРАВЛЕНИЕ ДЛЯ ЦВЕТА ИКОНОК
+              style={{ color: isDark ? "white" : "#1e293b" }}
             >
               <motion.div
                 whileHover={{ scale: 1.1 }}
@@ -222,7 +192,6 @@ const Header: React.FC<HeaderProps> = ({
               >
                 <ProductListIcon />
               </motion.div>
-              {/* --- ИСПРАВЛЕНИЕ ДЛЯ ЦВЕТА РАЗДЕЛИТЕЛЯ --- */}
               <div className="w-px h-6 mx-1 bg-slate-700 dark:bg-slate-100" />
               <motion.button
                 type="button"
@@ -242,7 +211,7 @@ const Header: React.FC<HeaderProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              style={{ color: isDark ? "white" : "#1e293b" }} // <--- ИСПРАВЛЕНИЕ И ДЛЯ МОБИЛЬНОЙ ИКОНКИ
+              style={{ color: isDark ? "white" : "#1e293b" }}
             >
               <ProductListIcon />
             </motion.div>
