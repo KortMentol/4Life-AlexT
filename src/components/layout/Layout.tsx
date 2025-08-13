@@ -1,4 +1,3 @@
-import { FluidProvider } from "@/context/FluidProvider";
 import { updateScroll } from "@/lib/lenis";
 import { AnimatePresence } from "framer-motion";
 import React, { useEffect } from "react";
@@ -24,9 +23,7 @@ const Layout: React.FC = () => {
 
   return (
     <>
-      <FluidProvider>
-        <FluidEffect />
-      </FluidProvider>
+      <FluidEffect />
       {/* Header теперь находится в App.tsx и рендерится над Layout */}
       {/* ИЗМЕНЕНИЕ: Убираем pt-20 отсюда */}
       <main id="main-content" className="flex-grow">

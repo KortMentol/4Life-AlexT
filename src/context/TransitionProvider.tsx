@@ -1,6 +1,9 @@
+// src/context/TransitionProvider.tsx
+
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PixelTransition, TransitionHandle } from "../components/transitions/PixelTransition";
+import { useFluid } from "../hooks/useFluid";
 import { useIsMobile } from "../hooks/useIsMobile";
 
 interface TransitionContextType {
@@ -22,35 +25,27 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children
   const location = useLocation();
   const overlayRef = useRef<TransitionHandle>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const isMobile = useIsMobile(); // <-- Определяем тип устройства
+  const isMobile = useIsMobile();
+  const { resetFluid } = useFluid(); // <-- ПОЛУЧАЕМ ФУНКЦИЮ СБРОСА
 
   const transitionTo = (path: string) => {
-    // Не запускаем переход, если он уже идет или мы пытаемся перейти на ту же страницу
     if (isTransitioning || location.pathname === path) return;
-
-    // <-- Ключевое изменение: если это мобильное устройство, просто переходим по ссылке
     if (isMobile) {
       navigate(path);
       return;
     }
-
-    // Логика для десктопа
     setIsTransitioning(true);
-    // 1. Анимация "входа" (экран закрывается)
     overlayRef.current?.play("in").then(() => {
-      // 2. В момент, когда экран черный, меняем страницу
       navigate(path);
-      // 3. Небольшая задержка, чтобы React успел отрендерить новую страницу
       setTimeout(() => {
-        // 4. Анимация "выхода" (экран открывается, показывая новый контент)
+        resetFluid(); // Сбрасываем fluid-эффект на черном экране
         overlayRef.current?.play("out").then(() => {
           setIsTransitioning(false);
         });
-      }, 50); // 50ms достаточно
+      }, 150); // Увеличенная и более надежная пауза
     });
   };
 
-  // При первой загрузке сайта плавно убираем оверлей (только на десктопе)
   useEffect(() => {
     if (!isMobile) {
       overlayRef.current?.play("out");
@@ -60,7 +55,6 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children
   return (
     <TransitionContext.Provider value={{ transitionTo }}>
       {children}
-      {/* Компонент перехода рендерится всегда, но используется только на десктопе */}
       <PixelTransition ref={overlayRef} />
     </TransitionContext.Provider>
   );

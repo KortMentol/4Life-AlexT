@@ -1,4 +1,4 @@
-// === Файл: src/components/effects/FluidEffect.tsx (ИСПРАВЛЕННАЯ ВЕРСИЯ БЕЗ ОШИБОК ТИПИЗАЦИИ) ===
+// src/components/effects/FluidEffect.tsx
 
 import { FluidInstance } from "@/context/FluidContext.types";
 import { useFluid } from "@/hooks/useFluid";
@@ -10,22 +10,18 @@ import WebGLFluidEnhanced from "webgl-fluid-enhanced";
 const TRANSITION_START = "menu-transition-start";
 const TRANSITION_COMPLETE = "menu-transition-complete";
 
-// ▼▼▼ ИСПРАВЛЕНО: Безопасная и корректная функция runIdle ▼▼▼
 const runIdle = (cb: () => void) => {
-  // Проверяем наличие requestIdleCallback на объекте window напрямую.
-  // Это самый надежный способ, который не вызывает ошибок типизации.
   if ("requestIdleCallback" in window) {
     window.requestIdleCallback(cb);
   } else {
-    // Fallback для старых браузеров.
     setTimeout(cb, 0);
   }
 };
 
-// --- РУБИЛЬНИК ЭФФЕКТА ---
+// --- РУБИЛЬНИК ЭФФЕКТА (для быстрой отладки) ---
 const DISABLE_FLUID_EFFECT = false;
 
-// ... (конфигурации getFluidConfig и getCommonConfig остаются без изменений)
+// --- Конфигурации эффекта ---
 const getFluidConfig = (tier: string, isMobile: boolean) => ({
   dyeResolution: isMobile ? 512 : 1024,
   simResolution: isMobile ? 150 : 256,
@@ -39,11 +35,8 @@ const getFluidConfig = (tier: string, isMobile: boolean) => ({
   shading: tier === "high" ? true : false,
   sunrays: tier === "high" ? true : false,
 });
-const getCommonConfig = (
-  theme: string,
-  isMobile: boolean,
-  isTouchDevice: boolean,
-) => {
+
+const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolean) => {
   const isLightTheme = theme === "light";
   return {
     transparent: true,
@@ -78,23 +71,20 @@ const FluidEffect: React.FC = () => {
   const stopTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isRunningRef = useRef<boolean>(false);
 
-  const { setFluidInstance } = useFluid();
+  // ▼▼▼ ГЛАВНОЕ ИЗМЕНЕНИЕ: Получаем resetKey для принудительного обновления ▼▼▼
+  const { setFluidInstance, resetKey } = useFluid();
   const { theme } = useTheme();
   const tier = usePerformanceTier();
 
   const isTouchDevice = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(pointer: coarse)").matches,
-    [],
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+    []
   );
   const isMobile = useMemo(
     () =>
       typeof navigator !== "undefined" &&
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      ),
-    [],
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+    []
   );
 
   const startAnimation = useCallback(() => {
@@ -120,6 +110,8 @@ const FluidEffect: React.FC = () => {
     }, 5000);
   }, []);
 
+  // Этот useEffect отвечает за создание и уничтожение всего эффекта.
+  // Теперь он будет перезапускаться при изменении resetKey.
   useEffect(() => {
     if (!containerRef.current || DISABLE_FLUID_EFFECT) return;
 
@@ -156,8 +148,10 @@ const FluidEffect: React.FC = () => {
         console.error("[FluidEffect] Cleanup Error:", error);
       }
     };
-  }, [setFluidInstance, theme, tier, isTouchDevice, isMobile]);
+    // ▼▼▼ ГЛАВНОЕ ИЗМЕНЕНИЕ: Добавление resetKey в массив зависимостей ▼▼▼
+  }, [setFluidInstance, theme, tier, isTouchDevice, isMobile, resetKey]);
 
+  // Этот useEffect отвечает за взаимодействие с курсором/пальцем.
   useEffect(() => {
     if (DISABLE_FLUID_EFFECT) return;
     const mainElement = document.querySelector("main");
@@ -193,12 +187,7 @@ const FluidEffect: React.FC = () => {
         scheduleStopAnimation();
       }
       const debugElement = document.querySelector('[class*="debugContainer"]');
-      if (
-        debugElement &&
-        event.target &&
-        debugElement.contains(event.target as Node)
-      )
-        return;
+      if (debugElement && event.target && debugElement.contains(event.target as Node)) return;
       if (event instanceof MouseEvent) {
         const mouseEvent = new MouseEvent(event.type, {
           clientX: event.clientX,
@@ -219,15 +208,10 @@ const FluidEffect: React.FC = () => {
           touch.clientX <= canvasRect.right &&
           touch.clientY >= canvasRect.top &&
           touch.clientY <= canvasRect.bottom;
-        if (event.type === "touchstart" && isDirectCanvasTouch)
-          event.preventDefault();
+        if (event.type === "touchstart" && isDirectCanvasTouch) event.preventDefault();
         if (event.type === "touchmove") lastTouchEvent = event;
         const mouseEventType =
-          event.type === "touchstart"
-            ? "mousedown"
-            : event.type === "touchend"
-              ? "mouseup"
-              : "mousemove";
+          event.type === "touchstart" ? "mousedown" : event.type === "touchend" ? "mouseup" : "mousemove";
         const mouseEvent = new MouseEvent(mouseEventType, {
           clientX: touch.clientX,
           clientY: touch.clientY,
@@ -261,35 +245,21 @@ const FluidEffect: React.FC = () => {
         }
       }
     }
-    const directEventTypes = [
-      "mousedown",
-      "mouseup",
-      "touchstart",
-      "touchmove",
-      "touchend",
-    ];
+    const directEventTypes = ["mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
     directEventTypes.forEach((type) => {
       mainElement.addEventListener(type, handleEvent, { passive: true });
     });
-    mainElement.addEventListener(
-      "mousemove",
-      throttledMouseMoveHandler as EventListener,
-      { passive: true },
-    );
+    mainElement.addEventListener("mousemove", throttledMouseMoveHandler as EventListener, { passive: true });
 
     return () => {
       if (touchInterval) clearInterval(touchInterval);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      directEventTypes.forEach((type) =>
-        mainElement.removeEventListener(type, handleEvent),
-      );
-      mainElement.removeEventListener(
-        "mousemove",
-        throttledMouseMoveHandler as EventListener,
-      );
+      directEventTypes.forEach((type) => mainElement.removeEventListener(type, handleEvent));
+      mainElement.removeEventListener("mousemove", throttledMouseMoveHandler as EventListener);
     };
   }, [startAnimation, scheduleStopAnimation]);
 
+  // Этот useEffect отвечает за паузу во время анимации меню.
   useEffect(() => {
     if (DISABLE_FLUID_EFFECT) return;
     const onStart = () => {
@@ -305,10 +275,7 @@ const FluidEffect: React.FC = () => {
     window.addEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
     return () => {
       window.removeEventListener(TRANSITION_START, onStart as EventListener);
-      window.removeEventListener(
-        TRANSITION_COMPLETE,
-        onComplete as EventListener,
-      );
+      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
     };
   }, [startAnimation]);
 

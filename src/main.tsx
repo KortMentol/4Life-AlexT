@@ -1,27 +1,23 @@
+// src/main.tsx
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
+import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
 import { TransitionProvider } from "./context/TransitionProvider";
 
-// Base styles (Tailwind directives)
-import "./styles/base.css";
-// Global styles (resets, typography, etc.)
-import "./styles/globals.css";
-// Browser/device specific fixes
-import "./styles/fixes.css";
-// Modern design system and animations
-import "./styles/modern-design.css";
-// Переменные темы и глобальные анимации
+// Стили
 import "./styles/animations.css";
+import "./styles/base.css";
+import "./styles/fixes.css";
+import "./styles/globals.css";
+import "./styles/modern-design.css";
 import "./styles/theme-variables.css";
 
-// Lenis инициализируется автоматически. Простого импорта любого компонента из ./lib/lenis достаточно.
-
-// Функция для инициализации приложения
 const initApp = () => {
   const rootElement = document.getElementById("root");
 
@@ -30,7 +26,6 @@ const initApp = () => {
     return;
   }
 
-  // Создаем роутер с поддержкой будущих флагов v7
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route
@@ -38,11 +33,13 @@ const initApp = () => {
         element={
           <HelmetProvider>
             <ThemeProvider>
-              <TransitionProvider>
-                <ParallaxProvider>
-                  <App />
-                </ParallaxProvider>
-              </TransitionProvider>
+              <FluidProvider>
+                <TransitionProvider>
+                  <ParallaxProvider>
+                    <App />
+                  </ParallaxProvider>
+                </TransitionProvider>
+              </FluidProvider>
             </ThemeProvider>
           </HelmetProvider>
         }
@@ -62,5 +59,4 @@ const initApp = () => {
   );
 };
 
-// Запускаем приложение
 initApp();

@@ -6,7 +6,6 @@ import Header from "@/components/layout/Header";
 import Layout from "@/components/layout/Layout";
 import TheodoreMenu from "@/components/layout/TheodoreMenu";
 import RouteChangeHandler from "@/components/RouteChangeHandler";
-import { FluidProvider } from "@/context/FluidProvider";
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
@@ -197,14 +196,7 @@ function App() {
           <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route
-                index
-                element={
-                  <FluidProvider>
-                    <HomePage />
-                  </FluidProvider>
-                }
-              />
+              <Route index element={<HomePage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="about" element={<AboutPage />} />
               <Route path="about-me" element={<AboutMePage />} />
