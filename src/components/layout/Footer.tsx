@@ -1,23 +1,31 @@
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { motion } from "framer-motion";
-import {
-  Facebook,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-  Twitter,
-  Youtube,
-} from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useTransition } from "../../context/TransitionProvider";
 import { siteConfig } from "../../site-config/site";
+import { scrollToTop } from "../../utils/navigationUtils";
 import DarkVeil from "../effects/DarkVeil";
 import DynamicLogo from "../ui/DynamicLogo";
 
 const Footer: React.FC = () => {
   const isMobile = useIsMobile();
   const currentYear = new Date().getFullYear();
+
+  // <-- 1. Получаем доступ к transitionTo и текущему пути
+  const { transitionTo } = useTransition();
+  const location = useLocation();
+
+  // <-- 2. Создаем умный обработчик клика
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    if (location.pathname === href) {
+      scrollToTop({ immediate: false });
+    } else {
+      transitionTo(href);
+    }
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -41,7 +49,6 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="pt-16 pb-8 relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
-      {/* Динамический фон Dark Veil с параметрами со скриншота */}
       <div className="absolute inset-0 w-full h-full z-1">
         <DarkVeil
           speed={0.8}
@@ -55,10 +62,8 @@ const Footer: React.FC = () => {
         />
       </div>
 
-      {/* Декоративная линия */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 z-10"></div>
 
-      {/* Контейнер с контентом */}
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* О компании */}
@@ -69,18 +74,12 @@ const Footer: React.FC = () => {
             viewport={{ once: true, margin: "-50px" }}
           >
             <motion.div variants={itemVariants}>
-              <Link to="/" className="inline-block mb-6">
-                <DynamicLogo
-                  alt="4Life Logo"
-                  className=""
-                  size="lg"
-                  themeOverride="dark"
-                />
-              </Link>
+              <a href="/" onClick={(e) => handleLinkClick(e, "/")} className="inline-block mb-6">
+                <DynamicLogo alt="4Life Logo" className="" size="lg" themeOverride="dark" />
+              </a>
               <p className="text-gray-300 mb-6 text-pretty">
-                4Life Research – глобальная компания в области велнеса,
-                специализирующаяся на научных разработках для поддержки иммунной
-                системы.
+                4Life Research – глобальная компания в области велнеса, специализирующаяся на научных разработках для
+                поддержки иммунной системы.
               </p>
               <div className="flex space-x-4">
                 <a
@@ -130,52 +129,55 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3
-              variants={itemVariants}
-              className="text-lg font-bold mb-6 text-white"
-            >
+            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-white">
               Быстрые ссылки
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-3">
+              {/* <-- 3. Заменяем все Link на a с нашим обработчиком */}
               <li>
-                <Link
-                  to="/products"
+                <a
+                  href="/products"
+                  onClick={(e) => handleLinkClick(e, "/products")}
                   className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Продукты
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  to="/about"
+                <a
+                  href="/about"
+                  onClick={(e) => handleLinkClick(e, "/about")}
                   className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   О компании
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  to="/about-me"
+                <a
+                  href="/about-me"
+                  onClick={(e) => handleLinkClick(e, "/about-me")}
                   className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Обо мне
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  to="/partnership"
+                <a
+                  href="/partnership"
+                  onClick={(e) => handleLinkClick(e, "/partnership")}
                   className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Партнерство
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  to="/contact"
+                <a
+                  href="/contact"
+                  onClick={(e) => handleLinkClick(e, "/contact")}
                   className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   Контакты
-                </Link>
+                </a>
               </li>
             </motion.ul>
           </motion.div>
@@ -187,10 +189,7 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3
-              variants={itemVariants}
-              className="text-lg font-bold mb-6 text-white"
-            >
+            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-white">
               Контакты
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-4">
@@ -214,9 +213,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-gray-300">
-                  {siteConfig.contact.address}
-                </span>
+                <span className="text-gray-300">{siteConfig.contact.address}</span>
               </li>
             </motion.ul>
           </motion.div>
@@ -225,13 +222,10 @@ const Footer: React.FC = () => {
         {/* Нижняя часть футера */}
         <div className="pt-8 border-t border-gray-200/20 dark:border-gray-700/50">
           <div className="text-center">
-            <p className="text-gray-300 text-sm">
-              © {currentYear} Александр Тощев. Все права защищены.
-            </p>
+            <p className="text-gray-300 text-sm">© {currentYear} Александр Тощев. Все права защищены.</p>
 
             <p className="text-xs text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
-              Информация, представленная на этом вебсайте, относится
-              исключительно к рынку Евразии.
+              Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
             </p>
             <p className="text-xs text-gray-400 font-medium mt-2">
               БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.

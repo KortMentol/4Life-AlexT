@@ -1,26 +1,3 @@
-/**
- * @module src/utils/icons.ts
- * @description Централизованный модуль для управления иконками из библиотеки `lucide-react`.
- * Экспортирует объект `Icons`, который содержит все используемые в проекте иконки, а также тип `IconName` для строгой типизации имен иконок.
- * @author Kort
- * @version 1.0.0
- * @see https://lucide.dev/guide/packages/lucide-react
- * @usage
- * 1. `src/pages/HowToBuyPage.tsx`: Используется для отображения иконок в информационных блоках.
- * @example
- * import { Icons, IconName } from '@/utils/icons';
- *
- * interface IconProps {
- *   name: IconName;
- * }
- *
- * const Icon = ({ name }: IconProps) => {
- *   const LucideIcon = Icons[name];
- *   return <LucideIcon />;
- * }
- */
-
-// Импортируем только используемые иконки
 import {
   ArrowRight,
   Award,
@@ -35,15 +12,18 @@ import {
   Globe,
   Headphones,
   HeartPulse,
+  Info,
   LifeBuoy,
   Lightbulb,
   Mail,
   MapPin,
   Menu,
   Microscope,
+  Minus,
   Moon,
   Phone,
   PieChart,
+  Plus,
   Quote,
   Scale,
   Send,
@@ -59,11 +39,11 @@ import {
   User,
   UserPlus,
   Users,
-  // Whatsapp (будем использовать Phone)
   X,
   Zap,
 } from "lucide-react";
 
+// [FIX] Централизованный экспорт всех иконок проекта.
 export const Icons = {
   Check,
   ExternalLink,
@@ -91,7 +71,7 @@ export const Icons = {
   Users,
   UserPlus,
   User,
-  Whatsapp: Phone, // Используем Phone как замену Whatsapp, который не доступен в lucide-react
+  Whatsapp: Phone,
   X,
   Zap,
   ArrowRight,
@@ -105,6 +85,9 @@ export const Icons = {
   Moon,
   Truck,
   BadgePercent,
+  Plus,
+  Minus,
+  Info,
 };
 
 export type IconName = keyof typeof Icons;

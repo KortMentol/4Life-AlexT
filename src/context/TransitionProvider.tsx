@@ -1,8 +1,7 @@
-// src/context/TransitionProvider.tsx
-
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PixelTransition, TransitionHandle } from "../components/transitions/PixelTransition";
+import { PixelTransition, TransitionHandle as PixelTransitionHandle } from "../components/transitions/PixelTransition";
+import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "../components/transitions/WaveTransition";
 import { useFluid } from "../hooks/useFluid";
 import { useIsMobile } from "../hooks/useIsMobile";
 
@@ -23,39 +22,42 @@ export const useTransition = () => {
 export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const overlayRef = useRef<TransitionHandle>(null);
+  const pixelOverlayRef = useRef<PixelTransitionHandle>(null);
+  const waveOverlayRef = useRef<WaveTransitionHandle>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { resetFluid } = useFluid();
   const isMobile = useIsMobile();
-  const { resetFluid } = useFluid(); // <-- ПОЛУЧАЕМ ФУНКЦИЮ СБРОСА
 
   const transitionTo = (path: string) => {
     if (isTransitioning || location.pathname === path) return;
-    if (isMobile) {
-      navigate(path);
-      return;
-    }
     setIsTransitioning(true);
-    overlayRef.current?.play("in").then(() => {
+
+    const overlay = isMobile ? waveOverlayRef.current : pixelOverlayRef.current;
+
+    overlay?.play("in").then(() => {
       navigate(path);
+      // Небольшая задержка, чтобы React успел начать рендеринг новой страницы "под капотом"
       setTimeout(() => {
         resetFluid(); // Сбрасываем fluid-эффект на черном экране
-        overlayRef.current?.play("out").then(() => {
+        overlay.play("out").then(() => {
           setIsTransitioning(false);
         });
-      }, 150); // Увеличенная и более надежная пауза
+      }, 150);
     });
   };
 
   useEffect(() => {
-    if (!isMobile) {
-      overlayRef.current?.play("out");
-    }
-  }, [isMobile]);
+    // Анимация появления при первой загрузке сайта
+    const overlay = isMobile ? waveOverlayRef.current : pixelOverlayRef.current;
+    overlay?.play("out");
+  }, [isMobile]); // Запускаем при смене типа устройства (редко, но надежно)
 
   return (
     <TransitionContext.Provider value={{ transitionTo }}>
       {children}
-      <PixelTransition ref={overlayRef} />
+      {/* Оба компонента всегда в DOM, но используется только один. Они ничего не весят в простое. */}
+      <PixelTransition ref={pixelOverlayRef} />
+      <WaveTransition ref={waveOverlayRef} />
     </TransitionContext.Provider>
   );
 };

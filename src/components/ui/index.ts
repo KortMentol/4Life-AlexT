@@ -8,7 +8,6 @@ export { default as Hero } from "./Hero";
 export { default as InteractiveProductCard } from "./InteractiveProductCard";
 export { default as KineticProductCarousel } from "./KineticProductCarousel";
 export { default as ParallaxSection } from "./ParallaxSection";
-export { default as ProductCard } from "./ProductCard";
 export { default as ProductDetailModal } from "./ProductDetailModal";
 export { default as ProductListIcon } from "./ProductListIcon";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";

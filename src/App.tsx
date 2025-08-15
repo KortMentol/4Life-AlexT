@@ -16,7 +16,7 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from "react
 import { Link, Route, Routes, useNavigate } from "react-router-dom";
 
 // Lazy-loaded компоненты страниц
-const HomePage = React.lazy(() => import("@/pages/HomePage"));
+import HomePage from "@/pages/HomePage";
 const ProductsPage = React.lazy(() => import("@/pages/ProductsPage"));
 const AboutPage = React.lazy(() => import("@/pages/AboutPage"));
 const AboutMePage = React.lazy(() => import("@/pages/AboutMePage"));

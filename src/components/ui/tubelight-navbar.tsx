@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTransition } from "../../context/TransitionProvider";
 import { useTheme } from "../../hooks/useTheme";
@@ -10,11 +10,18 @@ export const TubelightNavbar: React.FC = () => {
   const location = useLocation();
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { transitionTo } = useTransition(); // <-- Получаем нашу функцию перехода
+  const { transitionTo } = useTransition();
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // --- ИЗМЕНЕНИЕ 1: Новое состояние для "залипания" подсветки при клике ---
+  const [clickedIndex, setClickedIndex] = useState<number | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
+
+  // --- ИЗМЕНЕНИЕ 2: Сбрасываем "залипание" после завершения перехода на новую страницу ---
+  useEffect(() => {
+    setClickedIndex(null);
+  }, [location.pathname]);
 
   return (
     <motion.nav
@@ -67,10 +74,11 @@ export const TubelightNavbar: React.FC = () => {
                 // Если мы уже на этой странице, просто скроллим вверх
                 if (location.pathname === item.href) {
                   scrollToTop({ immediate: false });
-                } else {
-                  // Иначе запускаем наш кастомный переход
-                  transitionTo(item.href);
+                  return;
                 }
+                // --- ИЗМЕНЕНИЕ 3: При клике "запоминаем" индекс, чтобы подсветка осталась ---
+                setClickedIndex(index);
+                transitionTo(item.href);
               }}
               onMouseEnter={() => setHoveredIndex(index)}
               className={({ isActive }) =>
@@ -80,14 +88,21 @@ export const TubelightNavbar: React.FC = () => {
               }
             >
               {({ isActive }) => {
-                const showLamp = hoveredIndex === index || (hoveredIndex === null && isActive);
+                // --- ИЗМЕНЕНИЕ 4: Новая логика для отображения подсветки ---
+                const showLamp =
+                  clickedIndex === index || // 1. Показываем, если этот элемент был кликнут
+                  (clickedIndex === null && hoveredIndex === index) || // 2. Или если на него наведен курсор (и ничего не кликнуто)
+                  (clickedIndex === null && hoveredIndex === null && isActive); // 3. Или если это активная страница (и ничего не кликнуто/не наведено)
+
                 return (
                   <>
                     <span className="relative z-10">{item.title}</span>
                     {showLamp && (
                       <motion.div
                         layoutId="lamp"
-                        className={`absolute inset-0 w-full rounded-xl -z-10 ${isDark ? "bg-slate-700/50" : "bg-slate-200"}`}
+                        className={`absolute inset-0 w-full rounded-xl -z-10 ${
+                          isDark ? "bg-slate-700/50" : "bg-slate-200"
+                        }`}
                         initial={false}
                         transition={{
                           type: "spring",

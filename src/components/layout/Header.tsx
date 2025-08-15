@@ -5,7 +5,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { headerVariants, logoVariants } from "../../animations/headerAnimations";
-import { useTransition } from "../../context/TransitionProvider"; // <-- 1. ДОБАВИТЬ ЭТОТ ИМПОРТ
+import { useTransition } from "../../context/TransitionProvider";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { useNativeScroll } from "../../hooks/useNativeScroll";
 import { useTheme } from "../../hooks/useTheme";
 import { siteConfig } from "../../site-config/site";
@@ -27,7 +28,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
-  const { transitionTo } = useTransition(); // <-- 2. ПОЛУЧИТЬ ФУНКЦИЮ ПЕРЕХОДА
+  const { transitionTo } = useTransition();
+  const isMobile = useIsMobile();
 
   const headerRef = useRef<HTMLElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -43,6 +45,17 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
     topOffset: 8,
     disabled: isMenuOpen || isScrollingLocked,
   });
+
+  // Этот useEffect слушает наше кастомное событие и показывает хедер
+  useEffect(() => {
+    const handleForceShow = () => {
+      forceShowHeader();
+    };
+    window.addEventListener("force-header-show", handleForceShow);
+    return () => {
+      window.removeEventListener("force-header-show", handleForceShow);
+    };
+  }, [forceShowHeader]);
 
   useEffect(() => {
     if (!headerRef.current) return;
@@ -72,15 +85,19 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
     setTheme(isDark ? "light" : "dark");
   };
 
-  // ▼▼▼ 3. ИЗМЕНИТЬ ЭТУ ФУНКЦИЮ ▼▼▼
   const handleLogoClick = () => {
-    if (location.pathname === "/") {
+    if (isMobile) {
       scrollToTop({ immediate: false });
     } else {
-      transitionTo("/"); // Заменяем navigate("/") на transitionTo("/")
+      if (location.pathname === "/") {
+        scrollToTop({ immediate: false });
+      } else {
+        transitionTo("/");
+      }
     }
   };
 
+  // ... остальной JSX код хедера остается без изменений ...
   return (
     <motion.header
       ref={headerRef}
@@ -145,7 +162,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
               <button
                 onClick={handleLogoClick}
                 className="flex flex-col items-center group"
-                aria-label="Главная страница"
+                aria-label="Прокрутить вверх"
               >
                 <motion.div
                   className="text-center flex flex-col items-center"

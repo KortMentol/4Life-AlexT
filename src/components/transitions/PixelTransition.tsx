@@ -29,7 +29,7 @@ export const PixelTransition = forwardRef<TransitionHandle>((_, ref) => {
       };
 
       const toVars = {
-        scale: direction === "in" ? 1.01 : 0,
+        scale: direction === "in" ? 1.05 : 0,
         opacity: direction === "in" ? 1 : 0,
       };
 

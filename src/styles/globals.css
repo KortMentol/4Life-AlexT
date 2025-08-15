@@ -191,7 +191,7 @@ a {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 99999; /* Высший z-index, чтобы быть поверх всего */
+  z-index: 50;
   display: grid;
   grid-template-columns: repeat(14, 1fr); /* 14 колонок */
   grid-template-rows: repeat(8, 1fr); /* 8 рядов */
@@ -202,4 +202,46 @@ a {
 .pixel-overlay .pixel-cell {
   background-color: #0f172a; /* Цвет пикселей (темный фон вашего сайта) */
   will-change: opacity, transform;
+}
+
+/* Custom Swiper Navigation for Product Detail View */
+.product-detail-swiper .swiper-button-prev,
+.product-detail-swiper .swiper-button-next {
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.product-detail-swiper .swiper-button-prev:hover,
+.product-detail-swiper .swiper-button-next:hover {
+  background-color: rgba(0, 255, 255, 0.2);
+  color: #00ffff;
+}
+
+.product-detail-swiper .swiper-button-prev::after,
+.product-detail-swiper .swiper-button-next::after {
+  font-size: 20px !important;
+  font-weight: bold;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.5);
+}
+
+.swiper-pagination {
+  pointer-events: none; /* Весь блок с точками теперь "прозрачен" для кликов и свайпов */
 }

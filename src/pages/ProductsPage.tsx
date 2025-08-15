@@ -1,341 +1,207 @@
+import { productsData } from "@/data/productsData";
 import { SEO } from "@/seo/SEO";
-import { motion } from "framer-motion";
-import {
-  cardVariants,
-  containerVariants,
-  itemVariants,
-} from "../animations/variants";
-import { GlowEffect } from "../components/layout/GlowEffect";
-import CallToAction from "../components/ui/CallToAction";
+import { Icons } from "@/utils/icons";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { isEqual } from "lodash"; // <-- Установите lodash, если еще не установлен: npm install lodash @types/lodash
+import React, { useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { containerVariants } from "../animations/variants";
+import Button from "../components/ui/Button";
+import CategoryFilter from "../components/ui/CategoryFilter";
+import { AnimatedGridPattern } from "../components/ui/GridPattern";
+import ProductDetailView from "../components/ui/ProductDetailView";
+import ProductGridCard from "../components/ui/ProductGridCard";
+import Section from "../components/ui/Section";
 import SectionHeading from "../components/ui/SectionHeading";
-import { Icons } from "../utils/icons";
 
-// Варианты анимации для страницы
 const pageVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
   exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
 };
 
+const heroTextVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.03 } },
+};
+
+const charVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] } },
+};
+
 const ProductsPage: React.FC = () => {
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [, setSearchParams] = useSearchParams();
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({ target: pageRef, offset: ["start start", "end end"] });
+  const filterOpacity = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
+  const filterY = useTransform(scrollYProgress, [0, 0.15], [50, 0]);
+
+  const allCategories = useMemo(() => {
+    const categoriesSet = new Set<string>();
+    productsData.forEach((product) => product.categories.forEach((cat) => categoriesSet.add(cat)));
+    return Array.from(categoriesSet).sort();
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    if (selectedCategories.length === 0) return productsData;
+    return productsData.filter((product) => selectedCategories.every((cat) => product.categories.includes(cat)));
+  }, [selectedCategories]);
+
+  // [NEW] Логика для "умных" фильтров
+  const disabledCategories = useMemo(() => {
+    if (selectedCategories.length === 0) return [];
+
+    const currentProductIds = new Set(filteredProducts.map((p) => p.id));
+
+    return allCategories.filter((cat) => {
+      if (selectedCategories.includes(cat)) return false; // Активные фильтры не могут быть неактивными
+
+      const newSelection = [...selectedCategories, cat];
+      const potentialProducts = productsData.filter((p) => newSelection.every((c) => p.categories.includes(c)));
+
+      // Деактивируем, если результат будет пустым ИЛИ если результат не изменится
+      if (potentialProducts.length === 0) return true;
+
+      const potentialProductIds = new Set(potentialProducts.map((p) => p.id));
+      if (isEqual(currentProductIds, potentialProductIds)) return true;
+
+      return false;
+    });
+  }, [selectedCategories, filteredProducts, allCategories]);
+
+  const toggleCategory = (category: string) => {
+    if (disabledCategories.includes(category) && !selectedCategories.includes(category)) return;
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    );
+  };
+
+  const clearSelection = () => setSelectedCategories([]);
+  const handleCardClick = (productId: string) => setSearchParams({ product: productId }, { replace: true });
+
+  const heroTitle = "Протоколы Иммунитета";
+
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-    >
+    <motion.div ref={pageRef} initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <SEO
-        title="Продукты 4Life - Укрепление иммунитета и здоровье с Александром Тощевым"
-        description="Инновационные продукты 4Life с Трансфер Факторами для укрепления иммунитета и улучшения здоровья. Официальный представитель Александр Тощев."
+        title="Продукты 4Life - Каталог для иммунитета и здоровья"
+        description="Полный каталог инновационных продуктов 4Life с Трансфер Факторами."
         path="/products"
         type="website"
       />
-      <div className="min-h-screen text-gray-800 dark:text-gray-200">
-        {/* Hero Section */}
-        <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-100/0 to-teal-200/0 dark:from-gray-800/0 dark:to-gray-900/0 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 z-0"></div>
-          <div
-            className="absolute inset-0 z-0 opacity-30"
-            style={{
-              backgroundImage: "url(https://i.ibb.co/Yc53L8w/hero-pattern.png)",
-              backgroundRepeat: "repeat",
-              backgroundSize: "contain",
-            }}
-          ></div>
-          <div className="container mx-auto px-4 relative z-10">
+
+      <section className="relative h-screen flex items-center justify-center text-center overflow-hidden bg-gray-900">
+        <AnimatedGridPattern />
+        <div className="relative z-10 p-4">
+          <motion.h1
+            variants={heroTextVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-white"
+            aria-label={heroTitle}
+          >
+            {heroTitle.split("").map((char, index) => (
+              <motion.span key={index} variants={charVariants} className="inline-block">
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="mt-6 text-lg md:text-xl max-w-2xl mx-auto text-gray-300"
+          >
+            Научно разработанные формулы для калибровки и поддержки вашей иммунной системы.
+          </motion.p>
+        </div>
+      </section>
+
+      <Section background="dark" spacing="none" className="py-24 relative">
+        <div className="container mx-auto max-w-7xl px-4">
+          <motion.div style={{ opacity: filterOpacity, y: filterY }}>
+            <CategoryFilter
+              categories={allCategories}
+              selected={selectedCategories}
+              toggleCategory={toggleCategory}
+              clearSelection={clearSelection}
+              // disabledCategories={disabledCategories} // Передаем неактивные категории
+            />
+          </motion.div>
+
+          <motion.div
+            key={selectedCategories.join("-")}
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10 mt-12"
+          >
+            <AnimatePresence>
+              {filteredProducts.map((product) => (
+                <ProductGridCard key={product.id} product={product} onClick={() => handleCardClick(product.id)} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+
+          {filteredProducts.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px 0px" }}
-              transition={{ duration: 0.6 }}
-              className="relative z-10"
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-16 text-gray-500"
             >
-              <GlowEffect>
-                <motion.h1
-                  className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4 drop-shadow-lg"
-                  variants={itemVariants}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.3 }}
-                >
-                  Каталог Продукции 4Life
-                </motion.h1>
-              </GlowEffect>
-              <motion.p
-                className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-              >
-                Откройте для себя инновационные продукты для поддержки
-                иммунитета и общего благополучия.
-              </motion.p>
+              <p className="text-xl font-medium">Продукты не найдены</p>
+              <p className="mt-2">Попробуйте изменить или сбросить фильтры.</p>
+            </motion.div>
+          )}
+        </div>
+      </Section>
+
+      <Section background="dark" spacing="xl" className="border-t border-white/5">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <SectionHeading
+              title="Нужна помощь в выборе?"
+              subtitle="Персональный подход"
+              description="Каждый организм уникален. Я помогу вам подобрать программу, которая будет отвечать именно вашим целям и потребностям. Свяжитесь со мной для бесплатной консультации."
+              align="left"
+              titleClassName="text-white"
+              subtitleClassName="text-cyan-400"
+              withLine={true}
+              lineColor="blue"
+            />
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-8"
+            >
+              <Button to="/contact" variant="primary" size="lg" icon={<Icons.Send />}>
+                Получить консультацию
+              </Button>
             </motion.div>
           </div>
-        </section>
-
-        {/* Technology & Science Section */}
-        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="hidden md:block">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px 0px" }}
-              transition={{ duration: 0.5 }}
-              className="relative z-10"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <SectionHeading
-                title="Наши Уникальные Технологии и Научное Превосходство"
-                subtitle="Наука лежит в основе каждой формулы 4Life"
-                centered
+              <img
+                src="/src/assets/images/brand/4life-logo-light.svg"
+                alt="Science"
+                className="w-full h-auto opacity-10"
               />
             </motion.div>
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 relative z-10"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-50px 0px" }}
-            >
-              {/* Transfer Factors */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-              >
-                <Icons.ShieldCheck className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Трансфер Факторы
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Уникальные молекулы иммунной памяти, обучающие и балансирующие
-                  защитные клетки организма.
-                </p>
-              </motion.div>
-              {/* Patents & Research */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.2 }}
-              >
-                <Icons.FlaskConical className="h-12 w-12 text-emerald-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Патенты и Исследования
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  Продукция защищена патентами и подтверждена клиническими
-                  исследованиями.
-                </p>
-                <a
-                  href="https://russia.4life.com/12299550/page/47/studies-and-publications"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm font-medium text-primary-600 hover:underline"
-                >
-                  Подробнее
-                  <Icons.ArrowRight className="ml-1 h-4 w-4" />
-                </a>
-              </motion.div>
-              {/* Advisory Board */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.4 }}
-              >
-                <Icons.Users className="h-12 w-12 text-violet-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Экспертный Совет
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Формулы разрабатываются при участии ведущих учёных и врачей со
-                  всего мира.
-                </p>
-              </motion.div>
-              {/* Quality Control */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.6 }}
-              >
-                <Icons.CheckCircle className="h-12 w-12 text-teal-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Строгий Контроль Качества
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Многоступенчатая проверка — от сырья до готового продукта,
-                  гарантирует чистоту и эффективность.
-                </p>
-              </motion.div>
-            </motion.div>
           </div>
-        </section>
+        </div>
+      </Section>
 
-        {/* Categories Section */}
-        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
-          <div className="container mx-auto px-4 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px 0px" }}
-              transition={{ duration: 0.5 }}
-              className="relative z-10"
-            >
-              <SectionHeading
-                title="Категории продуктов"
-                subtitle="Выберите категорию, которая вас интересует"
-                centered
-              />
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 relative z-10"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-50px 0px" }}
-            >
-              {/* Категория 1 */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-              >
-                <Icons.Shield className="h-12 w-12 text-blue-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Иммунитет и Общее Здоровье
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Базовая поддержка иммунной системы и жизненной энергии.
-                </p>
-              </motion.div>
-              {/* Категория 2 */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.2 }}
-              >
-                <Icons.HeartPulse className="h-12 w-12 text-red-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Целевая Поддержка
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Решения для сердца, печени, мозга и других систем.
-                </p>
-              </motion.div>
-              {/* Категория 3 */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.4 }}
-              >
-                <Icons.Scale className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Управление Весом
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Продукты для контроля массы тела и метаболизма.
-                </p>
-              </motion.div>
-              {/* Категория 4 */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.6 }}
-              >
-                <Icons.Sparkles className="h-12 w-12 text-purple-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Красота и Уход
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Коллаген и другие решения для кожи, волос и ногтей.
-                </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Why Choose Section */}
-        <section className="py-16 md:py-24 bg-white/0 dark:bg-gray-800/0 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-black/10 z-0"></div>
-          <div className="container mx-auto px-4 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px 0px" }}
-              transition={{ duration: 0.5 }}
-              className="relative z-10"
-            >
-              <SectionHeading
-                title="Почему миллионы выбирают 4Life?"
-                subtitle="Три ключевые причины доверять нашему бренду"
-                centered
-              />
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-50px 0px" }}
-            >
-              {/* Innovation & Science */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-              >
-                <Icons.Lightbulb className="h-12 w-12 text-yellow-500 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Инновации и Наука
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Постоянные исследования и запатентованные технологии для
-                  максимальной эффективности.
-                </p>
-              </motion.div>
-              {/* Quality & Safety */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.2 }}
-              >
-                <Icons.CheckCircle className="h-12 w-12 text-teal-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Качество и Безопасность
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Многоступенчатый контроль качества и сырьё премиум-класса.
-                </p>
-              </motion.div>
-              {/* Global Community */}
-              <motion.div
-                className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md flex flex-col items-center text-center"
-                variants={cardVariants}
-                transition={{ delay: 0.4 }}
-              >
-                <Icons.Globe className="h-12 w-12 text-indigo-600 mb-4" />
-                <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">
-                  Глобальное Сообщество
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Миллионы довольных клиентов и дистрибьюторов в 70+ странах
-                  мира.
-                </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Финальный CTA */}
-        <CallToAction
-          title="Есть вопросы о продуктах 4Life?"
-          description="Свяжитесь со мной, и я помогу вам выбрать идеальные решения для ваших нужд."
-          primaryButtonText="Получить консультацию"
-          primaryButtonLink="/contact"
-          secondaryButtonText="Узнать о партнерстве"
-          secondaryButtonLink="/partnership"
-        />
-      </div>
+      <ProductDetailView />
     </motion.div>
   );
 };
