@@ -72,6 +72,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   lazyLoad = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
 
@@ -104,6 +105,39 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     }
   }, [finalBackgroundImage, skipPreload]);
 
+  // Intersection Observer для паузы видео при скролле (Awwwards уровень)
+  useEffect(() => {
+    const video = videoRef.current;
+    const container = containerRef.current;
+    
+    if (!video || !container || !backgroundVideo) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Пользователь в зоне секции + 300px буфер - включаем видео
+            video.play().catch(() => {});
+          } else {
+            // Пользователь за пределами зоны - ВСЕГДА пауза
+            video.pause();
+          }
+        });
+      },
+      {
+        threshold: 0,
+        rootMargin: '300px 0px 300px 0px' // 300px буфер со всех сторон
+      }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+      video.pause();
+    };
+  }, [backgroundVideo, inView]);
+
   return (
     <section
       ref={containerRef}
@@ -125,17 +159,18 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
         >
           {backgroundVideo ? (
             <video
-              key={inView ? "video-loaded" : "video-unloaded"} // 🔥 ИЗМЕНЕНИЕ 1: Добавляем key для перерисовки видео
+              ref={videoRef}
+              key={inView ? "video-loaded" : "video-unloaded"}
               className="absolute top-0 left-0 h-full w-full object-cover"
               autoPlay
               loop
               muted
               playsInline
+              preload="metadata"
               disablePictureInPicture
-              // 🔥 ИЗМЕНЕНИЕ 2: Используем poster для мобильных устройств, чтобы убрать вспышку.
               poster={isMobile ? backgroundImageMobile : undefined}
             >
-              {/* 🔥 ИЗМЕНЕНИЕ 3: Загружаем источники только когда видео в зоне видимости */}
+              {/* Загружаем источники только когда видео в зоне видимости */}
               {inView && (
                 <>
                   <source src={backgroundVideo} type="video/webm" />

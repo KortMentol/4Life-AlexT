@@ -8,6 +8,9 @@
  * 1. `src/main.tsx`: Импортируется сразу после `base.css` для применения глобальных стилей ко всему сайту.
  */
 
+
+
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -244,4 +247,100 @@ a {
 
 .swiper-pagination {
   pointer-events: none; /* Весь блок с точками теперь "прозрачен" для кликов и свайпов */
+}
+
+/* ProductsPage Awwwards Animations */
+.repeating-image-mover {
+  position: fixed;
+  z-index: 9999;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 12px;
+  pointer-events: none;
+  will-change: transform, opacity, clip-path;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Floating animations for quality section */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Gradient text animations */
+.gradient-text {
+  background: linear-gradient(45deg, #00ffff, #0080ff, #8000ff, #ff0080);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 8s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 50% 100%; }
+  75% { background-position: 50% 0%; }
+}
+
+/* Smooth section transitions */
+.section-transition {
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Accordion animations */
+.accordion-content {
+  transition: height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.3s ease;
+}
+
+/* Hover effects for cards */
+.card-hover-effect {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 255, 255, 0.1);
+}
+
+/* Blur effects for performance */
+.backdrop-blur-optimized {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Smooth scrolling improvements */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  .repeating-image-mover,
+  .float-animation,
+  .gradient-text,
+  .section-transition,
+  .card-hover-effect {
+    animation: none !important;
+    transition: none !important;
+  }
 }

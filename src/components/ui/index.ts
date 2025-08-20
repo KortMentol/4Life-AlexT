@@ -8,10 +8,15 @@ export { default as Hero } from "./Hero";
 export { default as InteractiveProductCard } from "./InteractiveProductCard";
 export { default as KineticProductCarousel } from "./KineticProductCarousel";
 export { default as ParallaxSection } from "./ParallaxSection";
+export { default as ProductCatalogGrid } from "./ProductCatalogGrid";
 export { default as ProductDetailModal } from "./ProductDetailModal";
+export { default as ProductFilters } from "./ProductFilters";
+
 export { default as ProductListIcon } from "./ProductListIcon";
+export { default as ProductSpecModal } from "./ProductSpecModal";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";
 export { default as Section } from "./Section";
 export { default as SectionHeading } from "./SectionHeading";
+export { default as ShoppingCartAnimation, useShoppingCart } from "./ShoppingCartAnimation";
 export { default as StaticFeature } from "./StaticFeature";
 export { TubelightNavbar } from "./tubelight-navbar";

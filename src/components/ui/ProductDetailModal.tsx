@@ -1,178 +1,181 @@
-import { useProductList } from "@/hooks/useProductList";
-import { Product } from "@/types/Product";
-import { Dialog, Transition } from "@headlessui/react";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { Fragment, useState } from "react";
+/**
+ * @module src/components/ui/ProductDetailModal.tsx
+ * @description Модальное окно, адаптированное для приема анимации RepeatingImageTransition.
+ * Управляется через GSAP из родительского компонента.
+ * @author Kort
+ * @version 4.0.0 - Refactored for GSAP control
+ */
+
+import { DetailedProduct } from "@/data/productsData";
+import { Icons } from "@/utils/icons";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import SciFiCloseButton from "./SciFiCloseButton";
+import { useShoppingCart } from "./ShoppingCartAnimation";
 
 interface ProductDetailModalProps {
-  product: Product;
-  isOpen: boolean;
+  product: DetailedProduct | null;
   onClose: () => void;
 }
 
-/**
- * @module components/ui/ProductDetailModal
- * @description Модальное окно для детального просмотра продукта ("Quick View").
- * Построено на базе Headless UI (`Dialog`, `Transition`) для обеспечения доступности и плавных анимаций.
- * Отображает подробную информацию о продукте, включая описание, преимущества, ингредиенты, и позволяет выбрать количество и добавить товар в список покупок с помощью хука `useProductList`.
- *
- * @author Kort
- * @version 1.0.0
- *
- * @param {Product} product - Объект с данными продукта для отображения.
- * @param {boolean} isOpen - Состояние, определяющее, открыто ли модальное окно.
- * @param {() => void} onClose - Функция обратного вызова для закрытия модального окна.
- *
- * @see Dialog - Компонент модального окна из Headless UI.
- * @see Transition - Компонент для управления анимациями входа/выхода из Headless UI.
- * @see useProductList - Хук для управления списком продуктов.
- * @see ProductCard - Компонент, который обычно инициирует открытие этого модального окна.
- *
- * @usage
- * Используется на страницах каталога для реализации функции "Быстрый просмотр".
- * Состояние `isOpen` и функция `onClose` управляются родительским компонентом.
- *
- * @example
- * const [isModalOpen, setIsModalOpen] = useState(false);
- * const [selectedProduct, setSelectedProduct] = useState(null);
- *
- * const handleQuickView = (product) => {
- *   setSelectedProduct(product);
- *   setIsModalOpen(true);
- * };
- *
- * const closeModal = () => setIsModalOpen(false);
- *
- * // ... в рендере
- * {selectedProduct && (
- *   <ProductDetailModal
- *     isOpen={isModalOpen}
- *     onClose={closeModal}
- *     product={selectedProduct}
- *   />
- * )}
- */
-const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
-  product,
-  isOpen,
-  onClose,
-}) => {
-  const { addToList } = useProductList();
-  const [quantity, setQuantity] = useState(1);
+// Новый тип для Handle, чтобы родитель мог получить доступ к DOM-элементам
+export interface ProductDetailModalHandle {
+  getPanel: () => HTMLDivElement | null;
+  getPanelImage: () => HTMLDivElement | null;
+  getPanelContent: () => HTMLDivElement | null;
+}
 
-  const increment = () => setQuantity((q) => Math.min(q + 1, 99));
-  const decrement = () => setQuantity((q) => Math.max(1, q - 1));
-  const handleAdd = () => {
-    addToList(product, quantity);
-    onClose();
-  };
+const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailModalProps>(
+  ({ product, onClose }, ref) => {
+    const { addToCart } = useShoppingCart();
+    const modalRef = useRef<HTMLDivElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const panelImageRef = useRef<HTMLDivElement>(null);
+    const panelContentRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+    // Предоставляем доступ к внутренним элементам через ref
+    useImperativeHandle(ref, () => ({
+      getPanel: () => panelRef.current,
+      getPanelImage: () => panelImageRef.current,
+      getPanelContent: () => panelContentRef.current,
+    }));
+
+    const handleAddToCart = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (product) {
+          const buttonElement = (e.target as HTMLElement).closest("button");
+          if (buttonElement) {
+            addToCart(product, buttonElement);
+          }
+        }
+      },
+      [product, addToCart]
+    );
+
+    // Блокировка скролла и управление фокусом
+    useEffect(() => {
+      if (product) {
+        // Открыто
+        previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
+        document.body.style.overflow = "hidden";
+        setTimeout(() => closeButtonRef.current?.focus(), 600); // Даем время на анимацию
+      } else {
+        // Закрыто
+        document.body.style.overflow = "";
+        previouslyFocusedElementRef.current?.focus?.();
+      }
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }, [product]);
+
+    // Закрытие по клавише Escape
+    useEffect(() => {
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && product) {
+          onClose();
+        }
+      };
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }, [product, onClose]);
+
+    if (!product) return null;
+
+    return (
+      // Контейнер модального окна, который всегда рендерится, но видим только при анимации
+      <div
+        ref={modalRef}
+        className="fixed inset-0 z-[9998] pointer-events-none" // Неактивен по умолчанию
+      >
+        <div
+          ref={panelRef}
+          className="fixed inset-0 w-full h-full p-6 md:p-8 opacity-0 pointer-events-none" // Скрыт по умолчанию
+          style={{ willChange: "transform, clip-path, opacity" }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="fixed inset-0 bg-black/50" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+          <div className="relative w-full h-full grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Левая часть - изображение */}
+            <div
+              ref={panelImageRef}
+              className="relative w-full h-full rounded-2xl"
+              style={{
+                backgroundImage: `url(${product.image})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                willChange: "transform, clip-path",
+              }}
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex justify-between items-start mb-4">
-                  <Dialog.Title className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    {product.name}
-                  </Dialog.Title>
-                  <button
-                    onClick={onClose}
-                    className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Image & Info */}
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="md:flex-shrink-0 md:w-1/2">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-auto rounded-lg object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-line">
-                      {product.longDescription}
-                    </p>
-
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                      Преимущества:
-                    </h4>
-                    <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">
-                      {product.benefits.map((b) => (
-                        <li key={b}>{b}</li>
-                      ))}
-                    </ul>
-
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                      Ключевые ингредиенты:
-                    </h4>
-                    <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">
-                      {product.keyIngredients.map((k) => (
-                        <li key={k}>{k}</li>
-                      ))}
-                    </ul>
-
-                    {/* Quantity selector */}
-                    <div className="flex items-center gap-3 mb-6">
-                      <button
-                        onClick={decrement}
-                        className="p-2 bg-gray-100 dark:bg-gray-800 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-10 text-center font-medium">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={increment}
-                        className="p-2 bg-gray-100 dark:bg-gray-800 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={handleAdd}
-                      className="w-full inline-flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-gray-900/80" />
+            </div>
+            {/* Правая часть - контент */}
+            <div
+              ref={panelContentRef}
+              className="relative p-8 lg:p-12 flex flex-col justify-center space-y-6 overflow-y-auto custom-scrollbar text-white"
+            >
+              <div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {product.categories.map((category: string) => (
+                    <span
+                      key={category}
+                      className="px-3 py-1 text-sm bg-cyan-500/20 text-cyan-300 rounded-full border border-cyan-500/30"
                     >
-                      <ShoppingCart className="w-5 h-5" />
-                      Добавить в Список
-                    </button>
-                  </div>
+                      {category}
+                    </span>
+                  ))}
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+                <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">{product.name}</h1>
+                <p className="text-lg text-gray-300 leading-relaxed">{product.mainDescription}</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-3">Основная поддержка:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.mainSupport.map((support: string) => (
+                    <span
+                      key={support}
+                      className="px-3 py-2 bg-green-500/20 text-green-300 rounded-lg border border-green-500/30 text-sm"
+                    >
+                      {support}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-3">Ключевые преимущества:</h3>
+                <ul className="space-y-2">
+                  {product.keyBenefits.map((benefit, index) => (
+                    <li key={index} className="flex items-start gap-3 text-gray-300">
+                      <Icons.Check className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm leading-relaxed">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                <div className="text-3xl font-bold text-cyan-400">{product.lp} LP</div>
+                <button
+                  onClick={handleAddToCart}
+                  className="flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25"
+                >
+                  <Icons.ShoppingCart className="w-5 h-5" />В корзину
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Кнопка закрытия */}
+          <div className="absolute top-4 right-4 z-10">
+            <SciFiCloseButton ref={closeButtonRef} onClick={onClose} />
           </div>
         </div>
-      </Dialog>
-    </Transition>
-  );
-};
+      </div>
+    );
+  }
+);
 
+ProductDetailModal.displayName = "ProductDetailModal";
 export default ProductDetailModal;

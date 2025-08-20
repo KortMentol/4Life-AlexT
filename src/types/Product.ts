@@ -3,11 +3,11 @@ export interface Product {
   name: string;
   image: string; // URL or static import path to product image
   shortDescription: string;
-  longDescription: string;
+  longDescription?: string;
   keyIngredients: string[];
-  benefits: string[];
+  benefits?: string[];
   categories: string[];
-  scientificNotes: string;
+  scientificNotes?: string;
   /**
    * Optional link to detailed product page or external URL
    */

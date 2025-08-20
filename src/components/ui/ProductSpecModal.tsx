@@ -4,6 +4,34 @@ import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import SciFiCloseButton from "./SciFiCloseButton";
 
+/**
+ * @module src/components/ui/ProductSpecModal.tsx
+ * @description
+ * Модальное окно со спецификацией продукта: отображает краткую и расширенную информацию,
+ * преимущества, состав и научное обоснование. Использует анимации Framer Motion и диалог Headless UI.
+ *
+ * Компонент устойчив к частично заполненным данным: использует фолбэки для описания, преимуществ
+ * и научных заметок (longDescription ?? mainDescription, benefits ?? keyBenefits ?? []).
+ *
+ * @author Kort
+ * @version 2.0.0
+ * @param {Object} props
+ * @param {DetailedProduct | null} props.product - Текущий продукт для отображения (null скрывает модалку)
+ * @param {boolean} props.isOpen - Флаг открытия модального окна
+ * @param {() => void} props.onClose - Обработчик закрытия модального окна
+ * @see src/components/ui/ProductDetailView.tsx — компонент, из которого открывается спецификация
+ * @usage
+ * 1) src/components/ui/ProductDetailView.tsx — при клике на кнопку «Показать полную спецификацию»:
+ *    Контекст: модальное окно деталей продукта; открывается с пропсами
+ *    `product={activeProduct}` и `isOpen={isSpecModalOpen}`.
+ * @example
+ * <ProductSpecModal
+ *   product={activeProduct}
+ *   isOpen={isSpecModalOpen}
+ *   onClose={() => setIsSpecModalOpen(false)}
+ * />
+ */
+
 interface ProductSpecModalProps {
   product: DetailedProduct | null;
   isOpen: boolean;
@@ -59,13 +87,13 @@ const ProductSpecModal: React.FC<ProductSpecModalProps> = ({ product, isOpen, on
                     )}
                     <div>
                       <h4 className="font-semibold text-cyan-400 mb-2">Описание:</h4>
-                      <p className="text-gray-300 whitespace-pre-line">{product.longDescription}</p>
+                      <p className="text-gray-300 whitespace-pre-line">{product.longDescription ?? product.mainDescription ?? ""}</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-cyan-400 mb-2">Ключевые преимущества:</h4>
                       <ul className="list-disc list-inside text-gray-300 space-y-1">
-                        {product.benefits.map((benefit, i) => (
-                          <li key={i}>{benefit}</li>
+                        {(product.benefits ?? product.keyBenefits ?? []).map((benefit: string, i: number) => (
+                          <li key={`${benefit}-${i}`}>{benefit}</li>
                         ))}
                       </ul>
                     </div>
@@ -79,7 +107,7 @@ const ProductSpecModal: React.FC<ProductSpecModalProps> = ({ product, isOpen, on
                     </div>
                     <div>
                       <h4 className="font-semibold text-cyan-400 mb-2">Научное обоснование:</h4>
-                      <p className="text-gray-400 text-sm italic">{product.scientificNotes}</p>
+                      <p className="text-gray-400 text-sm italic">{product.scientificEvidence ?? product.scientificNotes ?? ""}</p>
                     </div>
                   </div>
                 </Dialog.Panel>

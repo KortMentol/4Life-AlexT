@@ -1,0 +1,412 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;800;900&display=swap");
+
+/* Стили в духе оригинала hoanghodev + аккуратные sci‑fi акценты.
+   Без глобальных body/header, только область .carousel. */
+
+:root {
+  --aw-accent: #f1683a;
+  --sci-glow: 0 0 30px rgba(0, 255, 255, 0.35);
+}
+
+/* carousel root */
+.carousel {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  color: #eee;
+  font-family:
+    Poppins,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  background: #000;
+  isolation: isolate;
+  touch-action: pan-y; /* allow vertical scroll while enabling horizontal swipe */
+}
+
+/* list items */
+.carousel .list .item {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0 0 0 0;
+}
+
+/* Base visibility: show only the active slide */
+.carousel .list {
+  position: relative;
+  height: 100%;
+}
+.carousel .list .item {
+  opacity: 0;
+  pointer-events: none;
+}
+.carousel .list .item:nth-child(1) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carousel .list .item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.05) contrast(1.05);
+}
+
+/* gradient subtle overlay for sci‑fi depth */
+.carousel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.35) 30%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0) 75%);
+  z-index: 1; /* sits below content (z=2) but above base image */
+}
+.carousel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 400px at 70% 25%, rgba(0, 255, 255, 0.06), transparent 60%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.65) 100%);
+  z-index: 0;
+}
+
+/* content */
+.carousel .list .item .content {
+  position: absolute;
+  top: 20%;
+  width: 1140px;
+  max-width: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-right: 30%;
+  box-sizing: border-box;
+  color: #fff;
+  text-shadow: 0 5px 10px #0004;
+  z-index: 2;
+  /* sci‑fi glow var toggled via GSAP */
+  --glow: 0;
+  filter: drop-shadow(0 0 calc(var(--glow) * 14px) rgba(0, 255, 255, 0.45));
+}
+
+.carousel .list .item .author {
+  font-weight: 800;
+  letter-spacing: 10px;
+}
+
+.carousel .list .item .title,
+.carousel .list .item .topic {
+  font-size: 5em;
+  font-weight: 800;
+  line-height: 1.15em;
+}
+
+.carousel .list .item .topic {
+  color: var(--aw-accent);
+  text-shadow: 0 0 10px rgba(241, 104, 58, 0.35);
+}
+
+.carousel .list .item .des {
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+.carousel .list .item .buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 160px);
+  grid-template-rows: 44px;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.carousel .list .item .buttons button {
+  border: none;
+  background: #eee;
+  letter-spacing: 2px;
+  font-family: Poppins, sans-serif;
+  font-weight: 600;
+  border-radius: 12px;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
+  box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+}
+
+.carousel .list .item .buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sci-glow);
+}
+
+.carousel .list .item .buttons button:nth-child(2) {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #eee;
+}
+
+/* thumbnail */
+.thumbnail {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  left: auto;
+  width: max-content;
+  z-index: 3;
+  display: flex;
+  gap: 20px;
+  transform: none;
+  justify-content: flex-end;
+}
+
+.thumbnail .item {
+  width: 150px;
+  height: 220px;
+  flex-shrink: 0;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s ease;
+  will-change: transform;
+  cursor: pointer;
+}
+
+.thumbnail .item:hover {
+  transform: translateY(-3px);
+}
+
+.thumbnail .item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.thumbnail .item .content {
+  color: #fff;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.thumbnail .item .content .title {
+  font-weight: 700;
+}
+
+.thumbnail .item .content .description {
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+/* arrows */
+.arrows {
+  position: absolute;
+  top: 80%;
+  right: 52%;
+  z-index: 4;
+  width: 300px;
+  max-width: 30%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.arrows button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #eee4;
+  border: none;
+  color: #fff;
+  font-family: monospace;
+  font-weight: bold;
+  transition: 0.3s;
+  backdrop-filter: blur(8px);
+}
+
+.arrows button:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+/* animation base */
+.carousel .list .item:nth-child(1) {
+  z-index: 1;
+}
+
+/* During transitions, ensure involved slides are visible */
+.carousel.prev .list .item:nth-child(2),
+.carousel.next .list .item:nth-child(1),
+.carousel.next .list .item:nth-child(2) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Bring the incoming slide (2) above during NEXT */
+.carousel.next .list .item:nth-child(2) {
+  z-index: 2;
+}
+
+/* content CSS animation as в оригинале (оставлено для 1:1 эффекта) */
+.carousel .list .item:nth-child(1) .content .author,
+.carousel .list .item:nth-child(1) .content .title,
+.carousel .list .item:nth-child(1) .content .topic,
+.carousel .list .item:nth-child(1) .content .des,
+.carousel .list .item:nth-child(1) .content .buttons {
+  transform: translateY(50px);
+  filter: blur(20px);
+  opacity: 0;
+  animation: showContent 0.5s 1s linear 1 forwards;
+}
+@keyframes showContent {
+  to {
+    transform: translateY(0px);
+    filter: blur(0px);
+    opacity: 1;
+  }
+}
+.carousel .list .item:nth-child(1) .content .title {
+  animation-delay: 1.2s !important;
+}
+.carousel .list .item:nth-child(1) .content .topic {
+  animation-delay: 1.4s !important;
+}
+.carousel .list .item:nth-child(1) .content .des {
+  animation-delay: 1.6s !important;
+}
+.carousel .list .item:nth-child(1) .content .buttons {
+  animation-delay: 1.8s !important;
+}
+
+/* next click */
+.carousel.next .list .item:nth-child(2) img {
+  width: 150px;
+  height: 220px;
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  border-radius: 30px;
+  animation: showImage 0.5s linear 1 forwards;
+}
+@keyframes showImage {
+  to {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+}
+
+.carousel.prev .list .item img {
+  z-index: 100;
+}
+/* remove thumbnail sliding animations to keep strip static */
+
+/* running time */
+.carousel .time {
+  position: absolute;
+  z-index: 1000;
+  width: 0%;
+  height: 3px;
+  background-color: var(--aw-accent);
+  left: 0;
+  top: 0;
+}
+
+.carousel.next .time,
+.carousel.prev .time {
+  animation: runningTime 3s linear 1 forwards;
+}
+@keyframes runningTime {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}
+
+/* prev click */
+.carousel.prev .list .item:nth-child(2) {
+  z-index: 2;
+}
+
+.carousel.prev .list .item:nth-child(2) img {
+  animation: outFrame 0.5s linear 1 forwards;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+/* During transitions hide non-active slide content to avoid overlap */
+.carousel.next .list .item:nth-child(1) .content,
+.carousel.prev .list .item:nth-child(2) .content {
+  opacity: 0 !important;
+}
+@keyframes outFrame {
+  to {
+    width: 150px;
+    height: 220px;
+    bottom: 50px;
+    left: 50%;
+    border-radius: 20px;
+  }
+}
+
+/* no per-item show/hide animation for thumbnails */
+.carousel.next .arrows button,
+.carousel.prev .arrows button {
+  pointer-events: none;
+}
+
+/* Hide the thumbnail of the slide that is currently shown full-screen */
+.thumbnail .item.is-current {
+  opacity: 0;
+  transform: scale(0.9);
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, width 0.25s ease;
+  position: absolute; /* remove from flex flow so gap disappears */
+}
+
+/* Disable CSS-driven text animation; GSAP controls reveal timing */
+.carousel .list .item .content .author,
+.carousel .list .item .content .title,
+.carousel .list .item .content .topic,
+.carousel .list .item .content .des,
+.carousel .list .item .content .buttons {
+  animation: none !important;
+}
+
+/* Responsive */
+@media screen and (max-width: 678px) {
+  .carousel .list .item .content {
+    padding-right: 0;
+  }
+  .carousel .list .item .content .title {
+    font-size: 34px;
+    line-height: 1.15;
+  }
+  .arrows {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% - 120px);
+    max-width: none;
+    width: auto;
+  }
+}

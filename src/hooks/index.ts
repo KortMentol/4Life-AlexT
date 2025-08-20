@@ -1,5 +1,10 @@
 export { useFluid } from "./useFluid";
+export { default as useImageOptimization } from "./useImageOptimization";
+export { useIsMobile } from "./useIsMobile";
+export { useMediaQuery } from "./useMediaQuery";
+export { useNativeScroll } from "./useNativeScroll";
 export { usePerformanceTier } from "./usePerformanceTier";
 export { useProductList } from "./useProductList";
 export { useScrollRestoration } from "./useScrollRestoration";
 export { useTheme } from "./useTheme";
+export { default as useVirtualization } from "./useVirtualization";

@@ -11,12 +11,12 @@ import { ThemeProvider } from "./context/ThemeProvider";
 import { TransitionProvider } from "./context/TransitionProvider";
 
 // Стили
-import "./styles/animations.css";
-import "./styles/base.css";
-import "./styles/fixes.css";
+import "./styles/base/animations.css";
+import "./styles/base/base.css";
+import "./styles/base/fixes.css";
 import "./styles/globals.css";
-import "./styles/modern-design.css";
-import "./styles/theme-variables.css";
+import "./styles/base/modern-design.css";
+import "./styles/base/theme-variables.css";
 
 const initApp = () => {
   const rootElement = document.getElementById("root");

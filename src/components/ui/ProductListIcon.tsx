@@ -172,6 +172,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     <>
       <motion.button
         ref={buttonRef}
+        data-product-list-icon
         className={`product-list-icon relative p-2 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${className}`}
         onClick={openModal}
         whileHover={{ scale: 1.1 }}
