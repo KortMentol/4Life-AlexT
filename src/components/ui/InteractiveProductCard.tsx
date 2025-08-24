@@ -88,7 +88,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
             // --- ИЗМЕНЕНИЕ ЗДЕСЬ: добавлен класс `self-start` ---
             className="inline-flex items-center text-primary hover:text-blue-700 font-semibold transition-colors group text-sm mt-auto self-start"
           >
-            <span>Купить</span>
+            <span>В корзину</span>
             <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
           </Link>
         </div>

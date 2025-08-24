@@ -6,6 +6,7 @@ import { AuroraText } from "../components/magicui/aurora-text";
 import Button from "../components/ui/Button";
 import ParallaxSection from "../components/ui/ParallaxSection";
 import SectionHeading from "../components/ui/SectionHeading";
+import MorphingVideoSection from "../components/sections/MorphingVideoSection/MorphingVideoSection";
 import { useTransition } from "../context/TransitionProvider";
 import { Icons } from "../utils/icons";
 import { scrollToTop } from "../utils/navigationUtils";
@@ -40,26 +41,7 @@ const HomePage: React.FC = () => {
 
   const GLOBAL_PARALLAX_STRENGTH = 40;
 
-  // Данные для секций (без изменений)
-  const features = [
-    {
-      icon: Icons.FlaskConical,
-      title: "Научная основа",
-      description: "Более 20 патентов и команда врачей и ученых, которые создают продукты, меняющие жизнь.",
-    },
-    {
-      icon: Icons.ShieldCheck,
-      title: "Доказанная эффективность",
-      description:
-        "Трансфер Факторы обучают иммунные клетки, повышая их активность до 437% для быстрой реакции на угрозы.",
-    },
-    {
-      icon: Icons.Globe,
-      title: "25+ лет доверия",
-      description:
-        "Миллионы людей в более чем 70 странах мира выбирают 4Life для поддержки своего здоровья и благополучия.",
-    },
-  ];
+
   const benefits = [
     {
       icon: Icons.DollarSign,
@@ -125,22 +107,12 @@ const HomePage: React.FC = () => {
         contentClasses="flex flex-col items-center justify-center text-center py-8"
         skipPreload={true}
       >
-        <motion.div
-          className="max-w-4xl px-4 md:px-6 flex flex-col justify-between"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="mb-2 md:mb-4"
-          >
+        <div className="max-w-4xl px-4 md:px-6 flex flex-col justify-between">
+          <div className="mb-2 md:mb-4">
             <span className="px-3 py-1 md:px-4 md:py-1 bg-blue-600/30 text-blue-100 rounded-full text-xs md:text-sm font-medium border border-blue-400/30">
               Наука для вашего иммунитета
             </span>
-          </motion.div>
+          </div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0">
             <span className="block mb-1 md:mb-2">Раскройте потенциал своего здоровья</span>
@@ -182,46 +154,14 @@ const HomePage: React.FC = () => {
             </Button>
           </div>
 
-          <motion.div
-            className="mt-10 md:mt-12 flex items-start justify-center text-white/70"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
+          <div className="mt-10 md:mt-12 flex items-start justify-center text-white/70">
             <Icons.Microscope className="w-4 h-4 md:w-5 md:h-5 text-blue-300 mt-0.5 mr-0.5 md:mr-1" />
             <span className="text-xs md:text-sm">Научно доказанная эффективность с 1998 года</span>
-          </motion.div>
-        </motion.div>
-      </ParallaxSection>
-
-      <section id="about" className="relative py-24 md:min-h-[110vh] flex flex-col">
-        <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
-        <div className="relative z-10">
-          <div className="container max-w-7xl mx-auto px-6">
-            <SectionHeading
-              title="Почему 4Life?"
-              subtitle="Наука, которой доверяют миллионы"
-              description="4Life Research – это глобальная компания в области велнеса, основанная в 1998 году, специализирующаяся на научных разработках, производстве и распространении натуральных продуктов для поддержки иммунной системы."
-              centered={true}
-              titleClassName="text-black dark:text-gray-100"
-              subtitleClassName="text-blue-600 dark:text-blue-400"
-            />
-            <Suspense fallback={<div className="mt-16 h-[300px] w-full" />}>
-              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-                {features.map((feature, index) => (
-                  <StaticFeature
-                    key={index}
-                    icon={feature.icon}
-                    title={feature.title}
-                    description={feature.description}
-                    colorTheme="blue"
-                  />
-                ))}
-              </div>
-            </Suspense>
           </div>
         </div>
-      </section>
+      </ParallaxSection>
+
+      <MorphingVideoSection />
 
       <section id="products">
         <ParallaxSection
@@ -255,29 +195,13 @@ const HomePage: React.FC = () => {
             <div className="container max-w-7xl mx-auto">
               <Suspense fallback={<div className="mt-12 h-[500px] w-full" />}>
                 <div className="mt-12">
-                  <motion.div
-                    className="hidden lg:grid grid-cols-3 gap-8 px-6"
-                    initial="initial"
-                    whileInView="inView"
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ staggerChildren: 0.1 }}
-                  >
+                  <div className="hidden lg:grid grid-cols-3 gap-8 px-6">
                     {popularProducts.map((product) => (
-                      <motion.div
-                        key={product.id}
-                        variants={{
-                          initial: { opacity: 0, y: 30 },
-                          inView: {
-                            opacity: 1,
-                            y: 0,
-                            transition: { duration: 0.6 },
-                          },
-                        }}
-                      >
+                      <div key={product.id}>
                         <InteractiveProductCard product={product} />
-                      </motion.div>
+                      </div>
                     ))}
-                  </motion.div>
+                  </div>
                   <div className="block lg:hidden -mx-6">
                     <KineticProductCarousel products={popularProducts} />
                   </div>
