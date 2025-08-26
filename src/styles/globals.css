@@ -8,9 +8,6 @@
  * 1. `src/main.tsx`: Импортируется сразу после `base.css` для применения глобальных стилей ко всему сайту.
  */
 
-
-
-
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -182,9 +179,13 @@ a {
   Этот селектор отменяет transition для элементов Framer Motion, 
   чтобы не конфликтовать с их собственными анимациями.
 */
-[style*="--framer-will-change"],
-[style*="transform:"] {
+:not(.swiper, .swiper-wrapper, .swiper-slide) > [style*="--framer-will-change"],
+:not(.swiper, .swiper-wrapper, .swiper-slide) > [style*="transform:"] {
   transition: none;
+}
+
+.swiper-wrapper {
+  transition-property: transform;
 }
 
 /* Pixel Transition Overlay Styles */
@@ -265,8 +266,13 @@ a {
 
 /* Floating animations for quality section */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 .float-animation {
@@ -284,10 +290,19 @@ a {
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  25% { background-position: 100% 50%; }
-  50% { background-position: 50% 100%; }
-  75% { background-position: 50% 0%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
 }
 
 /* Smooth section transitions */
@@ -305,8 +320,9 @@ a {
 
 /* Accordion animations */
 .accordion-content {
-  transition: height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              opacity 0.3s ease;
+  transition:
+    height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.3s ease;
 }
 
 /* Hover effects for cards */
@@ -334,7 +350,7 @@ html {
   html {
     scroll-behavior: auto;
   }
-  
+
   .repeating-image-mover,
   .float-animation,
   .gradient-text,

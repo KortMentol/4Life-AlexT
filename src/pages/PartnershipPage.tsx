@@ -7,9 +7,9 @@ import {
   headingVariants,
   itemVariants,
   staggerContainer,
-} from "../animations/variants";
-import CallToAction from "../components/ui/CallToAction";
-import SectionHeading from "../components/ui/SectionHeading";
+} from "@/animations/variants";
+import { CallToAction } from "@/components/sections";
+import { SectionHeading } from "@/components/ui";
 
 // Варианты анимации для страницы
 const pageVariants = {

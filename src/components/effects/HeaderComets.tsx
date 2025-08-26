@@ -13,7 +13,7 @@
  */
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "@/hooks";
 
 const HeaderComets: React.FC = () => {
   const { theme } = useTheme();

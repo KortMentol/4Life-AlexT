@@ -1,6 +1,7 @@
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 import {
   buttonVariants,
@@ -8,9 +9,9 @@ import {
   itemVariants,
 } from "@/animations/variants";
 import TextShineEffect from "@/components/effects/TextShineEffect";
-import Accordion, { AccordionItem } from "@/components/ui/Accordion";
+import { FAQItem } from "@/components/ui";
 import { Icons } from "@/utils/icons";
-import SectionHeading from "../components/ui/SectionHeading";
+import { SectionHeading } from "@/components/ui";
 
 // Варианты анимации для страницы
 const pageVariants = {
@@ -21,6 +22,12 @@ const pageVariants = {
 
 // Страница описывает процесс покупки 4Life в 2 шага и преимущества ПК
 const HowToBuyPage = () => {
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+
+  const handleFAQToggle = (index: number) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  };
+
   // Преимущества для Приоритетного Клиента
   const pcBenefits = [
     {
@@ -239,56 +246,36 @@ const HowToBuyPage = () => {
               centered
             />
 
-            <Accordion
-              className="mt-8"
-              items={
-                [
-                  {
-                    id: 1,
-                    title: "1. Добавьте продукты в корзину",
-                    content: (
-                      <p>
-                        На странице «Продукты» нажмите «Добавить в корзину» на
-                        интересующих позициях. Количество можно изменить в любое
-                        время.
-                      </p>
-                    ),
-                  },
-                  {
-                    id: 2,
-                    title: "2. Укажите мой ID 12299550",
-                    content: (
-                      <p>
-                        В форме оформления заказа введите мой ID дистрибьютора,
-                        чтобы сохранить скидку и получить персональную
-                        поддержку.
-                      </p>
-                    ),
-                  },
-                  {
-                    id: 3,
-                    title: "3. Выберите способ доставки и оплаты",
-                    content: (
-                      <p>
-                        Доступны карта, СБП и другие методы оплаты. Доставка
-                        курьером или в пункт выдачи Boxberry / СДЭК.
-                      </p>
-                    ),
-                  },
-                  {
-                    id: 4,
-                    title:
-                      "4. Получите подтверждение и наслаждайтесь результатом",
-                    content: (
-                      <p>
-                        После оплаты вы получите трек-номер. Я буду на связи,
-                        чтобы ответить на любые вопросы.
-                      </p>
-                    ),
-                  },
-                ] as AccordionItem[]
-              }
-            />
+            <div className="mt-8 space-y-4">
+              <FAQItem
+                question="1. Добавьте продукты в корзину"
+                answer="На странице «Продукты» нажмите «Добавить в корзину» на интересующих позициях. Количество можно изменить в любое время."
+                index={0}
+                isOpen={openFAQ === 0}
+                onToggle={handleFAQToggle}
+              />
+              <FAQItem
+                question="2. Укажите мой ID 12299550"
+                answer="В форме оформления заказа введите мой ID дистрибьютора, чтобы сохранить скидку и получить персональную поддержку."
+                index={1}
+                isOpen={openFAQ === 1}
+                onToggle={handleFAQToggle}
+              />
+              <FAQItem
+                question="3. Выберите способ доставки и оплаты"
+                answer="Доступны карта, СБП и другие методы оплаты. Доставка курьером или в пункт выдачи Boxberry / СДЭК."
+                index={2}
+                isOpen={openFAQ === 2}
+                onToggle={handleFAQToggle}
+              />
+              <FAQItem
+                question="4. Получите подтверждение и наслаждайтесь результатом"
+                answer="После оплаты вы получите трек-номер. Я буду на связи, чтобы ответить на любые вопросы."
+                index={3}
+                isOpen={openFAQ === 3}
+                onToggle={handleFAQToggle}
+              />
+            </div>
           </motion.div>
         </div>
       </section>

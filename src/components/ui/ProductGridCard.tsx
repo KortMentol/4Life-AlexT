@@ -4,7 +4,7 @@ import { DetailedProduct } from "@/data/productsData";
 import { preloadImage } from "@/utils/imageUtils";
 import { motion } from "framer-motion";
 import { forwardRef } from "react";
-import { Icons } from "../../utils/icons";
+import { Icons } from "@/utils/icons";
 
 interface ProductGridCardProps {
   product: DetailedProduct;

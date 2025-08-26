@@ -1,9 +1,8 @@
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PixelTransition, TransitionHandle as PixelTransitionHandle } from "../components/transitions/PixelTransition";
-import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "../components/transitions/WaveTransition";
-import { useFluid } from "../hooks/useFluid";
-import { useIsMobile } from "../hooks/useIsMobile";
+import { PixelTransition, TransitionHandle as PixelTransitionHandle } from "@/components/transitions/PixelTransition";
+import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "@/components/transitions/WaveTransition";
+import { useFluid, useIsMobile } from "@/hooks";
 
 interface TransitionContextType {
   transitionTo: (path: string) => void;

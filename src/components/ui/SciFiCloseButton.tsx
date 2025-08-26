@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import React from "react";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 interface SciFiCloseButtonProps {
   onClick: () => void;

@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { ThemeContext } from "../context/ThemeContext.helpers";
-import { ThemeContextType } from "../context/ThemeContext.types";
+import { ThemeContext } from "@/context/ThemeContext.helpers";
+import { ThemeContextType } from "@/context/ThemeContext.types";
 
 /**
  * @module src/hooks/useTheme.ts

@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useTransition } from "../../context/TransitionProvider";
-import { useTheme } from "../../hooks/useTheme";
-import { mainNav } from "../../site-config/site";
-import { scrollToTop } from "../../utils/navigationUtils";
+import { useTransition } from "@/context/TransitionProvider";
+import { useTheme } from "@/hooks/useTheme";
+import { mainNav } from "@/site-config/site";
+import { scrollToTop } from "@/utils/navigationUtils";
 
 export const TubelightNavbar: React.FC = () => {
   const location = useLocation();

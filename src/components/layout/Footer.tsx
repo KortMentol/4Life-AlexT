@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { useTransition } from "../../context/TransitionProvider";
-import { siteConfig } from "../../site-config/site";
-import { scrollToTop } from "../../utils/navigationUtils";
-import DarkVeil from "../effects/DarkVeil";
-import DynamicLogo from "../ui/DynamicLogo";
+import { useTransition } from "@/context";
+import { siteConfig } from "@/site-config/site";
+import { scrollToTop } from "@/utils/navigationUtils";
+import DarkVeil from "@/components/effects/DarkVeil";
+import { DynamicLogo } from "@/components/ui";
 
 const Footer: React.FC = () => {
   const isMobile = useIsMobile();

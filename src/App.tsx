@@ -7,7 +7,6 @@ import Layout from "@/components/layout/Layout";
 import TheodoreMenu from "@/components/layout/TheodoreMenu";
 import RouteChangeHandler from "@/components/RouteChangeHandler";
 import { ProductListProvider } from "@/context/ProductListProvider";
-import { ThemeProvider } from "@/context/ThemeProvider";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
@@ -188,58 +187,56 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <ProductListProvider>
-        <RouteChangeHandler isMenuOpen={isMenuOpen} closeMenu={closeMenu} />
-        <Suspense fallback={null}>
-          <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isScrollingLocked={isScrollingLocked} />
-          <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<HomePage />} />
-              <Route path="products" element={<ProductsPage />} />
-              <Route path="about" element={<AboutPage />} />
-              <Route path="about-me" element={<AboutMePage />} />
-              <Route path="contact" element={<ContactPage />} />
-              <Route path="partnership" element={<PartnershipPage />} />
-              <Route path="how-to-buy" element={<HowToBuyPage />} />
-            </Route>
-            <Route
-              path="*"
-              element={
-                <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
-                  <div className="card-modern p-12 text-center max-w-lg">
-                    <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>
-                    <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>
-                    <Link
-                      to="/"
-                      className="btn-modern btn-primary-modern px-8 py-4 rounded-lg inline-flex items-center gap-2"
+    <ProductListProvider>
+      <RouteChangeHandler isMenuOpen={isMenuOpen} closeMenu={closeMenu} />
+      <Suspense fallback={null}>
+        <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isScrollingLocked={isScrollingLocked} />
+        <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="about-me" element={<AboutMePage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="partnership" element={<PartnershipPage />} />
+            <Route path="how-to-buy" element={<HowToBuyPage />} />
+          </Route>
+          <Route
+            path="*"
+            element={
+              <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
+                <div className="card-modern p-12 text-center max-w-lg">
+                  <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>
+                  <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>
+                  <Link
+                    to="/"
+                    className="btn-modern btn-primary-modern px-8 py-4 rounded-lg inline-flex items-center gap-2"
+                  >
+                    <span>Вернуться на главную</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      <span>Вернуться на главную</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m15 18-6-6 6-6" />
-                      </svg>
-                    </Link>
-                  </div>
+                      <path d="m15 18-6-6 6-6" />
+                    </svg>
+                  </Link>
                 </div>
-              }
-            />
-          </Routes>
-        </Suspense>
-        {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
-        {/* Старый оверлей для перехода удален */}
-      </ProductListProvider>
-    </ThemeProvider>
+              </div>
+            }
+          />
+        </Routes>
+      </Suspense>
+      {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
+      {/* Старый оверлей для перехода удален */}
+    </ProductListProvider>
   );
 }
 

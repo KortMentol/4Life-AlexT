@@ -3,7 +3,7 @@ import { scrollTo as lenisScrollTo } from "@/lib/lenis";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 const ScrollToTopButton: React.FC = () => {
   // --- ШАГ 1: ВСЕ ХУКИ ОБЪЯВЛЯЮТСЯ ЗДЕСЬ, НА ВЕРХНЕМ УРОВНЕ ---

@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import React from "react";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "@/hooks";
 
 // Улучшенная анимация блеска - один проход справа налево с более заметным эффектом
 const shineEffect = keyframes`

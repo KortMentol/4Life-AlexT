@@ -2,7 +2,7 @@ import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
 import React from "react";
 import { FaPhone, FaTelegram, FaWhatsapp } from "react-icons/fa";
-import { fadeIn, headingVariants, itemVariants } from "../animations/variants";
+import { fadeIn, headingVariants, itemVariants } from "@/animations/variants";
 
 // Варианты анимации для страницы
 const pageVariants = {

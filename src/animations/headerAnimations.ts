@@ -27,7 +27,7 @@ import {
   scaleVariants,
   hoverVariants,
   overlayVariants as createOverlayVariants,
-} from "../utils/framerUtils";
+} from "@/utils/framerUtils";
 
 /**
  * Анимации для хедера - определяет поведение при появлении и скрытии

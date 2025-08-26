@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { useTransition } from "../../context/TransitionProvider";
-import { scrollToTop } from "../../utils/navigationUtils";
+import { useTransition } from "@/context";
+import { scrollToTop } from "@/utils/navigationUtils";
 
 interface ButtonProps {
   children: React.ReactNode;

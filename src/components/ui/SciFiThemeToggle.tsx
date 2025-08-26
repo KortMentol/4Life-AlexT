@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import React from "react";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 const SciFiThemeToggle: React.FC = () => {
   const { theme, setTheme } = useTheme();

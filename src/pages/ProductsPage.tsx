@@ -10,13 +10,12 @@
 import { DetailedProduct, productsData } from "@/data/productsData";
 import { SEO } from "@/seo/SEO";
 
+import { FAQItem, ProductCatalogGrid, ProductDetailModal, ProductFilters } from "@/components/ui";
+import type { ProductDetailModalHandle } from "@/components/ui/ProductDetailModal";
+import type { FilterState } from "@/components/ui/ProductFilters";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import AccordionItem from "../components/ui/AccordionItem";
-import ProductCatalogGrid from "../components/ui/ProductCatalogGrid";
-import ProductDetailModal, { ProductDetailModalHandle } from "../components/ui/ProductDetailModal";
-import ProductFilters, { FilterState } from "../components/ui/ProductFilters";
 
 // ИСПРАВЛЕНИЕ 1: Импортируем useProductList
 import { useProductList } from "@/hooks/useProductList";
@@ -41,7 +40,7 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const ProductsPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<DetailedProduct | null>(null);
-
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [dimmedCardId, setDimmedCardId] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -254,6 +253,10 @@ const ProductsPage: React.FC = () => {
   }, [isAnimating, selectedProduct]);
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => setFilters(newFilters), []);
+
+  const handleFAQToggle = useCallback((index: number) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  }, [openFAQ]);
 
   const handleAddToCart = useCallback(
     (product: DetailedProduct, sourceElement: HTMLElement) => {
@@ -834,7 +837,14 @@ const ProductsPage: React.FC = () => {
                   "Да, продукты 4Life разработаны для совместного применения и дополняют друг друга. Например, ПРО-ТФ отлично сочетается с 4LifeTransform Бёрн для управления весом и улучшения состава тела.",
               },
             ].map((item, index) => (
-              <AccordionItem key={index} question={item.question} answer={item.answer} index={index} />
+              <FAQItem 
+                key={index} 
+                question={item.question} 
+                answer={item.answer} 
+                index={index}
+                isOpen={openFAQ === index}
+                onToggle={handleFAQToggle}
+              />
             ))}
           </div>
         </div>

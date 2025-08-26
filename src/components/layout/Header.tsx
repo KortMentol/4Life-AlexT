@@ -4,18 +4,14 @@ import { Moon, Sun } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { headerVariants, logoVariants } from "../../animations/headerAnimations";
-import { useTransition } from "../../context/TransitionProvider";
-import { useIsMobile } from "../../hooks/useIsMobile";
-import { useNativeScroll } from "../../hooks/useNativeScroll";
-import { useTheme } from "../../hooks/useTheme";
-import { siteConfig } from "../../site-config/site";
-import { scrollToTop } from "../../utils/navigationUtils";
-import HeaderComets from "../effects/HeaderComets";
-import TextShineEffect from "../effects/TextShineEffect";
-import HamburgerButton from "../ui/HamburgerButton";
-import ProductListIcon from "../ui/ProductListIcon";
-import { TubelightNavbar } from "../ui/tubelight-navbar";
+import { headerVariants, logoVariants } from "@/animations/headerAnimations";
+import { useTransition } from "@/context";
+import { useIsMobile, useNativeScroll, useTheme } from "@/hooks";
+import { siteConfig } from "@/site-config/site";
+import { scrollToTop } from "@/utils/navigationUtils";
+import HeaderComets from "@/components/effects/HeaderComets";
+import TextShineEffect from "@/components/effects/TextShineEffect";
+import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 
 interface HeaderProps {
   isMenuOpen: boolean;

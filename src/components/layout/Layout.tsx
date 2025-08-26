@@ -2,8 +2,8 @@ import { updateScroll } from "@/lib/lenis";
 import { AnimatePresence } from "framer-motion";
 import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import FluidEffect from "../effects/FluidEffect";
-import ScrollToTopButton from "../ui/ScrollToTopButton";
+import FluidEffect from "@/components/effects/FluidEffect";
+import { ScrollToTopButton } from "@/components/ui";
 import Footer from "./Footer";
 const Layout: React.FC = () => {
   const location = useLocation();

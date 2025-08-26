@@ -1,9 +1,9 @@
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
 import { Award, BookOpen, Heart, Users } from "lucide-react";
-import { containerVariants, itemVariants } from "../animations/variants";
-import CallToAction from "../components/ui/CallToAction";
-import SectionHeading from "../components/ui/SectionHeading";
+import { containerVariants, itemVariants } from "@/animations/variants";
+import { CallToAction } from "@/components/sections";
+import { SectionHeading } from "@/components/ui";
 
 // Варианты анимации для страницы
 const pageVariants = {

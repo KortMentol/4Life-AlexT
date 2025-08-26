@@ -11,7 +11,7 @@ import "swiper/css/effect-fade";
 import "swiper/css/navigation";
 import { EffectFade, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Icons } from "../../utils/icons";
+import { Icons } from "@/utils/icons";
 import Button from "./Button";
 import ProductSpecModal from "./ProductSpecModal";
 import SciFiCloseButton from "./SciFiCloseButton";

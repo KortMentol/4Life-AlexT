@@ -3,6 +3,7 @@ export { default as useImageOptimization } from "./useImageOptimization";
 export { useIsMobile } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNativeScroll } from "./useNativeScroll";
+export { useParallax } from "./useParallax";
 export { usePerformanceTier } from "./usePerformanceTier";
 export { useProductList } from "./useProductList";
 export { useScrollRestoration } from "./useScrollRestoration";

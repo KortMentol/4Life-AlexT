@@ -1,7 +1,7 @@
 import { useScroll, useSpring, useMotionValue } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
-import { scrollLockState } from "../lib/scrollLockState"; // <-- ИМПОРТ
+import { scrollLockState } from "@/lib/scrollLockState";
 
 interface UseNativeScrollOptions {
   headerHeight: number;

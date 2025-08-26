@@ -28,7 +28,7 @@
  * );
  */
 import { useCallback, useEffect, useState } from "react";
-import { debounce } from "../utils/performanceUtils";
+import { debounce } from "@/utils/performanceUtils";
 
 /**
  * Основной хук для работы с медиа-запросами
