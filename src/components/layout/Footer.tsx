@@ -1,23 +1,22 @@
+// Файл: src/components/layout/Footer.tsx
+
+import DarkVeil from "@/components/effects/DarkVeil";
+import { DynamicLogo } from "@/components/ui";
+import { useTransition } from "@/context";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { siteConfig } from "@/site-config/site";
+import { scrollToTop } from "@/utils/navigationUtils";
 import { motion } from "framer-motion";
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { useTransition } from "@/context";
-import { siteConfig } from "@/site-config/site";
-import { scrollToTop } from "@/utils/navigationUtils";
-import DarkVeil from "@/components/effects/DarkVeil";
-import { DynamicLogo } from "@/components/ui";
 
 const Footer: React.FC = () => {
   const isMobile = useIsMobile();
   const currentYear = new Date().getFullYear();
-
-  // <-- 1. Получаем доступ к transitionTo и текущему пути
   const { transitionTo } = useTransition();
   const location = useLocation();
 
-  // <-- 2. Создаем умный обработчик клика
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     if (location.pathname === href) {
@@ -48,8 +47,10 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="pt-16 pb-8 relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
-      <div className="absolute inset-0 w-full h-full z-1">
+    // ВАЖНО: Убедитесь, что здесь нет классов фона вроде bg-gray-900
+    <footer className="pt-16 pb-8 relative overflow-hidden">
+      {/* ВАЖНО: z-0 помещает фон на самый нижний слой ВНУТРИ футера */}
+      <div className="absolute inset-0 w-full h-full z-0">
         <DarkVeil
           speed={0.8}
           hueShift={isMobile ? 340 : 360}
@@ -62,10 +63,12 @@ const Footer: React.FC = () => {
         />
       </div>
 
+      {/* Весь контент ниже имеет z-10 и будет НАД фоном */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 z-10"></div>
 
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          {/* ... остальной код футера без изменений ... */}
           {/* О компании */}
           <motion.div
             variants={containerVariants}
@@ -133,7 +136,6 @@ const Footer: React.FC = () => {
               Быстрые ссылки
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-3">
-              {/* <-- 3. Заменяем все Link на a с нашим обработчиком */}
               <li>
                 <a
                   href="/products"

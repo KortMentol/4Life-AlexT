@@ -4,7 +4,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
-import { ParallaxProvider } from "react-scroll-parallax";
 import App from "./App";
 import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
@@ -14,9 +13,9 @@ import { TransitionProvider } from "./context/TransitionProvider";
 import "./styles/base/animations.css";
 import "./styles/base/base.css";
 import "./styles/base/fixes.css";
-import "./styles/globals.css";
 import "./styles/base/modern-design.css";
 import "./styles/base/theme-variables.css";
+import "./styles/globals.css";
 
 const initApp = () => {
   const rootElement = document.getElementById("root");
@@ -35,9 +34,7 @@ const initApp = () => {
             <ThemeProvider>
               <FluidProvider>
                 <TransitionProvider>
-                  <ParallaxProvider>
-                    <App />
-                  </ParallaxProvider>
+                  <App />
                 </TransitionProvider>
               </FluidProvider>
             </ThemeProvider>

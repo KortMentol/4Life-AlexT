@@ -1,63 +1,26 @@
-import { useInView } from "framer-motion"; // <-- 1. Импортируем хук для отслеживания видимости
-import { Mesh, Program, Renderer, Triangle, Vec2 } from "ogl";
-import { useEffect, useRef } from "react";
+// Файл: src/components/effects/DarkVeil.tsx
 
+import { useInView } from "framer-motion";
+import { Mesh, Program, Renderer, Triangle, Vec2 } from "ogl";
+import React, { useEffect, useRef, useState } from "react";
+
+// --- КОНСТАНТЫ И УТИЛИТЫ ---
 const TRANSITION_START = "menu-transition-start";
 const TRANSITION_COMPLETE = "menu-transition-complete";
-const runIdle = (cb: () => void) => {
-  if (
-    typeof window !== "undefined" &&
-    "requestIdleCallback" in window &&
-    typeof (
-      window as Window & { requestIdleCallback?: (cb: () => void) => number }
-    ).requestIdleCallback === "function"
-  ) {
-    (
-      window as Window & { requestIdleCallback: (cb: () => void) => number }
-    ).requestIdleCallback(cb);
-  } else {
-    setTimeout(cb, 0);
-  }
-};
 
-const vertex = `
-attribute vec2 position;
-void main(){gl_Position=vec4(position,0.0,1.0);}
-`;
-
+// --- КОД ШЕЙДЕРОВ (БЕЗ ИЗМЕНЕНИЙ) ---
+const vertex = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
 const fragment = `
 #ifdef GL_ES
 precision highp float;
 #endif
-uniform vec2 uResolution;
-uniform float uTime;
-uniform vec2 uCyclicTime; // x = cos(angle), y = sin(angle)
-uniform float uHueShift;
-uniform float uNoise;
-uniform float uScan;
-uniform float uScanFreq;
-uniform float uWarp;
-uniform float uIsMobile; // 1.0 for mobile, 0.0 for desktop
-
-vec4 buf[8];
-float rand(vec2 c){return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453);}
-
-mat3 rgb2yiq=mat3(0.299,0.587,0.114,0.596,-0.274,-0.322,0.211,-0.523,0.312);
-mat3 yiq2rgb=mat3(1.0,0.956,0.621,1.0,-0.272,-0.647,1.0,-1.106,1.703);
-
-vec3 hueShiftRGB(vec3 col,float deg){
-    vec3 yiq=rgb2yiq*col;
-    float rad=radians(deg);
-    float cosh=cos(rad),sinh=sin(rad);
-    vec3 yiqShift=vec3(yiq.x,yiq.y*cosh-yiq.z*sinh,yiq.y*sinh+yiq.z*cosh);
-    return clamp(yiq2rgb*yiqShift,0.0,1.0);
-}
-
+uniform vec2 uResolution;uniform float uTime;uniform vec2 uCyclicTime;uniform float uHueShift;uniform float uNoise;uniform float uScan;uniform float uScanFreq;uniform float uWarp;uniform float uIsMobile;
+vec4 buf[8];float rand(vec2 c){return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453);}
+mat3 rgb2yiq=mat3(0.299,0.587,0.114,0.596,-0.274,-0.322,0.211,-0.523,0.312);mat3 yiq2rgb=mat3(1.0,0.956,0.621,1.0,-0.272,-0.647,1.0,-1.106,1.703);
+vec3 hueShiftRGB(vec3 col,float deg){vec3 yiq=rgb2yiq*col;float rad=radians(deg);float cosh=cos(rad),sinh=sin(rad);vec3 yiqShift=vec3(yiq.x,yiq.y*cosh-yiq.z*sinh,yiq.y*sinh+yiq.z*cosh);return clamp(yiq2rgb*yiqShift,0.0,1.0);}
 vec4 sigmoid(vec4 x){return 1./(1.+exp(-x));}
-
 vec4 cppn_fn(vec2 coordinate,float in0,float in1,float in2){
-    buf[6]=vec4(coordinate.x,coordinate.y,0.3948333106474662+in0,0.36+in1);
-    buf[7]=vec4(0.14+in2,sqrt(coordinate.x*coordinate.x+coordinate.y*coordinate.y),0.,0.);
+    buf[6]=vec4(coordinate.x,coordinate.y,0.3948333106474662+in0,0.36+in1);buf[7]=vec4(0.14+in2,sqrt(coordinate.x*coordinate.x+coordinate.y*coordinate.y),0.,0.);
     buf[0]=mat4(vec4(6.5404263,-3.6126034,0.7590882,-1.13613),vec4(2.4582713,3.1660357,1.2219609,0.06276096),vec4(-5.478085,-6.159632,1.8701609,-4.7742867),vec4(6.039214,-5.542865,-0.90925294,3.251348))*buf[6]+mat4(vec4(0.8473259,-5.722911,3.975766,1.6522468),vec4(-0.24321538,0.5839259,-1.7661959,-5.350116),vec4(0.,0.,0.,0.),vec4(0.,0.,0.,0.))*buf[7]+vec4(0.21808943,1.1243913,-1.7969975,5.0294676);
     buf[1]=mat4(vec4(-3.3522482,-6.0612736,0.55641043,-4.4719114),vec4(0.8631464,1.7432913,5.643898,1.6106541),vec4(2.4941394,-3.5012043,1.7184316,6.357333),vec4(3.310376,8.209261,1.1355612,-1.165539))*buf[6]+mat4(vec4(5.24046,-13.034365,0.009859298,15.870829),vec4(2.987511,3.129433,-0.89023495,-1.6822904),vec4(0.,0.,0.,0.),vec4(0.,0.,0.,0.))*buf[7]+vec4(-5.9457836,-6.573602,-0.8812491,1.5436668);
     buf[0]=sigmoid(buf[0]);buf[1]=sigmoid(buf[1]);
@@ -74,23 +37,13 @@ vec4 cppn_fn(vec2 coordinate,float in0,float in1,float in2){
     buf[0]=sigmoid(buf[0]);
     return vec4(buf[0].x,buf[0].y,buf[0].z,1.);
 }
-
 void mainImage(out vec4 fragColor,in vec2 fragCoord){
     vec2 uv = fragCoord / uResolution.xy * 2.0 - 1.0;
-
-    if (uIsMobile > 0.5) {
-        // Коррекция соотношения сторон для мобильных
-        uv.x *= uResolution.x / uResolution.y;
-    }
-
+    if (uIsMobile > 0.5) { uv.x *= uResolution.x / uResolution.y; }
     uv.y*=-1.;
     uv+=uWarp*vec2(sin(uv.y*6.283+uTime*0.5),cos(uv.x*6.283+uTime*0.5))*0.05;
-    // Используем uCyclicTime для создания цикличной анимации
-    // uCyclicTime.x = cos(angle), uCyclicTime.y = sin(angle)
-    // Это позволяет получить сложные колебания без бесконечного роста времени
     fragColor=cppn_fn(uv,0.1*uCyclicTime.y,0.1*uCyclicTime.x,0.1*sin(uTime*0.44));
 }
-
 void main(){
     vec4 col;mainImage(col,gl_FragCoord.xy);
     col.rgb=hueShiftRGB(col.rgb,uHueShift);
@@ -101,6 +54,7 @@ void main(){
 }
 `;
 
+// --- КОМПОНЕНТЫ И ЛОГИКА ---
 type Props = {
   hueShift?: number;
   noiseIntensity?: number;
@@ -111,6 +65,25 @@ type Props = {
   resolutionScale?: number;
   isMobile?: boolean;
 };
+
+type GlObjects = {
+  renderer: Renderer;
+  program: Program;
+  mesh: Mesh;
+  start: number;
+  resize: () => void;
+};
+
+const FallbackBackground = React.memo(() => (
+  <div
+    className="w-full h-full"
+    style={{
+      background:
+        "radial-gradient(circle at 50% 30%, #4a2d7c, transparent 70%), radial-gradient(circle at 80% 80%, #2c3e50, transparent 70%), #0d0f1a",
+    }}
+  />
+));
+FallbackBackground.displayName = "FallbackBackground";
 
 export default function DarkVeil({
   hueShift = 0,
@@ -123,108 +96,132 @@ export default function DarkVeil({
   isMobile = false,
 }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  // Настраиваем "датчик": сработает за 400px до появления элемента
   const isInView = useInView(wrapperRef, { once: false, margin: "400px" });
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  type GlObjects = {
-    renderer: Renderer;
-    program: Program;
-    mesh: Mesh;
-    start: number;
-    resize: () => void;
-  };
   const glObjects = useRef<GlObjects | null>(null);
   const frameId = useRef<number | null>(null);
+  const [isWebGLReady, setIsWebGLReady] = useState(false);
 
-  // Инициализация WebGL. Выполняется один раз при монтировании.
   useEffect(() => {
-    const canvas = canvasRef.current as HTMLCanvasElement;
-    const parent = canvas.parentElement as HTMLElement;
+    // --- ПОЧЕМУ ЭТО РАБОТАЕТ: ---
+    // 1. `isMobile` определяет, какую логику использовать.
+    // 2. На ПК (`!isMobile`), WebGL инициализируется сразу и всегда.
+    // 3. На мобильных, инициализация ждет, пока `isInView` станет `true`.
+    // 4. `glObjects.current` используется как флаг, чтобы избежать повторной инициализации.
+    // 5. Функция очистки (`return () => ...`) вызывается, когда `isMobile` или `isInView` меняется,
+    //    чтобы корректно уничтожить старый экземпляр WebGL.
 
-    const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio, 2),
-      canvas,
-    });
+    let initTimeout: NodeJS.Timeout | undefined;
 
-    const gl = renderer.gl;
-    const geometry = new Triangle(gl);
+    const initWebGL = () => {
+      const canvas = canvasRef.current;
+      const parent = canvas?.parentElement;
+      if (!canvas || !parent) return;
 
-    const program = new Program(gl, {
-      vertex,
-      fragment,
-      uniforms: {
-        uTime: { value: 0 },
-        uCyclicTime: { value: new Vec2() },
-        uResolution: { value: new Vec2() },
-        uHueShift: { value: hueShift },
-        uNoise: { value: noiseIntensity },
-        uScan: { value: scanlineIntensity },
-        uScanFreq: { value: scanlineFrequency },
-        uWarp: { value: warpAmount },
-        uIsMobile: { value: isMobile ? 1.0 : 0.0 },
-      },
-    });
+      try {
+        const renderer = new Renderer({
+          dpr: Math.min(window.devicePixelRatio, 2),
+          canvas,
+          powerPreference: "low-power",
+        });
+        const gl = renderer.gl;
+        if (!gl) throw new Error("Failed to get WebGL context.");
 
-    const mesh = new Mesh(gl, { geometry, program });
-    const start = performance.now();
+        const geometry = new Triangle(gl);
+        const program = new Program(gl, {
+          vertex,
+          fragment,
+          uniforms: {
+            uTime: { value: 0 },
+            uCyclicTime: { value: new Vec2() },
+            uResolution: { value: new Vec2() },
+            uHueShift: { value: hueShift },
+            uNoise: { value: noiseIntensity },
+            uScan: { value: scanlineIntensity },
+            uScanFreq: { value: scanlineFrequency },
+            uWarp: { value: warpAmount },
+            uIsMobile: { value: isMobile ? 1.0 : 0.0 },
+          },
+        });
+        const mesh = new Mesh(gl, { geometry, program });
+        const start = performance.now();
+        const resize = () => {
+          if (!parent) return;
+          const w = parent.clientWidth,
+            h = parent.clientHeight;
+          renderer.setSize(w * resolutionScale, h * resolutionScale);
+          program.uniforms.uResolution.value.set(w, h);
+        };
 
-    const resize = () => {
-      const w = parent.clientWidth,
-        h = parent.clientHeight;
-      renderer.setSize(w * resolutionScale, h * resolutionScale);
-      program.uniforms.uResolution.value.set(w, h);
-    };
-
-    glObjects.current = { renderer, program, mesh, start, resize };
-
-    window.addEventListener("resize", resize);
-    resize();
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      if (frameId.current) {
-        cancelAnimationFrame(frameId.current);
+        glObjects.current = { renderer, program, mesh, start, resize };
+        window.addEventListener("resize", resize);
+        resize();
+        setIsWebGLReady(true);
+      } catch (error) {
+        console.error("DarkVeil WebGL Initialization Failed:", error);
+        setIsWebGLReady(false);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Пустой массив зависимостей для выполнения один раз
 
-  // Управление циклом анимации в зависимости от видимости
+    if ((isMobile && isInView && !glObjects.current) || (!isMobile && !glObjects.current)) {
+      // На мобильных - откладываем, на ПК - сразу
+      if (isMobile) {
+        initTimeout = setTimeout(initWebGL, 300);
+      } else {
+        initWebGL();
+      }
+    }
+
+    return () => {
+      clearTimeout(initTimeout);
+      const gl_objects = glObjects.current;
+      if (gl_objects) {
+        window.removeEventListener("resize", gl_objects.resize);
+      }
+      if (frameId.current) {
+        cancelAnimationFrame(frameId.current);
+        frameId.current = null;
+      }
+      glObjects.current = null;
+      setIsWebGLReady(false); // Сбрасываем состояние при уходе из view
+    };
+  }, [isMobile, isInView, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount, resolutionScale]);
+
+  // --- ЭФФЕКТ ДЛЯ ЦИКЛА АНИМАЦИИ (ОСТАЕТСЯ ПОЧТИ БЕЗ ИЗМЕНЕНИЙ) ---
   useEffect(() => {
-    if (!glObjects.current) return;
+    if (!isInView || !isWebGLReady || !glObjects.current) {
+      if (frameId.current) {
+        cancelAnimationFrame(frameId.current);
+        frameId.current = null;
+      }
+      return;
+    }
 
     const { renderer, program, mesh, start } = glObjects.current;
 
     const loop = () => {
-      const elapsedTime = (performance.now() - start) / 1000; // in seconds
-      // Keep linear time for non-looping effects like noise/warp
+      if (!glObjects.current) return;
+      const elapsedTime = (performance.now() - start) / 1000;
       program.uniforms.uTime.value = elapsedTime * speed;
-
-      // Create seamless looping time with trigonometry for the main pattern
-      const cycleDuration = 30; // 10-second cycle
+      const cycleDuration = 30;
       const cycleProgress = (elapsedTime * speed) / cycleDuration;
-      const angle = cycleProgress * 2.0 * Math.PI; // From 0 to 2*PI
+      const angle = cycleProgress * 2.0 * Math.PI;
       program.uniforms.uCyclicTime.value.set(Math.cos(angle), Math.sin(angle));
+
       program.uniforms.uHueShift.value = hueShift;
       program.uniforms.uNoise.value = noiseIntensity;
       program.uniforms.uScan.value = scanlineIntensity;
       program.uniforms.uScanFreq.value = scanlineFrequency;
       program.uniforms.uWarp.value = warpAmount;
+
       renderer.render({ scene: mesh });
       frameId.current = requestAnimationFrame(loop);
     };
 
-    if (isInView) {
+    if (!frameId.current) {
       frameId.current = requestAnimationFrame(loop);
-    } else {
-      if (frameId.current) {
-        cancelAnimationFrame(frameId.current);
-        frameId.current = null;
-      }
     }
 
-    // Пауза/возобновление рендера на время переходов меню
     const onStart = () => {
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
@@ -232,39 +229,30 @@ export default function DarkVeil({
       }
     };
     const onComplete = () => {
-      if (isInView && !frameId.current) {
-        runIdle(() => {
-          // Перезапускаем петлю только если WebGL ещё инициализирован
-          if (glObjects.current) frameId.current = requestAnimationFrame(loop);
-        });
+      if (isInView && !frameId.current && glObjects.current) {
+        if (!frameId.current) frameId.current = requestAnimationFrame(loop);
       }
     };
+
     window.addEventListener(TRANSITION_START, onStart as EventListener);
     window.addEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
 
     return () => {
       window.removeEventListener(TRANSITION_START, onStart as EventListener);
-      window.removeEventListener(
-        TRANSITION_COMPLETE,
-        onComplete as EventListener,
-      );
-      if (frameId.current) {
-        cancelAnimationFrame(frameId.current);
-      }
+      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
     };
-  }, [
-    isInView,
-    hueShift,
-    noiseIntensity,
-    scanlineIntensity,
-    speed,
-    scanlineFrequency,
-    warpAmount,
-  ]);
+  }, [isInView, isWebGLReady, speed, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount]);
 
   return (
-    <div ref={wrapperRef} className="w-full h-full">
-      <canvas ref={canvasRef} className="w-full h-full block" />
+    <div ref={wrapperRef} className="w-full h-full relative">
+      <div className={`absolute inset-0 transition-opacity duration-500 ${isWebGLReady ? "opacity-0" : "opacity-100"}`}>
+        <FallbackBackground />
+      </div>
+
+      <canvas
+        ref={canvasRef}
+        className={`w-full h-full block absolute inset-0 transition-opacity duration-500 ${isWebGLReady ? "opacity-100" : "opacity-0"}`}
+      />
     </div>
   );
 }
