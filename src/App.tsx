@@ -105,6 +105,7 @@ function App() {
     closeMenu();
   };
 
+  // --- НАЧАЛО ИСПРАВЛЕННОГО БЛОКА ---
   useEffect(() => {
     if (isMenuOpen) {
       lenis.stop();
@@ -113,11 +114,13 @@ function App() {
       lenis.start();
     }
 
-    let touchStartX = 0,
-      touchStartY = 0,
-      scrollDirectionDetermined = false;
-    const SENSITIVITY_THRESHOLD = 5,
-      HORIZONTAL_SWIPE_BIAS = 1.7;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    // Флаг, чтобы мы принимали решение о блокировке скролла только один раз за свайп
+    let scrollDirectionDetermined = false;
+
+    const SENSITIVITY_THRESHOLD = 5;
+    const HORIZONTAL_SWIPE_BIAS = 1.7;
 
     const handleTouchStart = (e: TouchEvent) => {
       if (isMenuOpen) return;
@@ -125,41 +128,51 @@ function App() {
       if (!touch) return;
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
+      // Сбрасываем флаг в начале каждого нового касания
       scrollDirectionDetermined = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (isMenuOpen) return;
       const touch = e.touches[0];
+      // Если направление уже определено, ничего не делаем. Это ключ к производительности!
       if (!touch || scrollDirectionDetermined) return;
+
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
+
+      // Принимаем решение только после того, как палец сдвинулся на достаточное расстояние
       if (deltaX > SENSITIVITY_THRESHOLD || deltaY > SENSITIVITY_THRESHOLD) {
         if (deltaX > deltaY * HORIZONTAL_SWIPE_BIAS) {
+          // Это горизонтальный свайп. Блокируем скролл.
           if (!isScrollingLockedRef.current) {
             lenis.stop();
             scrollLockState.isLocked = true;
             setIsScrollingLocked(true);
           }
         } else {
+          // Это вертикальный свайп. Убеждаемся, что скролл разблокирован.
           if (isScrollingLockedRef.current) {
             lenis.start();
             scrollLockState.isLocked = false;
             setIsScrollingLocked(false);
           }
         }
+        // Устанавливаем флаг, чтобы больше не входить в эту логику до следующего касания
         scrollDirectionDetermined = true;
       }
     };
 
     const handleTouchEnd = () => {
       if (isMenuOpen) return;
+      // Если мы заканчиваем свайп и скролл был заблокирован (т.е. это был горизонтальный свайп),
+      // то разблокируем его с небольшой задержкой.
       if (isScrollingLockedRef.current) {
         setTimeout(() => {
           lenis.start();
           scrollLockState.isLocked = false;
           setIsScrollingLocked(false);
-        }, 50);
+        }, 50); // 50ms достаточно, чтобы карусель/свайпер успел обработать жест
       }
     };
 
@@ -175,6 +188,7 @@ function App() {
       document.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [isMenuOpen]);
+  // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
 
   useEffect(() => {
     window.addEventListener("load", updateScroll);
