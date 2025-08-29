@@ -287,7 +287,7 @@ const FluidEffect: React.FC = () => {
     <div
       className="fixed inset-0 w-full pointer-events-none"
       style={{
-        zIndex: -1,
+        zIndex: -10,
         backgroundColor: "transparent",
         height: "100lvh",
         maxHeight: "100vh",

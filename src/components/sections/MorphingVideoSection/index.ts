@@ -1,1 +1,1 @@
-export { default } from './MorphingVideoSection';
+export { default } from "./MorphingVideoSection";

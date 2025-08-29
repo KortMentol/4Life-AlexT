@@ -33,12 +33,9 @@ export default {
       },
       boxShadow: {
         "3xl": "0 35px 60px -15px rgba(0, 0, 0, 0.4)",
-        "glass-sm":
-          "0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)",
-        "glass-md":
-          "0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)",
-        "4life":
-          "0 4px 6px -1px rgba(0, 123, 255, 0.1), 0 2px 4px -2px rgba(0, 123, 255, 0.06)",
+        "glass-sm": "0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)",
+        "glass-md": "0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)",
+        "4life": "0 4px 6px -1px rgba(0, 123, 255, 0.1), 0 2px 4px -2px rgba(0, 123, 255, 0.06)",
         glass: "0 4px 30px rgba(0, 0, 0, 0.1)",
         "glass-lg": "0 8px 40px rgba(0, 0, 0, 0.2)",
         "text-lg": "0 2px 8px rgba(0, 0, 0, 0.4)",
@@ -109,7 +106,8 @@ export default {
         "5xl": "3rem",
       },
       zIndex: {
-        fluid: "-1",
+        background: "-20",
+        fluid: "-10",
         parallax: "0",
         content: "10",
         header: "100",

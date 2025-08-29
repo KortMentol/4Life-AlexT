@@ -1,8 +1,8 @@
+import { useTransition } from "@/context";
+import { scrollToTop } from "@/utils/navigationUtils";
 import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { useTransition } from "@/context";
-import { scrollToTop } from "@/utils/navigationUtils";
 
 interface CallToActionProps {
   title?: string;

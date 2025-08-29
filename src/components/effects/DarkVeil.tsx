@@ -102,18 +102,15 @@ export default function DarkVeil({
   const frameId = useRef<number | null>(null);
   const [isWebGLReady, setIsWebGLReady] = useState(false);
 
+  // --- ИЗМЕНЕНИЕ 1: Отдельный useEffect для ИНИЦИАЛИЗАЦИИ ---
+  // Этот эффект запускается один раз при монтировании компонента,
+  // чтобы подготовить WebGL заранее и в фоновом режиме.
   useEffect(() => {
-    // --- ПОЧЕМУ ЭТО РАБОТАЕТ: ---
-    // 1. `isMobile` определяет, какую логику использовать.
-    // 2. На ПК (`!isMobile`), WebGL инициализируется сразу и всегда.
-    // 3. На мобильных, инициализация ждет, пока `isInView` станет `true`.
-    // 4. `glObjects.current` используется как флаг, чтобы избежать повторной инициализации.
-    // 5. Функция очистки (`return () => ...`) вызывается, когда `isMobile` или `isInView` меняется,
-    //    чтобы корректно уничтожить старый экземпляр WebGL.
+    // Если WebGL уже инициализирован, ничего не делаем.
+    if (glObjects.current) return;
 
-    let initTimeout: NodeJS.Timeout | undefined;
-
-    const initWebGL = () => {
+    // Функция для отложенной инициализации, чтобы не блокировать рендеринг страницы
+    const idleInit = () => {
       const canvas = canvasRef.current;
       const parent = canvas?.parentElement;
       if (!canvas || !parent) return;
@@ -156,6 +153,7 @@ export default function DarkVeil({
         glObjects.current = { renderer, program, mesh, start, resize };
         window.addEventListener("resize", resize);
         resize();
+        // Устанавливаем флаг готовности, что вызовет плавное появление канваса
         setIsWebGLReady(true);
       } catch (error) {
         console.error("DarkVeil WebGL Initialization Failed:", error);
@@ -163,17 +161,15 @@ export default function DarkVeil({
       }
     };
 
-    if ((isMobile && isInView && !glObjects.current) || (!isMobile && !glObjects.current)) {
-      // На мобильных - откладываем, на ПК - сразу
-      if (isMobile) {
-        initTimeout = setTimeout(initWebGL, 300);
-      } else {
-        initWebGL();
-      }
+    // Используем requestIdleCallback для выполнения задачи, когда браузер свободен.
+    // setTimeout - это фолбэк для старых браузеров.
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(idleInit, { timeout: 2000 });
+    } else {
+      setTimeout(idleInit, 500);
     }
 
     return () => {
-      clearTimeout(initTimeout);
       const gl_objects = glObjects.current;
       if (gl_objects) {
         window.removeEventListener("resize", gl_objects.resize);
@@ -182,13 +178,16 @@ export default function DarkVeil({
         cancelAnimationFrame(frameId.current);
         frameId.current = null;
       }
-      glObjects.current = null;
-      setIsWebGLReady(false); // Сбрасываем состояние при уходе из view
+      // Не уничтожаем glObjects.current здесь, чтобы он был готов к повторному появлению
     };
-  }, [isMobile, isInView, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount, resolutionScale]);
+    // Пустой массив зависимостей гарантирует, что этот эффект запустится только один раз.
+  }, [isMobile, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount, resolutionScale]);
 
-  // --- ЭФФЕКТ ДЛЯ ЦИКЛА АНИМАЦИИ (ОСТАЕТСЯ ПОЧТИ БЕЗ ИЗМЕНЕНИЙ) ---
+  // --- ИЗМЕНЕНИЕ 2: useEffect для УПРАВЛЕНИЯ АНИМАЦИЕЙ ---
+  // Этот эффект зависит от isInView и isWebGLReady. Он только запускает и останавливает
+  // цикл рендеринга, не выполняя тяжелой работы по инициализации.
   useEffect(() => {
+    // Если компонент не в зоне видимости или WebGL еще не готов, останавливаем анимацию.
     if (!isInView || !isWebGLReady || !glObjects.current) {
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
@@ -199,8 +198,9 @@ export default function DarkVeil({
 
     const { renderer, program, mesh, start } = glObjects.current;
 
+    // Цикл анимации (requestAnimationFrame)
     const loop = () => {
-      if (!glObjects.current) return;
+      if (!glObjects.current) return; // Дополнительная проверка на случай размонтирования
       const elapsedTime = (performance.now() - start) / 1000;
       program.uniforms.uTime.value = elapsedTime * speed;
       const cycleDuration = 30;
@@ -208,6 +208,7 @@ export default function DarkVeil({
       const angle = cycleProgress * 2.0 * Math.PI;
       program.uniforms.uCyclicTime.value.set(Math.cos(angle), Math.sin(angle));
 
+      // Обновляем uniform-переменные
       program.uniforms.uHueShift.value = hueShift;
       program.uniforms.uNoise.value = noiseIntensity;
       program.uniforms.uScan.value = scanlineIntensity;
@@ -218,10 +219,12 @@ export default function DarkVeil({
       frameId.current = requestAnimationFrame(loop);
     };
 
+    // Запускаем цикл, если он еще не запущен
     if (!frameId.current) {
       frameId.current = requestAnimationFrame(loop);
     }
 
+    // Обработчики для паузы во время переходов между страницами
     const onStart = () => {
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
@@ -230,7 +233,7 @@ export default function DarkVeil({
     };
     const onComplete = () => {
       if (isInView && !frameId.current && glObjects.current) {
-        if (!frameId.current) frameId.current = requestAnimationFrame(loop);
+        frameId.current = requestAnimationFrame(loop);
       }
     };
 
@@ -240,18 +243,33 @@ export default function DarkVeil({
     return () => {
       window.removeEventListener(TRANSITION_START, onStart as EventListener);
       window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+      // При уходе из зоны видимости, останавливаем анимацию для экономии ресурсов
+      if (frameId.current) {
+        cancelAnimationFrame(frameId.current);
+        frameId.current = null;
+      }
     };
   }, [isInView, isWebGLReady, speed, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount]);
 
   return (
     <div ref={wrapperRef} className="w-full h-full relative">
-      <div className={`absolute inset-0 transition-opacity duration-500 ${isWebGLReady ? "opacity-0" : "opacity-100"}`}>
+      {/* 
+        ПОЧЕМУ ЭТО РАБОТАЕТ:
+        1. Заглушка (FallbackBackground) видна сразу.
+        2. Канвас рендерится, но он прозрачен (`opacity-0`).
+        3. WebGL инициализируется в фоновом режиме, не блокируя скролл.
+        4. Когда isWebGLReady становится true, канвас плавно появляется (`opacity-100`),
+           а заглушка так же плавно исчезает (`opacity-0`).
+        5. Поскольку инициализация уже завершена к моменту появления, нет никакого рывка.
+      */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 ${isWebGLReady ? "opacity-0" : "opacity-100"}`}
+      >
         <FallbackBackground />
       </div>
-
       <canvas
         ref={canvasRef}
-        className={`w-full h-full block absolute inset-0 transition-opacity duration-500 ${isWebGLReady ? "opacity-100" : "opacity-0"}`}
+        className={`w-full h-full block absolute inset-0 transition-opacity duration-1000 ${isWebGLReady ? "opacity-100" : "opacity-0"}`}
       />
     </div>
   );
