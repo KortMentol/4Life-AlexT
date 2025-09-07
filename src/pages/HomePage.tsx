@@ -1,13 +1,13 @@
-import { SEO } from "@/seo/SEO";
-import { motion } from "framer-motion";
-import React, { lazy, Suspense } from "react";
-import { useLocation } from "react-router-dom";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { MorphingVideoSection } from "@/components/sections";
 import { Button, ParallaxSection, SectionHeading } from "@/components/ui";
 import { useTransition } from "@/context";
+import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { scrollToTop } from "@/utils/navigationUtils";
+import { motion } from "framer-motion";
+import React, { lazy, Suspense } from "react";
+import { useLocation } from "react-router-dom";
 
 // --- LAZY LOADED COMPONENTS ---
 const StaticFeature = lazy(() => import("@/components/ui/StaticFeature"));
@@ -238,7 +238,7 @@ const HomePage: React.FC = () => {
           <SectionHeading
             title="Бизнес с 4Life"
             subtitle="Партнерство для финансовой свободы"
-            description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Развивайте бизнес в удобном для вас темпе."
+            description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Присоединяйтесь к моей команде и развивайте бизнес в удобном для вас темпе."
             centered={true}
             className="max-w-3xl mx-auto"
             subtitleClassName="text-blue-600 dark:text-blue-400 font-semibold tracking-wide"

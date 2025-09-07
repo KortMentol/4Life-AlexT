@@ -29,7 +29,8 @@ const SciFiVideo: React.FC<{ scale: number; className?: string }> = ({ scale, cl
         loop
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
+        poster=""
         style={{ borderRadius: "12px", filter: "brightness(1.1) contrast(1.05)" }}
       >
         <source src="/src/assets/videos/homepage/Production/Production-4Life.mp4" type="video/mp4" />
@@ -81,10 +82,6 @@ const SectionBlock: React.FC<{
           </div>
         </div>
 
-        {/* Desktop data points */}
-        <div className="absolute -right-6 md:-right-8 top-2 md:top-4 text-xs font-mono opacity-60 text-blue-600 dark:text-cyan-400 hidden md:block">
-          {dataPoint1}
-        </div>
         <div className="absolute -left-6 md:-left-8 bottom-2 md:bottom-4 text-xs font-mono opacity-60 text-blue-600 dark:text-cyan-400 hidden md:block">
           {dataPoint2}
         </div>
@@ -122,7 +119,7 @@ const SectionBlock: React.FC<{
       </div>
 
       {/* Mobile bottom data point - ближе к нижней границе */}
-      <div className="md:hidden absolute bottom-3 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs font-mono opacity-60 text-blue-600 dark:text-cyan-400">
+      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs font-mono opacity-60 text-blue-600 dark:text-cyan-400">
         {dataPoint1}
       </div>
 
@@ -222,6 +219,8 @@ const MorphingVideoSection: React.FC = () => {
           end: "center center",
           scrub: 2,
           ease: "power4.out",
+          immediateRender: false,
+          fastScrollEnd: true,
         },
       }
     );
@@ -232,6 +231,8 @@ const MorphingVideoSection: React.FC = () => {
         start: "center center",
         end: "bottom top",
         scrub: 1.5,
+        immediateRender: false,
+        fastScrollEnd: true,
       },
     });
   };
@@ -252,6 +253,8 @@ const MorphingVideoSection: React.FC = () => {
           start: "top 80%",
           end: "bottom top",
           scrub: 2.5,
+          immediateRender: false,
+          fastScrollEnd: true,
         },
       })
       .fromTo(
@@ -290,6 +293,8 @@ const MorphingVideoSection: React.FC = () => {
           start: "top bottom",
           end: "bottom top",
           scrub: 1.8,
+          immediateRender: false,
+          fastScrollEnd: true,
         },
       })
       .set(gridWrap, { rotationY: 30 * config.rotationMultiplier })
@@ -321,9 +326,44 @@ const MorphingVideoSection: React.FC = () => {
           start: "top bottom",
           end: "bottom top",
           scrub: 1.5,
+          immediateRender: false,
+          fastScrollEnd: true,
         },
       }
     );
+  };
+
+  // Функция для мгновенной установки финальных состояний без анимации
+  const setFinalStatesWithoutAnimation = () => {
+    if (!window.gsap) return;
+
+    const config = getResponsiveConfig();
+
+    // Устанавливаем финальные состояния для результатов (левая секция)
+    if (resultGridRef.current) {
+      const gridWrap = resultGridRef.current.querySelector(".grid-wrap");
+      const gridItems = resultGridRef.current.querySelectorAll(".grid__item");
+
+      if (gridWrap && gridItems.length > 0) {
+        window.gsap.set(gridWrap, { rotationY: 30 * config.rotationMultiplier });
+        window.gsap.set(gridItems, {
+          rotationX: 70 * config.rotationMultiplier,
+          filter: "brightness(120%)",
+        });
+      }
+    }
+
+    // Устанавливаем финальное состояние для видео (правая секция)
+    if (resultVideoRef.current) {
+      // Устанавливаем в зависимости от позиции скролла
+      const scrollProgress = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      const yPercent = 100 - scrollProgress * 200; // от 100 до -100
+
+      window.gsap.set(resultVideoRef.current, {
+        yPercent: Math.max(-100, Math.min(100, yPercent)),
+        opacity: 1,
+      });
+    }
   };
 
   useEffect(() => {
@@ -331,6 +371,15 @@ const MorphingVideoSection: React.FC = () => {
     const timeoutId = setTimeout(() => {
       if (!window.gsap || !window.ScrollTrigger) return;
 
+      // Проверяем, если пользователь вернулся назад (не на верху страницы)
+      const isPageRestored = window.scrollY > 0;
+
+      if (isPageRestored) {
+        // При восстановлении страницы - сразу устанавливаем финальные состояния
+        setFinalStatesWithoutAnimation();
+      }
+
+      // Применяем анимации
       if (scienceGridRef.current) applyScienceAnimation(scienceGridRef.current);
       if (productionGridRef.current) applyProductionAnimation(productionGridRef.current);
       if (resultGridRef.current) applyResultImagesAnimation(resultGridRef.current);
@@ -339,7 +388,7 @@ const MorphingVideoSection: React.FC = () => {
       }
 
       triggers = window.ScrollTrigger.getAll();
-    }, 300);
+    }, 50);
 
     return () => {
       clearTimeout(timeoutId);
