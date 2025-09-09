@@ -1,6 +1,12 @@
 import React from "react";
 import { useTheme } from "@/hooks";
 
+// Logo imports
+import logoLight from "@/assets/images/brand/4life-logo-light.svg";
+import logoDark from "@/assets/images/brand/4life-logo.svg";
+
+
+
 interface DynamicLogoProps {
   alt?: string;
   className?: string;
@@ -61,10 +67,7 @@ const DynamicLogo: React.FC<DynamicLogoProps> = ({
 
   // Выбираем логотип в зависимости от темы (c возможностью принудительного выбора)
   const effectiveTheme = themeOverride ?? theme;
-  const logoSrc =
-    effectiveTheme === "dark"
-      ? "/src/assets/images/brand/4life-logo-light.svg" // Белый логотип
-      : "/src/assets/images/brand/4life-logo.svg"; // Синий логотип
+  const logoSrc = effectiveTheme === "dark" ? logoLight : logoDark;
 
   return (
     <img

@@ -34,8 +34,14 @@ function App() {
   const ownPopRef = useRef(false);
 
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent("app-mounted"));
+    const checkDevice = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
   }, []);
+
+  useScrollRestoration();
+
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
   useEffect(() => {
     try {
@@ -55,16 +61,6 @@ function App() {
       // ignore
     }
   }, [isMenuOpen]);
-
-  useEffect(() => {
-    const checkDevice = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
-  }, []);
-
-  useScrollRestoration();
-
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {

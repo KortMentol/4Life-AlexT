@@ -68,7 +68,6 @@ const Footer: React.FC = () => {
 
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          {/* ... остальной код футера без изменений ... */}
           {/* О компании */}
           <motion.div
             variants={containerVariants}
@@ -86,38 +85,34 @@ const Footer: React.FC = () => {
               </p>
               <div className="flex space-x-4">
                 <a
-                  href={siteConfig.socialLinks.facebook}
+                  href={siteConfig.links.telegram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-white/80 hover:text-white transition-colors"
-                  aria-label="Facebook"
+                  aria-label="Telegram"
                 >
                   <Facebook size={20} />
                 </a>
                 <a
-                  href={siteConfig.socialLinks.instagram}
+                  href={siteConfig.links.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-white/80 hover:text-white transition-colors"
-                  aria-label="Instagram"
+                  aria-label="WhatsApp"
                 >
                   <Instagram size={20} />
                 </a>
                 <a
-                  href={siteConfig.socialLinks.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
                   className="text-white/80 hover:text-white transition-colors"
-                  aria-label="Twitter"
+                  aria-label="Phone"
                 >
                   <Twitter size={20} />
                 </a>
                 <a
-                  href={siteConfig.socialLinks.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`mailto:${siteConfig.contact.email}`}
                   className="text-white/80 hover:text-white transition-colors"
-                  aria-label="YouTube"
+                  aria-label="Email"
                 >
                   <Youtube size={20} />
                 </a>

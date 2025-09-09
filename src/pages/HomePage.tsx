@@ -9,6 +9,16 @@ import { motion } from "framer-motion";
 import React, { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 
+// Media imports
+import tfPlusImg from "@/assets/images/products/tf-plus.webp";
+import tfTrifactorImg from "@/assets/images/products/tf-trifactor.webp";
+import renuvoImg from "@/assets/images/products/renuvo.webp";
+import bg2Img from "@/assets/images/backgrounds/HomePage/2.jpg";
+import bg5Img from "@/assets/images/backgrounds/HomePage/5.jpg";
+import heroVideoWebm from "@/assets/videos/backgrounds/HomePage/Hero-section/Why 4Life Transfer Factor®_.webm";
+import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.webp";
+import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
+
 // --- LAZY LOADED COMPONENTS ---
 const StaticFeature = lazy(() => import("@/components/ui/StaticFeature"));
 const KineticProductCarousel = lazy(() => import("@/components/ui/KineticProductCarousel"));
@@ -63,7 +73,7 @@ const HomePage: React.FC = () => {
       title: "Трай-Фактор Формула",
       description:
         "Революционное достижение науки о трансферцевтиках, поднимает здоровье иммунной системы на новый уровень",
-      image: "/src/assets/images/products/tf-plus.png",
+      image: tfPlusImg,
       link: "/products",
     },
     {
@@ -71,7 +81,7 @@ const HomePage: React.FC = () => {
       title: "Трансфер Фактор Плюс",
       description:
         "Помогает работе вашего иммунитета и поддерживает оптимальное здоровье, самочувствие и качество жизни",
-      image: "/src/assets/images/products/tf-tri-factor.png",
+      image: tfTrifactorImg,
       link: "/products",
     },
     {
@@ -79,7 +89,7 @@ const HomePage: React.FC = () => {
       title: "Трансфер Фактор Ренуво",
       description:
         "Запатентованная адаптогенная формула для системного восстановления организма в условиях современного стресса",
-      image: "/src/assets/images/products/belle-vie.png",
+      image: renuvoImg,
       link: "/products",
     },
   ];
@@ -96,9 +106,9 @@ const HomePage: React.FC = () => {
       />
 
       <ParallaxSection
-        backgroundVideo="/src/assets/videos/backgrounds/Why 4Life Transfer Factor®_.webm"
-        backgroundImageMobile="/src/assets/images/backgrounds/bg-hero-Mobile.webp"
-        backgroundImagePC="/src/assets/images/backgrounds/bg-hero-PC.webp"
+        backgroundVideo={heroVideoWebm}
+        backgroundImageMobile={heroBgMobile}
+        backgroundImagePC={heroBgPC}
         altText="Здоровье и благополучие с 4Life"
         height="h-screen"
         parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
@@ -163,7 +173,7 @@ const HomePage: React.FC = () => {
 
       <section id="products">
         <ParallaxSection
-          backgroundImage="/src/assets/images/backgrounds/2.jpg"
+          backgroundImage={bg2Img}
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
@@ -293,7 +303,7 @@ const HomePage: React.FC = () => {
       </section>
 
       <ParallaxSection
-        backgroundImage="/src/assets/images/backgrounds/5.jpg"
+        backgroundImage={bg5Img}
         altText="Присоединяйтесь к команде 4Life"
         height="h-[120vh]"
         parallaxStrength={GLOBAL_PARALLAX_STRENGTH}

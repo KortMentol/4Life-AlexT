@@ -54,6 +54,14 @@ const initApp = () => {
       <RouterProvider router={router} />
     </React.StrictMode>
   );
+
+  // Dispatch event to signal app is mounted
+  window.dispatchEvent(new CustomEvent("app-mounted"));
 };
 
-initApp();
+// Initialize app when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}

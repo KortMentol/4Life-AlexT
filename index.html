@@ -48,138 +48,137 @@
         --preloader-track-color-light: rgba(100, 116, 139, 0.15);
         --preloader-track-color-dark: rgba(203, 213, 225, 0.1);
       }
+      
       html {
         scrollbar-gutter: stable;
       }
+      
       #preloader {
         position: fixed;
         inset: 0;
-        /* Поднимаем прелоадер выше любых оверлеев приложения */
-        z-index: 2147483647; /* max safe z-index */
-        display: grid;
-        place-items: center;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background: var(--preloader-bg-light);
         opacity: 1;
         will-change: opacity;
+        backface-visibility: hidden;
+        perspective: 1000px;
       }
+      
       @media (prefers-color-scheme: dark) {
         #preloader {
           background: var(--preloader-bg-dark);
         }
       }
 
-      .preloader-content {
+      .preloader-stage {
         position: relative;
         width: 140px;
-        height: 220px;
-      }
-
-      .progress-ring-container,
-      .preloader-text-group {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        will-change: transform, opacity;
+        height: 200px;
+        transform-style: preserve-3d;
+        will-change: transform;
       }
 
       .progress-ring-container {
+        position: absolute;
         top: 0;
+        left: 0;
         width: 140px;
         height: 140px;
+        will-change: transform, opacity;
+        transform-style: preserve-3d;
       }
+      
       .preloader-text-group {
+        position: absolute;
         top: 160px;
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 0.5rem;
-        width: 250px;
-      }
-
-      .preloader-anim-item {
-        opacity: 0;
-        transform: translateY(30px) translateX(-50%);
+        width: 280px;
+        will-change: transform, opacity;
       }
 
       .progress-ring-haze {
         position: absolute;
-        inset: 0;
-        background: radial-gradient(circle, var(--preloader-neon-color) 0%, transparent 65%);
-        opacity: 0.15;
-        filter: blur(30px);
-        animation: preloader-haze-pulse 4s ease-in-out infinite;
-      }
-      @keyframes preloader-haze-pulse {
-        0%,
-        100% {
-          transform: scale(0.95);
-          opacity: 0.1;
-        }
-        50% {
-          transform: scale(1.05);
-          opacity: 0.2;
-        }
+        inset: -20px;
+        background: radial-gradient(circle, var(--preloader-neon-color) 0%, transparent 70%);
+        opacity: 0;
+        filter: blur(40px);
+        will-change: opacity, transform;
       }
 
       .progress-ring__svg {
+        width: 100%;
+        height: 100%;
         overflow: visible;
+        will-change: transform;
       }
+      
       .progress-ring__track,
       .progress-ring__progress {
         transform: rotate(-90deg);
         transform-origin: 50% 50%;
+        will-change: stroke-dashoffset;
       }
+      
       .progress-ring__track {
         stroke: var(--preloader-track-color-light);
+        stroke-width: 3;
+        fill: none;
       }
+      
       @media (prefers-color-scheme: dark) {
         .progress-ring__track {
           stroke: var(--preloader-track-color-dark);
         }
       }
+      
       .progress-ring__progress {
         stroke: var(--preloader-neon-color);
-        filter: drop-shadow(0 0 5px var(--preloader-neon-color)) drop-shadow(0 0 15px var(--preloader-neon-color));
+        stroke-width: 3;
+        fill: none;
         stroke-linecap: round;
+        filter: drop-shadow(0 0 8px var(--preloader-neon-color));
       }
 
       .preloader-logo-wrapper {
         position: absolute;
         inset: 0;
-        display: grid;
-        place-items: center;
-        animation: preloader-logo-pulse 4s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        will-change: transform;
       }
-      @keyframes preloader-logo-pulse {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.04);
-        }
-      }
+      
       .preloader-logo {
-        width: 64px;
-        height: 64px;
+        width: 96px;
+        height: 48px;
+        will-change: transform;
       }
 
       .preloader-text,
       .preloader-percentage {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
-          "Segoe UI Emoji", "Segoe UI Symbol";
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
         white-space: nowrap;
+        will-change: transform;
       }
 
       .preloader-text {
         font-size: 1rem;
         font-weight: 500;
         color: var(--preloader-text-light);
+        margin: 0;
       }
+      
       @media (prefers-color-scheme: dark) {
         .preloader-text {
           color: var(--preloader-text-dark);
@@ -191,7 +190,9 @@
         font-weight: 600;
         font-variant-numeric: tabular-nums;
         color: var(--preloader-percent-light);
+        margin: 0;
       }
+      
       @media (prefers-color-scheme: dark) {
         .preloader-percentage {
           color: var(--preloader-percent-dark);
@@ -201,26 +202,18 @@
   </head>
   <body>
     <div id="preloader">
-      <div class="preloader-content">
-        <div class="progress-ring-container preloader-anim-item">
+      <div class="preloader-stage">
+        <div class="progress-ring-container">
           <div class="progress-ring-haze"></div>
-          <svg class="progress-ring__svg" width="140" height="140">
-            <circle class="progress-ring__track" stroke-width="3" fill="transparent" r="68" cx="70" cy="70" />
-            <circle
-              id="progress-ring-circle"
-              class="progress-ring__progress"
-              stroke-width="3"
-              fill="transparent"
-              r="68"
-              cx="70"
-              cy="70"
-            />
+          <svg class="progress-ring__svg" viewBox="0 0 140 140">
+            <circle class="progress-ring__track" r="68" cx="70" cy="70" />
+            <circle id="progress-ring-circle" class="progress-ring__progress" r="68" cx="70" cy="70" />
           </svg>
           <div class="preloader-logo-wrapper">
-            <img src="/src/assets/images/brand/4life-logo-light.svg" alt="4Life Logo" class="preloader-logo" />
+            <img src="/images/brand/4life-logo-light.svg" alt="4Life Logo" class="preloader-logo" />
           </div>
         </div>
-        <div class="preloader-text-group preloader-anim-item">
+        <div class="preloader-text-group">
           <p class="preloader-text">Инициализация иммунной поддержки...</p>
           <p class="preloader-percentage" id="preloader-percentage">0%</p>
         </div>
@@ -228,91 +221,194 @@
     </div>
     <div id="root"></div>
 
+    <!-- Vite will inject the script tag here in production -->
+    <script type="module" src="/src/main.tsx"></script>
+
     <script>
       (function () {
+        // Логотип для светлой темы
         const logoImg = document.querySelector(".preloader-logo");
         if (logoImg && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
-          logoImg.src = "/src/assets/images/brand/4life-logo.svg";
+          logoImg.src = "/images/brand/4life-logo.svg";
         }
 
+        // Элементы
         const preloader = document.getElementById("preloader");
+        const stage = document.querySelector(".preloader-stage");
+        const ringContainer = document.querySelector(".progress-ring-container");
+        const textGroup = document.querySelector(".preloader-text-group");
+        const haze = document.querySelector(".progress-ring-haze");
+        const logo = document.querySelector(".preloader-logo");
         const percentageEl = document.getElementById("preloader-percentage");
         const ring = document.getElementById("progress-ring-circle");
-        const radius = ring.r.baseVal.value;
+        
+        // Прогресс кольцо
+        const radius = 68;
         const circumference = 2 * Math.PI * radius;
-
-        gsap.set(ring, { strokeDasharray: circumference, strokeDashoffset: circumference });
-
-        let progress = { value: 0 };
+        
+        // Начальные состояния
+        gsap.set([stage, ringContainer, textGroup], { opacity: 0 });
+        gsap.set(stage, { scale: 0.6, rotationX: 45, z: -200 });
+        gsap.set(textGroup, { y: 40 });
+        gsap.set(logo, { scale: 0.8 });
+        gsap.set(haze, { opacity: 0, scale: 0.8 });
+        gsap.set(ring, { 
+          strokeDasharray: circumference, 
+          strokeDashoffset: circumference,
+          opacity: 0
+        });
+        
+        // Прогресс объект
+        const progress = { value: 0, display: 0 };
         let assetsReady = false;
-        let animationFinished = false;
+        let canFinish = false;
 
-        const masterTimeline = gsap.timeline({
-          paused: true,
+        // 🎭 Awwwards хореография
+        const masterTl = gsap.timeline({ 
           onComplete: () => {
-            animationFinished = true;
-            finishLoading();
-          },
+            canFinish = true;
+            checkFinish();
+          }
         });
 
-        masterTimeline.to(".preloader-anim-item", {
-          autoAlpha: 1,
+        // ✨ Нежное материализация из эфира (0.9s)
+        masterTl.to(stage, {
+          opacity: 1,
+          scale: 1,
+          rotationX: 0,
+          z: 0,
+          duration: 0.9,
+          ease: "expo.out"
+        });
+        
+        // 🌸 Синхронное появление всех элементов
+        masterTl.to(ringContainer, {
+          opacity: 1,
+          duration: 0.6,
+          ease: "power2.out"
+        }, "-=0.7");
+        
+        masterTl.to([ring, haze], {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.out"
+        }, "-=0.4");
+        
+        masterTl.to(logo, {
+          scale: 1,
+          duration: 0.7,
+          ease: "back.out(1.1)"
+        }, "-=0.5");
+        
+        masterTl.to(textGroup, {
+          opacity: 1,
           y: 0,
-          stagger: 0.15,
-          duration: 1,
-          ease: "power3.out",
-        });
+          duration: 0.6,
+          ease: "power3.out"
+        }, "-=0.3");
+        
+        // 🌊 Одновременный старт прогресса с текстом
+        masterTl.to(progress, {
+          value: 99.5,
+          duration: 2.2,
+          ease: "power1.inOut",
+          onUpdate: updateProgress
+        }, "-=0.6");
+        
+        // 💫 Плавные проценты
+        masterTl.to(progress, {
+          display: 99.5,
+          duration: 2.2,
+          ease: "power1.inOut",
+          onUpdate: () => {
+            if (percentageEl) {
+              percentageEl.textContent = `${Math.round(progress.display)}%`;
+            }
+          }
+        }, "-=2.2");
+        
+        // 🌟 Живое дыхание свечения
+        gsap.to(haze, {
+          opacity: 0.3,
+          scale: 1.15,
+          duration: 1.8,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1
+        }, 1.0);
+        
+        // 💎 Тонкая пульсация лого
+        gsap.to(logo, {
+          scale: 1.02,
+          duration: 2.2,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1
+        }, 1.2);
 
-        masterTimeline.to(
-          progress,
-          {
-            value: 99.9,
-            duration: 2.0,
-            ease: "none",
-            onUpdate: () => {
-              const currentPercent = Math.floor(progress.value);
-              const offset = circumference - (currentPercent / 100) * circumference;
-              gsap.set(ring, { strokeDashoffset: offset });
-              if (percentageEl) percentageEl.textContent = `${currentPercent}%`;
-            },
-          },
-          "-=0.75"
-        );
-
-        function finishLoading() {
-          if (!assetsReady || !animationFinished) return;
-
-          const outroTl = gsap.timeline();
-          outroTl.to(progress, {
-            value: 100,
-            duration: 0.6,
-            ease: "power2.out",
-            onUpdate: () => {
-              const currentPercent = Math.floor(progress.value);
-              const offset = circumference - (currentPercent / 100) * circumference;
-              gsap.set(ring, { strokeDashoffset: offset });
-              if (percentageEl) percentageEl.textContent = `${currentPercent}%`;
-            },
-          });
-          outroTl.to(".preloader-text-group", { autoAlpha: 0, y: -20, duration: 0.4, ease: "power2.in" }, "+=0.2");
-          outroTl.to(
-            ".progress-ring-container",
-            { autoAlpha: 0, scale: 0.8, duration: 0.5, ease: "power2.in" },
-            "-=0.3"
-          );
-          outroTl.to("#preloader", {
-            autoAlpha: 0,
-            duration: 1.0,
-            ease: "expo.inOut",
-            onComplete: () => preloader.remove(),
-          });
+        function updateProgress() {
+          const offset = circumference - (progress.value / 100) * circumference;
+          ring.style.strokeDashoffset = offset;
         }
 
-        const loadCriticalAssets = () => {
+        function checkFinish() {
+          if (!assetsReady || !canFinish) return;
+          
+          // 🌅 Элегантное растворение
+          const outroTl = gsap.timeline();
+          
+          // Финальный штрих до 100%
+          outroTl.to(progress, {
+            value: 100,
+            display: 100,
+            duration: 0.4,
+            ease: "power2.out",
+            onUpdate: () => {
+              updateProgress();
+              if (percentageEl) percentageEl.textContent = `${Math.round(progress.display)}%`;
+            }
+          });
+          
+          // Нежное исчезновение текста
+          outroTl.to(textGroup, {
+            opacity: 0,
+            y: -20,
+            duration: 0.5,
+            ease: "power2.inOut"
+          }, "+=0.2");
+          
+          // Затухание свечения и кольца
+          outroTl.to([haze, ring], {
+            opacity: 0,
+            duration: 0.4,
+            ease: "power2.inOut"
+          }, "-=0.3");
+          
+          // Растворение в эфире
+          outroTl.to(stage, {
+            scale: 0.7,
+            rotationX: -30,
+            z: -150,
+            opacity: 0,
+            duration: 0.8,
+            ease: "expo.inOut"
+          }, "-=0.2");
+          
+          // Финальное затемнение
+          outroTl.to(preloader, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => preloader.remove()
+          }, "-=0.4");
+        }
+
+        // Загрузка критичных ресурсов
+        const loadAssets = () => {
           const isMobile = window.innerWidth < 768;
           const criticalAssetUrl = isMobile
-            ? "/src/assets/images/backgrounds/bg-hero-Mobile.webp"
-            : "/src/assets/images/backgrounds/bg-hero-PC.webp";
+            ? "/images/backgrounds/bg-hero-Mobile.webp"
+            : "/images/backgrounds/bg-hero-PC.webp";
 
           const imagePromise = new Promise((resolve) => {
             const img = new Image();
@@ -321,25 +417,18 @@
             img.onerror = resolve;
           });
 
-          const scriptPromise = new Promise((resolve) => {
-            const mainScript = document.createElement("script");
-            mainScript.type = "module";
-            mainScript.src = "/src/main.tsx";
-            mainScript.onload = () => {
-              window.addEventListener("app-mounted", resolve, { once: true });
-            };
-            document.body.appendChild(mainScript);
+          const appMountedPromise = new Promise((resolve) => {
+            window.addEventListener("app-mounted", resolve, { once: true });
           });
 
-          Promise.all([imagePromise, scriptPromise]).then(() => {
+          Promise.all([imagePromise, appMountedPromise]).then(() => {
             assetsReady = true;
-            finishLoading();
+            checkFinish();
           });
         };
 
-        // Запускаем анимацию и загрузку одновременно
-        masterTimeline.play();
-        loadCriticalAssets();
+        // Запуск
+        loadAssets();
       })();
     </script>
   </body>

@@ -10,6 +10,9 @@
 
 import React, { useEffect, useRef } from "react";
 
+// Media imports
+import productionVideo from "@/assets/videos/backgrounds/HomePage/Production/Production-4Life.mp4";
+
 // Объявляем gsap глобально, так как он подключается через CDN
 declare global {
   interface Window {
@@ -33,12 +36,11 @@ const SciFiVideo: React.FC<{ scale: number; className?: string }> = ({ scale, cl
         poster=""
         style={{ borderRadius: "12px", filter: "brightness(1.1) contrast(1.05)" }}
       >
-        <source src="/src/assets/videos/homepage/Production/Production-4Life.mp4" type="video/mp4" />
+        <source src={productionVideo} type="video/mp4" />
       </video>
     </div>
   </div>
 );
-
 // Внутренний компонент для рендеринга текстового блока секции
 const SectionBlock: React.FC<{
   num: string;
@@ -181,14 +183,13 @@ const MorphingVideoSection: React.FC = () => {
 
   const generateLocalImages = (count: number) => {
     const images = [];
-    const totalImagesAvailable = 49;
+    const totalImagesAvailable = 20;
     for (let i = 1; i <= count; i++) {
       const imageIndex = ((i - 1) % totalImagesAvailable) + 1;
-      images.push(`/src/assets/images/backgrounds/img/${imageIndex}.jpg`);
+      images.push(`/images/backgrounds/HomePage/img/${imageIndex}.jpg`);
     }
     return images;
   };
-
   // --- АНИМАЦИИ В СТИЛЕ CODROPS, АДАПТИРОВАННЫЕ ДЛЯ REACT И LENIS ---
 
   const applyScienceAnimation = (grid: HTMLElement) => {

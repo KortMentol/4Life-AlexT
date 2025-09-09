@@ -21,14 +21,8 @@ export const siteConfig = {
     fourLifeId: import.meta.env.VITE_4LIFE_ID || "00000000",
     whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",
     email: import.meta.env.VITE_CONTACT_EMAIL || "contact@example.com",
-    phone: import.meta.env.VITE_CONTACT_PHONE || "+7 (XXX) XXX-XX-XX",
-    address: "Москва, Россия",
-  },
-  socialLinks: {
-    facebook: import.meta.env.VITE_FACEBOOK_URL || "https://facebook.com/",
-    instagram: import.meta.env.VITE_INSTAGRAM_URL || "https://instagram.com/",
-    twitter: import.meta.env.VITE_TWITTER_URL || "https://twitter.com/",
-    youtube: import.meta.env.VITE_YOUTUBE_URL || "https://youtube.com/",
+    phone: import.meta.env.VITE_DISTRIBUTOR_PHONE || "+7 (XXX) XXX-XX-XX",
+    address: import.meta.env.VITE_OFFICE_ADDRESS || "Москва, Россия",
   },
 };
 

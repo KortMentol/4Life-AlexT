@@ -13,6 +13,12 @@ import HeaderComets from "@/components/effects/HeaderComets";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 
+// Logo imports
+import logoLight from "@/assets/images/brand/4life-logo-light.svg";
+import logoDark from "@/assets/images/brand/4life-logo.svg";
+
+
+
 interface HeaderProps {
   isMenuOpen: boolean;
   setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -124,9 +130,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
                 whileHover="hover"
               >
                 <img
-                  src={
-                    isDark ? "/src/assets/images/brand/4life-logo-light.svg" : "/src/assets/images/brand/4life-logo.svg"
-                  }
+                  src={isDark ? logoLight : logoDark}
                   alt="4Life Logo"
                   className="h-8 w-auto"
                 />

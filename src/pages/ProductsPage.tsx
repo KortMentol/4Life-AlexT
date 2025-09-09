@@ -21,6 +21,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useProductList } from "@/hooks/useProductList";
 import { getOptimizedImageUrl, optimizeAnimations, optimizeGSAP, preloadCriticalResources } from "@/utils/performance";
 
+// Media imports
+import productsHeroVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
+
 const BACKGROUND_IMAGES = {
   stats:
     "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80",
@@ -357,7 +360,7 @@ const ProductsPage: React.FC = () => {
         as="image"
         href={getOptimizedImageUrl("https://images.unsplash.com/photo-1518709268805-4e9042af2176", 1920, 80)}
       />
-      <link rel="preload" as="video" href="/src/assets/videos/backgrounds/bg-video-ProductsPage.mp4" type="video/mp4" />
+
 
       {/* Hero Section with Video Background */}
       <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -371,7 +374,7 @@ const ProductsPage: React.FC = () => {
           preload="metadata"
           className="absolute inset-0 w-full h-full object-cover z-0"
         >
-          <source src="/src/assets/videos/backgrounds/bg-video-ProductsPage.mp4" type="video/mp4" />
+          <source src={productsHeroVideo} type="video/mp4" />
         </video>
 
         {/* Video Overlay */}

@@ -2,39 +2,36 @@ import { siteConfig } from "@/site-config/site";
 import React from "react";
 import { Helmet } from "react-helmet-async";
 
-export type BreadcrumbItem = {
-  name: string;
-  url: string;
+// --- Вспомогательные функции ---
+/**
+ * Преобразует относительный путь в абсолютный URL.
+ * @param path - Относительный путь или полный URL.
+ * @returns Абсолютный URL.
+ */
+const toAbsoluteUrl = (path?: string): string => {
+  if (!path) return siteConfig.url;
+  // Если путь уже является полным URL, возвращаем его как есть.
+  if (path.startsWith("http")) return path;
+  // Убираем завершающий слэш у siteConfig.url, если он есть.
+  const baseUrl = siteConfig.url.endsWith("/") ? siteConfig.url.slice(0, -1) : siteConfig.url;
+  // Убираем начальный слэш у path, если он есть.
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${baseUrl}/${cleanPath}`;
 };
 
-export type SEOProps = {
-  title: string;
-  description: string;
-  path: string; // URL path starting with '/'
-  image?: string; // absolute or relative url
-  type?: "website" | "article" | "profile" | string;
-  noIndex?: boolean;
-  breadcrumbs?: BreadcrumbItem[];
-  includeOrganizationAndPerson?: boolean; // put org/person JSON-LD (e.g., on Home)
-  includeWebSiteSearch?: boolean; // add WebSite SearchAction JSON-LD (usually Home)
+/**
+ * Объединяет заголовок страницы с названием сайта.
+ * @param title - Заголовок страницы.
+ * @returns Объединенный заголовок.
+ */
+const mergeTitle = (title?: string): string => {
+  if (!title) return siteConfig.name;
+  // Проверяем, содержит ли заголовок уже название сайта, чтобы избежать дублирования.
+  return title.includes(siteConfig.name) ? title : `${title} | ${siteConfig.name}`;
 };
 
-const toAbsoluteUrl = (maybeUrl?: string): string | undefined => {
-  if (!maybeUrl) return undefined;
-  if (maybeUrl.startsWith("http://") || maybeUrl.startsWith("https://"))
-    return maybeUrl;
-  const base = siteConfig.url.replace(/\/$/, "");
-  const rel = maybeUrl.startsWith("/") ? maybeUrl : `/${maybeUrl}`;
-  return `${base}${rel}`;
-};
-
-const mergeTitle = (title: string) => {
-  const brand = siteConfig.name;
-  // Avoid duplicating brand if already present
-  return title.includes(brand) ? title : `${title} | ${brand}`;
-};
-
-const buildBreadcrumbsJSONLD = (items: BreadcrumbItem[] | undefined) => {
+// --- JSON-LD Schema Builders ---
+const buildBreadcrumbsJSONLD = (items?: { name: string; url: string }[]) => {
   if (!items || items.length === 0) return undefined;
   return {
     "@context": "https://schema.org",
@@ -62,17 +59,10 @@ const buildWebSiteSearchJSONLD = () => ({
 const buildOrganizationJSONLD = () => ({
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: siteConfig.distributor?.name
-    ? `4Life с ${siteConfig.distributor.name}`
-    : siteConfig.name,
+  name: siteConfig.distributor?.name ? `4Life с ${siteConfig.distributor.name}` : siteConfig.name,
   url: siteConfig.url,
   logo: toAbsoluteUrl("/favicon.svg") || toAbsoluteUrl(siteConfig.ogImage),
-  sameAs: [
-    siteConfig.socialLinks?.instagram,
-    siteConfig.socialLinks?.youtube,
-    siteConfig.socialLinks?.twitter,
-    siteConfig.socialLinks?.facebook,
-  ].filter(Boolean),
+  // Удалены ссылки на социальные сети, так как они не используются
 });
 
 const buildPersonJSONLD = () => ({
@@ -83,13 +73,20 @@ const buildPersonJSONLD = () => ({
   image: toAbsoluteUrl(siteConfig.ogImage || "/favicon.svg"),
   jobTitle: siteConfig.distributor?.title || "",
   worksFor: { "@type": "Organization", name: "4Life" },
-  sameAs: [
-    siteConfig.socialLinks?.instagram,
-    siteConfig.socialLinks?.youtube,
-    siteConfig.socialLinks?.twitter,
-    siteConfig.socialLinks?.facebook,
-  ].filter(Boolean),
+  // Удалены ссылки на социальные сети, так как они не используются
 });
+
+export interface SEOProps {
+  title?: string;
+  description?: string;
+  path?: string;
+  image?: string;
+  type?: "website" | "article" | "product";
+  noIndex?: boolean;
+  breadcrumbs?: { name: string; url: string }[];
+  includeOrganizationAndPerson?: boolean;
+  includeWebSiteSearch?: boolean;
+}
 
 export const SEO: React.FC<SEOProps> = ({
   title,
@@ -120,29 +117,25 @@ export const SEO: React.FC<SEOProps> = ({
     <Helmet>
       <title>{finalTitle}</title>
       <meta name="description" content={description} />
-      <meta
-        name="robots"
-        content={noIndex ? "noindex, nofollow" : "index, follow"}
-      />
-
+      <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
       <link rel="canonical" href={url} />
 
+      {/* Open Graph */}
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:type" content={type} />
-      {url && <meta property="og:url" content={url} />}
-      {absoluteImage && <meta property="og:image" content={absoluteImage} />}
+      <meta property="og:url" content={url} />
+      <meta property="og:image" content={absoluteImage} />
+      <meta property="og:site_name" content={siteConfig.name} />
 
+      {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={finalTitle} />
       <meta name="twitter:description" content={description} />
-      {absoluteImage && <meta name="twitter:image" content={absoluteImage} />}
+      <meta name="twitter:image" content={absoluteImage} />
 
-      {jsonLd.length > 0 && (
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      )}
+      {/* JSON-LD */}
+      {jsonLd.length > 0 && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
     </Helmet>
   );
 };
-
-export default SEO;

@@ -1,21 +1,21 @@
+import DynamicLogo from "@/components/ui/DynamicLogo";
+import SciFiThemeToggle from "@/components/ui/SciFiThemeToggle";
+import { lenis } from "@/lib/lenis";
 import { mainNav } from "@/site-config/site";
 import { gsap } from "gsap";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { lenis } from "../../../lib/lenis";
-import DynamicLogo from "../../ui/DynamicLogo";
-import SciFiThemeToggle from "../../ui/SciFiThemeToggle";
 import "./style.css";
 
-import img1 from "../../../assets/images/MobileMenu/1.jpg";
-import img2 from "../../../assets/images/MobileMenu/2.jpg";
-import img3 from "../../../assets/images/MobileMenu/3.jpg";
-import img4 from "../../../assets/images/MobileMenu/4.jpg";
-import img5 from "../../../assets/images/MobileMenu/5.jpg";
-import img6 from "../../../assets/images/MobileMenu/6.jpg";
-import img7 from "../../../assets/images/MobileMenu/7.jpg";
-import img8 from "../../../assets/images/MobileMenu/8.jpg";
-import img9 from "../../../assets/images/MobileMenu/9.jpg";
+import img1 from "@/assets/images/MobileMenu/1.jpg";
+import img2 from "@/assets/images/MobileMenu/2.jpg";
+import img3 from "@/assets/images/MobileMenu/3.jpg";
+import img4 from "@/assets/images/MobileMenu/4.jpg";
+import img5 from "@/assets/images/MobileMenu/5.jpg";
+import img6 from "@/assets/images/MobileMenu/6.jpg";
+import img7 from "@/assets/images/MobileMenu/7.jpg";
+import img8 from "@/assets/images/MobileMenu/8.jpg";
+import img9 from "@/assets/images/MobileMenu/9.jpg";
 
 // === Константы таймингов анимации волн (секунды) ===
 // Используются для метки "чёрного" кадра и синхронизации префетча.
@@ -27,8 +27,7 @@ const WAVE_OPEN_UP_2 = 0.8; // вверх до исчезновения (отк�
 const NAVIGATION_EPS = 0.06; // небольшой буфер, чтобы навигация началась строго «на чёрном»
 
 // Полное время анимации открытия меню (для старта префетча после завершения)
-const OPEN_TOTAL =
-  WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2 + WAVE_OPEN_UP_1 + WAVE_OPEN_UP_2; // 2.2с
+const OPEN_TOTAL = WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2 + WAVE_OPEN_UP_1 + WAVE_OPEN_UP_2; // 2.2с
 
 // Типизация глобального окна для флага перехода меню
 declare global {
@@ -50,9 +49,7 @@ const routePrefetchers: Record<string, () => Promise<unknown>> = {
 };
 
 function prefetchAllRoutesExcept(currentPath: string) {
-  const entries = Object.entries(routePrefetchers).filter(
-    ([path]) => path !== currentPath,
-  );
+  const entries = Object.entries(routePrefetchers).filter(([path]) => path !== currentPath);
   entries.forEach(([, loader]) => {
     loader().catch(() => {});
   });
@@ -90,11 +87,7 @@ const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   </button>
 );
 
-const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
-  isOpen,
-  onClose,
-  navigateFromMenu,
-}) => {
+const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFromMenu }) => {
   const location = useLocation();
   const menuWrapRef = useRef<HTMLDivElement>(null);
   const overlayPathRef = useRef<SVGPathElement>(null);
@@ -155,7 +148,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
         ease: "power4.in",
         attr: { d: "M 0 100 V 50 Q 50 0 100 50 V 100 z" },
       },
-      0,
+      0
     );
     tl.to(overlayPath, {
       duration: 0.3,
@@ -180,7 +173,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
       menuItems,
       { y: 150, opacity: 0 },
       { duration: 1.1, ease: "power4", y: 0, opacity: 1, stagger: 0.05 },
-      "-=1.1",
+      "-=1.1"
     );
 
     return () => {
@@ -206,8 +199,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
 
     // Безопасно остановим внешние твины и запустим обратное проигрывание
     gsap.killTweensOf(tl);
-    const labelTime =
-      tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2; // запасной расчёт
+    const labelTime = tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2; // запасной расчёт
     let lastTime = tl.time();
     const prevUpdate = tl.eventCallback("onUpdate") as gsap.Callback | null;
     const targetHref = pendingHrefRef.current;
@@ -277,82 +269,28 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
         </div>
         <div className="tiles">
           <div className="tiles__line">
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img4})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img5})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img6})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img4})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img5})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img6})` }}
-            ></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
           </div>
           <div className="tiles__line">
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img1})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img2})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img3})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img1})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img2})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img3})` }}
-            ></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
           </div>
           <div className="tiles__line">
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img7})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img8})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img9})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img7})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img8})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img9})` }}
-            ></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
           </div>
         </div>
         <nav className="menu">
@@ -371,13 +309,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
           <SciFiThemeToggle />
         </div>
       </div>
-      <svg
-        className="overlay"
-        width="100%"
-        height="100%"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
+      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path
           ref={overlayPathRef}
           className="overlay__path"

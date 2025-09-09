@@ -9,6 +9,7 @@ export default defineConfig({
   },
   build: {
     minify: "terser",
+    sourcemap: false,
     terserOptions: {
       compress: {
         drop_console: true,
@@ -16,13 +17,22 @@ export default defineConfig({
       },
     },
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+      },
       output: {
-        manualChunks: {
-          react: ["react", "react-dom"],
-          router: ["react-router-dom"],
-          motion: ["framer-motion"],
-          vendors: ["react-helmet-async", "react-scroll-parallax"],
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) {
+            return "assets/[name]-[hash][extname]";
+          }
+          let extType = assetInfo.name.split(".").at(1);
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType || "")) {
+            extType = "img";
+          }
+          return `assets/${extType}/[name]-[hash][extname]`;
         },
+        chunkFileNames: "assets/js/[name]-[hash].js",
+        entryFileNames: "assets/js/[name]-[hash].js",
       },
     },
   },
