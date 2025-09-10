@@ -10,15 +10,24 @@
  * import { lenis, scrollTo } from '@/lib/lenis';
  */
 import Lenis from "lenis";
-import {
-  LenisOptions,
-  Lenis as LenisType,
-  LenisScrollToOptions,
-} from "./lenis.types";
+import { LenisOptions, LenisScrollToOptions, Lenis as LenisType } from "./lenis.types";
+
+// Определяем мобильное устройство (аналогично useIsMobile хуку)
+const isMobile = () => {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth <= 767; // Как в useIsMobile хуке
+};
 
 // 1. Создаем и экспортируем ЕДИНСТВЕННЫЙ экземпляр Lenis
 export const lenis = new Lenis({
   syncTouch: true,
+  lerp: 0.07, // Ключевой параметр: 0.05-0.08 дает ощущение "тягучести"
+  duration: isMobile() ? 1.5 : 1.7, // mobile: 1.5, desktop: 1.7
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Плавное замедление
+  smoothWheel: true,
+  wheelMultiplier: 1.0, // Стандартная скорость колеса
+  touchMultiplier: 2.5, // Немного ускорить скролл на тач-устройствах
+  infinite: false,
 } as LenisOptions) as unknown as LenisType;
 
 // Добавляем кастомное свойство, если оно нужно для вашего типа
@@ -39,16 +48,12 @@ if (typeof window !== "undefined") {
 /**
  * @description Плавно прокручивает страницу к указанной цели.
  */
-export const scrollTo = (
-  target: string | HTMLElement | number,
-  options: LenisScrollToOptions = {},
-) => {
+export const scrollTo = (target: string | HTMLElement | number, options: LenisScrollToOptions = {}) => {
   lenis.scrollTo(target, {
     offset: 0,
     immediate: false,
     duration: 1.5,
-    easing: (t: number) =>
-      t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2,
+    easing: (t: number) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2),
     ...options,
   });
 };
