@@ -318,6 +318,12 @@ a {
   perspective: 1000px;
 }
 
+/* Text scroll effects */
+.scroll-text-word {
+  will-change: opacity, color;
+  transition: none;
+}
+
 /* Accordion animations */
 .accordion-content {
   transition:
@@ -346,6 +352,39 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 3D Grid Animation Styles - Максимальная производительность */
+.grid-wrap {
+  transform-style: preserve-3d;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.grid__item {
+  will-change: transform, filter;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  /* Убираем лесенки в Firefox */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* Optimized 3D transforms */
+.grid-3d-container {
+  perspective: var(--perspective, 1500px);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Параллакс оптимизация */
+.parallax-bg {
+  contain: layout style paint;
+  isolation: isolate;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -355,8 +394,11 @@ html {
   .float-animation,
   .gradient-text,
   .section-transition,
-  .card-hover-effect {
+  .card-hover-effect,
+  .grid-wrap,
+  .grid__item {
     animation: none !important;
     transition: none !important;
+    transform: none !important;
   }
 }

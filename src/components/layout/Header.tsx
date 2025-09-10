@@ -22,10 +22,9 @@ import logoDark from "@/assets/images/brand/4life-logo.svg";
 interface HeaderProps {
   isMenuOpen: boolean;
   setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isScrollingLocked: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingLocked }) => {
+const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const headerTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
@@ -45,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, isScrollingL
   const { headerY, forceShowHeader } = useNativeScroll({
     headerHeight,
     topOffset: 8,
-    disabled: isMenuOpen || isScrollingLocked,
+    disabled: isMenuOpen,
   });
 
   // Этот useEffect слушает наше кастомное событие и показывает хедер

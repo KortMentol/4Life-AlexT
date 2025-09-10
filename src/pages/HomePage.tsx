@@ -1,13 +1,10 @@
 import { AuroraText } from "@/components/magicui/aurora-text";
-import { MorphingVideoSection } from "@/components/sections";
-import { Button, ParallaxSection, SectionHeading } from "@/components/ui";
-import { useTransition } from "@/context";
+import { MorphingVideoSection, PartnershipSection } from "@/components/sections";
+import { Button, ParallaxSection } from "@/components/ui";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
-import { scrollToTop } from "@/utils/navigationUtils";
 import { motion } from "framer-motion";
 import React, { lazy, Suspense } from "react";
-import { useLocation } from "react-router-dom";
 
 // Media imports
 import tfPlusImg from "@/assets/images/products/tf-plus.webp";
@@ -20,7 +17,6 @@ import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.we
 import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
 
 // --- LAZY LOADED COMPONENTS ---
-const StaticFeature = lazy(() => import("@/components/ui/StaticFeature"));
 const KineticProductCarousel = lazy(() => import("@/components/ui/KineticProductCarousel"));
 const InteractiveProductCard = lazy(() => import("@/components/ui/InteractiveProductCard"));
 
@@ -33,40 +29,13 @@ const pageVariants = {
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
-  // --- Хуки для умной навигации ---
-  const { transitionTo } = useTransition();
-  const location = useLocation();
 
-  // --- Умный обработчик клика для уникальных ссылок (как кнопка партнерства) ---
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    if (location.pathname === href) {
-      scrollToTop({ immediate: false });
-    } else {
-      transitionTo(href);
-    }
-  };
+
+
 
   const GLOBAL_PARALLAX_STRENGTH = 40;
 
-  const benefits = [
-    {
-      icon: Icons.DollarSign,
-      title: "Гибкий доход",
-      description: "Зарабатывайте на продажах и развитии своей партнерской сети без ограничения по времени",
-    },
-    {
-      icon: Icons.Users,
-      title: "Обучение и поддержка",
-      description: "Доступ к проверенной бизнес-модели, готовым инструментам и персональной поддержке на всех этапах",
-    },
-    {
-      icon: Icons.Globe,
-      title: "Глобальные возможности",
-      description:
-        "Стройте бизнес с крупной международной компанией, которая обеспечивает стабильность, официальные выплаты и безупречную репутацию на рынке",
-    },
-  ];
+
   const popularProducts = [
     {
       id: 1,
@@ -242,65 +211,7 @@ const HomePage: React.FC = () => {
         </ParallaxSection>
       </section>
 
-      <section id="business" className="relative py-24">
-        <div className="absolute inset-0 bg-white dark:bg-gray-900 -z-20"></div>
-        <div className="container max-w-7xl mx-auto px-6 relative z-10">
-          <SectionHeading
-            title="Бизнес с 4Life"
-            subtitle="Партнерство для финансовой свободы"
-            description="Станьте партнером 4Life и получите доступ к проверенной бизнес-модели, поддержке команды и стабильному доходу. Присоединяйтесь к моей команде и развивайте бизнес в удобном для вас темпе."
-            centered={true}
-            className="max-w-3xl mx-auto"
-            subtitleClassName="text-blue-600 dark:text-blue-400 font-semibold tracking-wide"
-            titleClassName="font-extrabold tracking-tight text-gray-800 dark:text-white"
-          />
-          <Suspense fallback={<div className="mt-16 h-[300px] w-full" />}>
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-              {benefits.map((benefit, index) => (
-                <StaticFeature
-                  key={index}
-                  icon={benefit.icon}
-                  title={benefit.title}
-                  description={benefit.description}
-                />
-              ))}
-            </div>
-          </Suspense>
-
-          {/* ▼▼▼ ИСПРАВЛЕННАЯ УНИКАЛЬНАЯ КНОПКА ▼▼▼ */}
-          <div className="mt-16 text-center">
-            <motion.a
-              href="/partnership"
-              onClick={(e) => handleLinkClick(e, "/partnership")}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="group relative inline-flex items-center justify-center p-0.5 rounded-lg font-medium text-gray-900 bg-gradient-to-r from-green-400 to-blue-500 hover:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 transition-all duration-300"
-            >
-              <span className="relative px-8 py-4 transition-all ease-in duration-150 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                <span className="relative flex items-center gap-2">
-                  <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent dark:text-transparent dark:bg-gradient-to-r dark:from-green-300 dark:to-blue-400 group-hover:text-white transition-colors duration-150">
-                    Узнать о возможностях партнерства
-                  </span>
-                  <Icons.ArrowRight className="w-5 h-5 text-blue-600 dark:text-blue-400 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
-                </span>
-              </span>
-            </motion.a>
-          </div>
-
-          <div className="mt-16 max-w-3xl mx-auto bg-white/0 dark:bg-gray-800/0 p-8 rounded-xl border border-green-100/30 dark:border-green-900/30 shadow-lg">
-            <div className="flex items-start">
-              <Icons.Quote className="w-10 h-10 text-green-400 dark:text-green-500 mr-4 flex-shrink-0" />
-              <div>
-                <p className="text-gray-700 dark:text-gray-300 italic mb-4">
-                  &ldquo;В наши дни люди всему знают цену, но ничего не умеют ценить. Инвестируйте в своё здоровье
-                  сегодня, чтобы наслаждаться каждым днём полноценно и счастливо!&rdquo;
-                </p>
-                <p className="text-right text-gray-500 dark:text-gray-400 font-medium">— Оскар Уайльд</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PartnershipSection />
 
       <ParallaxSection
         backgroundImage={bg5Img}
