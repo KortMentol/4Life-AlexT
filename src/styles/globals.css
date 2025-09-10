@@ -383,6 +383,20 @@ html {
 .parallax-bg {
   contain: layout style paint;
   isolation: isolate;
+  will-change: transform;
+}
+
+/* Оптимизация текстовых эффектов */
+.scroll-text-word {
+  will-change: opacity;
+  contain: layout style;
+}
+
+/* GPU слои для всех анимируемых элементов */
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {

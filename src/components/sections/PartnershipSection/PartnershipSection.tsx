@@ -36,30 +36,16 @@ const ScrollText: React.FC<{ children: string; className?: string }> = ({ childr
 
 const Word: React.FC<{ children: string; progress: any; range: [number, number] }> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0.3, 1]);
-  const color = useTransform(
-    progress, 
-    range, 
-    ["rgb(107, 114, 128)", "rgb(34, 197, 94)"] // gray-500 to green-500
-  );
-  
-  const colorDark = useTransform(
-    progress, 
-    range, 
-    ["rgb(107, 114, 128)", "rgb(16, 185, 129)"] // gray-500 to emerald-500
-  );
 
   return (
     <span className="relative mr-3 mt-3 inline-block">
       <span className="absolute opacity-30 dark:opacity-20">{children}</span>
       <motion.span 
-        className="dark:hidden"
-        style={{ opacity, color }}
-      >
-        {children}
-      </motion.span>
-      <motion.span 
-        className="hidden dark:inline"
-        style={{ opacity, color: colorDark }}
+        style={{ 
+          opacity,
+          color: 'rgb(34, 197, 94)' // green-500 for light
+        }}
+        className="dark:text-emerald-500"
       >
         {children}
       </motion.span>
@@ -73,28 +59,37 @@ const PartnershipSection: React.FC = () => {
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
 
-  // Параллакс для фона
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
+  // Параллакс для фона - теперь через CSS
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  
-  // GPU-оптимизация для максимального FPS
+  // Чистый CSS параллакс для максимального FPS
   useEffect(() => {
-    const updateTransform = (latest: string) => {
-      if (sectionRef.current) {
-        const bg = sectionRef.current.querySelector('.parallax-bg') as HTMLElement;
-        if (bg) {
-          bg.style.transform = `translate3d(0, ${latest}, 0)`;
-        }
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      
+      const rect = sectionRef.current.getBoundingClientRect();
+      const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+      const yPos = (scrolled - 0.5) * 20; // -10% to 10%
+      
+      const bg = sectionRef.current.querySelector('.parallax-bg') as HTMLElement;
+      if (bg) {
+        bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
       }
     };
     
-    const unsubscribe = backgroundY.onChange(updateTransform);
-    return unsubscribe;
-  }, [backgroundY]);
+    let ticking = false;
+    const optimizedScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', optimizedScroll, { passive: true });
+    return () => window.removeEventListener('scroll', optimizedScroll);
+  }, []);
 
   return (
     <section ref={sectionRef} className="relative min-h-[300vh] overflow-hidden bg-transparent">

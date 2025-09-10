@@ -6,7 +6,7 @@
  * @version 2.0.0 - Complete rewrite with parallax background, text effects, 3D animations
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 // Media imports
@@ -47,30 +47,16 @@ const ScrollText: React.FC<{ children: string; className?: string }> = ({ childr
 
 const Word: React.FC<{ children: string; progress: any; range: [number, number] }> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0.3, 1]);
-  const color = useTransform(
-    progress, 
-    range, 
-    ["rgb(107, 114, 128)", "rgb(59, 130, 246)"] // gray-500 to blue-500
-  );
-  
-  const colorDark = useTransform(
-    progress, 
-    range, 
-    ["rgb(107, 114, 128)", "rgb(6, 182, 212)"] // gray-500 to cyan-500
-  );
 
   return (
     <span className="relative mr-3 mt-3 inline-block">
       <span className="absolute opacity-30 dark:opacity-20">{children}</span>
       <motion.span 
-        className="dark:hidden"
-        style={{ opacity, color }}
-      >
-        {children}
-      </motion.span>
-      <motion.span 
-        className="hidden dark:inline"
-        style={{ opacity, color: colorDark }}
+        style={{ 
+          opacity,
+          color: 'rgb(59, 130, 246)' // blue-500 for light
+        }}
+        className="dark:text-cyan-500"
       >
         {children}
       </motion.span>
@@ -78,9 +64,12 @@ const Word: React.FC<{ children: string; progress: any; range: [number, number] 
   );
 };
 
-// Компонент для парящего видео
+// Компонент для парящего видео с Awwwards логикой
 const FloatingVideo: React.FC<{ triggerRef: React.RefObject<HTMLElement> }> = ({ triggerRef }) => {
-  const videoRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [canPlay, setCanPlay] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const { scrollYProgress } = useScroll({
     target: triggerRef,
     offset: ["start end", "end start"]
@@ -88,20 +77,64 @@ const FloatingVideo: React.FC<{ triggerRef: React.RefObject<HTMLElement> }> = ({
 
   const y = useTransform(scrollYProgress, [0, 1], ["50%", "-50%"]);
 
+  // Awwwards логика: показываем видео как только можем, постер только при буферизации
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleCanPlay = () => {
+      setCanPlay(true);
+      setIsBuffering(false);
+    };
+    
+    const handleWaiting = () => {
+      setIsBuffering(true); // Видео ждет данных - показываем постер
+    };
+    
+    const handlePlaying = () => {
+      setIsBuffering(false); // Видео играет - скрываем постер
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('playing', handlePlaying);
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('playing', handlePlaying);
+    };
+  }, []);
+
+  // Показываем постер только если видео буферизируется или еще не готово
+  const showPoster = !canPlay || isBuffering;
+
   return (
     <motion.div
-      ref={videoRef}
+      ref={containerRef}
       style={{ y, transform: 'translateZ(0)' }}
       className="absolute left-1/2 top-1/2 z-20 w-[70vw] max-w-[800px] -translate-x-1/2 -translate-y-1/2 will-change-transform lg:w-[60vw]"
     >
       <div className="relative aspect-video overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm">
+        {/* Постер - показывается только при буферизации */}
+        <div 
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
+            showPoster ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            backgroundImage: `url(/images/backgrounds/HomePage/img/1.jpg)`
+          }}
+        />
+        
+        {/* Видео - всегда пытается играть */}
         <video
+          ref={videoRef}
           className="h-full w-full object-cover"
           autoPlay
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
         >
           <source src={productionVideo} type="video/mp4" />
         </video>
@@ -123,6 +156,8 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
     };
     
     if (!window.gsap || !window.ScrollTrigger || window.innerWidth < 1024 || !supports3D()) return;
+    
+
 
     const grid = gridRef.current;
     if (!grid) return;
@@ -132,7 +167,7 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
     
     if (!gridWrap || !gridItems.length) return;
 
-    let timeline;
+    let timeline: any;
 
     switch (type) {
       case 1: // Движение слева направо
@@ -142,9 +177,10 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
             trigger: triggerRef.current,
             start: 'top bottom+=20%',
             end: 'bottom top-=20%',
-            scrub: 1.5,
+            scrub: 1.2,
             fastScrollEnd: true,
-            refreshPriority: -1
+            refreshPriority: -1,
+            invalidateOnRefresh: false
           }
         })
         .set(gridWrap, { rotationY: 25, force3D: true })
@@ -174,9 +210,10 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
             trigger: triggerRef.current,
             start: 'top bottom+=20%',
             end: 'bottom top-=20%',
-            scrub: 1.5,
+            scrub: 1.2,
             fastScrollEnd: true,
-            refreshPriority: -1
+            refreshPriority: -1,
+            invalidateOnRefresh: false
           }
         })
         .set(gridWrap, { rotationX: 20, force3D: true })
@@ -207,9 +244,10 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
             trigger: triggerRef.current,
             start: 'top bottom+=20%',
             end: 'bottom top-=20%',
-            scrub: 1.5,
+            scrub: 1.2,
             fastScrollEnd: true,
-            refreshPriority: -1
+            refreshPriority: -1,
+            invalidateOnRefresh: false
           }
         })
         .set(gridItems, {
@@ -238,8 +276,8 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
     };
   }, [type, triggerRef]);
 
-  // Генерируем изображения
-  const imageCount = window.innerWidth >= 1024 ? 20 : 10;
+  // Генерируем изображения - оптимизировано для производительности
+  const imageCount = window.innerWidth >= 1024 ? 15 : 8;
   const images = Array.from({ length: imageCount }, (_, i) => 
     `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`
   );
@@ -267,28 +305,60 @@ const MorphingVideoSection: React.FC = () => {
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
 
-  // Оптимизированный параллакс через CSS transform3d
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
-
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  
-  // GPU-оптимизация для максимального FPS
+  // Оптимизированный параллакс с throttling
   useEffect(() => {
-    const updateTransform = (latest: string) => {
-      if (sectionRef.current) {
-        const bg = sectionRef.current.querySelector('.parallax-bg') as HTMLElement;
-        if (bg) {
-          bg.style.transform = `translate3d(0, ${latest}, 0)`;
-        }
+    let lastTime = 0;
+    const throttleDelay = 16; // ~60fps максимум
+    
+    const handleScroll = () => {
+      const now = performance.now();
+      if (now - lastTime < throttleDelay) return;
+      lastTime = now;
+      
+      if (!sectionRef.current) return;
+      
+      const rect = sectionRef.current.getBoundingClientRect();
+      const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+      const yPos = (scrolled - 0.5) * 20; // -10% to 10%
+      
+      const bg = sectionRef.current.querySelector('.parallax-bg') as HTMLElement;
+      if (bg) {
+        bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
       }
     };
     
-    const unsubscribe = backgroundY.onChange(updateTransform);
-    return unsubscribe;
-  }, [backgroundY]);
+    let ticking = false;
+    const optimizedScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', optimizedScroll, { passive: true });
+    return () => window.removeEventListener('scroll', optimizedScroll);
+  }, []);
+
+  // Предзагрузка видео сразу после загрузки страницы
+  useEffect(() => {
+    const preloadVideos = () => {
+      // Используем link preload для эффективной предзагрузки
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'video';
+      link.href = productionVideo;
+      document.head.appendChild(link);
+    };
+
+    if (document.readyState === 'complete') {
+      preloadVideos();
+    } else {
+      window.addEventListener('load', preloadVideos);
+    }
+  }, []);
 
   return (
     <section ref={sectionRef} className="relative min-h-[400vh] overflow-hidden bg-transparent">
