@@ -12,6 +12,14 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  /* 3D Grid переменные как в Codrops */
+  --perspective: 1500px;
+  --grid-item-ratio: 1.5;
+  --grid-width: 100%;
+  --grid-height: auto;
+  --grid-gap: 2vw;
+  --grid-columns: 4;
+  --grid-inner-scale: 1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -354,22 +362,89 @@ html {
 
 /* 3D Grid Animation Styles - Максимальная производительность */
 .grid-wrap {
+  height: var(--grid-height);
+  width: var(--grid-width);
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  gap: var(--grid-gap);
   transform-style: preserve-3d;
+  /* Стабилизация для Lenis */
   will-change: transform;
   backface-visibility: hidden;
   transform: translate3d(0, 0, 0);
 }
 
 .grid__item {
-  will-change: transform, filter;
-  transform-style: preserve-3d;
+  aspect-ratio: 1.5;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  position: relative;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+
+.grid__item-inner {
+  position: relative;
+  width: calc(1 / var(--grid-inner-scale) * 100%);
+  height: calc(1 / var(--grid-inner-scale) * 100%);
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+/* ==============================================
+   АНИМАЦИЯ 1: Горизонтальное движение с rotateY(25deg)
+   ============================================== */
+.grid__item--type-1 {
+  will-change: transform;
+  transform: translateZ(0);
   backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  /* Убираем лесенки в Firefox */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  /* Лесенка на верхней поверхности из-за поворота */
+  filter: blur(0.3px) contrast(1.05);
+}
+
+.grid__item--type-1 .grid__item-inner {
+  /* Дополнительная стабилизация */
+  transform: scale(1.01);
+}
+
+/* ==============================================
+   АНИМАЦИЯ 2: Вертикальное движение с rotationY(-45/45)
+   ============================================== */
+.grid__item--type-2 {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Лесенка на боковых гранях */
+  filter: blur(0.2px) contrast(1.03);
+  /* ПРОФЕССИОНАЛЬНЫЙ ФИКС: Добавляем прозрачную обводку для принудительного сглаживания в Firefox */
+  outline: 1px solid transparent;
+}
+
+.grid__item--type-2 .grid__item-inner {
+  /* Мягкое сглаживание для боковых поворотов */
   -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: auto;
+}
+
+/* ==============================================
+   АНИМАЦИЯ 3: Движение из глубины с rotationX
+   ============================================== */
+.grid__item--type-3 {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Минимальное сглаживание */
+  filter: blur(0.1px);
+  /* ПРОФЕССИОНАЛЬНЫЙ ФИКС: Добавляем прозрачную обводку для принудительного сглаживания в Firefox */
+  outline: 1px solid transparent;
+}
+
+.grid__item--type-3 .grid__item-inner {
+  /* Оптимизация для глубинного движения */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimizeQuality;
 }
 
 /* Optimized 3D transforms */

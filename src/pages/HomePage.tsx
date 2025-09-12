@@ -185,7 +185,7 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               </Suspense>
-              <div className="mt-12 text-center px-6">
+              <div className="mt-16 mb-10 text-center px-6">
                 <Button
                   to="/products"
                   variant="secondary"
@@ -198,14 +198,7 @@ const HomePage: React.FC = () => {
                   Посмотреть все
                 </Button>
               </div>
-              <div className="mt-10 text-center px-6">
-                <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 border border-white/20">
-                  <Icons.ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
-                  <span className="text-white/80 text-sm sm:text-base ml-2 sm:ml-3">
-                    Продукция 4Life не заменяет медикаментозное лечение
-                  </span>
-                </div>
-              </div>
+
             </div>
           </div>
         </ParallaxSection>

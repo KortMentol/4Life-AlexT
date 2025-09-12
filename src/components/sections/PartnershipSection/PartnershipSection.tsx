@@ -118,7 +118,8 @@ const PartnershipSection: React.FC = () => {
             style={{
               backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
               backgroundSize: '400px 400px',
-              backgroundPosition: '0 0'
+              backgroundPosition: '0 0',
+              filter: 'brightness(0.6) contrast(1.1)'
             }}
           />
         </div>
