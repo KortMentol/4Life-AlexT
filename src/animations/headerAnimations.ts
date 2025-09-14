@@ -30,8 +30,8 @@ import {
 } from "@/utils/framerUtils";
 
 /**
- * Анимации для хедера - определяет поведение при появлении и скрытии
- * Использует пружинную анимацию для естественного движения
+ * Awwwards 2025 оптимизированные анимации для хедера
+ * Максимальная производительность с GPU-ускорением
  */
 export const headerVariants: Variants = {
   visible: {
@@ -39,9 +39,9 @@ export const headerVariants: Variants = {
     opacity: 1,
     transition: {
       type: "spring",
-      stiffness: 300,
-      damping: 30,
-      mass: 0.8,
+      stiffness: 200,
+      damping: 25,
+      mass: 0.6,
     },
   },
   hidden: {
@@ -49,9 +49,9 @@ export const headerVariants: Variants = {
     opacity: 0,
     transition: {
       type: "spring",
-      stiffness: 300,
-      damping: 30,
-      mass: 0.8,
+      stiffness: 250,
+      damping: 28,
+      mass: 0.6,
     },
   },
 };
@@ -95,25 +95,23 @@ export const iconVariants: Variants = {
 };
 
 /**
- * Анимации для логотипа сайта
- * Плавное появление с небольшой задержкой и эффект при наведении
+ * Оптимизированные анимации для логотипа с GPU-ускорением
  */
 export const logoVariants: Variants = {
   ...scaleVariants(0.5, 0.1),
   hover: {
-    scale: 1.05,
+    scale: 1.03,
     transition: {
       type: "spring",
-      stiffness: 400,
-      damping: 10,
+      stiffness: 300,
+      damping: 15,
     },
   },
 };
 
 /**
- * Анимации для мобильного меню
- * Определяет поведение при открытии, закрытии и выходе
- * Использует горизонтальное движение слева направо
+ * Оптимизированные анимации для мобильного меню
+ * Максимальная производительность с уменьшенными значениями stiffness
  */
 export const mobileMenuVariants: Variants = {
   hidden: {
@@ -121,8 +119,8 @@ export const mobileMenuVariants: Variants = {
     opacity: 0,
     transition: {
       type: "spring",
-      stiffness: 300,
-      damping: 30,
+      stiffness: 200,
+      damping: 25,
     },
   },
   visible: {
@@ -130,8 +128,8 @@ export const mobileMenuVariants: Variants = {
     opacity: 1,
     transition: {
       type: "spring",
-      stiffness: 300,
-      damping: 30,
+      stiffness: 200,
+      damping: 25,
     },
   },
   exit: {
@@ -139,8 +137,8 @@ export const mobileMenuVariants: Variants = {
     opacity: 0,
     transition: {
       type: "spring",
-      stiffness: 400,
-      damping: 40,
+      stiffness: 250,
+      damping: 30,
     },
   },
 };

@@ -101,7 +101,7 @@ export const TubelightNavbar: React.FC = () => {
                       <motion.div
                         layoutId="lamp"
                         className={`absolute inset-0 w-full rounded-xl -z-10 ${
-                          isDark ? "bg-slate-700/50" : "bg-slate-200"
+                          isDark ? "bg-slate-700/60" : "bg-blue-100/80"
                         }`}
                         initial={false}
                         transition={{
@@ -113,25 +113,25 @@ export const TubelightNavbar: React.FC = () => {
                         <div
                           className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full"
                           style={{
-                            background: isDark ? "linear-gradient(90deg, #00ffff, #00aaff)" : "#f8fafc",
+                            background: isDark ? "linear-gradient(90deg, #00ffff, #00aaff)" : "linear-gradient(90deg, #374151, #1f2937)",
                           }}
                         >
                           <div
                             className="absolute w-12 h-6 rounded-full blur-md -top-2 -left-2"
                             style={{
-                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(0,0,0,0.08)",
+                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.25)",
                             }}
                           />
                           <div
                             className="absolute w-8 h-6 rounded-full blur-md -top-1"
                             style={{
-                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(0,0,0,0.08)",
+                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.2)",
                             }}
                           />
                           <div
                             className="absolute w-4 h-4 rounded-full blur-sm top-0 left-2"
                             style={{
-                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(0,0,0,0.08)",
+                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.15)",
                             }}
                           />
                         </div>

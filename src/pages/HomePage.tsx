@@ -81,7 +81,7 @@ const HomePage: React.FC = () => {
         altText="Здоровье и благополучие с 4Life"
         height="h-screen"
         parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
-        contentClasses="flex flex-col items-center justify-center text-center py-8"
+        contentClasses="flex flex-col items-center justify-center text-center py-8 pt-24"
         skipPreload={true}
       >
         <div className="max-w-4xl px-4 md:px-6 flex flex-col justify-between">

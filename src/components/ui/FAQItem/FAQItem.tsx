@@ -38,17 +38,14 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, answer, index, isOpen = fal
       transition={{ delay: index * 0.08, duration: 0.5 }}
       className="relative group mb-4"
     >
-      {/* Основной контейнер */}
-      <div className="relative bg-black/30 backdrop-blur-sm rounded-2xl border border-cyan-400/20 overflow-hidden group-hover:border-cyan-400/40 transition-all duration-500">
+      {/* Оптимизированный контейнер для мобильных */}
+      <div className="relative bg-black/30 rounded-2xl border border-cyan-400/20 overflow-hidden group-hover:border-cyan-400/40 transition-all duration-300">
         
-        {/* Неоновые углы */}
-        <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-cyan-400/60" />
-        <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-cyan-400/60" />
-        <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-cyan-400/60" />
-        <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-cyan-400/60" />
-        
-        {/* Градиентный фон */}
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Упрощенные углы для лучшей производительности */}
+        <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-cyan-400/40" />
+        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-cyan-400/40" />
+        <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-cyan-400/40" />
+        <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-cyan-400/40" />
         
         {/* Заголовок */}
         <button
@@ -108,8 +105,8 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, answer, index, isOpen = fal
           )}
         </AnimatePresence>
         
-        {/* Пульсирующий эффект */}
-        <div className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        {/* Упрощенный эффект для мобильных */}
+        <div className="absolute inset-0 bg-cyan-400/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     </motion.div>
   );

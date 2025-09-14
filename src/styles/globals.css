@@ -474,6 +474,88 @@ html {
   will-change: transform;
 }
 
+/* ===== AWWWARDS 2025 HEADER OPTIMIZATIONS ===== */
+/* Максимальная производительность хедера */
+.header-optimized {
+  contain: layout style paint;
+  isolation: isolate;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+}
+
+/* Sci-fi эффекты для хедера */
+.header-glow {
+  position: relative;
+}
+
+.header-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  animation: border-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes border-glow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.8; }
+}
+
+/* Оптимизация backdrop-blur */
+@supports (backdrop-filter: blur(12px)) {
+  .header-blur {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+@supports not (backdrop-filter: blur(12px)) {
+  .header-blur {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  
+  .dark .header-blur {
+    background-color: rgba(15, 23, 42, 0.95);
+  }
+}
+
+/* Мобильная оптимизация */
+@media (max-width: 767px) {
+  .header-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .header-glow::before {
+    animation-duration: 4s;
+  }
+}
+
+/* Высокопроизводительные переходы */
+.header-transition {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* Принудительное GPU-ускорение */
+.force-gpu {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  contain: layout style paint;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -485,7 +567,9 @@ html {
   .section-transition,
   .card-hover-effect,
   .grid-wrap,
-  .grid__item {
+  .grid__item,
+  .header-transition,
+  .header-glow::before {
     animation: none !important;
     transition: none !important;
     transform: none !important;

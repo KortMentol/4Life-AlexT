@@ -1,23 +1,21 @@
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { Moon, Sun } from "lucide-react";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 import { headerVariants, logoVariants } from "@/animations/headerAnimations";
+import TextShineEffect from "@/components/effects/TextShineEffect";
+import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 import { useTransition } from "@/context";
 import { useIsMobile, useNativeScroll, useTheme } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
+import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
-import HeaderComets from "@/components/effects/HeaderComets";
-import TextShineEffect from "@/components/effects/TextShineEffect";
-import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 
 // Logo imports
 import logoLight from "@/assets/images/brand/4life-logo-light.svg";
 import logoDark from "@/assets/images/brand/4life-logo.svg";
-
-
 
 interface HeaderProps {
   isMenuOpen: boolean;
@@ -33,17 +31,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const isMobile = useIsMobile();
 
   const headerRef = useRef<HTMLElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
-
-  useLayoutEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
-    }
-  }, []);
 
   const { headerY, forceShowHeader } = useNativeScroll({
-    headerHeight,
-    topOffset: 8,
     disabled: isMenuOpen,
   });
 
@@ -98,7 +87,14 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   };
 
-  // ... остальной JSX код хедера остается без изменений ...
+  // Мемоизация CSS переменных для производительности
+  const cssVars = useMemo(
+    () => ({
+      "--header-glow-rgb": isDark ? "6, 182, 212" : "148, 163, 184",
+    }),
+    [isDark]
+  );
+
   return (
     <motion.header
       ref={headerRef}
@@ -106,11 +102,46 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       variants={headerVariants}
       initial="visible"
       animate="visible"
-      style={{ y: headerY }}
-      className={`fixed left-0 right-0 mx-auto w-full max-w-7xl z-40 top-2 py-2 md:py-2 px-4 md:px-6 rounded-full border shadow-lg ${isDark ? "bg-neutral-900/80 border-cyan-400/20 backdrop-blur-md" : "bg-white/80 border-slate-200 backdrop-blur-md"}`}
+      style={{
+        y: headerY,
+        ...cssVars,
+      }}
+      className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >
-      <HeaderComets />
-      <div className="container max-w-7xl mx-auto px-4 relative z-10">
+      {/* Энергетические линии премиум качества */}
+      <div
+        className={`header-energy-line header-energy-line--top ${
+          isDark ? "header-energy-line--dark-top" : "header-energy-line--light-top"
+        }`}
+      />
+      <div
+        className={`header-energy-line header-energy-line--bottom ${
+          isDark ? "header-energy-line--dark-bottom" : "header-energy-line--light-bottom"
+        }`}
+      />
+
+      {/* Амбиентное свечение */}
+      <motion.div
+        className="header-ambient-glow header-ambient-glow--primary"
+        animate={{ opacity: [0.4, 0.8, 0.4] }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      <motion.div
+        className="header-ambient-glow header-ambient-glow--secondary"
+        animate={{ opacity: [0.3, 0.7, 0.3] }}
+        transition={{
+          duration: 3.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.5,
+        }}
+      />
+      <div className="header-content">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
             <div className="md:hidden relative z-[100] no-highlight flex items-center">
@@ -118,7 +149,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
             </div>
             <button
               onClick={handleLogoClick}
-              className="hidden md:flex items-center space-x-3 group"
+              className="hidden md:flex items-center space-x-3 group relative"
               aria-label="Главная страница"
             >
               <motion.div
@@ -128,11 +159,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 animate="animate"
                 whileHover="hover"
               >
-                <img
-                  src={isDark ? logoLight : logoDark}
-                  alt="4Life Logo"
-                  className="h-8 w-auto"
-                />
+                <img src={isDark ? logoLight : logoDark} alt="4Life Logo" className="h-8 w-auto relative z-10" />
               </motion.div>
               <motion.div
                 style={{
@@ -141,7 +168,10 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 }}
                 className="flex flex-col items-center"
               >
-                <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
+                <TextShineEffect
+                  text={siteConfig.distributor.name}
+                  className="font-semibold text-sm leading-tight whitespace-nowrap"
+                />
                 <div
                   className={"text-xs font-medium mt-0.5"}
                   style={{
@@ -170,7 +200,10 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                     textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <TextShineEffect text={siteConfig.distributor.name} className="font-semibold text-sm leading-tight" />
+                  <TextShineEffect
+                    text={siteConfig.distributor.name}
+                    className="font-semibold text-sm leading-tight whitespace-nowrap"
+                  />
                   <div
                     className="text-xs font-medium mt-0.5"
                     style={{
