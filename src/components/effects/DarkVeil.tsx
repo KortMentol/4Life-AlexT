@@ -85,7 +85,7 @@ const FallbackBackground = React.memo(() => (
 ));
 FallbackBackground.displayName = "FallbackBackground";
 
-export default function DarkVeil({
+function DarkVeil({
   hueShift = 0,
   noiseIntensity = 0,
   scanlineIntensity = 0,
@@ -96,7 +96,7 @@ export default function DarkVeil({
   isMobile = false,
 }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(wrapperRef, { once: false, margin: "400px" });
+  const isInView = useInView(wrapperRef, { once: false, margin: "50px" });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glObjects = useRef<GlObjects | null>(null);
   const frameId = useRef<number | null>(null);
@@ -181,7 +181,7 @@ export default function DarkVeil({
       // Не уничтожаем glObjects.current здесь, чтобы он был готов к повторному появлению
     };
     // Пустой массив зависимостей гарантирует, что этот эффект запустится только один раз.
-  }, [isMobile, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount, resolutionScale]);
+  }, []);
 
   // --- ИЗМЕНЕНИЕ 2: useEffect для УПРАВЛЕНИЯ АНИМАЦИЕЙ ---
   // Этот эффект зависит от isInView и isWebGLReady. Он только запускает и останавливает
@@ -214,6 +214,7 @@ export default function DarkVeil({
       program.uniforms.uScan.value = scanlineIntensity;
       program.uniforms.uScanFreq.value = scanlineFrequency;
       program.uniforms.uWarp.value = warpAmount;
+      program.uniforms.uIsMobile.value = isMobile ? 1.0 : 0.0;
 
       renderer.render({ scene: mesh });
       frameId.current = requestAnimationFrame(loop);
@@ -274,3 +275,5 @@ export default function DarkVeil({
     </div>
   );
 }
+
+export default React.memo(DarkVeil);

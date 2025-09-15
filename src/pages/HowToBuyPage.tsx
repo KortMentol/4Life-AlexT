@@ -1,7 +1,7 @@
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import {
   buttonVariants,
@@ -283,4 +283,4 @@ const HowToBuyPage = () => {
   );
 };
 
-export default HowToBuyPage;
+export default React.memo(HowToBuyPage);

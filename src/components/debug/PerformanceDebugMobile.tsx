@@ -316,4 +316,4 @@ const PerformanceDebugMobile: React.FC = () => {
   );
 };
 
-export default PerformanceDebugMobile;
+export default React.memo(PerformanceDebugMobile);

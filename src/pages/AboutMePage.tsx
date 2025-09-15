@@ -1,5 +1,6 @@
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
+import React from "react";
 import { Award, BookOpen, Heart, Users } from "lucide-react";
 import { containerVariants, itemVariants } from "@/animations/variants";
 import { CallToAction } from "@/components/sections";
@@ -201,4 +202,4 @@ const AboutMePage: React.FC = () => {
   );
 };
 
-export default AboutMePage;
+export default React.memo(AboutMePage);

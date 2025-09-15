@@ -1,5 +1,6 @@
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
+import React from "react";
 import { FlaskConical, Headphones, TrendingUp } from "lucide-react";
 import { containerVariants, itemVariants } from "@/animations/variants";
 import { CallToAction } from "@/components/sections";
@@ -147,4 +148,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export default React.memo(AboutPage);

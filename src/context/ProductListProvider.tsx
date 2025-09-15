@@ -17,7 +17,7 @@ import React, { useEffect, useState } from "react";
 import { ProductListContext, ProductListContextType, ProductListItem } from "./ProductListContext.helpers";
 import { loadFromStorage, saveToStorage } from "./ProductListUtils";
 
-export const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<ProductListItem[]>(loadFromStorage);
 
   useEffect(() => {
@@ -61,3 +61,8 @@ export const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   return <ProductListContext.Provider value={value}>{children}</ProductListContext.Provider>;
 };
+
+const MemoizedProductListProvider = React.memo(ProductListProvider);
+
+export { MemoizedProductListProvider as ProductListProvider };
+export default MemoizedProductListProvider;

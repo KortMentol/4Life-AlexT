@@ -105,4 +105,4 @@ const ContactPage: React.FC = () => {
   );
 };
 
-export default ContactPage;
+export default React.memo(ContactPage);

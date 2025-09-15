@@ -1,7 +1,7 @@
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
 import { ArrowRight, Award, Clock, DollarSign, Lightbulb } from "lucide-react";
-import { FC } from "react";
+import React, { FC } from "react";
 import { Tilt } from "react-tilt";
 import {
   headingVariants,
@@ -282,4 +282,4 @@ const PartnershipPage: FC<PartnershipPageProps> = () => {
   );
 };
 
-export default PartnershipPage;
+export default React.memo(PartnershipPage);
