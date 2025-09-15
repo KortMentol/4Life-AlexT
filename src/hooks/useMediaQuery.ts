@@ -53,7 +53,7 @@ export const useMediaQuery = (query: string): boolean => {
     };
 
     // Дебаунсим функцию для оптимизации производительности
-    const debouncedHandleChange = debounce(handleChange, 100);
+    const debouncedHandleChange = debounce(handleChange, 300);
 
     // Создаем медиа-запрос
     const matchMedia = window.matchMedia(query);

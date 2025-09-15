@@ -44,7 +44,7 @@ interface AuroraTextProps {
  *   <AuroraText>с научным подходом4Life</AuroraText>
  * </h1>
  */
-export const AuroraText = memo(
+const AuroraTextComponent = memo(
   ({
     children,
     className = "",
@@ -75,4 +75,6 @@ export const AuroraText = memo(
   },
 );
 
-AuroraText.displayName = "AuroraText";
+AuroraTextComponent.displayName = "AuroraText";
+
+export const AuroraText = React.memo(AuroraTextComponent);

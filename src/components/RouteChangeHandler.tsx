@@ -1,5 +1,5 @@
 import { lenis, updateScroll } from "@/lib/lenis";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
 // ИНТЕРФЕЙС С НЕОБЯЗАТЕЛЬНЫМИ ПРОПСАМИ
@@ -234,4 +234,4 @@ const RouteChangeHandler: React.FC<RouteChangeHandlerProps> = ({
   return null;
 };
 
-export default RouteChangeHandler;
+export default React.memo(RouteChangeHandler);

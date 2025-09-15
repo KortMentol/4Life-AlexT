@@ -197,4 +197,4 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   );
 };
 
-export default ParallaxSection;
+export default React.memo(ParallaxSection);

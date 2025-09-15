@@ -1,6 +1,6 @@
 // src/main.tsx
 
-import React from "react";
+// import React from "react"; - <React.StrictMode> отключен ниже
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
@@ -50,9 +50,9 @@ const initApp = () => {
   );
 
   ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <RouterProvider router={router} />
-    </React.StrictMode>
+    //<React.StrictMode> - временно отключен
+    <RouterProvider router={router} />
+    //</React.StrictMode> - временно отключен
   );
 
   // Dispatch event to signal app is mounted

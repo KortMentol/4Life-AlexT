@@ -3,7 +3,7 @@ import SciFiThemeToggle from "@/components/ui/SciFiThemeToggle";
 import { lenis } from "@/lib/lenis";
 import { mainNav } from "@/site-config/site";
 import { gsap } from "gsap";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./style.css";
 
@@ -321,4 +321,4 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
   );
 };
 
-export default TheodoreMenu;
+export default React.memo(TheodoreMenu);

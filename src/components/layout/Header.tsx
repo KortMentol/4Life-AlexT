@@ -239,4 +239,4 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);
