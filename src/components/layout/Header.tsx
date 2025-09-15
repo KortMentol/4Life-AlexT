@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   useEffect(() => {
     if (!headerRef.current) return;
     headerTimelineRef.current = gsap.timeline({ paused: true }).to(headerRef.current, {
-      y: "-110%",
+      y: "-120%",
       duration: 0.8,
       ease: "power4.inOut",
     });
@@ -90,7 +90,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   // Мемоизация CSS переменных для производительности
   const cssVars = useMemo(
     () => ({
-      "--header-glow-rgb": isDark ? "6, 182, 212" : "148, 163, 184",
+      "--header-glow-rgb": isDark ? "0, 212, 255" : "59, 130, 246",
     }),
     [isDark]
   );
@@ -108,39 +108,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       }}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >
-      {/* Энергетические линии премиум качества */}
-      <div
-        className={`header-energy-line header-energy-line--top ${
-          isDark ? "header-energy-line--dark-top" : "header-energy-line--light-top"
-        }`}
-      />
-      <div
-        className={`header-energy-line header-energy-line--bottom ${
-          isDark ? "header-energy-line--dark-bottom" : "header-energy-line--light-bottom"
-        }`}
-      />
 
-      {/* Амбиентное свечение */}
-      <motion.div
-        className="header-ambient-glow header-ambient-glow--primary"
-        animate={{ opacity: [0.4, 0.8, 0.4] }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      <motion.div
-        className="header-ambient-glow header-ambient-glow--secondary"
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{
-          duration: 3.5,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1.5,
-        }}
-      />
       <div className="header-content">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start w-full md:w-auto md:flex-1">

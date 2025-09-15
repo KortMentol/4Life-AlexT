@@ -70,7 +70,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
       <div
         className={`relative z-10 h-full min-h-[420px] ${
           opaque ? "bg-white dark:bg-gray-900" : "bg-white/80 dark:bg-gray-900/80"
-        } rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70 card-hover-effect hover:shadow-2xl transition-all duration-300 flex flex-col`}
+        } rounded-none lg:rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70 card-hover-effect hover:shadow-2xl transition-all duration-300 flex flex-col`}
       >
         <Link to={product.link}>
           <img
