@@ -17,21 +17,7 @@
       rel="stylesheet"
     />
 
-    <!-- Early sentinel: ensures first Back stays within this page so we can close the menu instead of leaving the site -->
-    <script>
-      (function () {
-        try {
-          var st = window.history.state || {};
-          if (!st || !st.__sentinel) {
-            // mark current entry and create a duplicate on top
-            window.history.replaceState(Object.assign({}, st, { __sentinel: true }), document.title);
-            window.history.pushState(Object.assign({}, st, { __sentinel: true }), document.title);
-          }
-        } catch (e) {
-          /* noop */
-        }
-      })();
-    </script>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>

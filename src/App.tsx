@@ -7,12 +7,11 @@ import Layout from "@/components/layout/Layout";
 import TheodoreMenu from "@/components/layout/TheodoreMenu";
 import RouteChangeHandler from "@/components/RouteChangeHandler";
 import { ProductListProvider } from "@/context/ProductListProvider";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
 import { scrollToTop } from "@/utils/navigationUtils";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Link, Route, Routes, useNavigate } from "react-router-dom";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 // Lazy-loaded компоненты страниц
 import HomePage from "@/pages/HomePage";
@@ -26,10 +25,8 @@ const HowToBuyPage = React.lazy(() => import("@/pages/HowToBuyPage"));
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const navigate = useNavigate();
-  const menuStateActiveRef = useRef(false);
-  const ownPopRef = useRef(false);
+  const location = useLocation();
 
   useEffect(() => {
     const checkDevice = () => setIsMobile(window.innerWidth < 768);
@@ -37,72 +34,49 @@ function App() {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  useScrollRestoration();
-
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
-
-  useEffect(() => {
-    try {
-      if (isMenuOpen) {
-        const st = window.history.state || {};
-        if (!(st as any).__menuOpen) {
-          window.history.pushState({ ...st, __menuOpen: true }, "");
-        }
-        menuStateActiveRef.current = true;
-      } else {
-        if (menuStateActiveRef.current) {
-          ownPopRef.current = true;
-          window.history.back();
-        }
-      }
-    } catch {
-      // ignore
+  // --- НАДЕЖНАЯ ЛОГИКА УПРАВЛЕНИЯ МЕНЮ ---
+  const closeMenu = useCallback(() => {
+    if (location.hash === "#menu") {
+      navigate(-1);
+    } else {
+      setIsMenuOpen(false);
     }
-  }, [isMenuOpen]);
+  }, [navigate, location.hash]);
 
   useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const st = (e.state as any) || {};
+    const isMenuInUrl = location.hash === "#menu";
+    if (isMenuInUrl !== isMenuOpen) {
+      setIsMenuOpen(isMenuInUrl);
+    }
+  }, [location.hash, isMenuOpen]);
 
-      if (ownPopRef.current) {
-        ownPopRef.current = false;
-        e.stopImmediatePropagation();
-        menuStateActiveRef.current = false;
-        return;
+  const toggleMenu = useCallback(() => {
+    if (isMenuOpen) {
+      closeMenu();
+    } else {
+      setIsMenuOpen(true);
+      if (location.hash !== "#menu") {
+        navigate(`${location.pathname}${location.search}#menu`);
       }
-
-      if (menuStateActiveRef.current && isMenuOpen) {
-        e.stopImmediatePropagation();
-        menuStateActiveRef.current = false;
-        closeMenu();
-        return;
-      }
-
-      if (st.__menuOpen === true && !isMenuOpen) {
-        e.stopImmediatePropagation();
-        menuStateActiveRef.current = true;
-        setIsMenuOpen(true);
-        return;
-      }
-    };
-
-    window.addEventListener("popstate", onPop, { capture: true });
-    return () => window.removeEventListener("popstate", onPop, true);
-  }, [isMenuOpen, closeMenu]);
+    }
+  }, [isMenuOpen, closeMenu, navigate, location.pathname, location.search, location.hash]);
 
   const navigateFromMenu = (href: string, isSame: boolean) => {
+    if (isMenuOpen) {
+      navigate(-1);
+    }
+
     if (isSame) {
       scrollToTop({ immediate: false });
     } else {
-      navigate(href);
+      setTimeout(() => navigate(href), 50);
     }
-    closeMenu();
   };
+  // --- КОНЕЦ ЛОГИКИ МЕНЮ ---
 
   useEffect(() => {
     if (isMenuOpen) {
       lenis.stop();
-      return;
     } else {
       lenis.start();
     }
@@ -127,7 +101,6 @@ function App() {
       if (isMenuOpen || scrollDirectionDetermined) return;
       const touch = e.touches[0];
       if (!touch) return;
-
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
 
@@ -182,9 +155,9 @@ function App() {
 
   return (
     <ProductListProvider>
-      <RouteChangeHandler isMenuOpen={isMenuOpen} closeMenu={closeMenu} />
+      <RouteChangeHandler />
       <Suspense fallback={null}>
-        <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+        <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />
         <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -229,7 +202,6 @@ function App() {
         </Routes>
       </Suspense>
       {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
-      {/* Старый оверлей для перехода удален */}
     </ProductListProvider>
   );
 }
