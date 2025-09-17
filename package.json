@@ -12,7 +12,12 @@
     "lint:watch": "esw --ext .js,.jsx,.ts,.tsx --format=codeframe --watch src",
     "preview": "vite preview",
     "preview:local": "vite preview --host 192.168.0.11 --port 4173",
-    "dev:local": "vite --host 192.168.0.11 --port 3000"
+    "dev:local": "vite --host 192.168.0.11 --port 3000",
+    "clean": "rmdir /s /q node_modules .vite 2>nul & npm install",
+    "clean:cache": "rmdir /s /q .vite 2>nul",
+    "clean:modules": "rmdir /s /q node_modules 2>nul & npm install",
+    "fresh": "npm run clean & npm run dev",
+    "reset": "npm run clean & npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

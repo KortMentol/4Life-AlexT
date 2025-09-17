@@ -7,32 +7,117 @@ import { useTheme } from "@/hooks/useTheme";
 
 const ScrollToTopButton: React.FC = () => {
   const isMobile = useIsMobile();
-  
-  // 🚫 ВРЕМЕННО ОТКЛЮЧЕНО НА МОБИЛЬНЫХ ДЛЯ ТЕСТА ПРОИЗВОДИТЕЛЬНОСТИ
-  if (isMobile) {
-    return null;
-  }
-  
   const [isVisible, setIsVisible] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const prevScrollPos = useRef(0);
 
-  // Состояния для десктопной версии
+  // === МОБИЛЬНАЯ ВЕРСИЯ: УЛЬТРА-ОПТИМИЗИРОВАННАЯ ===
+  if (isMobile) {
+    const timeoutRef = useRef<number | null>(null);
+
+    useEffect(() => {
+      let rafId: number;
+      let lastCheck = 0;
+      
+      const handleScroll = () => {
+        const now = performance.now();
+        if (now - lastCheck < 250) return; // Агрессивный throttle для мобильных
+        lastCheck = now;
+        
+        const currentScrollPos = window.scrollY;
+        const isScrollingUp = prevScrollPos.current > currentScrollPos;
+        prevScrollPos.current = currentScrollPos;
+
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const maxScroll = scrollHeight - clientHeight;
+        const scrollPercentage = maxScroll > 0 ? currentScrollPos / maxScroll : 0;
+
+        // Показывать после 20% прокрутки при скролле вверх
+        const shouldShow = scrollPercentage > 0.2 && isScrollingUp;
+        
+        if (shouldShow !== isVisible) {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          // Дебаунс для стабильности
+          timeoutRef.current = window.setTimeout(() => {
+            setIsVisible(shouldShow);
+          }, 100);
+        }
+      };
+      
+      let ticking = false;
+      const optimizedScroll = () => {
+        if (!ticking) {
+          rafId = requestAnimationFrame(() => {
+            handleScroll();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      window.addEventListener("scroll", optimizedScroll, { passive: true });
+      return () => {
+        window.removeEventListener("scroll", optimizedScroll);
+        if (rafId) cancelAnimationFrame(rafId);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
+    }, [isVisible]);
+
+    const handleMobileClick = () => {
+      lenisScrollTo(0, { duration: 1.2 });
+    };
+
+    return (
+      <button
+        onClick={handleMobileClick}
+        className={`fixed z-50 bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transform-gpu transition-all duration-300 ease-out ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+        } ${
+          isDark 
+            ? "bg-gradient-to-br from-violet-600/90 to-indigo-700/90 border border-violet-400/30" 
+            : "bg-gradient-to-br from-blue-500/90 to-indigo-600/90 border border-blue-300/30"
+        } backdrop-blur-sm shadow-lg active:scale-95`}
+        style={{ 
+          willChange: 'transform, opacity',
+          backfaceVisibility: 'hidden'
+        }}
+        aria-label="Прокрутить вверх"
+      >
+        {/* Sci-fi внутреннее свечение */}
+        <div className={`absolute inset-1 rounded-full opacity-20 ${
+          isDark ? "bg-violet-400" : "bg-blue-300"
+        }`} />
+        
+        {/* Стрелка */}
+        <ArrowUp
+          size={18}
+          strokeWidth={2.5}
+          className="text-white relative z-10"
+          style={{
+            filter: `drop-shadow(0 0 2px ${
+              isDark ? 'rgba(139, 92, 246, 0.6)' : 'rgba(59, 130, 246, 0.6)'
+            })`
+          }}
+        />
+      </button>
+    );
+  }
+
+  // === ДЕСКТОПНАЯ ВЕРСИЯ: ПРОДВИНУТАЯ С ЭФФЕКТАМИ ===
   const [isActivated, setIsActivated] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const particlesRef = useRef<HTMLDivElement>(null);
   const progressIntervalRef = useRef<number | null>(null);
 
-  // Оптимизированный эффект для отслеживания скролла
   useEffect(() => {
     let rafId: number;
     let lastCheck = 0;
     
     const handleScroll = () => {
       const now = performance.now();
-      // Оптимизация для десктопа
-      if (now - lastCheck < 100) return;
+      if (now - lastCheck < 100) return; // Оптимизация для десктопа
       lastCheck = now;
       
       const currentScrollPos = window.scrollY;
@@ -44,7 +129,7 @@ const ScrollToTopButton: React.FC = () => {
       const maxScroll = scrollHeight - clientHeight;
       const scrollPercentage = maxScroll > 0 ? currentScrollPos / maxScroll : 0;
 
-      setIsVisible(scrollPercentage > 0.3 && isScrollingUp);
+      setIsVisible(scrollPercentage > 0.2 && isScrollingUp); // 20% для десктопа
     };
     
     let ticking = false;
@@ -65,7 +150,6 @@ const ScrollToTopButton: React.FC = () => {
     };
   }, []);
 
-  // Очистка интервала
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) {
@@ -74,17 +158,13 @@ const ScrollToTopButton: React.FC = () => {
     };
   }, []);
 
-  // Мобильная версия отключена
-
-  // Продвинутый клик для десктопа с частицами
   const createParticles = () => {
     if (!particlesRef.current) return;
     const container = particlesRef.current;
     
-    // Очищаем активные частицы
     container.querySelectorAll('.particle').forEach(p => p.remove());
     
-    const particleCount = 12; // Меньше частиц для лучшей производительности
+    const particleCount = 12;
     
     for (let i = 0; i < particleCount; i++) {
       const particle = document.createElement("div");
@@ -95,7 +175,6 @@ const ScrollToTopButton: React.FC = () => {
       const duration = 0.5 + Math.random() * 0.4;
       const delay = Math.random() * 0.1;
       
-      // GPU ускорение
       particle.style.cssText = `
         position: absolute;
         width: ${size}px;
@@ -115,7 +194,6 @@ const ScrollToTopButton: React.FC = () => {
         particle.style.boxShadow = `0 0 ${size * 2}px rgba(59, 130, 246, 0.6)`;
       }
       
-      // Оптимизированная анимация
       particle.animate(
         [
           { transform: `translate3d(${xPos}px, 0px, 0px)`, opacity: 0.9 },
@@ -131,7 +209,6 @@ const ScrollToTopButton: React.FC = () => {
       
       container.appendChild(particle);
       
-      // Автоочистка
       setTimeout(() => {
         if (particle.parentNode) {
           particle.remove();
@@ -164,7 +241,6 @@ const ScrollToTopButton: React.FC = () => {
     lenisScrollTo(0, { duration: scrollDuration / 1000 });
   };
 
-  // Варианты анимации для десктопа
   const buttonVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.8 },
     visible: {
@@ -184,7 +260,6 @@ const ScrollToTopButton: React.FC = () => {
     },
   };
 
-  // Оптимизированная пульсация для десктопа
   const pulseVariants = {
     initial: { scale: 0.95, opacity: 0.6 },
     animate: isVisible ? {
@@ -194,9 +269,6 @@ const ScrollToTopButton: React.FC = () => {
     } : { scale: 0.95, opacity: 0.6 },
   };
 
-  // МОБИЛЬНАЯ ВЕРСИЯ ОТКЛЮЧЕНА ДЛЯ ТЕСТА
-
-  // ДЕСКТОПНАЯ ВЕРСИЯ - красивая и оптимизированная
   return (
     <AnimatePresence>
       {isVisible && (
@@ -216,7 +288,6 @@ const ScrollToTopButton: React.FC = () => {
           aria-label="Прокрутить вверх"
           style={{ willChange: 'transform' }}
         >
-          {/* Пульсирующий blur эффект */}
           <motion.div
             className={`absolute inset-0 rounded-full ${
               isDark ? "bg-indigo-600" : "bg-blue-500"
@@ -227,7 +298,6 @@ const ScrollToTopButton: React.FC = () => {
             style={{ opacity: 0.15, willChange: 'transform, opacity' }}
           />
           
-          {/* Дополнительное свечение при hover */}
           <motion.div
             className={`absolute inset-0 rounded-full ${
               isDark ? "bg-violet-400" : "bg-blue-300"
@@ -236,7 +306,6 @@ const ScrollToTopButton: React.FC = () => {
           />
           
           <div className="absolute inset-0.5 rounded-full overflow-hidden backdrop-blur-sm">
-            {/* Радиальный градиент */}
             <div
               className={`absolute inset-0 opacity-30 ${
                 isDark 
@@ -245,7 +314,6 @@ const ScrollToTopButton: React.FC = () => {
               }`}
             />
             
-            {/* Движущаяся полоска */}
             <div className="absolute inset-0 overflow-hidden">
               <motion.div
                 className={`absolute h-1 w-full ${
@@ -256,10 +324,8 @@ const ScrollToTopButton: React.FC = () => {
               />
             </div>
             
-            {/* Граница */}
             <div className="absolute inset-0 rounded-full border border-white/20" />
             
-            {/* Прогресс-бар при активации */}
             {isActivated && (
               <svg
                 className="absolute inset-0 w-full h-full"
@@ -288,14 +354,12 @@ const ScrollToTopButton: React.FC = () => {
               </svg>
             )}
             
-            {/* Контейнер для частиц */}
             <div
               ref={particlesRef}
               className="absolute inset-0 overflow-hidden rounded-full"
             />
           </div>
           
-          {/* Стрелка */}
           <div className="relative z-10 flex items-center justify-center">
             <motion.div
               animate={isActivated ? { y: [-3, -8, -3] } : { y: 0 }}
