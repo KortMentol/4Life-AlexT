@@ -15,7 +15,7 @@ import { LenisOptions, LenisScrollToOptions, Lenis as LenisType } from "./lenis.
 // Определяем мобильное устройство (аналогично useIsMobile хуку)
 const isMobile = () => {
   if (typeof window === "undefined") return false;
-  return window.innerWidth <= 767; // Как в useIsMobile хуке
+  return window.innerWidth <= 767;
 };
 
 // 1. Создаем и экспортируем ЕДИНСТВЕННЫЙ экземпляр Lenis
@@ -25,6 +25,7 @@ export const lenis = new Lenis({
   duration: isMobile() ? 1.5 : 2.2, // mobile: 1.5, desktop: 1.7
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Плавное замедление
   smoothWheel: true,
+  normalizeWheel: true,
   wheelMultiplier: 1.0, // Стандартная скорость колеса
   touchMultiplier: 2.5, // Немного ускорить скролл на тач-устройствах
   infinite: false,

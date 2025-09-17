@@ -1,0 +1,57 @@
+/**
+ * @module src/styles/image-rendering.css
+ * @description Глобальные CSS правила для устранения пикселизации изображений во всех браузерах
+ * @author Kort
+ * @version 1.0.0
+ * @usage Импортировать в main.tsx или App.tsx
+ */
+
+/* 🎯 УНИВЕРСАЛЬНОЕ РЕШЕНИЕ для всех браузеров */
+img,
+video,
+canvas,
+svg,
+[style*="background-image"] {
+  /* Современный стандарт */
+  image-rendering: auto;
+  image-rendering: smooth;
+
+  /* Webkit (Chrome, Safari, Edge) */
+  -webkit-image-rendering: auto;
+  -webkit-image-rendering: smooth;
+
+  /* Firefox */
+  -moz-image-rendering: auto;
+
+  /* IE/Edge Legacy */
+  -ms-image-rendering: auto;
+
+  /* Дополнительная оптимизация для высокого DPI */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+
+  /* Приоритет: smooth > auto > crisp-edges */
+  image-rendering: smooth;
+}
+
+/* 🔧 Специально для background-image элементов */
+.bg-cover,
+.bg-contain,
+.bg-center,
+[class*="bg-"] {
+  image-rendering: auto;
+  -webkit-image-rendering: auto;
+  -moz-image-rendering: auto;
+  -ms-image-rendering: auto;
+}
+
+/* 🎨 Для анимированных/трансформируемых изображений */
+.will-change-transform img,
+.will-change-transform [style*="background-image"],
+[style*="transform"] img,
+[style*="transform"] [style*="background-image"] {
+  image-rendering: smooth;
+  -webkit-image-rendering: smooth;
+  -moz-image-rendering: auto;
+}

@@ -10,8 +10,8 @@
  * <MorphingVideoSection />
  */
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Media imports
 import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
@@ -83,7 +83,8 @@ const FloatingVideo: React.FC<{
   const [canPlay, setCanPlay] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
 
-  const isMobile = window.innerWidth < 768;
+  // 🔧 ИСПРАВЛЕНИЕ: Мемоизируем проверку мобильного устройства
+  const isMobile = useMemo(() => window.innerWidth < 768, []);
 
   // Отдельные useScroll для каждого блока с разными настройками для ПК и мобильных
   const { scrollYProgress: block1Progress } = useScroll({
@@ -101,116 +102,127 @@ const FloatingVideo: React.FC<{
     offset: isMobile ? ["start +65%", "end start"] : ["start +50%", "end start"],
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-  // 📱 НАСТРОЙКИ ПЛАВНОСТИ (только для мобильных)
-  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-  // Здесь можно включить пружину для сглаживания (сейчас отключена для точности)
-  const smoothBlock1Progress = block1Progress;
-  const smoothBlock2Progress = block2Progress;
-  const smoothBlock3Progress = block3Progress;
-
-  // Логика движения видео
-  const y = useTransform([smoothBlock1Progress, smoothBlock2Progress, smoothBlock3Progress], (values: number[]) => {
-    const [p1 = 0, p2 = 0, p3 = 0] = values;
-
-    if (isMobile) {
-      // 📱 МОБИЛЬНАЯ ЛОГИКА: Медленное движение 1:1 к скроллу
-      // Блок 1
-      if (p1 > 0.05 && p1 <= 0.95) {
-        if (p1 <= 0.4) {
-          const localProgress = (p1 - 0.05) / 0.35; // 35% блока на появление
-          return `${100 - localProgress * 100}vh`;
-        }
-        if (p1 > 0.8) {
-          const localProgress = (p1 - 0.8) / 0.15; // 25% блока на уход
-          return `${-localProgress * 100}vh`;
-        }
-        return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
-      }
-
-      // Блок 2
-      if (p2 > 0.05 && p2 <= 0.95) {
-        if (p2 <= 0.4) {
-          const localProgress = (p2 - 0.05) / 0.35; // 35% блока на появление
-          return `${100 - localProgress * 100}vh`;
-        }
-        if (p2 > 0.8) {
-          const localProgress = (p2 - 0.8) / 0.15; // 25% блока на уход
-          return `${-localProgress * 100}vh`;
-        }
-        return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
-      }
-
-      // Блок 3
-      if (p3 > 0.05 && p3 <= 0.95) {
-        if (p3 <= 0.4) {
-          const localProgress = (p3 - 0.05) / 0.35; // 35% блока на появление
-          return `${100 - localProgress * 100}vh`;
-        }
-        if (p3 > 0.8) {
-          const localProgress = (p3 - 0.8) / 0.15; // 25% блока на уход
-          return `${-localProgress * 100}vh`;
-        }
-        return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
-      }
-    } else {
-      // 🖥️ ПК ЛОГИКА: Оригинальная быстрая логика
-      // Блок 1
-      if (p1 > 0.1 && p1 <= 0.9) {
-        if (p1 <= 0.3) {
-          const localProgress = (p1 - 0.1) / 0.2;
-          return `${100 - localProgress * 100}vh`;
-        }
-        if (p1 > 0.7) {
-          const localProgress = (p1 - 0.7) / 0.2;
-          return `${-localProgress * 100}vh`;
-        }
-        return "0vh";
-      }
-
-      // Блок 2
-      if (p2 > 0.1 && p2 <= 0.9) {
-        if (p2 <= 0.3) {
-          const localProgress = (p2 - 0.1) / 0.2;
-          return `${100 - localProgress * 100}vh`;
-        }
-        if (p2 > 0.7) {
-          const localProgress = (p2 - 0.7) / 0.2;
-          return `${-localProgress * 100}vh`;
-        }
-        return "0vh";
-      }
-
-      // Блок 3
-      if (p3 > 0.1 && p3 <= 0.9) {
-        if (p3 <= 0.3) {
-          const localProgress = (p3 - 0.1) / 0.2;
-          return `${100 - localProgress * 100}vh`;
-        }
-        if (p3 > 0.7) {
-          const localProgress = (p3 - 0.7) / 0.2;
-          return `${-localProgress * 100}vh`;
-        }
-        return "0vh";
-      }
-    }
-
-    return "100vh";
+  const smoothBlock1Progress = useSpring(block1Progress, {
+    stiffness: 300,
+    damping: 30,
+    mass: 0.8,
+  });
+  const smoothBlock2Progress = useSpring(block2Progress, {
+    stiffness: 300,
+    damping: 30,
+    mass: 0.8,
+  });
+  const smoothBlock3Progress = useSpring(block3Progress, {
+    stiffness: 300,
+    damping: 30,
+    mass: 0.8,
   });
 
-  // Opacity для каждого блока с раздельной логикой для ПК и мобильных
-  const opacity = useTransform(
-    [smoothBlock1Progress, smoothBlock2Progress, smoothBlock3Progress],
+  const calculatePosition = useCallback(
+    (values: number[]) => {
+      const [p1 = 0, p2 = 0, p3 = 0] = values;
+
+      if (isMobile) {
+        // 📱 МОБИЛЬНАЯ ЛОГИКА.
+        // Блок 1
+        if (p1 > 0.05 && p1 <= 0.95) {
+          if (p1 <= 0.4) {
+            const localProgress = (p1 - 0.05) / 0.35; // 35% блока на появление
+            return `${100 - localProgress * 100}vh`;
+          }
+          if (p1 > 0.8) {
+            const localProgress = (p1 - 0.8) / 0.15; // 25% блока на уход
+            return `${-localProgress * 100}vh`;
+          }
+          return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
+        }
+
+        // Блок 2
+        if (p2 > 0.05 && p2 <= 0.95) {
+          if (p2 <= 0.4) {
+            const localProgress = (p2 - 0.05) / 0.35; // 35% блока на появление
+            return `${100 - localProgress * 100}vh`;
+          }
+          if (p2 > 0.8) {
+            const localProgress = (p2 - 0.8) / 0.15; // 25% блока на уход
+            return `${-localProgress * 100}vh`;
+          }
+          return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
+        }
+
+        // Блок 3
+        if (p3 > 0.05 && p3 <= 0.95) {
+          if (p3 <= 0.4) {
+            const localProgress = (p3 - 0.05) / 0.35; // 35% блока на появление
+            return `${100 - localProgress * 100}vh`;
+          }
+          if (p3 > 0.8) {
+            const localProgress = (p3 - 0.8) / 0.15; // 25% блока на уход
+            return `${-localProgress * 100}vh`;
+          }
+          return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
+        }
+      } else {
+        // 🖥️ ПК ЛОГИКА.
+        // Блок 1
+        if (p1 > 0.1 && p1 <= 0.9) {
+          if (p1 <= 0.3) {
+            const localProgress = (p1 - 0.1) / 0.2;
+            return `${100 - localProgress * 100}vh`;
+          }
+          if (p1 > 0.7) {
+            const localProgress = (p1 - 0.7) / 0.2;
+            return `${-localProgress * 100}vh`;
+          }
+          return "0vh";
+        }
+
+        // Блок 2
+        if (p2 > 0.1 && p2 <= 0.9) {
+          if (p2 <= 0.3) {
+            const localProgress = (p2 - 0.1) / 0.2;
+            return `${100 - localProgress * 100}vh`;
+          }
+          if (p2 > 0.7) {
+            const localProgress = (p2 - 0.7) / 0.2;
+            return `${-localProgress * 100}vh`;
+          }
+          return "0vh";
+        }
+
+        // Блок 3
+        if (p3 > 0.1 && p3 <= 0.9) {
+          if (p3 <= 0.3) {
+            const localProgress = (p3 - 0.1) / 0.2;
+            return `${100 - localProgress * 100}vh`;
+          }
+          if (p3 > 0.7) {
+            const localProgress = (p3 - 0.7) / 0.2;
+            return `${-localProgress * 100}vh`;
+          }
+          return "0vh";
+        }
+      }
+
+      return "100vh";
+    },
+    [isMobile]
+  );
+
+  // Логика движения видео с оптимизированными вычислениями
+  const y = useTransform([smoothBlock1Progress, smoothBlock2Progress, smoothBlock3Progress], calculatePosition);
+
+  const calculateOpacity = useCallback(
     (values: number[]) => {
       const [p1 = 0, p2 = 0, p3 = 0] = values;
 
       const processOpacity = (p: number) => {
         if (isMobile) {
-          // 📱 НОВАЯ ЛОГИКА ПРОЗРАЧНОСТИ ДЛЯ МОБИЛЬНЫХ
           if (p > 0.05 && p <= 0.95) {
             // Появление происходит на первых 35% пути (до p = 0.4)
-            if (p <= 0.25) { // Становится непрозрачным на полпути к центру
-              return (p - 0.05) / 0.20;
+            if (p <= 0.25) {
+              // Становится непрозрачным на полпути к центру
+              return (p - 0.05) / 0.2;
             }
             // Исчезновение начинается, когда видео двигается вверх (p > 0.8)
             if (p > 0.8) {
@@ -219,7 +231,6 @@ const FloatingVideo: React.FC<{
             return 1; // Полностью видимо
           }
         } else {
-          // 🖥️ СТАРАЯ ЛОГИКА ПРОЗРАЧНОСТИ ДЛЯ ПК (работает идеально)
           if (p > 0.1 && p <= 0.9) {
             if (p <= 0.2) return (p - 0.1) / 0.1;
             if (p >= 0.7) return 1 - (p - 0.7) / 0.2;
@@ -236,8 +247,12 @@ const FloatingVideo: React.FC<{
 
       // Возвращаем максимальное значение, чтобы обеспечить плавный переход
       return Math.max(opacity1, opacity2, opacity3);
-    }
+    },
+    [isMobile]
   );
+
+  // Opacity для каждого блока с оптимизированными вычислениями
+  const opacity = useTransform([smoothBlock1Progress, smoothBlock2Progress, smoothBlock3Progress], calculateOpacity);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -309,7 +324,9 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
       trigger: triggerRef.current,
       start: "top bottom",
       end: "bottom top",
-      scrub: true,
+      scrub: 0.5,
+      ease: "none",
+      invalidateOnRefresh: true,
     };
 
     switch (type) {
@@ -383,15 +400,29 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
     };
   }, [type, triggerRef]);
 
-  const imageCount = window.innerWidth >= 1024 ? 20 : 8;
-  const images = Array.from({ length: imageCount }, (_, i) => `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`);
+  const imageCount = useMemo(() => (window.innerWidth >= 1024 ? 20 : 8), []);
+  const images = useMemo(
+    () => Array.from({ length: imageCount }, (_, i) => `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`),
+    [imageCount]
+  );
 
   return (
     <div ref={gridRef} className="absolute inset-0 z-10 hidden lg:block" style={{ perspective: "var(--perspective)" }}>
       <div className="grid-wrap grid h-full w-full p-8" style={{ transformStyle: "preserve-3d" }}>
         {images.map((src, i) => (
           <div key={i} className="grid__item aspect-[1.5] overflow-hidden rounded-xl">
-            <div className="h-full w-full bg-cover bg-center rounded-xl" style={{ backgroundImage: `url(${src})` }} />
+            <div
+              className="h-full w-full bg-cover bg-center rounded-xl"
+              style={
+                {
+                  backgroundImage: `url(${src})`,
+                  imageRendering: "auto",
+                  WebkitImageRendering: "auto",
+                  MozImageRendering: "auto",
+                  msImageRendering: "auto",
+                } as React.CSSProperties
+              }
+            />
           </div>
         ))}
       </div>

@@ -1,5 +1,3 @@
-// src/main.tsx
-
 // import React from "react"; - <React.StrictMode> отключен ниже
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
@@ -16,6 +14,7 @@ import "./styles/base/fixes.css";
 import "./styles/base/modern-design.css";
 import "./styles/base/theme-variables.css";
 import "./styles/globals.css";
+import "./styles/image-rendering.css";
 
 const initApp = () => {
   const rootElement = document.getElementById("root");

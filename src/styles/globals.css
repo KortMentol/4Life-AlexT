@@ -383,9 +383,21 @@ html {
   height: auto;
   overflow: hidden;
   position: relative;
-  border-radius: 8px;
+  border-radius: 12px; /* tailwind .rounded-xl */
   display: grid;
   place-items: center;
+  /* 1. Форсируем GPU-ускорение и создаем новый слой рендеринга */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* 2. Классический хак для улучшения сглаживания в WebKit и Firefox.
+     Прозрачная обводка заставляет браузер пересчитать границы элемента
+     и применить более качественный anti-aliasing. */
+  outline: 1px solid transparent;
+  /* 3. Минимальное размытие, которое визуально незаметно,
+     но запускает другой, более качественный алгоритм рендеринга. */
+  filter: blur(0.1px);
 }
 
 .grid__item-inner {
@@ -496,21 +508,27 @@ html {
 }
 
 .header-glow::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   mask-composite: xor;
   -webkit-mask-composite: xor;
   animation: border-glow 3s ease-in-out infinite alternate;
 }
 
 @keyframes border-glow {
-  0% { opacity: 0.3; }
-  100% { opacity: 0.8; }
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.8;
+  }
 }
 
 /* Оптимизация backdrop-blur */
@@ -525,7 +543,7 @@ html {
   .header-blur {
     background-color: rgba(255, 255, 255, 0.95);
   }
-  
+
   .dark .header-blur {
     background-color: rgba(15, 23, 42, 0.95);
   }
@@ -537,7 +555,7 @@ html {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
-  
+
   .header-glow::before {
     animation-duration: 4s;
   }
