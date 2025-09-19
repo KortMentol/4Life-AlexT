@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
 
 // Импортируем модули и стили для эффекта Куба и Пагинации
 import "swiper/css";
@@ -8,6 +9,7 @@ import "swiper/css/pagination";
 import { EffectCube, Pagination } from "swiper/modules";
 
 import InteractiveProductCard from "./InteractiveProductCard";
+import { Icons } from "@/utils/icons";
 
 interface ProductData {
   id: number;
@@ -41,7 +43,7 @@ interface KineticCarouselProps {
  * Используется для интерактивного и привлекающего внимание отображения списка продуктов.
  *
  * 1. **На главной странице (`src/pages/HomePage.tsx`):**
- *    - Для демонстрации избранных или популярных товаров в компактном формате.
+ *    - Для демонстрации избранных или популярных товаров в компактном формате с навигационными стрелками под кубом.
  *
  * @example
  * const featuredProducts = [
@@ -54,24 +56,23 @@ interface KineticCarouselProps {
 const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
   products,
 }) => {
-  // При loop=true Swiper сам обрабатывает дублирование слайдов.
-  // Использования оригинального массива `products` достаточно, даже для 3 элементов.
+  const swiperRef = useRef<SwiperType | null>(null);
+
   if (!products || products.length === 0) {
-    return null; // Или можно вернуть компонент-заглушку
+    return null;
   }
 
   return (
-    // Контейнер, который скрывает карусель на больших экранах (lg и выше)
     <div className="lg:hidden">
-      {/* Контейнер для центрирования карусели по вертикали и горизонтали */}
-      {/* Внешние отступы убраны и должны задаваться на родительской странице */}
+      {/* Куб */}
       <div className="w-full flex justify-center">
         <Swiper
+          onSwiper={(swiper) => { swiperRef.current = swiper; }}
           effect={"cube"}
           grabCursor={true}
           cubeEffect={{
-            shadow: false, // Отключаем тени для производительности
-            slideShadows: false, // Отключаем тени для производительности
+            shadow: false,
+            slideShadows: false,
             shadowOffset: 20,
             shadowScale: 0.94,
           }}
@@ -80,7 +81,6 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
             clickable: true,
           }}
           modules={[EffectCube, Pagination]}
-          // Задаем адаптивную ширину самой карусели, чтобы центрирование работало
           className="w-[80vw] max-w-sm"
           slidesPerView={1}
           centeredSlides={true}
@@ -90,7 +90,6 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
               key={product.id}
               className="flex justify-center items-center"
             >
-              {/* Внутренний div для задания ширины больше не нужен */}
               <InteractiveProductCard
                 product={product}
                 opaque={true}
@@ -99,6 +98,27 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
             </SwiperSlide>
           ))}
         </Swiper>
+      </div>
+      
+      {/* Навигационные стрелки под кубом */}
+      <div className="flex justify-center gap-4 mt-6">
+        <button
+          onClick={() => swiperRef.current?.slidePrev()}
+          className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 transition-transform duration-100 active:scale-90 md:hover:bg-white/20 md:dark:hover:bg-white/10 focus:outline-none"
+          style={{ willChange: 'transform', contain: 'layout style paint' }}
+          aria-label="Предыдущий продукт"
+        >
+          <Icons.ChevronLeft className="w-5 h-5 text-white/80 dark:text-white/70 mx-auto" />
+        </button>
+        
+        <button
+          onClick={() => swiperRef.current?.slideNext()}
+          className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 transition-transform duration-100 active:scale-90 md:hover:bg-white/20 md:dark:hover:bg-white/10 focus:outline-none"
+          style={{ willChange: 'transform', contain: 'layout style paint' }}
+          aria-label="Следующий продукт"
+        >
+          <Icons.ChevronRight className="w-5 h-5 text-white/80 dark:text-white/70 mx-auto" />
+        </button>
       </div>
     </div>
   );

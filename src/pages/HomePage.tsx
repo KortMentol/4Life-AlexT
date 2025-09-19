@@ -185,14 +185,15 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               </Suspense>
-              <div className="mt-16 mb-10 text-center px-6">
+              <div className="mt-16 mb-10 text-center px-6" style={{ contain: 'layout style paint' }}>
                 <Button
                   to="/products"
                   variant="secondary"
                   size="lg"
-                  className="group bg-white/20 border-white/30 backdrop-blur-sm"
+                  className="group bg-white/20 border-white/30 backdrop-blur-sm hover:bg-white/30 transition-colors duration-150"
+                  style={{ contain: 'layout style paint', willChange: 'auto' }}
                   icon={
-                    <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:translate-x-1" />
+                    <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-transform duration-150 group-hover:translate-x-1" style={{ willChange: 'transform' }} />
                   }
                 >
                   Посмотреть все

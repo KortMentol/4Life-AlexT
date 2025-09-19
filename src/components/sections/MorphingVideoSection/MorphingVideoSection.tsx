@@ -130,11 +130,11 @@ const FloatingVideo: React.FC<{
             const localProgress = (p1 - 0.05) / 0.35; // 35% блока на появление
             return `${100 - localProgress * 100}vh`;
           }
-          if (p1 > 0.8) {
-            const localProgress = (p1 - 0.8) / 0.15; // 25% блока на уход
+          if (p1 > 0.7) {
+            const localProgress = (p1 - 0.7) / 0.25; // 25% блока на уход
             return `${-localProgress * 100}vh`;
           }
-          return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
+          return "0vh"; // Прилипание 0.4-0.7 (Прилипание 30% блока)
         }
 
         // Блок 2
@@ -143,11 +143,11 @@ const FloatingVideo: React.FC<{
             const localProgress = (p2 - 0.05) / 0.35; // 35% блока на появление
             return `${100 - localProgress * 100}vh`;
           }
-          if (p2 > 0.8) {
-            const localProgress = (p2 - 0.8) / 0.15; // 25% блока на уход
+          if (p2 > 0.7) {
+            const localProgress = (p2 - 0.7) / 0.25; // 25% блока на уход
             return `${-localProgress * 100}vh`;
           }
-          return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
+          return "0vh"; // Прилипание 0.4-0.7 (Прилипание 30% блока)
         }
 
         // Блок 3
@@ -156,11 +156,11 @@ const FloatingVideo: React.FC<{
             const localProgress = (p3 - 0.05) / 0.35; // 35% блока на появление
             return `${100 - localProgress * 100}vh`;
           }
-          if (p3 > 0.8) {
-            const localProgress = (p3 - 0.8) / 0.15; // 25% блока на уход
+          if (p3 > 0.7) {
+            const localProgress = (p3 - 0.7) / 0.25; // 25% блока на уход
             return `${-localProgress * 100}vh`;
           }
-          return "0vh"; // Прилипание 0.4-0.8 (Прилипание 40% блока)
+          return "0vh"; // Прилипание 0.4-0.7 (Прилипание 30% блока)
         }
       } else {
         // 🖥️ ПК ЛОГИКА.
@@ -224,9 +224,9 @@ const FloatingVideo: React.FC<{
               // Становится непрозрачным на полпути к центру
               return (p - 0.05) / 0.2;
             }
-            // Исчезновение начинается, когда видео двигается вверх (p > 0.8)
-            if (p > 0.8) {
-              return 1 - (p - 0.8) / 0.15;
+            // Исчезновение начинается, когда видео двигается вверх (p > 0.7)
+            if (p > 0.7) {
+              return 1 - (p - 0.7) / 0.25;
             }
             return 1; // Полностью видимо
           }
@@ -442,7 +442,7 @@ const MorphingVideoSection: React.FC = () => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-      const yPos = (scrolled - 0.5) * 80;
+      const yPos = (scrolled - 0.5) * 120; // Сила параллакса
       const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
       if (bg) {
         bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
@@ -486,12 +486,22 @@ const MorphingVideoSection: React.FC = () => {
             className="w-full h-full bg-repeat opacity-100 dark:opacity-0 transition-opacity duration-500"
             style={{ backgroundImage: `url(/images/backgrounds/light-pattern.webp)`, backgroundSize: "400px 400px" }}
           />
+          {/* ПК версия темного фона */}
           <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500"
+            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 hidden md:block"
             style={{
               backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
               backgroundSize: "400px 400px",
-              filter: "brightness(0.5) contrast(1.1)",
+              filter: "brightness(0.6) contrast(1.1)",
+            }}
+          />
+          {/* Мобильная версия темного фона (светлее на 10%) */}
+          <div
+            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 block md:hidden"
+            style={{
+              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
+              backgroundSize: "400px 400px",
+              filter: "brightness(0.7) contrast(1.1)",
             }}
           />
         </div>
