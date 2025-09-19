@@ -191,7 +191,6 @@ const HomePage: React.FC = () => {
                   variant="secondary"
                   size="lg"
                   className="group bg-white/20 border-white/30 backdrop-blur-sm hover:bg-white/30 transition-colors duration-150"
-                  style={{ contain: 'layout style paint', willChange: 'auto' }}
                   icon={
                     <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-transform duration-150 group-hover:translate-x-1" style={{ willChange: 'transform' }} />
                   }

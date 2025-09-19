@@ -79,9 +79,19 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+    
+    let resizeTimeout: number;
+    const throttledResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(checkMobile, isMobile ? 250 : 100);
+    };
+    
+    window.addEventListener("resize", throttledResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", throttledResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [isMobile]);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -155,7 +165,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       >
         <motion.div
           className={`relative w-full h-full ${imageBrightness}`}
-          style={{ y, willChange: "transform" }}
+          style={{ 
+            y, 
+            willChange: "transform",
+            contain: isMobile ? 'layout style paint' : 'none'
+          }}
         >
           {backgroundVideo ? (
             <video

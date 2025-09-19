@@ -34,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   const { headerY, forceShowHeader } = useNativeScroll({
     disabled: isMenuOpen,
+    throttleMs: isMobile ? 250 : 100,
   });
 
   // Этот useEffect слушает наше кастомное событие и показывает хедер
@@ -105,6 +106,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       style={{
         y: headerY,
         ...cssVars,
+        willChange: isMobile ? 'transform' : 'auto',
+        contain: isMobile ? 'layout style paint' : 'none',
       }}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >
@@ -121,11 +124,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               aria-label="Главная страница"
             >
               <motion.div
-                className="relative z-10 transition-transform duration-300 group-hover:scale-105"
+                className={`relative z-10 transition-transform duration-200 ${isMobile ? '' : 'group-hover:scale-105'}`}
                 variants={logoVariants}
                 initial="initial"
                 animate="animate"
-                whileHover="hover"
+                whileHover={isMobile ? undefined : "hover"}
               >
                 <img src={isDark ? logoLight : logoDark} alt="4Life Logo" className="h-8 w-auto relative z-10" />
               </motion.div>
@@ -203,9 +206,10 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               style={{ color: isDark ? "white" : "#1e293b" }}
             >
               <motion.div
-                whileHover={{ scale: 1.1 }}
+                whileHover={isMobile ? undefined : { scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                style={{ willChange: isMobile ? 'transform' : 'auto' }}
               >
                 <ProductListIcon />
               </motion.div>
@@ -213,11 +217,12 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               <motion.button
                 type="button"
                 onClick={toggleTheme}
-                className="p-2 rounded-full transition-colors duration-300"
+                className="p-2 rounded-full transition-colors duration-200"
                 aria-label="Переключить тему"
-                whileHover={{ scale: 1.1, rotate: 15 }}
+                whileHover={isMobile ? undefined : { scale: 1.1, rotate: 15 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                style={{ willChange: isMobile ? 'transform' : 'auto' }}
               >
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </motion.button>
@@ -226,9 +231,12 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               className="md:hidden"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              style={{ color: isDark ? "white" : "#1e293b" }}
+              style={{ 
+                color: isDark ? "white" : "#1e293b",
+                willChange: 'transform',
+                contain: 'layout style paint'
+              }}
             >
               <ProductListIcon />
             </motion.div>

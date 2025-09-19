@@ -438,16 +438,24 @@ const MorphingVideoSection: React.FC = () => {
   const block3Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    let lastCheck = 0;
+    
     const handleScroll = () => {
+      const now = performance.now();
+      if (now - lastCheck < (isMobile ? 250 : 100)) return;
+      lastCheck = now;
+      
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-      const yPos = (scrolled - 0.5) * 120; // Сила параллакса
+      const yPos = (scrolled - 0.5) * 120;
       const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
       if (bg) {
         bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
       }
     };
+    
     let ticking = false;
     const optimizedScroll = () => {
       if (!ticking) {
@@ -458,6 +466,7 @@ const MorphingVideoSection: React.FC = () => {
         ticking = true;
       }
     };
+    
     window.addEventListener("scroll", optimizedScroll, { passive: true });
     return () => window.removeEventListener("scroll", optimizedScroll);
   }, []);
@@ -480,7 +489,12 @@ const MorphingVideoSection: React.FC = () => {
       <div className="absolute inset-0 -z-30 overflow-hidden">
         <div
           className="parallax-bg absolute inset-0 w-full"
-          style={{ height: "calc(100% + 200px)", top: "-100px", willChange: "transform" }}
+          style={{ 
+            height: "calc(100% + 200px)", 
+            top: "-100px", 
+            willChange: "transform",
+            contain: window.innerWidth < 768 ? 'layout style paint' : 'none'
+          }}
         >
           <div
             className="w-full h-full bg-repeat opacity-100 dark:opacity-0 transition-opacity duration-500"

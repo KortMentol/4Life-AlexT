@@ -72,34 +72,31 @@ const ScrollToTopButton: React.FC = () => {
     return (
       <button
         onClick={handleMobileClick}
-        className={`fixed z-50 bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transform-gpu transition-all duration-300 ease-out ${
+        className={`fixed z-50 bottom-2 right-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
         } ${
           isDark 
-            ? "bg-gradient-to-br from-violet-600/90 to-indigo-700/90 border border-violet-400/30" 
-            : "bg-gradient-to-br from-blue-500/90 to-indigo-600/90 border border-blue-300/30"
-        } backdrop-blur-sm shadow-lg active:scale-95`}
+            ? "bg-gray-900/95 border-2 border-cyan-400/60 shadow-lg shadow-cyan-400/20" 
+            : "bg-white/95 border-2 border-blue-500/60 shadow-lg shadow-blue-500/20"
+        } active:scale-90 focus:outline-none`}
         style={{ 
           willChange: 'transform, opacity',
-          backfaceVisibility: 'hidden'
+          contain: 'layout style paint'
         }}
         aria-label="Прокрутить вверх"
       >
-        {/* Sci-fi внутреннее свечение */}
-        <div className={`absolute inset-1 rounded-full opacity-20 ${
-          isDark ? "bg-violet-400" : "bg-blue-300"
+        {/* Sci-fi внутренний глоу */}
+        <div className={`absolute inset-0.5 rounded-full opacity-30 ${
+          isDark ? "bg-gradient-to-br from-cyan-400/40 to-blue-500/40" : "bg-gradient-to-br from-blue-400/40 to-indigo-500/40"
         }`} />
         
         {/* Стрелка */}
         <ArrowUp
-          size={18}
+          size={16}
           strokeWidth={2.5}
-          className="text-white relative z-10"
-          style={{
-            filter: `drop-shadow(0 0 2px ${
-              isDark ? 'rgba(139, 92, 246, 0.6)' : 'rgba(59, 130, 246, 0.6)'
-            })`
-          }}
+          className={`relative z-10 ${
+            isDark ? "text-cyan-300" : "text-blue-600"
+          }`}
         />
       </button>
     );
