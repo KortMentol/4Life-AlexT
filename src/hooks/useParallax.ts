@@ -7,12 +7,20 @@ export const useParallax = (speed: number = 0.5) => {
     const element = ref.current;
     if (!element) return;
 
+    const isMobile = window.innerWidth < 768;
     let ticking = false;
 
     const updateTransform = () => {
       const scrolled = window.pageYOffset;
       const parallax = scrolled * speed;
       element.style.transform = `translate3d(0, ${parallax}px, 0)`;
+      
+      // CSS оптимизации для мобильных
+      if (isMobile) {
+        element.style.willChange = 'transform';
+        element.style.contain = 'layout style paint';
+      }
+      
       ticking = false;
     };
 

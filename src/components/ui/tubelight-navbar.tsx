@@ -30,6 +30,7 @@ export const TubelightNavbar: React.FC = () => {
       style={{ marginLeft: "4rem" }}
       onMouseLeave={() => setHoveredIndex(null)}
       onMouseMove={(e) => {
+        // Оптимизация: throttling для мобильных (хотя навбар скрыт на мобильных)
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         rafRef.current = requestAnimationFrame(() => {
           const OVERLAP = 14;
@@ -106,8 +107,8 @@ export const TubelightNavbar: React.FC = () => {
                         initial={false}
                         transition={{
                           type: "spring",
-                          stiffness: 300,
-                          damping: 30,
+                          stiffness: 400,
+                          damping: 35,
                         }}
                       >
                         <div

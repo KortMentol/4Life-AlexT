@@ -22,6 +22,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     if (disabled) return;
 
     // Десктопная логика - 2 скролла вниз чтобы скрыть, 1 вверх чтобы показать
+    
     const handleWheel = (event: WheelEvent) => {
       const direction = event.deltaY > 0 ? "down" : "up";
       
@@ -29,7 +30,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         if (scrollTimer.current) clearTimeout(scrollTimer.current);
         scrollCount.current++;
         
-        if (scrollCount.current >= 2 && window.scrollY > 100) {
+        if (scrollCount.current >= 2 && window.scrollY > 50) {
           headerY.set(-100);
         }
         
@@ -44,16 +45,24 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     };
 
     // Мобильная логика - следование за пальцем как нативный бар браузера
+    let lastTouchTime = 0;
+    
     const handleTouchStart = (event: TouchEvent) => {
       if (!event.touches[0]) return;
       isTouching.current = true;
       touchStartY.current = event.touches[0].clientY;
       headerStartY.current = headerY.get();
       headerY.stop(); // Останавливаем spring анимацию
+      lastTouchTime = performance.now();
     };
 
     const handleTouchMove = (event: TouchEvent) => {
       if (!isTouching.current || !event.touches[0]) return;
+      
+      // Throttling для мобильных - максимум 60 FPS
+      const now = performance.now();
+      if (now - lastTouchTime < 16) return;
+      lastTouchTime = now;
       
       // Если вертикальный скролл заблокирован горизонтальным свайпом - не двигаем хедер
       if (scrollLockState.isLocked) return;

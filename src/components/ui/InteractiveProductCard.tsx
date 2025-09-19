@@ -57,27 +57,38 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
   opaque = false,
   isHoverEffectDisabled = false,
 }) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
   return (
     <motion.div
-      className="h-full transform-gpu" // Добавляем transform-gpu для аппаратного ускорения
-      whileHover={isHoverEffectDisabled ? {} : { y: -5, rotateY: 5, scale: 1.02 }}
-      transition={{ duration: 0.3 }}
+      className="h-full transform-gpu"
+      whileHover={isHoverEffectDisabled || isMobile ? {} : { y: -5, rotateY: 5, scale: 1.02 }}
+      whileTap={isMobile ? { scale: 0.98 } : {}}
+      transition={{ duration: isMobile ? 0.2 : 0.3 }}
       style={{
         transformPerspective: 1000,
         transformStyle: "preserve-3d",
+        willChange: isMobile ? 'transform' : 'auto',
+        contain: isMobile ? 'layout style paint' : 'none',
       }}
     >
       <div
         className={`relative z-10 h-full min-h-[420px] ${
           opaque ? "bg-white dark:bg-gray-900" : "bg-white/80 dark:bg-gray-900/80"
-        } rounded-none lg:rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 hover:border-white/40 dark:hover:border-gray-600/70 card-hover-effect hover:shadow-2xl transition-all duration-300 flex flex-col`}
+        } rounded-none lg:rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 ${
+          isMobile ? 'active:border-white/40 dark:active:border-gray-600/70' : 'hover:border-white/40 dark:hover:border-gray-600/70'
+        } card-hover-effect ${
+          isMobile ? 'active:shadow-2xl' : 'hover:shadow-2xl'
+        } transition-all duration-${isMobile ? '200' : '300'} flex flex-col`}
       >
         <Link to={product.link}>
           <img
             src={product.image}
             alt={product.title}
             loading="lazy"
-            className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+            className={`w-full h-48 object-cover transition-transform duration-${isMobile ? '300' : '500'} ${
+              isMobile ? 'active:scale-105' : 'hover:scale-105'
+            }`}
           />
         </Link>
         <div className="p-6 flex flex-col flex-grow">
@@ -86,10 +97,14 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
           <Link
             to={product.link}
             // --- ИЗМЕНЕНИЕ ЗДЕСЬ: добавлен класс `self-start` ---
-            className="inline-flex items-center text-primary hover:text-blue-700 font-semibold transition-colors group text-sm mt-auto self-start"
+            className={`inline-flex items-center text-primary font-semibold transition-colors group text-sm mt-auto self-start ${
+              isMobile ? 'active:text-blue-700' : 'hover:text-blue-700'
+            }`}
           >
             <span>В корзину</span>
-            <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
+            <ArrowRight className={`h-5 w-5 ml-1 transition-transform duration-200 ${
+              isMobile ? 'group-active:translate-x-1' : 'group-hover:translate-x-1'
+            }`} />
           </Link>
         </div>
       </div>

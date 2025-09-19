@@ -63,17 +63,12 @@ const PartnershipSection: React.FC = () => {
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
 
-  // Параллакс для фона - теперь через CSS
-
-  // Чистый CSS параллакс для максимального FPS
   useEffect(() => {
     const handleScroll = () => {
       if (!sectionRef.current) return;
-
       const rect = sectionRef.current.getBoundingClientRect();
       const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-      const yPos = (scrolled - 0.5) * 120; // Сила параллакса
-
+      const yPos = (scrolled - 0.5) * 120;
       const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
       if (bg) {
         bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
@@ -107,6 +102,7 @@ const PartnershipSection: React.FC = () => {
             transform: "translate3d(0, 0, 0)",
             willChange: "transform",
             backfaceVisibility: "hidden",
+            contain: window.innerWidth < 768 ? 'layout style paint' : 'none',
           }}
         >
           <div

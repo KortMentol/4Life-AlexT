@@ -438,14 +438,7 @@ const MorphingVideoSection: React.FC = () => {
   const block3Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    let lastCheck = 0;
-    
     const handleScroll = () => {
-      const now = performance.now();
-      if (now - lastCheck < (isMobile ? 250 : 100)) return;
-      lastCheck = now;
-      
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);

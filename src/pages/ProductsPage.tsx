@@ -95,14 +95,20 @@ const ProductsPage: React.FC = () => {
 
   // Инициализация оптимизаций производительности
   useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    
     // Предзагрузка критических ресурсов
     preloadCriticalResources();
 
     // Оптимизация анимаций для слабых устройств
-    optimizeAnimations();
+    if (isMobile) {
+      optimizeAnimations();
+    }
 
     // Оптимизация GSAP
-    optimizeGSAP();
+    if (isMobile) {
+      optimizeGSAP();
+    }
   }, []);
 
   // Intersection Observer для паузы видео при скролле
@@ -456,9 +462,13 @@ const ProductsPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: item.delay, duration: 0.6, ease: "easeOut" }}
-                whileHover={{ scale: 1.05, y: -10 }}
-                className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-cyan-400/50 transition-all duration-500"
-                style={{ willChange: "transform" }}
+                whileHover={window.innerWidth >= 768 ? { scale: 1.05, y: -10 } : {}}
+                whileTap={window.innerWidth < 768 ? { scale: 0.98 } : {}}
+                className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-cyan-400/50 transition-all duration-300"
+                style={{ 
+                  willChange: window.innerWidth < 768 ? 'transform' : 'auto',
+                  contain: window.innerWidth < 768 ? 'layout style paint' : 'none'
+                }}
               >
                 <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">{item.icon}</div>
                 <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
@@ -488,8 +498,9 @@ const ProductsPage: React.FC = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.8 + index * 0.1, duration: 0.5, ease: "backOut" }}
-                whileHover={{ scale: 1.1 }}
-                className="text-center p-6 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 transition-all duration-300"
+                whileHover={window.innerWidth >= 768 ? { scale: 1.1 } : {}}
+                whileTap={window.innerWidth < 768 ? { scale: 0.95 } : {}}
+                className="text-center p-6 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 transition-all duration-200"
               >
                 <div className="text-4xl font-bold text-cyan-400 mb-2">
                   {stat.value}
@@ -731,9 +742,14 @@ const ProductsPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.6, ease: "easeOut" }}
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/30 transition-all duration-500"
-                style={{ willChange: "transform", transformStyle: "preserve-3d" }}
+                whileHover={window.innerWidth >= 768 ? { scale: 1.05, rotateY: 5 } : {}}
+                whileTap={window.innerWidth < 768 ? { scale: 0.98 } : {}}
+                className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/30 transition-all duration-300"
+                style={{ 
+                  willChange: window.innerWidth < 768 ? 'transform' : 'auto',
+                  transformStyle: window.innerWidth >= 768 ? "preserve-3d" : 'flat',
+                  contain: window.innerWidth < 768 ? 'layout style paint' : 'none'
+                }}
               >
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${item.color} rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}

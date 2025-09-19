@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5 },
+      transition: { duration: isMobile ? 0.3 : 0.5 },
     },
   };
 
@@ -40,8 +40,8 @@ const Footer: React.FC = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
+        staggerChildren: isMobile ? 0.05 : 0.1,
+        delayChildren: isMobile ? 0.1 : 0.2,
       },
     },
   };
@@ -88,7 +88,9 @@ const Footer: React.FC = () => {
                   href={siteConfig.links.telegram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white transition-colors"
+                  className={`text-white/80 transition-colors duration-200 ${
+                    isMobile ? 'active:text-white' : 'hover:text-white'
+                  }`}
                   aria-label="Telegram"
                 >
                   <Facebook size={20} />
@@ -97,21 +99,27 @@ const Footer: React.FC = () => {
                   href={siteConfig.links.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white transition-colors"
+                  className={`text-white/80 transition-colors duration-200 ${
+                    isMobile ? 'active:text-white' : 'hover:text-white'
+                  }`}
                   aria-label="WhatsApp"
                 >
                   <Instagram size={20} />
                 </a>
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
-                  className="text-white/80 hover:text-white transition-colors"
+                  className={`text-white/80 transition-colors duration-200 ${
+                    isMobile ? 'active:text-white' : 'hover:text-white'
+                  }`}
                   aria-label="Phone"
                 >
                   <Twitter size={20} />
                 </a>
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className="text-white/80 hover:text-white transition-colors"
+                  className={`text-white/80 transition-colors duration-200 ${
+                    isMobile ? 'active:text-white' : 'hover:text-white'
+                  }`}
                   aria-label="Email"
                 >
                   <Youtube size={20} />
@@ -135,7 +143,9 @@ const Footer: React.FC = () => {
                 <a
                   href="/products"
                   onClick={(e) => handleLinkClick(e, "/products")}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   Продукты
                 </a>
@@ -144,7 +154,9 @@ const Footer: React.FC = () => {
                 <a
                   href="/about"
                   onClick={(e) => handleLinkClick(e, "/about")}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   О компании
                 </a>
@@ -153,7 +165,9 @@ const Footer: React.FC = () => {
                 <a
                   href="/about-me"
                   onClick={(e) => handleLinkClick(e, "/about-me")}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   Обо мне
                 </a>
@@ -162,7 +176,9 @@ const Footer: React.FC = () => {
                 <a
                   href="/partnership"
                   onClick={(e) => handleLinkClick(e, "/partnership")}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   Партнерство
                 </a>
@@ -171,7 +187,9 @@ const Footer: React.FC = () => {
                 <a
                   href="/contact"
                   onClick={(e) => handleLinkClick(e, "/contact")}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   Контакты
                 </a>
@@ -194,7 +212,9 @@ const Footer: React.FC = () => {
                 <Mail className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   {siteConfig.contact.email}
                 </a>
@@ -203,7 +223,9 @@ const Footer: React.FC = () => {
                 <Phone className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
-                  className="text-gray-300 hover:text-blue-400 transition-colors"
+                  className={`text-gray-300 transition-colors duration-200 ${
+                    isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
+                  }`}
                 >
                   {siteConfig.contact.phone}
                 </a>
