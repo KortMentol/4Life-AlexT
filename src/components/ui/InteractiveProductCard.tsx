@@ -63,7 +63,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
     <motion.div
       className="h-full transform-gpu"
       whileHover={isHoverEffectDisabled || isMobile ? {} : { y: -5, rotateY: 5, scale: 1.02 }}
-      whileTap={isMobile ? { scale: 0.98 } : {}}
+      whileTap={isMobile ? {} : {}}
       transition={{ duration: isMobile ? 0.2 : 0.3 }}
       style={{
         transformPerspective: 1000,
@@ -76,9 +76,9 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
         className={`relative z-10 h-full min-h-[420px] ${
           opaque ? "bg-white dark:bg-gray-900" : "bg-white/80 dark:bg-gray-900/80"
         } rounded-none lg:rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 ${
-          isMobile ? 'active:border-white/40 dark:active:border-gray-600/70' : 'hover:border-white/40 dark:hover:border-gray-600/70'
+          isMobile ? '' : 'hover:border-white/40 dark:hover:border-gray-600/70'
         } card-hover-effect ${
-          isMobile ? 'active:shadow-2xl' : 'hover:shadow-2xl'
+          isMobile ? '' : 'hover:shadow-2xl'
         } transition-all duration-${isMobile ? '200' : '300'} flex flex-col`}
       >
         <Link to={product.link}>
@@ -87,7 +87,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
             alt={product.title}
             loading="lazy"
             className={`w-full h-48 object-cover transition-transform duration-${isMobile ? '300' : '500'} ${
-              isMobile ? 'active:scale-105' : 'hover:scale-105'
+              isMobile ? '' : 'hover:scale-105'
             }`}
           />
         </Link>
@@ -98,12 +98,12 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
             to={product.link}
             // --- ИЗМЕНЕНИЕ ЗДЕСЬ: добавлен класс `self-start` ---
             className={`inline-flex items-center text-primary font-semibold transition-colors group text-sm mt-auto self-start ${
-              isMobile ? 'active:text-blue-700' : 'hover:text-blue-700'
+              isMobile ? '' : 'hover:text-blue-700'
             }`}
           >
             <span>В корзину</span>
             <ArrowRight className={`h-5 w-5 ml-1 transition-transform duration-200 ${
-              isMobile ? 'group-active:translate-x-1' : 'group-hover:translate-x-1'
+              isMobile ? '' : 'group-hover:translate-x-1'
             }`} />
           </Link>
         </div>

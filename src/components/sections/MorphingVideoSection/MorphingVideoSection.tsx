@@ -16,6 +16,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // Media imports
 import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
 
+// Components
+import ScrollNumber from "@/components/ui/ScrollNumber";
+
+// Hooks
+import { useTheme } from "@/hooks";
+
 // Глобальные типы для GSAP
 declare global {
   interface Window {
@@ -29,7 +35,7 @@ const ScrollText: React.FC<{ children: string; className?: string }> = ({ childr
   const containerRef = useRef<HTMLParagraphElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start 0.9", "start 0.25"],
+    offset: ["start 1", "end 0.6"],
   });
 
   const words = children.split(" ");
@@ -54,17 +60,17 @@ const Word: React.FC<{ children: string; progress: any; range: [number, number] 
   progress,
   range,
 }) => {
-  const opacity = useTransform(progress, range, [0.3, 1]);
+  const { theme } = useTheme();
+  const opacity = useTransform(progress, range, [theme === 'dark' ? 0.1 : 0.2, 1]);
 
   return (
     <span className="relative mr-3 mt-3 inline-block">
-      <span className="absolute opacity-30 dark:opacity-20">{children}</span>
+      <span className="absolute opacity-0">{children}</span>
       <motion.span
         style={{
           opacity,
-          color: "rgb(59, 130, 246)", // blue-500 for light
+          color: theme === 'dark' ? '#00d4ff' : '#0066ff',
         }}
-        className="dark:text-cyan-500"
       >
         {children}
       </motion.span>
@@ -89,17 +95,17 @@ const FloatingVideo: React.FC<{
   // Отдельные useScroll для каждого блока с разными настройками для ПК и мобильных
   const { scrollYProgress: block1Progress } = useScroll({
     target: block1Ref,
-    offset: isMobile ? ["start +60%", "end start"] : ["start +50%", "end start"],
+    offset: isMobile ? ["start +40%", "end start"] : ["start +30%", "end start"],
   });
 
   const { scrollYProgress: block2Progress } = useScroll({
     target: block2Ref,
-    offset: isMobile ? ["start +65%", "end start"] : ["start +50%", "end start"],
+    offset: isMobile ? ["start +45%", "end start"] : ["start +30%", "end start"],
   });
 
   const { scrollYProgress: block3Progress } = useScroll({
     target: block3Ref,
-    offset: isMobile ? ["start +65%", "end start"] : ["start +50%", "end start"],
+    offset: isMobile ? ["start +45%", "end start"] : ["start +30%", "end start"],
   });
 
   const smoothBlock1Progress = useSpring(block1Progress, {
@@ -517,10 +523,26 @@ const MorphingVideoSection: React.FC = () => {
       {/* Заголовок секции */}
       <div className="relative z-30 px-4 pt-24 pb-12 text-center">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-blue-600 dark:text-cyan-400">
+          <h2 className="mb-4 text-sm font-medium uppercase tracking-[0.2em]" style={{
+            background: 'linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)',
+            backgroundSize: '200% 100%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'gradient-shift 6s ease-in-out infinite',
+            textShadow: '0 0 20px rgba(14, 165, 233, 0.3)',
+            filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))'
+          }}>
             Наука • Качество • Доверие
           </h2>
-          <h3 className="mb-8 text-4xl font-semibold text-gray-900 dark:text-white md:text-6xl">Почему 4Life?</h3>
+          <h3 className="mb-8 text-4xl font-semibold md:text-6xl" style={{
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #1e293b 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 0 2px rgba(59, 130, 246, 0.4))',
+            position: 'relative'
+          }}>Почему 4Life?</h3>
           <ScrollText className="mx-auto max-w-4xl text-lg leading-relaxed">
             Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая продукты,
             которые являются результатом фундаментальных исследований и передовых технологий.
@@ -532,17 +554,32 @@ const MorphingVideoSection: React.FC = () => {
         {/* Блок 01 - Наука */}
         <div ref={block1Ref} className="relative">
           <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="relative mx-auto max-w-6xl text-center">
-              <div className="mb-8 text-8xl font-light text-gray-300 dark:text-gray-600">01</div>
-              <h4 className="mb-6 text-3xl font-semibold text-gray-900 dark:text-white md:text-5xl">
-                Исследования и Инновации
-              </h4>
-              <h5 className="mb-8 text-xl font-bold uppercase tracking-[0.2em] text-blue-500">НАУКА</h5>
-              <ScrollText className="mx-auto max-w-5xl text-lg leading-relaxed">
-                В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы, уникальные
-                молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные функции для точного и
-                своевременного реагирования. 4Life не просто следует науке — компания её создаёт.
-              </ScrollText>
+            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-3 order-2 lg:order-1">
+                  <ScrollNumber 
+                    number="01" 
+                    className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none"
+                  />
+                </div>
+                <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
+                  <h4 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight" style={{
+                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))',
+                    position: 'relative'
+                  }}>
+                    Исследования и Инновации
+                  </h4>
+                  <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl">
+                    В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы, уникальные
+                    молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные функции для точного и
+                    своевременного реагирования. 4Life не просто следует науке — компания её создаёт.
+                  </ScrollText>
+                </div>
+              </div>
             </div>
           </div>
           <div className="relative z-10 min-h-[190vh] lg:min-h-[200vh]">
@@ -553,17 +590,32 @@ const MorphingVideoSection: React.FC = () => {
         {/* Блок 02 - Производство */}
         <div ref={block2Ref} className="relative">
           <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="relative mx-auto max-w-6xl text-center">
-              <div className="mb-8 text-8xl font-light text-gray-300 dark:text-gray-600">02</div>
-              <h4 className="mb-6 text-3xl font-semibold text-gray-900 dark:text-white md:text-5xl">
-                Бескомпромиссный Контроль Качества
-              </h4>
-              <h5 className="mb-8 text-xl font-bold uppercase tracking-[0.2em] text-blue-600">ПРОИЗВОДСТВО</h5>
-              <ScrollText className="mx-auto max-w-5xl text-lg leading-relaxed">
-                Каждый этап производства проходит строгий контроль качества. Современные технологии и сертифицированные
-                процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности и эффективности
-                продукции.
-              </ScrollText>
+            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-9 order-1 space-y-6 text-right">
+                  <h4 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight" style={{
+                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))',
+                    position: 'relative'
+                  }}>
+                    Бескомпромиссный Контроль Качества
+                  </h4>
+                  <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl ml-auto">
+                    Каждый этап производства проходит строгий контроль качества. Современные технологии и сертифицированные
+                    процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности и эффективности
+                    продукции.
+                  </ScrollText>
+                </div>
+                <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
+                  <ScrollNumber 
+                    number="02" 
+                    className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none lg:translate-x-8"
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <div className="relative z-10 min-h-[190vh] lg:min-h-[200vh]">
@@ -571,19 +623,34 @@ const MorphingVideoSection: React.FC = () => {
           </div>
         </div>
 
+
+
         {/* Блок 03 - Результат */}
         <div ref={block3Ref} className="relative">
           <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="relative mx-auto max-w-6xl text-center">
-              <div className="mb-8 text-8xl font-light text-gray-300 dark:text-gray-600">03</div>
-              <h4 className="mb-6 text-3xl font-semibold text-gray-900 dark:text-white md:text-5xl">
-                Подтверждённая Эффективность
-              </h4>
-              <h5 className="mb-8 text-xl font-bold uppercase tracking-[0.2em] text-blue-600">РЕЗУЛЬТАТ</h5>
-              <ScrollText className="mx-auto max-w-5xl text-lg leading-relaxed">
-                Миллионы довольных клиентов по всему миру подтверждают эффективность продукции 4Life. Научно
-                обоснованные решения приносят реальные, ощутимые результаты для здоровья, энергии и качества жизни.
-              </ScrollText>
+            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+              <div className="text-center space-y-8">
+                <ScrollNumber 
+                  number="03" 
+                  className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none"
+                />
+                <div className="space-y-6">
+                  <h4 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight max-w-4xl mx-auto" style={{
+                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))',
+                    position: 'relative'
+                  }}>
+                    Подтверждённая Эффективность
+                  </h4>
+                  <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl mx-auto">
+                    Миллионы довольных клиентов по всему миру подтверждают эффективность продукции 4Life. Научно
+                    обоснованные решения приносят реальные, ощутимые результаты для здоровья, энергии и качества жизни.
+                  </ScrollText>
+                </div>
+              </div>
             </div>
           </div>
           <div className="relative z-10 min-h-[190vh] lg:min-h-[200vh]">

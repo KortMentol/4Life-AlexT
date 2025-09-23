@@ -34,7 +34,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   const { headerY, forceShowHeader } = useNativeScroll({
     disabled: isMenuOpen,
-    throttleMs: isMobile ? 250 : 100,
   });
 
   // Этот useEffect слушает наше кастомное событие и показывает хедер
