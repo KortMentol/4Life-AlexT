@@ -200,11 +200,7 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Оптимизация скролла */
-.scroll-container {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
+/* Оптимизация скролла - убрано неиспользуемое правило */
 
 /* Lazy loading изображений */
 .lazy-image {

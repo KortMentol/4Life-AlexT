@@ -355,10 +355,7 @@ a {
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Smooth scrolling improvements */
-html {
-  scroll-behavior: smooth;
-}
+/* Smooth scrolling improvements - уже определено выше */
 
 /* 3D Grid Animation Styles - Максимальная производительность */
 .grid-wrap {
