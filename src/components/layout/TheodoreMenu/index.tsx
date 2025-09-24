@@ -125,10 +125,16 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
     timelineRef.current = gsap.timeline({
       paused: true,
       onStart: () => {
+        // Добавляем класс для скрытия скроллбара
+        document.body.classList.add('menu-open');
+        document.documentElement.classList.add('menu-open');
         lenis.stop();
       },
       onReverseComplete: () => {
         gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
+        // Убираем класс для возвращения скроллбара
+        document.body.classList.remove('menu-open');
+        document.documentElement.classList.remove('menu-open');
         lenis.start();
         // Сообщаем глобально, что переход завершён (включая случай закрытия по стрелке)
         window.dispatchEvent(new CustomEvent("menu-transition-complete"));

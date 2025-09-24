@@ -96,81 +96,78 @@ const FloatingVideo: React.FC<{
   // Используем useScroll для отслеживания общего скролла страницы
   const { scrollY } = useScroll();
 
-  // Отслеживаем изменения скролла и обновляем y/opacity
+  // Ref для хранения кешированных позиций и размеров.
+  const geometries = useRef<{ [key: string]: { top: number; height: number } }>({});
+
+  // Эффект №1: Кеширование геометрии блоков.
+  // Срабатывает один раз при монтировании и при изменении размера окна.
+  useEffect(() => {
+    const updateGeometries = () => {
+      // Используем requestAnimationFrame для гарантии, что DOM уже отрисован
+      requestAnimationFrame(() => {
+        if (block1Ref.current) geometries.current['1'] = { top: block1Ref.current.offsetTop, height: block1Ref.current.offsetHeight };
+        if (block2Ref.current) geometries.current['2'] = { top: block2Ref.current.offsetTop, height: block2Ref.current.offsetHeight };
+        if (block3Ref.current) geometries.current['3'] = { top: block3Ref.current.offsetTop, height: block3Ref.current.offsetHeight };
+      });
+    };
+
+    updateGeometries(); // Вызываем один раз для начального кеширования
+    window.addEventListener('resize', updateGeometries, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', updateGeometries);
+    };
+  }, [block1Ref, block2Ref, block3Ref]); // Зависимости от ref'ов
+
+  // Эффект №2: Анимация на основе скролла и кешированных данных.
   useEffect(() => {
     const calculateState = (latestScrollY: number) => {
       const vh = window.innerHeight;
-      let finalY = 100 * vh; // 100vh в пикселях
+      let finalY = 100 * vh;
       let finalOpacity = 0;
 
-      // Функция для обработки каждого блока
-      const processBlock = (ref: React.RefObject<HTMLDivElement>, blockIndex: number) => {
-        if (!ref.current) return { y: 100 * vh, opacity: 0 };
-
-        const rect = ref.current.getBoundingClientRect();
-        const start = rect.top + latestScrollY;
-
-        // Прогресс скролла внутри блока (от 0 до 1)
-        const progress = (latestScrollY + vh - start) / (vh + rect.height);
-
-        // 🎬 НАСТРОЙКИ АНИМАЦИИ ВИДЕО:
-        // =============================
-        // 🖥️ ПК КОРРЕКТИРОВКА: Блок 03 появляется на 25% (вместо 20%)
-        // 📱 МОБИЛЬНАЯ КОРРЕКТИРОВКА: Появление и исчезновение на 10% позже
-        let appearStart, appearEnd, disappearStart, disappearEnd;
+      // ВАША ФУНКЦИЯ ОБРАБОТКИ БЛОКА С ОДНИМ ИЗМЕНЕНИЕМ
+      const processBlock = (blockIndex: number) => {
+        const geo = geometries.current[String(blockIndex)];
+        if (!geo) return { y: 100 * vh, opacity: 0 };
         
+        const start = geo.top; // БЕРЕМ ИЗ КЕША
+        const blockHeight = geo.height; // БЕРЕМ ИЗ КЕША
+
+        // Вся ваша логика ниже остается АБСОЛЮТНО НЕИЗМЕННОЙ
+        const progress = (latestScrollY + vh - start) / (vh + blockHeight);
+
+        let appearStart, appearEnd, disappearStart, disappearEnd;
         if (isMobile) {
-          // Мобильные: сдвиг на +10%
-          appearStart = 0.3;  // было 0.2, стало 0.3
-          appearEnd = 0.5;    // было 0.4, стало 0.5
-          disappearStart = 0.8; // было 0.7, стало 0.8
-          disappearEnd = 0.95;
+          appearStart = 0.55; appearEnd = 0.95; disappearStart = 1.2; disappearEnd = 1.6;
         } else {
-          // ПК: корректировка только для блока 03
-          appearStart = blockIndex === 3 ? 0.25 : 0.2;
-          appearEnd = blockIndex === 3 ? 0.45 : 0.4;
-          disappearStart = 0.7;
-          disappearEnd = 0.95;
+          appearStart = blockIndex === 3 ? 0.65 : 0.6;
+          appearEnd = blockIndex === 3 ? 0.85 : 0.8;
+          disappearStart = 1.1;
+          disappearEnd = 1.35;
         }
         
-        if (progress > appearStart && progress <= disappearEnd) {
-          // ФАЗА 1: Появление снизу
+        if (progress >= appearStart && progress <= disappearEnd) {
           if (progress <= appearEnd) {
-            const localProgress = (progress - appearStart) / (appearEnd - appearStart);
-            const currentY = (1 - localProgress) * vh; // Движение снизу вверх
-            const currentOpacity = localProgress; // Плавное появление
-            return { y: currentY, opacity: currentOpacity };
+            const localProgress = Math.max(0, Math.min(1, (progress - appearStart) / (appearEnd - appearStart)));
+            return { y: (1 - localProgress) * vh, opacity: localProgress };
           }
-          // ФАЗА 3: Исчезновение вверх
-          if (progress > disappearStart) {
-            const localProgress = (progress - disappearStart) / (disappearEnd - disappearStart);
-            const currentY = -localProgress * vh; // Движение вверх (минус = вверх)
-            const currentOpacity = 1 - localProgress; // Плавное исчезновение
-            return { y: currentY, opacity: currentOpacity };
+          if (progress >= disappearStart) {
+            const localProgress = Math.max(0, Math.min(1, (progress - disappearStart) / (disappearEnd - disappearStart)));
+            return { y: -localProgress * vh, opacity: Math.max(0, 1 - localProgress) };
           }
-          // ФАЗА 2: Прилипание к центру
           return { y: 0, opacity: 1 };
         }
         return { y: 100 * vh, opacity: 0 };
       };
 
-      const state1 = processBlock(block1Ref, 1);
-      const state2 = processBlock(block2Ref, 2);
-      const state3 = processBlock(block3Ref, 3);
+      const state1 = processBlock(1);
+      const state2 = processBlock(2);
+      const state3 = processBlock(3);
 
-      // Выбираем состояние с наибольшей видимостью
-      if (state1.opacity > finalOpacity) {
-        finalY = state1.y;
-        finalOpacity = state1.opacity;
-      }
-      if (state2.opacity > finalOpacity) {
-        finalY = state2.y;
-        finalOpacity = state2.opacity;
-      }
-      if (state3.opacity > finalOpacity) {
-        finalY = state3.y;
-        finalOpacity = state3.opacity;
-      }
+      if (state1.opacity > finalOpacity) { finalY = state1.y; finalOpacity = state1.opacity; }
+      if (state2.opacity > finalOpacity) { finalY = state2.y; finalOpacity = state2.opacity; }
+      if (state3.opacity > finalOpacity) { finalY = state3.y; finalOpacity = state3.opacity; }
 
       y.set(`${(finalY / vh) * 100}vh`);
       opacity.set(Math.min(1, finalOpacity));
@@ -178,7 +175,7 @@ const FloatingVideo: React.FC<{
 
     const unsubscribe = scrollY.on("change", calculateState);
     return () => unsubscribe();
-  }, [scrollY, y, opacity, block1Ref, block2Ref, block3Ref, isMobile]);
+  }, [scrollY, y, opacity, isMobile]); // Убираем ref'ы из зависимостей
 
   useEffect(() => {
     const video = videoRef.current;
@@ -514,7 +511,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="relative z-10 min-h-[137vh] lg:min-h-[180vh]">
+          <div className="relative z-10 min-h-[200vh] lg:min-h-[180vh]">
             <Grid3D type={1} triggerRef={block1Ref} />
           </div>
         </div>
@@ -553,7 +550,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="relative z-10 min-h-[137vh] lg:min-h-[180vh]">
+          <div className="relative z-10 min-h-[200vh] lg:min-h-[180vh]">
             <Grid3D type={2} triggerRef={block2Ref} />
           </div>
         </div>
@@ -589,7 +586,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="relative z-10 min-h-[137vh] lg:min-h-[180vh]">
+          <div className="relative z-10 min-h-[200vh] lg:min-h-[180vh]">
             <Grid3D type={3} triggerRef={block3Ref} />
           </div>
         </div>

@@ -113,7 +113,7 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
             {/* Правая часть - контент */}
             <div
               ref={panelContentRef}
-              className="relative p-8 lg:p-12 flex flex-col justify-center space-y-6 overflow-y-auto custom-scrollbar text-white"
+              className="relative p-8 lg:p-12 flex flex-col justify-center space-y-6 overflow-y-auto text-white"
             >
               <div>
                 <div className="flex flex-wrap gap-2 mb-4">

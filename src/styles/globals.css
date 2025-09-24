@@ -51,6 +51,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Скрываем нативный скроллбар при открытом меню */
+body.menu-open {
+  overflow: hidden !important;
+}
+
+html.menu-open {
+  overflow: hidden !important;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -240,19 +249,7 @@ a {
   font-weight: bold;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 255, 0.5);
-}
+
 
 .swiper-pagination {
   pointer-events: none; /* Весь блок с точками теперь "прозрачен" для кликов и свайпов */

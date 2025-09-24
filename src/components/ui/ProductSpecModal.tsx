@@ -74,7 +74,7 @@ const ProductSpecModal: React.FC<ProductSpecModalProps> = ({ product, isOpen, on
                   </Dialog.Title>
                   <p className="text-gray-400 mb-6">{product.shortDescription}</p>
 
-                  <div className="max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar space-y-6">
+                  <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-6">
                     <div>
                       <h4 className="font-semibold text-cyan-400 mb-2">Основная поддержка:</h4>
                       <p className="text-gray-300">{product.mainSupport.join(", ")}</p>

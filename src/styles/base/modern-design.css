@@ -383,29 +383,4 @@
   box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
 }
 
-/* Современные скроллбары */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 224, 0.5);
-  border-radius: var(--radius-full);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(113, 128, 150, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(160, 174, 192, 0.8);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(160, 174, 192, 0.5);
-}

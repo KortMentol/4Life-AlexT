@@ -17,6 +17,8 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const isTouching = useRef(false);
   const touchStartY = useRef(0);
   const headerStartY = useRef(0);
+  const prevScrollPos = useRef(0);
+  const lastScrollTime = useRef(0);
 
   // Переменные для дросселирования (throttling)
   const lastTouchMoveTime = useRef(0);
@@ -26,7 +28,9 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   useEffect(() => {
     if (disabled) return;
 
-    // Десктопная логика остается без изменений
+
+
+    // Десктопная логика для wheel
     const handleWheel = (event: WheelEvent) => {
       const direction = event.deltaY > 0 ? "down" : "up";
 
@@ -45,6 +49,27 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         if (scrollTimer.current) clearTimeout(scrollTimer.current);
         scrollCount.current = 0;
         headerY.set(0);
+      }
+    };
+
+    // Новая логика для ручного перетаскивания скроллбара (только ПК)
+    const handleScroll = () => {
+      const now = performance.now();
+      if (now - lastScrollTime.current < 16) return; // 60fps throttle
+      lastScrollTime.current = now;
+
+      const currentScrollPos = window.scrollY;
+      const isScrollingUp = prevScrollPos.current > currentScrollPos;
+      const scrollDelta = Math.abs(currentScrollPos - prevScrollPos.current);
+      prevScrollPos.current = currentScrollPos;
+
+      // Игнорируем микро-движения
+      if (scrollDelta < 5) return;
+
+      if (isScrollingUp) {
+        headerY.set(0);
+      } else if (currentScrollPos > 50) {
+        headerY.set(-100);
       }
     };
 
@@ -97,7 +122,9 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       window.addEventListener("touchend", handleTouchEnd, { passive: true });
       window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
     } else {
+      // На ПК слушаем и wheel (колесико), и scroll (ручное перетаскивание)
       window.addEventListener("wheel", handleWheel, { passive: true });
+      window.addEventListener("scroll", handleScroll, { passive: true });
     }
 
     return () => {
@@ -108,6 +135,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         window.removeEventListener("touchcancel", handleTouchEnd);
       } else {
         window.removeEventListener("wheel", handleWheel);
+        window.removeEventListener("scroll", handleScroll);
       }
       if (scrollTimer.current) clearTimeout(scrollTimer.current);
     };

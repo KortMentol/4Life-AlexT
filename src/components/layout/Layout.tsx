@@ -5,6 +5,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import FluidEffect from "@/components/effects/FluidEffect";
 import { ScrollToTopButton } from "@/components/ui";
 import Footer from "./Footer";
+import CustomScrollbar from "../ui/CustomScrollbar";
 const Layout: React.FC = () => {
   const location = useLocation();
 
@@ -23,6 +24,7 @@ const Layout: React.FC = () => {
 
   return (
     <>
+      <CustomScrollbar />
       <FluidEffect />
       {/* Header теперь находится в App.tsx и рендерится над Layout */}
       {/* ИЗМЕНЕНИЕ: Убираем pt-20 отсюда */}
