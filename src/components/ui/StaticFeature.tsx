@@ -108,6 +108,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
         initial="hidden"
         animate={controls}
         className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg ${className || ""}`}
+        style={{ contain: 'content' }}
       >
         <div
           className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${theme.icon} flex items-center justify-center mb-6 shadow-md`}
@@ -132,6 +133,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
   return (
     <div
       className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className || ""}`}
+      style={{ contain: 'content' }}
     >
       <div
         className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${theme.icon} flex items-center justify-center mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300`}

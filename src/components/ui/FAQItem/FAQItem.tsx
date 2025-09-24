@@ -37,6 +37,7 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, answer, index, isOpen = fal
       viewport={{ once: true }}
       transition={{ delay: index * 0.08, duration: 0.5 }}
       className="relative group mb-4"
+      style={{ contain: 'content' }}
     >
       {/* Оптимизированный контейнер для мобильных */}
       <div className="relative bg-black/30 rounded-2xl border border-cyan-400/20 overflow-hidden group-hover:border-cyan-400/40 transition-all duration-300">

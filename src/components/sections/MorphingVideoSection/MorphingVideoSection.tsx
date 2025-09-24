@@ -10,8 +10,8 @@
  * <MorphingVideoSection />
  */
 
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Media imports
 import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
@@ -61,7 +61,7 @@ const Word: React.FC<{ children: string; progress: any; range: [number, number] 
   range,
 }) => {
   const { theme } = useTheme();
-  const opacity = useTransform(progress, range, [theme === 'dark' ? 0.1 : 0.2, 1]);
+  const opacity = useTransform(progress, range, [theme === "dark" ? 0.1 : 0.2, 1]);
 
   return (
     <span className="relative mr-3 mt-3 inline-block">
@@ -69,7 +69,7 @@ const Word: React.FC<{ children: string; progress: any; range: [number, number] 
       <motion.span
         style={{
           opacity,
-          color: theme === 'dark' ? '#00d4ff' : '#0066ff',
+          color: theme === "dark" ? "#00d4ff" : "#0066ff",
         }}
       >
         {children}
@@ -85,180 +85,100 @@ const FloatingVideo: React.FC<{
   block3Ref: React.RefObject<HTMLDivElement>;
 }> = ({ block1Ref, block2Ref, block3Ref }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
   const [canPlay, setCanPlay] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const isMobile = useMemo(() => typeof window !== "undefined" && window.innerWidth < 768, []);
 
-  // 🔧 ИСПРАВЛЕНИЕ: Мемоизируем проверку мобильного устройства
-  const isMobile = useMemo(() => window.innerWidth < 768, []);
+  // Создаем motion values для y и opacity
+  const y = useMotionValue("100vh");
+  const opacity = useMotionValue(0);
 
-  // Отдельные useScroll для каждого блока с разными настройками для ПК и мобильных
-  const { scrollYProgress: block1Progress } = useScroll({
-    target: block1Ref,
-    offset: isMobile ? ["start +40%", "end start"] : ["start +30%", "end start"],
-  });
+  // Используем useScroll для отслеживания общего скролла страницы
+  const { scrollY } = useScroll();
 
-  const { scrollYProgress: block2Progress } = useScroll({
-    target: block2Ref,
-    offset: isMobile ? ["start +45%", "end start"] : ["start +30%", "end start"],
-  });
+  // Отслеживаем изменения скролла и обновляем y/opacity
+  useEffect(() => {
+    const calculateState = (latestScrollY: number) => {
+      const vh = window.innerHeight;
+      let finalY = 100 * vh; // 100vh в пикселях
+      let finalOpacity = 0;
 
-  const { scrollYProgress: block3Progress } = useScroll({
-    target: block3Ref,
-    offset: isMobile ? ["start +45%", "end start"] : ["start +30%", "end start"],
-  });
+      // Функция для обработки каждого блока
+      const processBlock = (ref: React.RefObject<HTMLDivElement>, blockIndex: number) => {
+        if (!ref.current) return { y: 100 * vh, opacity: 0 };
 
-  const smoothBlock1Progress = useSpring(block1Progress, {
-    stiffness: 300,
-    damping: 30,
-    mass: 0.8,
-  });
-  const smoothBlock2Progress = useSpring(block2Progress, {
-    stiffness: 300,
-    damping: 30,
-    mass: 0.8,
-  });
-  const smoothBlock3Progress = useSpring(block3Progress, {
-    stiffness: 300,
-    damping: 30,
-    mass: 0.8,
-  });
+        const rect = ref.current.getBoundingClientRect();
+        const start = rect.top + latestScrollY;
 
-  const calculatePosition = useCallback(
-    (values: number[]) => {
-      const [p1 = 0, p2 = 0, p3 = 0] = values;
+        // Прогресс скролла внутри блока (от 0 до 1)
+        const progress = (latestScrollY + vh - start) / (vh + rect.height);
 
-      if (isMobile) {
-        // 📱 МОБИЛЬНАЯ ЛОГИКА.
-        // Блок 1
-        if (p1 > 0.05 && p1 <= 0.95) {
-          if (p1 <= 0.4) {
-            const localProgress = (p1 - 0.05) / 0.35; // 35% блока на появление
-            return `${100 - localProgress * 100}vh`;
-          }
-          if (p1 > 0.7) {
-            const localProgress = (p1 - 0.7) / 0.25; // 25% блока на уход
-            return `${-localProgress * 100}vh`;
-          }
-          return "0vh"; // Прилипание 0.4-0.7 (Прилипание 30% блока)
-        }
-
-        // Блок 2
-        if (p2 > 0.05 && p2 <= 0.95) {
-          if (p2 <= 0.4) {
-            const localProgress = (p2 - 0.05) / 0.35; // 35% блока на появление
-            return `${100 - localProgress * 100}vh`;
-          }
-          if (p2 > 0.7) {
-            const localProgress = (p2 - 0.7) / 0.25; // 25% блока на уход
-            return `${-localProgress * 100}vh`;
-          }
-          return "0vh"; // Прилипание 0.4-0.7 (Прилипание 30% блока)
-        }
-
-        // Блок 3
-        if (p3 > 0.05 && p3 <= 0.95) {
-          if (p3 <= 0.4) {
-            const localProgress = (p3 - 0.05) / 0.35; // 35% блока на появление
-            return `${100 - localProgress * 100}vh`;
-          }
-          if (p3 > 0.7) {
-            const localProgress = (p3 - 0.7) / 0.25; // 25% блока на уход
-            return `${-localProgress * 100}vh`;
-          }
-          return "0vh"; // Прилипание 0.4-0.7 (Прилипание 30% блока)
-        }
-      } else {
-        // 🖥️ ПК ЛОГИКА.
-        // Блок 1
-        if (p1 > 0.1 && p1 <= 0.9) {
-          if (p1 <= 0.3) {
-            const localProgress = (p1 - 0.1) / 0.2;
-            return `${100 - localProgress * 100}vh`;
-          }
-          if (p1 > 0.7) {
-            const localProgress = (p1 - 0.7) / 0.2;
-            return `${-localProgress * 100}vh`;
-          }
-          return "0vh";
-        }
-
-        // Блок 2
-        if (p2 > 0.1 && p2 <= 0.9) {
-          if (p2 <= 0.3) {
-            const localProgress = (p2 - 0.1) / 0.2;
-            return `${100 - localProgress * 100}vh`;
-          }
-          if (p2 > 0.7) {
-            const localProgress = (p2 - 0.7) / 0.2;
-            return `${-localProgress * 100}vh`;
-          }
-          return "0vh";
-        }
-
-        // Блок 3
-        if (p3 > 0.1 && p3 <= 0.9) {
-          if (p3 <= 0.3) {
-            const localProgress = (p3 - 0.1) / 0.2;
-            return `${100 - localProgress * 100}vh`;
-          }
-          if (p3 > 0.7) {
-            const localProgress = (p3 - 0.7) / 0.2;
-            return `${-localProgress * 100}vh`;
-          }
-          return "0vh";
-        }
-      }
-
-      return "100vh";
-    },
-    [isMobile]
-  );
-
-  // Логика движения видео с оптимизированными вычислениями
-  const y = useTransform([smoothBlock1Progress, smoothBlock2Progress, smoothBlock3Progress], calculatePosition);
-
-  const calculateOpacity = useCallback(
-    (values: number[]) => {
-      const [p1 = 0, p2 = 0, p3 = 0] = values;
-
-      const processOpacity = (p: number) => {
+        // 🎬 НАСТРОЙКИ АНИМАЦИИ ВИДЕО:
+        // =============================
+        // 🖥️ ПК КОРРЕКТИРОВКА: Блок 03 появляется на 25% (вместо 20%)
+        // 📱 МОБИЛЬНАЯ КОРРЕКТИРОВКА: Появление и исчезновение на 10% позже
+        let appearStart, appearEnd, disappearStart, disappearEnd;
+        
         if (isMobile) {
-          if (p > 0.05 && p <= 0.95) {
-            // Появление происходит на первых 35% пути (до p = 0.4)
-            if (p <= 0.25) {
-              // Становится непрозрачным на полпути к центру
-              return (p - 0.05) / 0.2;
-            }
-            // Исчезновение начинается, когда видео двигается вверх (p > 0.7)
-            if (p > 0.7) {
-              return 1 - (p - 0.7) / 0.25;
-            }
-            return 1; // Полностью видимо
-          }
+          // Мобильные: сдвиг на +10%
+          appearStart = 0.3;  // было 0.2, стало 0.3
+          appearEnd = 0.5;    // было 0.4, стало 0.5
+          disappearStart = 0.8; // было 0.7, стало 0.8
+          disappearEnd = 0.95;
         } else {
-          if (p > 0.1 && p <= 0.9) {
-            if (p <= 0.2) return (p - 0.1) / 0.1;
-            if (p >= 0.7) return 1 - (p - 0.7) / 0.2;
-            return 1;
-          }
+          // ПК: корректировка только для блока 03
+          appearStart = blockIndex === 3 ? 0.25 : 0.2;
+          appearEnd = blockIndex === 3 ? 0.45 : 0.4;
+          disappearStart = 0.7;
+          disappearEnd = 0.95;
         }
-        return 0; // Скрыто по умолчанию
+        
+        if (progress > appearStart && progress <= disappearEnd) {
+          // ФАЗА 1: Появление снизу
+          if (progress <= appearEnd) {
+            const localProgress = (progress - appearStart) / (appearEnd - appearStart);
+            const currentY = (1 - localProgress) * vh; // Движение снизу вверх
+            const currentOpacity = localProgress; // Плавное появление
+            return { y: currentY, opacity: currentOpacity };
+          }
+          // ФАЗА 3: Исчезновение вверх
+          if (progress > disappearStart) {
+            const localProgress = (progress - disappearStart) / (disappearEnd - disappearStart);
+            const currentY = -localProgress * vh; // Движение вверх (минус = вверх)
+            const currentOpacity = 1 - localProgress; // Плавное исчезновение
+            return { y: currentY, opacity: currentOpacity };
+          }
+          // ФАЗА 2: Прилипание к центру
+          return { y: 0, opacity: 1 };
+        }
+        return { y: 100 * vh, opacity: 0 };
       };
 
-      // Применяем логику к каждому блоку
-      const opacity1 = processOpacity(p1);
-      const opacity2 = processOpacity(p2);
-      const opacity3 = processOpacity(p3);
+      const state1 = processBlock(block1Ref, 1);
+      const state2 = processBlock(block2Ref, 2);
+      const state3 = processBlock(block3Ref, 3);
 
-      // Возвращаем максимальное значение, чтобы обеспечить плавный переход
-      return Math.max(opacity1, opacity2, opacity3);
-    },
-    [isMobile]
-  );
+      // Выбираем состояние с наибольшей видимостью
+      if (state1.opacity > finalOpacity) {
+        finalY = state1.y;
+        finalOpacity = state1.opacity;
+      }
+      if (state2.opacity > finalOpacity) {
+        finalY = state2.y;
+        finalOpacity = state2.opacity;
+      }
+      if (state3.opacity > finalOpacity) {
+        finalY = state3.y;
+        finalOpacity = state3.opacity;
+      }
 
-  // Opacity для каждого блока с оптимизированными вычислениями
-  const opacity = useTransform([smoothBlock1Progress, smoothBlock2Progress, smoothBlock3Progress], calculateOpacity);
+      y.set(`${(finalY / vh) * 100}vh`);
+      opacity.set(Math.min(1, finalOpacity));
+    };
+
+    const unsubscribe = scrollY.on("change", calculateState);
+    return () => unsubscribe();
+  }, [scrollY, y, opacity, block1Ref, block2Ref, block3Ref, isMobile]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -281,12 +201,12 @@ const FloatingVideo: React.FC<{
 
   const showPoster = !canPlay || isBuffering;
 
+  // Используем motion values напрямую в motion.div
   return (
     <>
-      <div ref={sectionRef} className="absolute inset-0 pointer-events-none" />
       <div className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none">
         <motion.div
-          style={{ y, opacity }}
+          style={{ y, opacity }} // <--- Прямое использование
           className="w-[95vw] max-w-[1000px] will-change-transform lg:w-[60vw] pointer-events-auto"
         >
           <div className="relative aspect-video overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm">
@@ -454,7 +374,7 @@ const MorphingVideoSection: React.FC = () => {
         bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
       }
     };
-    
+
     let ticking = false;
     const optimizedScroll = () => {
       if (!ticking) {
@@ -465,7 +385,7 @@ const MorphingVideoSection: React.FC = () => {
         ticking = true;
       }
     };
-    
+
     window.addEventListener("scroll", optimizedScroll, { passive: true });
     return () => window.removeEventListener("scroll", optimizedScroll);
   }, []);
@@ -488,11 +408,11 @@ const MorphingVideoSection: React.FC = () => {
       <div className="absolute inset-0 -z-30 overflow-hidden">
         <div
           className="parallax-bg absolute inset-0 w-full"
-          style={{ 
-            height: "calc(100% + 200px)", 
-            top: "-100px", 
+          style={{
+            height: "calc(100% + 200px)",
+            top: "-100px",
             willChange: "transform",
-            contain: window.innerWidth < 768 ? 'layout style paint' : 'none'
+            contain: window.innerWidth < 768 ? "layout style paint" : "none",
           }}
         >
           <div
@@ -523,26 +443,34 @@ const MorphingVideoSection: React.FC = () => {
       {/* Заголовок секции */}
       <div className="relative z-30 px-4 pt-24 pb-12 text-center">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-[0.2em]" style={{
-            background: 'linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)',
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            animation: 'gradient-shift 6s ease-in-out infinite',
-            textShadow: '0 0 20px rgba(14, 165, 233, 0.3)',
-            filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))'
-          }}>
+          <h2
+            className="mb-4 text-sm font-medium uppercase tracking-[0.2em]"
+            style={{
+              background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
+              backgroundSize: "200% 100%",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              animation: "gradient-shift 6s ease-in-out infinite",
+              textShadow: "0 0 20px rgba(14, 165, 233, 0.3)",
+              filter: "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
+            }}
+          >
             Наука • Качество • Доверие
           </h2>
-          <h3 className="mb-8 text-4xl font-semibold md:text-6xl" style={{
-            background: 'linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #1e293b 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: 'drop-shadow(0 0 2px rgba(59, 130, 246, 0.4))',
-            position: 'relative'
-          }}>Почему 4Life?</h3>
+          <h3
+            className="mb-8 text-4xl font-semibold md:text-6xl"
+            style={{
+              background: "linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #1e293b 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              filter: "drop-shadow(0 0 2px rgba(59, 130, 246, 0.4))",
+              position: "relative",
+            }}
+          >
+            Почему 4Life?
+          </h3>
           <ScrollText className="mx-auto max-w-4xl text-lg leading-relaxed">
             Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая продукты,
             которые являются результатом фундаментальных исследований и передовых технологий.
@@ -557,32 +485,36 @@ const MorphingVideoSection: React.FC = () => {
             <div className="container mx-auto px-4 md:px-8 max-w-6xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-3 order-2 lg:order-1">
-                  <ScrollNumber 
-                    number="01" 
+                  <ScrollNumber
+                    number="01"
                     className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none"
                   />
                 </div>
                 <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
-                  <h4 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight" style={{
-                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))',
-                    position: 'relative'
-                  }}>
+                  <h4
+                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight"
+                    style={{
+                      background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
+                      position: "relative",
+                    }}
+                  >
                     Исследования и Инновации
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl">
-                    В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы, уникальные
-                    молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные функции для точного и
-                    своевременного реагирования. 4Life не просто следует науке — компания её создаёт.
+                    В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
+                    уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
+                    функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
+                    создаёт.
                   </ScrollText>
                 </div>
               </div>
             </div>
           </div>
-          <div className="relative z-10 min-h-[190vh] lg:min-h-[200vh]">
+          <div className="relative z-10 min-h-[137vh] lg:min-h-[180vh]">
             <Grid3D type={1} triggerRef={block1Ref} />
           </div>
         </div>
@@ -593,56 +525,60 @@ const MorphingVideoSection: React.FC = () => {
             <div className="container mx-auto px-4 md:px-8 max-w-6xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-9 order-1 space-y-6 text-right">
-                  <h4 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight" style={{
-                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))',
-                    position: 'relative'
-                  }}>
+                  <h4
+                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight"
+                    style={{
+                      background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
+                      position: "relative",
+                    }}
+                  >
                     Бескомпромиссный Контроль Качества
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl ml-auto">
-                    Каждый этап производства проходит строгий контроль качества. Современные технологии и сертифицированные
-                    процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности и эффективности
-                    продукции.
+                    Каждый этап производства проходит строгий контроль качества. Современные технологии и
+                    сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности
+                    и эффективности продукции.
                   </ScrollText>
                 </div>
                 <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
-                  <ScrollNumber 
-                    number="02" 
+                  <ScrollNumber
+                    number="02"
                     className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none lg:translate-x-8"
                   />
                 </div>
               </div>
             </div>
           </div>
-          <div className="relative z-10 min-h-[190vh] lg:min-h-[200vh]">
+          <div className="relative z-10 min-h-[137vh] lg:min-h-[180vh]">
             <Grid3D type={2} triggerRef={block2Ref} />
           </div>
         </div>
-
-
 
         {/* Блок 03 - Результат */}
         <div ref={block3Ref} className="relative">
           <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
             <div className="container mx-auto px-4 md:px-8 max-w-6xl">
               <div className="text-center space-y-8">
-                <ScrollNumber 
-                  number="03" 
+                <ScrollNumber
+                  number="03"
                   className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none"
                 />
                 <div className="space-y-6">
-                  <h4 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight max-w-4xl mx-auto" style={{
-                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))',
-                    position: 'relative'
-                  }}>
+                  <h4
+                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight max-w-4xl mx-auto"
+                    style={{
+                      background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
+                      position: "relative",
+                    }}
+                  >
                     Подтверждённая Эффективность
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl mx-auto">
@@ -653,13 +589,13 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="relative z-10 min-h-[190vh] lg:min-h-[200vh]">
+          <div className="relative z-10 min-h-[137vh] lg:min-h-[180vh]">
             <Grid3D type={3} triggerRef={block3Ref} />
           </div>
         </div>
 
         {/* Пространство после секции */}
-        <div className="h-[50vh]"></div>
+        <div className="h-[36vh] lg:h-[45vh]"></div>
       </div>
 
       {/* Единое видео для всех блоков */}

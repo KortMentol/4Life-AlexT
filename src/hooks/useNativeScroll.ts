@@ -1,16 +1,16 @@
+import { scrollLockState } from "@/lib/scrollLockState";
 import { useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
-import { scrollLockState } from "@/lib/scrollLockState";
 
 export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const headerY = useMotionValue(0);
-  const headerYSmooth = useSpring(headerY, { 
-    stiffness: 400, 
+  const headerYSmooth = useSpring(headerY, {
+    stiffness: 400,
     damping: 40,
-    mass: 0.8
+    mass: 0.8,
   });
-  
+
   const isMobile = useIsMobile();
   const scrollCount = useRef(0);
   const scrollTimer = useRef<NodeJS.Timeout | null>(null);
@@ -18,22 +18,26 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const touchStartY = useRef(0);
   const headerStartY = useRef(0);
 
+  // Переменные для дросселирования (throttling)
+  const lastTouchMoveTime = useRef(0);
+  // Обновляем не чаще, чем раз в ~16.67 мс (что соответствует ~60 FPS)
+  const THROTTLE_INTERVAL = 16;
+
   useEffect(() => {
     if (disabled) return;
 
-    // Десктопная логика - 2 скролла вниз чтобы скрыть, 1 вверх чтобы показать
-    
+    // Десктопная логика остается без изменений
     const handleWheel = (event: WheelEvent) => {
       const direction = event.deltaY > 0 ? "down" : "up";
-      
+
       if (direction === "down") {
         if (scrollTimer.current) clearTimeout(scrollTimer.current);
         scrollCount.current++;
-        
+
         if (scrollCount.current >= 2 && window.scrollY > 50) {
           headerY.set(-100);
         }
-        
+
         scrollTimer.current = setTimeout(() => {
           scrollCount.current = 0;
         }, 300);
@@ -44,57 +48,46 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       }
     };
 
-    // Мобильная логика - следование за пальцем как нативный бар браузера
-    let lastTouchTime = 0;
-    
+    // Мобильная логика с оптимизацией
     const handleTouchStart = (event: TouchEvent) => {
       if (!event.touches[0]) return;
       isTouching.current = true;
       touchStartY.current = event.touches[0].clientY;
       headerStartY.current = headerY.get();
-      headerY.stop(); // Останавливаем spring анимацию
-      lastTouchTime = performance.now();
+      headerY.stop(); // Останавливаем spring-анимацию для мгновенного отклика
     };
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (!isTouching.current || !event.touches[0]) return;
-      
-      // Throttling для мобильных - максимум 60 FPS
       const now = performance.now();
-      if (now - lastTouchTime < 16) return;
-      lastTouchTime = now;
-      
-      // Если вертикальный скролл заблокирован горизонтальным свайпом - не двигаем хедер
+      if (now - lastTouchMoveTime.current < THROTTLE_INTERVAL) {
+        return; // Пропускаем вызов, если прошло слишком мало времени
+      }
+      lastTouchMoveTime.current = now;
+
+      if (!isTouching.current || !event.touches[0]) return;
       if (scrollLockState.isLocked) return;
-      
+
       const currentTouchY = event.touches[0].clientY;
       const deltaY = currentTouchY - touchStartY.current;
-      
-      // Рассчитываем новую позицию хедера на основе движения пальца
-      const newHeaderY = headerStartY.current + deltaY * 0.8; // Увеличиваем чувствительность
+      const newHeaderY = headerStartY.current + deltaY;
       const clampedY = Math.max(-100, Math.min(0, newHeaderY));
-      
-      // Прямое управление без spring для мгновенного отклика
+
       headerY.set(clampedY);
     };
 
     const handleTouchEnd = () => {
       if (!isTouching.current) return;
       isTouching.current = false;
-      
-      // Если скролл был заблокирован - не анимируем хедер
       if (scrollLockState.isLocked) return;
-      
+
       const currentY = headerY.get();
       const velocity = headerY.getVelocity();
-      
-      // Логика "прилипания" с учетом скорости и позиции
+
       if (Math.abs(velocity) > 150) {
-        // Быстрое движение - анимируем в направлении движения
         headerY.set(velocity < 0 ? -100 : 0);
       } else {
-        // Медленное движение - прилипаем к ближайшей позиции (более чувствительный порог)
-        headerY.set(currentY < -30 ? -100 : 0);
+        // Используем порог в 50% для "прилипания"
+        headerY.set(currentY < -50 ? -100 : 0);
       }
     };
 
@@ -106,7 +99,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     } else {
       window.addEventListener("wheel", handleWheel, { passive: true });
     }
-    
+
     return () => {
       if (isMobile) {
         window.removeEventListener("touchstart", handleTouchStart);

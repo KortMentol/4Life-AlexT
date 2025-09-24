@@ -6,7 +6,7 @@
   --header-dark-highlight: #3a4553;
   --header-dark-glow: #00d4ff;
   --header-dark-glow-rgb: 0, 212, 255;
-  
+
   /* Light Theme - Premium Glass */
   --header-light-bg: rgba(255, 255, 255, 0.98);
   --header-light-surface: rgba(248, 250, 252, 0.95);
@@ -32,6 +32,7 @@
   will-change: transform;
   contain: layout style paint;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  isolation: isolate;
 }
 
 .header-premium--dark {
@@ -39,27 +40,35 @@
     /* Top spotlight creating depth */
     radial-gradient(ellipse 150% 60% at 50% -10%, rgba(var(--header-dark-glow-rgb), 0.2) 0%, transparent 70%),
     /* Side highlights for 3D effect */
-    linear-gradient(90deg, transparent 0%, rgba(var(--header-dark-glow-rgb), 0.05) 20%, transparent 40%, transparent 60%, rgba(var(--header-dark-glow-rgb), 0.05) 80%, transparent 100%),
+      linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(var(--header-dark-glow-rgb), 0.05) 20%,
+        transparent 40%,
+        transparent 60%,
+        rgba(var(--header-dark-glow-rgb), 0.05) 80%,
+        transparent 100%
+      ),
     /* Main capsule gradient with extreme depth */
-    linear-gradient(135deg, 
-      var(--header-dark-bg) 0%,
-      var(--header-dark-surface) 15%,
-      var(--header-dark-accent) 35%,
-      var(--header-dark-highlight) 50%,
-      var(--header-dark-accent) 65%,
-      var(--header-dark-surface) 85%,
-      var(--header-dark-bg) 100%
-    );
-  
+      linear-gradient(
+        135deg,
+        var(--header-dark-bg) 0%,
+        var(--header-dark-surface) 15%,
+        var(--header-dark-accent) 35%,
+        var(--header-dark-highlight) 50%,
+        var(--header-dark-accent) 65%,
+        var(--header-dark-surface) 85%,
+        var(--header-dark-bg) 100%
+      );
+
   box-shadow:
     /* Inner 3D structure */
     inset 0 2px 4px rgba(var(--header-dark-glow-rgb), 0.3),
     inset 0 -2px 4px rgba(0, 0, 0, 0.8),
     inset 2px 0 4px rgba(var(--header-dark-glow-rgb), 0.1),
     inset -2px 0 4px rgba(var(--header-dark-glow-rgb), 0.1),
-    /* Deep drop shadow */
-    0 25px 80px rgba(0, 0, 0, 0.6);
-  
+    /* Deep drop shadow */ 0 25px 80px rgba(0, 0, 0, 0.6);
+
   border: 1px solid rgba(var(--header-dark-glow-rgb), 0.4);
 }
 
@@ -68,36 +77,43 @@
     /* Top glass highlight */
     radial-gradient(ellipse 150% 60% at 50% -10%, rgba(255, 255, 255, 0.9) 0%, transparent 70%),
     /* Side reflections */
-    linear-gradient(90deg, transparent 0%, rgba(var(--header-light-glow-rgb), 0.08) 20%, transparent 40%, transparent 60%, rgba(var(--header-light-glow-rgb), 0.08) 80%, transparent 100%),
+      linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(var(--header-light-glow-rgb), 0.08) 20%,
+        transparent 40%,
+        transparent 60%,
+        rgba(var(--header-light-glow-rgb), 0.08) 80%,
+        transparent 100%
+      ),
     /* Premium glass gradient */
-    linear-gradient(135deg,
-      var(--header-light-bg) 0%,
-      var(--header-light-surface) 15%,
-      var(--header-light-accent) 35%,
-      var(--header-light-highlight) 50%,
-      var(--header-light-accent) 65%,
-      var(--header-light-surface) 85%,
-      var(--header-light-bg) 100%
-    );
-  
+      linear-gradient(
+        135deg,
+        var(--header-light-bg) 0%,
+        var(--header-light-surface) 15%,
+        var(--header-light-accent) 35%,
+        var(--header-light-highlight) 50%,
+        var(--header-light-accent) 65%,
+        var(--header-light-surface) 85%,
+        var(--header-light-bg) 100%
+      );
+
   box-shadow:
     /* Outer glow */
     0 0 40px rgba(var(--header-light-glow-rgb), 0.2),
     0 0 80px rgba(var(--header-light-glow-rgb), 0.1),
-    /* Glass depth effect */
-    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    /* Glass depth effect */ inset 0 2px 4px rgba(255, 255, 255, 0.8),
     inset 0 -2px 4px rgba(0, 0, 0, 0.15),
     inset 2px 0 4px rgba(255, 255, 255, 0.4),
     inset -2px 0 4px rgba(255, 255, 255, 0.4),
-    /* Drop shadow */
-    0 20px 60px rgba(0, 0, 0, 0.15);
-  
+    /* Drop shadow */ 0 20px 60px rgba(0, 0, 0, 0.15);
+
   border: 1px solid rgba(var(--header-light-glow-rgb), 0.3);
 }
 
 /* 3D Capsule Enhancement */
 .header-premium::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 1px;
   left: 1px;

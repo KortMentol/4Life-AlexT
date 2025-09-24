@@ -34,7 +34,6 @@ const ScrollNumber: React.FC<ScrollNumberProps> = ({ number, className = "" }) =
   );
 
   const opacity = useTransform(scrollYProgress, [0, 0.3, 1], [0, 1, 0.9]);
-  const glow = useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.8, 0.6]);
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
@@ -49,9 +48,7 @@ const ScrollNumber: React.FC<ScrollNumberProps> = ({ number, className = "" }) =
         style={{
           clipPath,
           opacity,
-          color: theme === 'dark' ? '#22d3ee' : '#0ea5e9',
-          filter: `drop-shadow(0 0 ${glow.get() * 12}px rgba(14, 165, 233, ${glow.get() * 0.4}))`,
-          textShadow: `0 0 ${glow.get() * 8}px rgba(14, 165, 233, ${glow.get() * 0.3})`
+          color: theme === 'dark' ? '#22d3ee' : '#0ea5e9'
         }}
       >
         {number}
