@@ -19,6 +19,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const headerStartY = useRef(0);
   const prevScrollPos = useRef(0);
   const lastScrollTime = useRef(0);
+  const isNavigating = useRef(false);
 
   // Переменные для дросселирования (throttling)
   const lastTouchMoveTime = useRef(0);
@@ -54,6 +55,9 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
 
     // Новая логика для ручного перетаскивания скроллбара (только ПК)
     const handleScroll = () => {
+      // Игнорируем скролл во время навигации
+      if (isNavigating.current) return;
+      
       const now = performance.now();
       if (now - lastScrollTime.current < 16) return; // 60fps throttle
       lastScrollTime.current = now;
@@ -142,7 +146,23 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   }, [disabled, isMobile, headerY]);
 
   const forceShowHeader = () => {
+    // Устанавливаем флаг навигации
+    isNavigating.current = true;
+    
+    // Принудительно показываем хедер
     headerY.set(0);
+    scrollCount.current = 0;
+    if (scrollTimer.current) {
+      clearTimeout(scrollTimer.current);
+      scrollTimer.current = null;
+    }
+    
+    // Снимаем флаг через короткую задержку
+    setTimeout(() => {
+      // Обновляем позицию скролла ПОСЛЕ снятия флага
+      prevScrollPos.current = window.scrollY;
+      isNavigating.current = false;
+    }, 300);
   };
 
   return { headerY: headerYSmooth, forceShowHeader };

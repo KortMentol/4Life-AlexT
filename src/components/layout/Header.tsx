@@ -68,8 +68,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   }, [isMenuOpen]);
 
   useEffect(() => {
+    // При смене страницы плавно показываем хедер
     forceShowHeader();
-  }, [location.pathname, location.search, location.hash]);
+  }, [location.pathname, location.search, location.hash, forceShowHeader]);
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
