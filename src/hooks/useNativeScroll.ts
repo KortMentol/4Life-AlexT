@@ -55,8 +55,10 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
 
 
 
-    // Десктопная логика для wheel
+    // Десктопная логика для wheel (защищена от скролла во время прелоадера)
     const handleWheel = (event: WheelEvent) => {
+      if (!isAppMounted.current || isNavigating.current) return;
+      
       const direction = event.deltaY > 0 ? "down" : "up";
 
       if (direction === "down") {
@@ -77,28 +79,41 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       }
     };
 
-    // Новая логика для ручного перетаскивания скроллбара (только ПК)
+    // Логика для ручного перетаскивания скроллбара (работает всегда)
     const handleScroll = () => {
-      // Игнорируем скролл до монтирования приложения и во время навигации
-      if (!isAppMounted.current || isNavigating.current) return;
+      if (isNavigating.current) return;
       
       const now = performance.now();
-      if (now - lastScrollTime.current < 16) return; // 60fps throttle
+      if (now - lastScrollTime.current < 16) return;
       lastScrollTime.current = now;
 
       const currentScrollPos = window.scrollY;
       const isScrollingUp = prevScrollPos.current > currentScrollPos;
       const scrollDelta = Math.abs(currentScrollPos - prevScrollPos.current);
-      prevScrollPos.current = currentScrollPos;
-
-      // Игнорируем микро-движения
-      if (scrollDelta < 5) return;
-
-      if (isScrollingUp) {
-        headerY.set(0);
-      } else if (currentScrollPos > 50) {
-        headerY.set(-100);
+      
+      if (scrollDelta < 2) {
+        prevScrollPos.current = currentScrollPos;
+        return;
       }
+      
+      if (isScrollingUp) {
+        if (scrollTimer.current) clearTimeout(scrollTimer.current);
+        scrollCount.current = 0;
+        headerY.set(0);
+      } else {
+        if (scrollTimer.current) clearTimeout(scrollTimer.current);
+        scrollCount.current++;
+
+        if (scrollCount.current >= 2 && currentScrollPos > 50) {
+          headerY.set(-100);
+        }
+
+        scrollTimer.current = setTimeout(() => {
+          scrollCount.current = 0;
+        }, 300);
+      }
+
+      prevScrollPos.current = currentScrollPos;
     };
 
     // Мобильная логика с оптимизацией

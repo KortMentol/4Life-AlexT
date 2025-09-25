@@ -464,6 +464,8 @@ const MorphingVideoSection: React.FC = () => {
               backgroundClip: "text",
               filter: "drop-shadow(0 0 2px rgba(59, 130, 246, 0.4))",
               position: "relative",
+              lineHeight: "1.2",
+              paddingBottom: "0.1em",
             }}
           >
             Почему 4Life?

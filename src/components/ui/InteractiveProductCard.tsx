@@ -93,7 +93,7 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
         </Link>
         <div className="p-6 flex flex-col flex-grow">
           <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">{product.title}</h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">{product.description}</p>
+          <p className={`text-gray-600 dark:text-gray-400 text-sm mb-4 ${isMobile ? 'line-clamp-4' : 'line-clamp-3'}`}>{product.description}</p>
           <Link
             to={product.link}
             // --- ИЗМЕНЕНИЕ ЗДЕСЬ: добавлен класс `self-start` ---
