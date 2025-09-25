@@ -20,11 +20,35 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const prevScrollPos = useRef(0);
   const lastScrollTime = useRef(0);
   const isNavigating = useRef(false);
+  const isAppMounted = useRef(false);
 
   // Переменные для дросселирования (throttling)
   const lastTouchMoveTime = useRef(0);
   // Обновляем не чаще, чем раз в ~16.67 мс (что соответствует ~60 FPS)
   const THROTTLE_INTERVAL = 16;
+
+  // Слушатель глобального события для принудительного показа хедера
+  useEffect(() => {
+    const handleForceShow = () => {
+      forceShowHeader();
+    };
+    window.addEventListener("force-header-show", handleForceShow);
+    return () => {
+      window.removeEventListener("force-header-show", handleForceShow);
+    };
+  }, []);
+
+  // Слушатель события монтирования приложения от прелоадера
+  useEffect(() => {
+    const handleAppReady = () => {
+      isAppMounted.current = true;
+      forceShowHeader();
+    };
+    window.addEventListener("app-mounted", handleAppReady, { once: true });
+    return () => {
+      window.removeEventListener("app-mounted", handleAppReady);
+    };
+  }, []);
 
   useEffect(() => {
     if (disabled) return;
@@ -55,8 +79,8 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
 
     // Новая логика для ручного перетаскивания скроллбара (только ПК)
     const handleScroll = () => {
-      // Игнорируем скролл во время навигации
-      if (isNavigating.current) return;
+      // Игнорируем скролл до монтирования приложения и во время навигации
+      if (!isAppMounted.current || isNavigating.current) return;
       
       const now = performance.now();
       if (now - lastScrollTime.current < 16) return; // 60fps throttle

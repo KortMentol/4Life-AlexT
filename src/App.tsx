@@ -4,12 +4,13 @@ import Header from "@/components/layout/Header";
 import Layout from "@/components/layout/Layout";
 import TheodoreMenu from "@/components/layout/TheodoreMenu";
 import RouteChangeHandler from "@/components/RouteChangeHandler";
+import PopTransitionOverlay from "@/components/transitions/PopTransitionOverlay";
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { useIsMobile } from "@/hooks/useIsMobile"; // <--- ИМПОРТИРУЕМ ХУК
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
 import { scrollToTop } from "@/utils/navigationUtils";
-import React, { Suspense, useCallback, useEffect, useState } from "react";
+import React, { createContext, Suspense, useCallback, useContext, useEffect, useState, useRef } from "react";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 // Lazy-loaded...
@@ -21,6 +22,32 @@ const ContactPage = React.lazy(() => import("@/pages/ContactPage"));
 const PartnershipPage = React.lazy(() => import("@/pages/PartnershipPage"));
 const HowToBuyPage = React.lazy(() => import("@/pages/HowToBuyPage"));
 
+// Navigation Context
+interface NavigationContextType {
+  setIsPopping: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const NavigationContext = createContext<NavigationContextType | null>(null);
+
+export const useNavigation = () => {
+  const context = useContext(NavigationContext);
+  if (!context) {
+    throw new Error("useNavigation must be used within a NavigationProvider");
+  }
+  return context;
+};
+
+const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isPopping, setIsPopping] = useState(false);
+
+  return (
+    <NavigationContext.Provider value={{ setIsPopping }}>
+      {children}
+      <PopTransitionOverlay isActive={isPopping} />
+    </NavigationContext.Provider>
+  );
+};
+
 function App() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -28,6 +55,18 @@ function App() {
 
   // --- НАЧАЛО ИСПРАВЛЕННОЙ ЛОГИКИ МЕНЮ ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMenuActionRef = useRef(false);
+  const wasMenuOpenRef = useRef(false);
+
+  useEffect(() => {
+    // Сбрасываем флаг после того, как состояние меню обновилось,
+    // чтобы не мешать реальным pop-переходам.
+    isMenuActionRef.current = false;
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    wasMenuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
 
   // Следим за popstate (кнопки вперед/назад)
   useEffect(() => {
@@ -43,6 +82,8 @@ function App() {
   const toggleMenu = useCallback(() => {
     const currentPath = location.pathname + location.search;
 
+    isMenuActionRef.current = true;
+
     if (isMenuOpen) {
       // Если меню открыто, закрываем его, возвращаясь назад по истории
       navigate(-1);
@@ -56,6 +97,7 @@ function App() {
 
   const closeMenu = useCallback(() => {
     if (isMenuOpen) {
+      isMenuActionRef.current = true;
       navigate(-1);
     }
   }, [isMenuOpen, navigate]);
@@ -140,8 +182,9 @@ function App() {
   }, []);
 
   return (
-    <ProductListProvider>
-      <RouteChangeHandler />
+    <NavigationProvider>
+      <ProductListProvider>
+        <RouteChangeHandler isMenuActionRef={isMenuActionRef} wasMenuOpenRef={wasMenuOpenRef} />
       <Suspense fallback={null}>
         <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />
         <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
@@ -191,8 +234,9 @@ function App() {
           />
         </Routes>
       </Suspense>
-      {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
-    </ProductListProvider>
+        {isMobile ? <PerformanceDebugMobile /> : <PerformanceDebug />}
+      </ProductListProvider>
+    </NavigationProvider>
   );
 }
 
