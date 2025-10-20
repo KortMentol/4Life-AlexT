@@ -1,6 +1,9 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
+
+// Проверка на мобильное устройство
+const isMobile = () => window.innerWidth < 768;
 
 interface AuroraTextProps {
   children: React.ReactNode;
@@ -15,7 +18,7 @@ interface AuroraTextProps {
  * Эффект достигается за счет анимированного линейного градиента, примененного к тексту.
  *
  * @author Kort
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @param {React.ReactNode} children - Текстовый узел, к которому применяется эффект.
  * @param {string} [className] - Дополнительные CSS-классы для стилизации контейнера.
@@ -26,6 +29,7 @@ interface AuroraTextProps {
  *
  * @usage
  * Компонент используется для создания анимированного градиентного текста в ключевых заголовках на главной странице.
+ * На мобильных устройствах анимация отключается для оптимизации производительности.
  *
  * **Точное использование в проекте:**
  * 1. **Главная страница (`src/pages/HomePage.tsx`), главный экран `Hero`:**
@@ -35,7 +39,7 @@ interface AuroraTextProps {
  *    - Применяется к заголовку `"Инновационные продукты для иммунитета"`.
  *
  * 3. **Главная страница (`src/pages/HomePage.tsx`), финальная секция `CallToAction`:**
- *    - Применяется к части заголовка `"в своё здоровье и будущее?"`.
+ *    - Применяется к части заголовка `"первый шаг?"`.
  *
  * @example
  * // Пример из блока Hero на HomePage.tsx
@@ -51,20 +55,26 @@ const AuroraTextComponent = memo(
     colors = ["#FF0080", "#7928CA", "#0070F3", "#38bdf8"],
     speed = 1,
   }: AuroraTextProps) => {
+    // Мемоизируем проверку мобильного устройства
+    const isOnMobile = useMemo(() => isMobile(), []);
+    
     const gradientStyle = {
       backgroundImage: `linear-gradient(135deg, ${colors.join(", ")}, ${
         colors[0]
       })`,
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
-      animationDuration: `${10 / speed}s`,
+      // Отключаем анимацию на мобильных для производительности
+      animationDuration: isOnMobile ? "0s" : `${10 / speed}s`,
     };
 
     return (
       <span className={`relative inline-block ${className}`}>
         <span className="sr-only">{children}</span>
         <span
-          className="relative animate-aurora bg-[length:200%_auto] bg-clip-text text-transparent"
+          className={`relative bg-[length:200%_auto] bg-clip-text text-transparent ${
+            isOnMobile ? "" : "animate-aurora"
+          }`}
           style={gradientStyle}
           aria-hidden="true"
         >

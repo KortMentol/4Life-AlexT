@@ -1,5 +1,5 @@
 import { AuroraText } from "@/components/magicui/aurora-text";
-import { MorphingVideoSection, PartnershipSection } from "@/components/sections";
+import { FinalCTASection, MorphingVideoSection, PartnershipSection } from "@/components/sections";
 import { Button, ParallaxSection } from "@/components/ui";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
@@ -11,7 +11,7 @@ import tfPlusImg from "@/assets/images/products/tf-plus.webp";
 import tfTrifactorImg from "@/assets/images/products/tf-trifactor.webp";
 import renuvoImg from "@/assets/images/products/renuvo.webp";
 import bg2Img from "@/assets/images/backgrounds/HomePage/2.jpg";
-import bg5Img from "@/assets/images/backgrounds/HomePage/5.jpg";
+
 import heroVideoWebm from "@/assets/videos/backgrounds/HomePage/Hero-section/Why 4Life Transfer Factor®_.webm";
 import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.webp";
 import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
@@ -127,7 +127,7 @@ const HomePage: React.FC = () => {
                 <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-all duration-300 group-hover:rotate-12" />
               }
             >
-              Получить скидку
+              Как приобрести
             </Button>
           </div>
 
@@ -206,59 +206,7 @@ const HomePage: React.FC = () => {
 
       <PartnershipSection />
 
-      <ParallaxSection
-        backgroundImage={bg5Img}
-        altText="Присоединяйтесь к команде 4Life"
-        height="h-[120vh]"
-        parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
-        contentClasses="flex flex-col items-center justify-center text-center py-24"
-        imageBrightness="brightness-[.5]"
-      >
-        <div className="container max-w-7xl mx-auto px-6 text-center">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex justify-center mb-8">
-              <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
-            </div>
-
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              <span className="block mb-2">Готовы инвестировать</span>
-              <AuroraText colors={["#007BFF", "#FFFFFF", "#38BDF8", "#60A5FA"]} speed={1.4}>
-                в своё здоровье и будущее?
-              </AuroraText>
-            </h2>
-
-            <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto">
-              Присоединяйтесь к нашей команде и получите персональную консультацию по продуктам и бизнес-возможностям
-              4Life. Сделайте первый шаг к здоровью и финансовой независимости.
-            </p>
-
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <Button
-                href="https://russia.4life.com/12299550"
-                isExternal
-                variant="primary"
-                size="lg"
-                className="group"
-                icon={<Icons.ShoppingCart className="w-5 h-5 transition-all duration-300 group-hover:rotate-12" />}
-              >
-                Купить продукты
-              </Button>
-              <Button
-                href="https://russia.4life.com/12299550/signup/PC"
-                isExternal
-                variant="secondary"
-                size="lg"
-                className="group"
-                icon={<Icons.UserPlus className="w-5 h-5 transition-all duration-300 group-hover:scale-110" />}
-              >
-                Стать партнером
-              </Button>
-            </div>
-
-
-          </div>
-        </div>
-      </ParallaxSection>
+      <FinalCTASection />
     </motion.div>
   );
 };

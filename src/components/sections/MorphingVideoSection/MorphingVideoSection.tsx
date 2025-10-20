@@ -24,7 +24,7 @@ import { useTheme } from "@/hooks";
 
 // Глобальные типы для GSAP
 declare global {
-  interface Window {
+  interface Window { 
     gsap: any;
     ScrollTrigger: any;
   }
@@ -105,17 +105,20 @@ const FloatingVideo: React.FC<{
     const updateGeometries = () => {
       // Используем requestAnimationFrame для гарантии, что DOM уже отрисован
       requestAnimationFrame(() => {
-        if (block1Ref.current) geometries.current['1'] = { top: block1Ref.current.offsetTop, height: block1Ref.current.offsetHeight };
-        if (block2Ref.current) geometries.current['2'] = { top: block2Ref.current.offsetTop, height: block2Ref.current.offsetHeight };
-        if (block3Ref.current) geometries.current['3'] = { top: block3Ref.current.offsetTop, height: block3Ref.current.offsetHeight };
+        if (block1Ref.current)
+          geometries.current["1"] = { top: block1Ref.current.offsetTop, height: block1Ref.current.offsetHeight };
+        if (block2Ref.current)
+          geometries.current["2"] = { top: block2Ref.current.offsetTop, height: block2Ref.current.offsetHeight };
+        if (block3Ref.current)
+          geometries.current["3"] = { top: block3Ref.current.offsetTop, height: block3Ref.current.offsetHeight };
       });
     };
 
     updateGeometries(); // Вызываем один раз для начального кеширования
-    window.addEventListener('resize', updateGeometries, { passive: true });
+    window.addEventListener("resize", updateGeometries, { passive: true });
 
     return () => {
-      window.removeEventListener('resize', updateGeometries);
+      window.removeEventListener("resize", updateGeometries);
     };
   }, [block1Ref, block2Ref, block3Ref]); // Зависимости от ref'ов
 
@@ -130,7 +133,7 @@ const FloatingVideo: React.FC<{
       const processBlock = (blockIndex: number) => {
         const geo = geometries.current[String(blockIndex)];
         if (!geo) return { y: 100 * vh, opacity: 0 };
-        
+
         const start = geo.top; // БЕРЕМ ИЗ КЕША
         const blockHeight = geo.height; // БЕРЕМ ИЗ КЕША
 
@@ -139,21 +142,27 @@ const FloatingVideo: React.FC<{
 
         let appearStart, appearEnd, disappearStart, disappearEnd;
         if (isMobile) {
-          appearStart = 0.55; appearEnd = 0.95; disappearStart = 1.2; disappearEnd = 1.6;
+          appearStart = 0.55;
+          appearEnd = 0.95;
+          disappearStart = 1.2;
+          disappearEnd = 1.6;
         } else {
           appearStart = blockIndex === 3 ? 0.65 : 0.6;
           appearEnd = blockIndex === 3 ? 0.85 : 0.8;
           disappearStart = 1.1;
           disappearEnd = 1.35;
         }
-        
+
         if (progress >= appearStart && progress <= disappearEnd) {
           if (progress <= appearEnd) {
             const localProgress = Math.max(0, Math.min(1, (progress - appearStart) / (appearEnd - appearStart)));
             return { y: (1 - localProgress) * vh, opacity: localProgress };
           }
           if (progress >= disappearStart) {
-            const localProgress = Math.max(0, Math.min(1, (progress - disappearStart) / (disappearEnd - disappearStart)));
+            const localProgress = Math.max(
+              0,
+              Math.min(1, (progress - disappearStart) / (disappearEnd - disappearStart))
+            );
             return { y: -localProgress * vh, opacity: Math.max(0, 1 - localProgress) };
           }
           return { y: 0, opacity: 1 };
@@ -165,9 +174,18 @@ const FloatingVideo: React.FC<{
       const state2 = processBlock(2);
       const state3 = processBlock(3);
 
-      if (state1.opacity > finalOpacity) { finalY = state1.y; finalOpacity = state1.opacity; }
-      if (state2.opacity > finalOpacity) { finalY = state2.y; finalOpacity = state2.opacity; }
-      if (state3.opacity > finalOpacity) { finalY = state3.y; finalOpacity = state3.opacity; }
+      if (state1.opacity > finalOpacity) {
+        finalY = state1.y;
+        finalOpacity = state1.opacity;
+      }
+      if (state2.opacity > finalOpacity) {
+        finalY = state2.y;
+        finalOpacity = state2.opacity;
+      }
+      if (state3.opacity > finalOpacity) {
+        finalY = state3.y;
+        finalOpacity = state3.opacity;
+      }
 
       y.set(`${(finalY / vh) * 100}vh`);
       opacity.set(Math.min(1, finalOpacity));
@@ -581,8 +599,10 @@ const MorphingVideoSection: React.FC = () => {
                     Подтверждённая Эффективность
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl mx-auto">
-                    Миллионы довольных клиентов по всему миру подтверждают эффективность продукции 4Life. Научно
-                    обоснованные решения приносят реальные, ощутимые результаты для здоровья, энергии и качества жизни.
+                    Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом,
+                    мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная
+                    система работает как швейцарские часы. Миллионы людей уже почувствовали эту разницу. Теперь ваша
+                    очередь открыть для себя, каково это — жить в полную силу.
                   </ScrollText>
                 </div>
               </div>
