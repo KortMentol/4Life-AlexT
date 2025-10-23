@@ -7,6 +7,7 @@ import RouteChangeHandler from "@/components/RouteChangeHandler";
 import PopTransitionOverlay from "@/components/transitions/PopTransitionOverlay";
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { useIsMobile } from "@/hooks/useIsMobile"; // <--- ИМПОРТИРУЕМ ХУК
+import { useTouchScrollLock } from "@/hooks/useTouchScrollLock";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
 import { scrollToTop } from "@/utils/navigationUtils";
@@ -55,6 +56,9 @@ function App() {
 
   // --- НАЧАЛО ИСПРАВЛЕННОЙ ЛОГИКИ МЕНЮ ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Агрессивная блокировка нативного скролла (когда меню закрыто)
+  useTouchScrollLock(!isMenuOpen);
   const isMenuActionRef = useRef(false);
   const wasMenuOpenRef = useRef(false);
 

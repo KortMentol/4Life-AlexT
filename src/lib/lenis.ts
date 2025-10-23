@@ -29,6 +29,7 @@ export const lenis = new Lenis({
   wheelMultiplier: 1.0, // Стандартная скорость колеса
   touchMultiplier: 2.5, // Немного ускорить скролл на тач-устройствах
   infinite: false,
+  gestureOrientation: "vertical",
 } as LenisOptions) as unknown as LenisType;
 
 // Добавляем кастомное свойство, если оно нужно для вашего типа
