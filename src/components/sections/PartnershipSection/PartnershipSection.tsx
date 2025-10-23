@@ -335,4 +335,4 @@ const PartnershipSection: React.FC = () => {
   );
 };
 
-export default PartnershipSection;
+export default React.memo(PartnershipSection);

@@ -166,8 +166,8 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
         <motion.div
           className={`relative w-full h-full ${imageBrightness}`}
           style={{ 
-            y, 
-            willChange: "transform",
+            y,
+            willChange: 'transform',
             contain: isMobile ? 'layout style paint' : 'none'
           }}
         >

@@ -380,32 +380,11 @@ const MorphingVideoSection: React.FC = () => {
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-      const yPos = (scrolled - 0.5) * 120;
-      const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
-      if (bg) {
-        bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
-      }
-    };
-
-    let ticking = false;
-    const optimizedScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", optimizedScroll, { passive: true });
-    return () => window.removeEventListener("scroll", optimizedScroll);
-  }, []);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [-100, 100]);
 
   useEffect(() => {
     const preloadVideos = () => {
@@ -423,9 +402,10 @@ const MorphingVideoSection: React.FC = () => {
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
       {/* Параллакс фон */}
       <div className="absolute inset-0 -z-30 overflow-hidden">
-        <div
+        <motion.div
           className="parallax-bg absolute inset-0 w-full"
           style={{
+            y: parallaxY,
             height: "calc(100% + 200px)",
             top: "-100px",
             willChange: "transform",
@@ -454,7 +434,7 @@ const MorphingVideoSection: React.FC = () => {
               filter: "brightness(0.7) contrast(1.1)",
             }}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Заголовок секции */}

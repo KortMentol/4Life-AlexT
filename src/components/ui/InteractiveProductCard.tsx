@@ -68,8 +68,8 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
       style={{
         transformPerspective: 1000,
         transformStyle: "preserve-3d",
-        willChange: isMobile ? 'transform' : 'auto',
-        contain: isMobile ? 'layout style paint' : 'none',
+        willChange: 'transform',
+        contain: 'layout style paint',
       }}
     >
       <div

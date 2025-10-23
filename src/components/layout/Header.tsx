@@ -106,8 +106,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       style={{
         y: headerY,
         ...cssVars,
-        willChange: isMobile ? 'transform' : 'auto',
-        contain: isMobile ? 'layout style paint' : 'none',
+        willChange: 'transform',
+        contain: 'layout style paint',
       }}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >

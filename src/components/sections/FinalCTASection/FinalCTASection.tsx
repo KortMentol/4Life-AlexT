@@ -107,9 +107,11 @@ const FinalCTASection: React.FC = () => {
           </div>
 
           {/* Дополнительная информация */}
-          <div className="mt-12 flex items-center justify-center text-white/70">
-            <Icons.Shield className="w-5 h-5 text-cyan-300 mr-2" />
-            <span className="text-sm md:text-base">Присоединяйтесь к миллионам людей в 50+ странах мира</span>
+          <div className="mt-12 flex flex-col md:flex-row items-center justify-center text-white/70 gap-3 md:gap-0">
+            <div className="flex items-center justify-center w-12 h-12 md:w-auto md:h-auto rounded-full bg-cyan-500/10 md:bg-transparent border border-cyan-400/30 md:border-0 backdrop-blur-sm md:backdrop-blur-0">
+              <Icons.Shield className="w-5 h-5 md:mr-2 text-cyan-300" />
+            </div>
+            <span className="text-sm md:text-base text-center md:text-left">Присоединяйтесь к миллионам людей в 50+ странах мира</span>
           </div>
         </div>
       </div>
@@ -117,4 +119,4 @@ const FinalCTASection: React.FC = () => {
   );
 };
 
-export default FinalCTASection;
+export default React.memo(FinalCTASection);
