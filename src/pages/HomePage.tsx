@@ -110,7 +110,7 @@ const HomePage: React.FC = () => {
               to="/products"
               variant="primary"
               size="lg"
-              className="group from-blue-600 to-blue-500 shadow-lg"
+              className="group from-blue-600 to-blue-500 shadow-lg min-w-[245px] sm:min-w-0"
               icon={
                 <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:translate-x-1" />
               }
@@ -122,7 +122,7 @@ const HomePage: React.FC = () => {
               to="/how-to-buy"
               variant="secondary"
               size="lg"
-              className="group bg-white/10 border-white/30"
+              className="group bg-white/10 border-white/30 min-w-[245px] sm:min-w-0"
               icon={
                 <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-all duration-300 group-hover:rotate-12" />
               }

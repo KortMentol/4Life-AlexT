@@ -18,6 +18,8 @@ import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-secti
 
 // Components
 import ScrollNumber from "@/components/ui/ScrollNumber";
+import { Button } from "@/components/ui";
+import { Icons } from "@/utils/icons";
 
 // Hooks
 import { useTheme } from "@/hooks";
@@ -614,7 +616,22 @@ const MorphingVideoSection: React.FC = () => {
         </div>
 
         {/* Пространство после секции */}
-        <div className="h-[36vh] lg:h-[45vh]"></div>
+        <div className="h-[12vh] lg:h-[20vh]"></div>
+      </div>
+
+      {/* CTA кнопка */}
+      <div className="relative z-30 px-4 pb-24 text-center">
+        <div className="mx-auto max-w-4xl">
+          <Button
+            to="/about"
+            variant="primary"
+            size="lg"
+            className="from-cyan-600 to-blue-600 shadow-lg"
+            icon={<Icons.Info className="w-5 h-5" />}
+          >
+            Узнать больше о компании
+          </Button>
+        </div>
       </div>
 
       {/* Единое видео для всех блоков */}

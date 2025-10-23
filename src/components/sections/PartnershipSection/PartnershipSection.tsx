@@ -316,34 +316,19 @@ const PartnershipSection: React.FC = () => {
             Готовы узнать о возможностях?
           </h3>
           <ScrollText className="mx-auto mb-12 max-w-3xl text-lg leading-relaxed">
-            Получите персональную консультацию и узнайте, как стать частью глобального сообщества 4Life. Первый шаг к новым возможностям начинается с простого разговора.
+            Узнайте, как стать частью глобального сообщества 4Life и открыть для себя новые горизонты развития и дохода.
           </ScrollText>
 
-          <div className="flex flex-col gap-6 sm:flex-row sm:justify-center">
-            <Button
-              to="/partnership"
-              variant="primary"
-              size="lg"
-              className="from-cyan-600 to-blue-600 shadow-lg"
-              icon={
-                <Icons.Users className="w-5 h-5" />
-              }
-            >
-              Узнать о возможностях
-            </Button>
-
-            <Button
-              to="/contact"
-              variant="secondary"
-              size="lg"
-              className="bg-white/10 border-white/30 backdrop-blur-sm"
-              icon={
-                <Icons.MessageCircle className="w-5 h-5" />
-              }
-            >
-              Получить консультацию
-            </Button>
-          </div>
+          <Button
+            to="/partnership"
+            variant="primary"
+            size="lg"
+            className="from-cyan-600 to-blue-600 shadow-lg"
+            icon={<Icons.Users className="w-5 h-5" />}
+          >
+            <span className="hidden sm:inline">Узнать о возможностях партнерства</span>
+            <span className="inline sm:hidden">Узнать о партнерстве</span>
+          </Button>
         </div>
       </div>
     </section>
