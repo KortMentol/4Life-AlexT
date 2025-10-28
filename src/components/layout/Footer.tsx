@@ -1,17 +1,20 @@
 // Файл: src/components/layout/Footer.tsx
 
 import DarkVeil from "@/components/effects/DarkVeil";
+import CssVeilBackground from "@/components/effects/CssVeilBackground";
 import { DynamicLogo } from "@/components/ui";
 import { useTransition } from "@/context";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { useIsMobile, usePerformanceTier } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
 import { scrollToTop } from "@/utils/navigationUtils";
 import { motion } from "framer-motion";
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import React from "react";
 import { useLocation } from "react-router-dom";
+import "./Footer.css";
 
 const Footer: React.FC = () => {
+  const tier = usePerformanceTier();
   const isMobile = useIsMobile();
   const currentYear = new Date().getFullYear();
   const { transitionTo } = useTransition();
@@ -47,26 +50,28 @@ const Footer: React.FC = () => {
   };
 
   return (
-    // ВАЖНО: Убедитесь, что здесь нет классов фона вроде bg-gray-900
     <footer className="pt-16 pb-8 relative overflow-hidden">
-      {/* ВАЖНО: z-0 помещает фон на самый нижний слой ВНУТРИ футера */}
       <div className="absolute inset-0 w-full h-full z-0">
-        <DarkVeil
-          speed={0.8}
-          hueShift={isMobile ? 340 : 360}
-          noiseIntensity={0}
-          scanlineFrequency={0}
-          scanlineIntensity={0}
-          warpAmount={5}
-          resolutionScale={1}
-          isMobile={isMobile}
-        />
+        {tier === 'high' ? (
+          <DarkVeil
+            speed={0.8}
+            hueShift={isMobile ? 340 : 360}
+            noiseIntensity={0}
+            scanlineFrequency={0}
+            scanlineIntensity={0}
+            warpAmount={5}
+            resolutionScale={1}
+            isMobile={isMobile}
+          />
+        ) : (
+          <CssVeilBackground />
+        )}
       </div>
 
       {/* Весь контент ниже имеет z-10 и будет НАД фоном */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 z-10"></div>
+      <div className="footer-top-line absolute top-0 left-0 w-full h-px bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 z-10"></div>
 
-      <div className="container max-w-7xl mx-auto px-6 relative z-10">
+      <div className={`container footer-container ${tier !== 'high' ? 'css-veil-active' : ''} max-w-7xl mx-auto px-6 relative z-10`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* О компании */}
           <motion.div
@@ -77,9 +82,9 @@ const Footer: React.FC = () => {
           >
             <motion.div variants={itemVariants}>
               <a href="/" onClick={(e) => handleLinkClick(e, "/")} className="inline-block mb-6">
-                <DynamicLogo alt="4Life Logo" className="" size="lg" themeOverride="dark" />
+                <DynamicLogo alt="4Life Logo" className="" size="lg" themeOverride={tier === 'high' ? 'dark' : undefined} />
               </a>
-              <p className="text-gray-300 mb-6 text-pretty">
+              <p className="footer-description text-gray-300 mb-6 text-pretty">
                 4Life Research – глобальная компания в области велнеса, специализирующаяся на научных разработках для
                 поддержки иммунной системы.
               </p>
@@ -88,7 +93,7 @@ const Footer: React.FC = () => {
                   href={siteConfig.links.telegram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-white/80 transition-colors duration-200 ${
+                  className={`footer-social-icon text-white/80 transition-colors duration-200 ${
                     isMobile ? 'active:text-white' : 'hover:text-white'
                   }`}
                   aria-label="Telegram"
@@ -99,7 +104,7 @@ const Footer: React.FC = () => {
                   href={siteConfig.links.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-white/80 transition-colors duration-200 ${
+                  className={`footer-social-icon text-white/80 transition-colors duration-200 ${
                     isMobile ? 'active:text-white' : 'hover:text-white'
                   }`}
                   aria-label="WhatsApp"
@@ -108,7 +113,7 @@ const Footer: React.FC = () => {
                 </a>
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
-                  className={`text-white/80 transition-colors duration-200 ${
+                  className={`footer-social-icon text-white/80 transition-colors duration-200 ${
                     isMobile ? 'active:text-white' : 'hover:text-white'
                   }`}
                   aria-label="Phone"
@@ -117,7 +122,7 @@ const Footer: React.FC = () => {
                 </a>
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className={`text-white/80 transition-colors duration-200 ${
+                  className={`footer-social-icon text-white/80 transition-colors duration-200 ${
                     isMobile ? 'active:text-white' : 'hover:text-white'
                   }`}
                   aria-label="Email"
@@ -135,7 +140,7 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-white">
+            <motion.h3 variants={itemVariants} className="footer-heading text-lg font-bold mb-6 text-white">
               Быстрые ссылки
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-3">
@@ -143,7 +148,7 @@ const Footer: React.FC = () => {
                 <a
                   href="/products"
                   onClick={(e) => handleLinkClick(e, "/products")}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -154,7 +159,7 @@ const Footer: React.FC = () => {
                 <a
                   href="/about"
                   onClick={(e) => handleLinkClick(e, "/about")}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -165,7 +170,7 @@ const Footer: React.FC = () => {
                 <a
                   href="/about-me"
                   onClick={(e) => handleLinkClick(e, "/about-me")}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -176,7 +181,7 @@ const Footer: React.FC = () => {
                 <a
                   href="/partnership"
                   onClick={(e) => handleLinkClick(e, "/partnership")}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -187,7 +192,7 @@ const Footer: React.FC = () => {
                 <a
                   href="/contact"
                   onClick={(e) => handleLinkClick(e, "/contact")}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -204,15 +209,15 @@ const Footer: React.FC = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
           >
-            <motion.h3 variants={itemVariants} className="text-lg font-bold mb-6 text-white">
+            <motion.h3 variants={itemVariants} className="footer-heading text-lg font-bold mb-6 text-white">
               Контакты
             </motion.h3>
             <motion.ul variants={itemVariants} className="space-y-4">
               <li className="flex items-start">
-                <Mail className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
+                <Mail className="footer-icon w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -220,10 +225,10 @@ const Footer: React.FC = () => {
                 </a>
               </li>
               <li className="flex items-start">
-                <Phone className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
+                <Phone className="footer-icon w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
-                  className={`text-gray-300 transition-colors duration-200 ${
+                  className={`footer-link text-gray-300 transition-colors duration-200 ${
                     isMobile ? 'active:text-blue-400' : 'hover:text-blue-400'
                   }`}
                 >
@@ -231,22 +236,22 @@ const Footer: React.FC = () => {
                 </a>
               </li>
               <li className="flex items-start">
-                <MapPin className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-gray-300">{siteConfig.contact.address}</span>
+                <MapPin className="footer-icon w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
+                <span className="footer-description text-gray-300">{siteConfig.contact.address}</span>
               </li>
             </motion.ul>
           </motion.div>
         </div>
 
         {/* Нижняя часть футера */}
-        <div className="pt-8 border-t border-gray-200/20 dark:border-gray-700/50">
+        <div className="pt-8 border-t footer-divider border-gray-200/20 dark:border-gray-700/50">
           <div className="text-center">
-            <p className="text-gray-300 text-sm">© {currentYear} Александр Тощев. Все права защищены.</p>
+            <p className="footer-description text-gray-300 text-sm">© {currentYear} Александр Тощев. Все права защищены.</p>
 
-            <p className="text-xs text-gray-400 max-w-3xl mx-auto mt-6 leading-relaxed">
+            <p className="footer-small-text text-xs max-w-3xl mx-auto mt-6 leading-relaxed">
               Информация, представленная на этом вебсайте, относится исключительно к рынку Евразии.
             </p>
-            <p className="text-xs text-gray-400 font-medium mt-2">
+            <p className="footer-small-text text-xs font-medium mt-2">
               БИОЛОГИЧЕСКИ АКТИВНАЯ ДОБАВКА. НЕ МОЖЕТ ЗАМЕНЯТЬ ЛЕКАРСТВА.
             </p>
           </div>

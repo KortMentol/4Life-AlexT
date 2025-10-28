@@ -1,10 +1,8 @@
 /**
  * @module src/pages/ProductsPage.tsx
- * @description Awwwards 2025. Финальная версия страницы продуктов.
- * Оркестрирует ProductHeroSlider (hoanghodev), ProductCatalogGrid с хореографией добавления в корзину (biazo)
- * и бесшовные переходы в ProductDetailModal (Codrops RepeatingImageTransition).
+ * @description Awwwards 2025. Адаптивная версия с поддержкой разных уровней производительности.
  * @author Kort
- * @version 5.2.0 - TypeScript fixes
+ * @version 6.0.0 - Performance tier support
  */
 
 import { DetailedProduct, productsData } from "@/data/productsData";
@@ -17,8 +15,7 @@ import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-// ИСПРАВЛЕНИЕ 1: Импортируем useProductList
-import { useProductList } from "@/hooks/useProductList";
+import { useProductList, usePerformanceTier } from "@/hooks";
 import { getOptimizedImageUrl, optimizeAnimations, optimizeGSAP, preloadCriticalResources } from "@/utils/performance";
 
 // Media imports
@@ -42,12 +39,13 @@ const pageVariants = {
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const ProductsPage: React.FC = () => {
+  const tier = usePerformanceTier();
   const [selectedProduct, setSelectedProduct] = useState<DetailedProduct | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [dimmedCardId, setDimmedCardId] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // ИСПРАВЛЕНИЕ 1: Получаем addToList из правильного хука
   const { addToList } = useProductList();
 
   const [filters, setFilters] = useState<FilterState>({
@@ -147,8 +145,15 @@ const ProductsPage: React.FC = () => {
   const handleProductClick = useCallback(
     (product: DetailedProduct, element: HTMLDivElement) => {
       if (isAnimating) return;
-      setIsAnimating(true);
+      
       setSelectedProduct(product);
+
+      if (tier !== 'high') {
+        setIsOpen(true);
+        return;
+      }
+
+      setIsAnimating(true);
 
       const startImageEl = element.querySelector<HTMLElement>("[data-img-main]");
       const panel = modalRef.current?.getPanel();
@@ -237,10 +242,16 @@ const ProductsPage: React.FC = () => {
 
       tl.to(panelContent, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.5");
     },
-    [isAnimating]
+    [isAnimating, tier]
   );
 
   const handleCloseModal = useCallback(() => {
+    if (tier !== 'high') {
+      setIsOpen(false);
+      setSelectedProduct(null);
+      return;
+    }
+
     const panel = modalRef.current?.getPanel();
     const panelImage = modalRef.current?.getPanelImage();
     const panelContent = modalRef.current?.getPanelContent();
@@ -259,7 +270,7 @@ const ProductsPage: React.FC = () => {
       })
       .to(panelContent, { opacity: 0, y: 30, duration: 0.3, ease: "power2.in" })
       .to(panelImage, { clipPath: "inset(100% 0% 0% 0%)", duration: 0.5, ease: "power3.in" }, 0);
-  }, [isAnimating, selectedProduct]);
+  }, [isAnimating, selectedProduct, tier]);
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => setFilters(newFilters), []);
 
@@ -270,6 +281,12 @@ const ProductsPage: React.FC = () => {
   const handleAddToCart = useCallback(
     (product: DetailedProduct, sourceElement: HTMLElement) => {
       if (isAnimating) return;
+
+      // LOW TIER: Простое добавление без анимации
+      if (tier === 'low') {
+        addToList(product, 1);
+        return;
+      }
 
       setIsAnimating(true);
       setDimmedCardId(product.id);
@@ -285,7 +302,8 @@ const ProductsPage: React.FC = () => {
       const sourceRect = sourceElement.getBoundingClientRect();
       const cartRect = headerCartButton.getBoundingClientRect();
 
-      const flyingElements: HTMLElement[] = Array.from({ length: 5 }, () => {
+      const particleCount = tier === 'medium' ? 1 : 5;
+      const flyingElements: HTMLElement[] = Array.from({ length: particleCount }, () => {
         const el = document.createElement("div");
         el.className = "repeating-image-mover";
         el.style.cssText = `
@@ -325,8 +343,7 @@ const ProductsPage: React.FC = () => {
 
       tl.to(`[data-product-id="${product.id}"]`, { scale: 1, duration: 0.6, ease: "elastic.out(1, 0.6)" }, "+=0.2");
     },
-    // ИСПРАВЛЕНИЕ 1: Добавляем addToList в зависимости
-    [isAnimating, addToList]
+    [isAnimating, addToList, tier]
   );
 
   return (
@@ -872,8 +889,9 @@ const ProductsPage: React.FC = () => {
       <ProductDetailModal
         ref={modalRef}
         product={selectedProduct}
-        // ИСПРАВЛЕНИЕ 2: Удаляем ненужный проп isOpen
+        isOpen={isOpen}
         onClose={handleCloseModal}
+        isGsapControlled={tier === 'high'}
       />
     </motion.div>
   );

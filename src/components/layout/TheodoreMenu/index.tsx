@@ -5,6 +5,7 @@ import { mainNav } from "@/site-config/site";
 import { gsap } from "gsap";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import "./style.css";
 
 import img1 from "@/assets/images/MobileMenu/1.jpg";
@@ -89,6 +90,7 @@ const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 
 const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFromMenu }) => {
   const location = useLocation();
+  const tier = usePerformanceTier();
   const menuWrapRef = useRef<HTMLDivElement>(null);
   const overlayPathRef = useRef<SVGPathElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -119,6 +121,11 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
     const menuWrap = menuWrapRef.current;
     const overlayPath = overlayPathRef.current;
     const menuItems = gsap.utils.toArray<HTMLElement>(".menu__item", menuWrap);
+    
+    // Добавляем класс для отключения анимации плиток на low tier
+    if (tier === 'low') {
+      menuWrap.classList.add('low-performance');
+    }
 
     gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
 
@@ -184,8 +191,11 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
 
     return () => {
       tl.kill();
+      if (tier === 'low' && menuWrap) {
+        menuWrap.classList.remove('low-performance');
+      }
     };
-  }, []);
+  }, [tier]);
 
   useEffect(() => {
     const tl = timelineRef.current;

@@ -12,11 +12,9 @@ import {
   Gauge,
   HardDrive,
   Info,
-  Monitor,
   PieChart,
   Smartphone,
   Star,
-  Wifi,
   X,
   Zap,
 } from "lucide-react";
@@ -93,6 +91,23 @@ const PerformanceDebugMobile: React.FC = () => {
       animationId = requestAnimationFrame(performanceLoop);
     };
     performanceLoop();
+
+    // Предотвращаем скролл фона при скролле дебагера
+    const debugBody = document.querySelector(`.${styles.debugBody}`);
+    if (debugBody) {
+      const preventBackgroundScroll = (e: Event) => {
+        e.stopPropagation();
+      };
+      debugBody.addEventListener('touchstart', preventBackgroundScroll, { passive: true });
+      debugBody.addEventListener('touchmove', preventBackgroundScroll, { passive: true });
+      
+      return () => {
+        if (animationId) cancelAnimationFrame(animationId);
+        debugBody.removeEventListener('touchstart', preventBackgroundScroll);
+        debugBody.removeEventListener('touchmove', preventBackgroundScroll);
+      };
+    }
+
     return () => {
       if (animationId) cancelAnimationFrame(animationId);
     };
@@ -263,7 +278,7 @@ const PerformanceDebugMobile: React.FC = () => {
               </div>
               <strong>CPU:</strong>
               <span className={styles.infoValue}>
-                {deviceSpecs.cpuCores}c @ {deviceSpecs.cpuFrequency}
+                {deviceSpecs.cpuCores} cores
               </span>
             </div>
             <div className={styles.infoRow}>
@@ -284,29 +299,11 @@ const PerformanceDebugMobile: React.FC = () => {
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
-                <Monitor size={16} />
-              </div>
-              <strong>Screen:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.screenResolution}
-              </span>
-            </div>
-            <div className={styles.infoRow}>
-              <div className={styles.infoIcon}>
                 <Smartphone size={16} />
               </div>
               <strong>Touch:</strong>
               <span className={styles.infoValue}>
                 {deviceSpecs.touchSupport ? "Yes" : "No"}
-              </span>
-            </div>
-            <div className={styles.infoRow}>
-              <div className={styles.infoIcon}>
-                <Wifi size={16} />
-              </div>
-              <strong>Network:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.connectionType}
               </span>
             </div>
           </div>

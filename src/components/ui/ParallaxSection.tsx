@@ -2,6 +2,7 @@
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 
 export interface ParallaxSectionProps {
   backgroundImage?: string;
@@ -75,6 +76,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
+  const tier = usePerformanceTier();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -98,10 +100,12 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     offset: ["start end", "end start"],
   });
 
+  const finalParallaxStrength = tier === 'low' ? 0 : (tier === 'medium' ? parallaxStrength / 2 : parallaxStrength);
+
   const y = useTransform(
     scrollYProgress,
     [0, 1],
-    [`-${parallaxStrength / 2}vh`, `${parallaxStrength / 2}vh`],
+    [`-${finalParallaxStrength / 2}vh`, `${finalParallaxStrength / 2}vh`],
   );
 
   const finalBackgroundImage = isMobile
@@ -159,8 +163,8 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
       <div
         className="fixed left-0 w-full -z-10"
         style={{
-          height: `calc(100vh + ${parallaxStrength}vh)`,
-          top: `-${parallaxStrength / 2}vh`,
+          height: `calc(100vh + ${finalParallaxStrength}vh)`,
+          top: `-${finalParallaxStrength / 2}vh`,
         }}
       >
         <motion.div

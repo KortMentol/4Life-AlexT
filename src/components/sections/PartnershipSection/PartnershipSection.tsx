@@ -10,81 +10,39 @@
  * <PartnershipSection />
  */
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useEffect, useRef, useMemo } from "react";
-import { ScrollNumber } from "@/components/ui";
-import { Button } from "@/components/ui";
+import { Button, ScrollNumber } from "@/components/ui";
+import ScrollText from "@/components/ui/ScrollText";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { Icons } from "@/utils/icons";
+import React, { useEffect, useMemo, useRef } from "react";
 
 // Проверка на мобильное устройство
 const isMobile = () => window.innerWidth < 768;
-
-// Компонент для текста с эффектом окрашивания при скролле
-const ScrollText: React.FC<{ children: string; className?: string }> = ({ children, className = "" }) => {
-  const containerRef = useRef<HTMLParagraphElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 0.9", "start 0.25"],
-  });
-
-  const words = children.split(" ");
-
-  return (
-    <p ref={containerRef} className={`relative ${className}`}>
-      {words.map((word, i) => {
-        const start = i / words.length;
-        const end = start + 1 / words.length;
-        return (
-          <Word key={i} progress={scrollYProgress} range={[start, end]}>
-            {word}
-          </Word>
-        );
-      })}
-    </p>
-  );
-};
-
-const Word: React.FC<{ children: string; progress: any; range: [number, number] }> = ({
-  children,
-  progress,
-  range,
-}) => {
-  const opacity = useTransform(progress, range, [0.3, 1]);
-
-  return (
-    <span className="relative mr-3 mt-3 inline-block">
-      <span className="absolute opacity-30 dark:opacity-20">{children}</span>
-      <motion.span
-        style={{
-          opacity,
-          color: "rgb(6, 182, 212)", // cyan-500 for light theme
-        }}
-        className="dark:text-cyan-400"
-      >
-        {children}
-      </motion.span>
-    </span>
-  );
-};
 
 const PartnershipSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const block1Ref = useRef<HTMLDivElement>(null);
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
-  
+  const tier = usePerformanceTier();
+
   // Мемоизируем проверку мобильного устройства
   const isOnMobile = useMemo(() => isMobile(), []);
 
   useEffect(() => {
     // Отключаем параллакс на мобильных для производительности
     if (isOnMobile) return;
-    
+
     const handleScroll = () => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-      const yPos = (scrolled - 0.5) * 60; // Уменьшили интенсивность параллакса
+
+      let strength = 60;
+      if (tier === "medium") strength = 30;
+      if (tier === "low") strength = 0;
+
+      const yPos = (scrolled - 0.5) * strength;
       const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
       if (bg) {
         bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
@@ -104,7 +62,7 @@ const PartnershipSection: React.FC = () => {
 
     window.addEventListener("scroll", optimizedScroll, { passive: true });
     return () => window.removeEventListener("scroll", optimizedScroll);
-  }, [isOnMobile]);
+  }, [isOnMobile, tier]);
 
   return (
     <section ref={sectionRef} className="relative min-h-[300vh] overflow-hidden bg-transparent">
@@ -118,7 +76,7 @@ const PartnershipSection: React.FC = () => {
             transform: "translate3d(0, 0, 0)",
             willChange: "transform",
             backfaceVisibility: "hidden",
-            contain: window.innerWidth < 768 ? 'layout style paint' : 'none',
+            contain: window.innerWidth < 768 ? "layout style paint" : "none",
           }}
         >
           <div
@@ -187,7 +145,8 @@ const PartnershipSection: React.FC = () => {
             Путь к новым горизонтам
           </h3>
           <ScrollText className="mx-auto max-w-4xl text-lg leading-relaxed">
-            Откройте для себя мир возможностей, где ваша страсть к здоровому образу жизни становится источником дохода и личностного роста. Присоединяйтесь к глобальному сообществу единомышленников.
+            Откройте для себя мир возможностей, где ваша страсть к здоровому образу жизни становится источником дохода и
+            личностного роста. Присоединяйтесь к глобальному сообществу единомышленников.
           </ScrollText>
         </div>
       </div>
@@ -219,7 +178,9 @@ const PartnershipSection: React.FC = () => {
                     Дополнительные источники дохода
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl">
-                    Дополнительные источники дохода открываются перед теми, кто готов делиться знаниями о здоровье. Это не просто продажи — это миссия помочь людям обрести лучшую версию себя, получая за это достойное вознаграждение.
+                    Дополнительные источники дохода открываются перед теми, кто готов делиться знаниями о здоровье. Это
+                    не просто продажи — это миссия помочь людям обрести лучшую версию себя, получая за это достойное
+                    вознаграждение.
                   </ScrollText>
                 </div>
               </div>
@@ -248,7 +209,9 @@ const PartnershipSection: React.FC = () => {
                     Личностный рост и экспертность
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl ml-auto">
-                    Погружение в мир здорового образа жизни становится частью вашего личностного роста. Изучение принципов питания, иммунитета, биохимии организма расширяет горизонты и формирует экспертность в области, которая всегда будет актуальна.
+                    Погружение в мир здорового образа жизни становится частью вашего личностного роста. Изучение
+                    принципов питания, иммунитета, биохимии организма расширяет горизонты и формирует экспертность в
+                    области, которая всегда будет актуальна.
                   </ScrollText>
                 </div>
                 <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
@@ -287,7 +250,9 @@ const PartnershipSection: React.FC = () => {
                     Сообщество единомышленников
                   </h4>
                   <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl mx-auto">
-                    Вокруг вас формируется круг единомышленников — людей, которые ценят качество жизни и стремятся к совершенству. Это не просто бизнес-партнеры, это команда, которая поддерживает друг друга на пути к общим целям.
+                    Вокруг вас формируется круг единомышленников — людей, которые ценят качество жизни и стремятся к
+                    совершенству. Это не просто бизнес-партнеры, это команда, которая поддерживает друг друга на пути к
+                    общим целям.
                   </ScrollText>
                 </div>
               </div>

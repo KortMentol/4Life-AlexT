@@ -87,6 +87,9 @@
   padding: 0 1rem 1rem 1rem; /* 16px */
   max-height: 40vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y; /* Разрешаем вертикальный скролл внутри */
+  overscroll-behavior: contain; /* Предотвращаем скролл фона */
 }
 
 .metricsGrid {

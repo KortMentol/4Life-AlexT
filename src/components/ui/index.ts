@@ -16,6 +16,7 @@ export { default as ProductSpecModal } from "./ProductSpecModal";
 export { default as SciFiCloseButton } from "./SciFiCloseButton";
 export { default as SciFiThemeToggle } from "./SciFiThemeToggle";
 export { default as ScrollNumber } from "./ScrollNumber";
+export { default as ScrollText } from "./ScrollText";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";
 export { default as SectionHeading } from "./SectionHeading";
 export { default as ShoppingCartAnimation, useShoppingCart } from "./ShoppingCartAnimation";

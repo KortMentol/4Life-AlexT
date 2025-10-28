@@ -1,0 +1,142 @@
+/* 
+ * Footer.css - Awwwards 2025 дизайн для LOW/MEDIUM тиров
+ * Приоритет: FPS > Красота (но красота тоже важна)
+ */
+
+/* === ЦВЕТОВАЯ СХЕМА === */
+:root {
+  --footer-bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
+  --footer-text: #0f172a;
+  --footer-text-muted: #64748b;
+  --footer-accent: #3b82f6;
+  --footer-accent-glow: rgba(59, 130, 246, 0.15);
+  --footer-border: rgba(15, 23, 42, 0.06);
+  --footer-card-bg: rgba(255, 255, 255, 0.6);
+}
+
+.dark {
+  --footer-bg: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e293b 100%);
+  --footer-text: #f8fafc;
+  --footer-text-muted: #94a3b8;
+  --footer-accent: #38bdf8;
+  --footer-accent-glow: rgba(56, 189, 248, 0.15);
+  --footer-border: rgba(248, 250, 252, 0.06);
+  --footer-card-bg: rgba(15, 23, 42, 0.6);
+}
+
+/* === ФОН === */
+.css-veil-background {
+  position: absolute;
+  inset: 0;
+  background: var(--footer-bg);
+  transition: background 0.4s ease;
+}
+
+.css-veil-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 15% 20%, var(--footer-accent-glow), transparent 35%),
+    radial-gradient(circle at 85% 80%, var(--footer-accent-glow), transparent 35%);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+/* === ВЕРХНЯЯ ЛИНИЯ === */
+.footer-container.css-veil-active .footer-top-line {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--footer-accent) 50%, 
+    transparent 100%
+  );
+  opacity: 0.3;
+  height: 2px;
+  box-shadow: 0 0 20px var(--footer-accent-glow);
+}
+
+/* === ТИПОГРАФИКА === */
+.footer-container.css-veil-active .footer-heading {
+  color: var(--footer-text) !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.footer-container.css-veil-active .footer-description {
+  color: var(--footer-text-muted) !important;
+  line-height: 1.7;
+}
+
+.footer-container.css-veil-active .footer-link {
+  color: var(--footer-text-muted) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.footer-container.css-veil-active .footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--footer-accent);
+  transition: width 0.2s ease;
+}
+
+.footer-container.css-veil-active .footer-link:hover {
+  color: var(--footer-accent) !important;
+  transform: translateX(2px);
+}
+
+.footer-container.css-veil-active .footer-link:hover::after {
+  width: 100%;
+}
+
+/* === ИКОНКИ === */
+.footer-container.css-veil-active .footer-icon {
+  color: var(--footer-accent) !important;
+  filter: drop-shadow(0 0 4px var(--footer-accent-glow));
+}
+
+.footer-container.css-veil-active .footer-social-icon {
+  color: var(--footer-text-muted) !important;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--footer-card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--footer-border);
+}
+
+.footer-container.css-veil-active .footer-social-icon:hover {
+  color: var(--footer-accent) !important;
+  background: var(--footer-accent-glow);
+  border-color: var(--footer-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--footer-accent-glow);
+}
+
+/* === МЕЛКИЙ ТЕКСТ === */
+.footer-container.css-veil-active .footer-small-text {
+  color: var(--footer-text) !important;
+  opacity: 0.5;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+/* === РАЗДЕЛИТЕЛЬ === */
+.footer-container.css-veil-active .footer-divider {
+  border-color: var(--footer-border) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* === КАРТОЧКИ СЕКЦИЙ (опционально) === */
+.footer-container.css-veil-active > div > div {
+  backdrop-filter: blur(8px);
+}

@@ -9,6 +9,7 @@
  * <CustomScrollbar />
  */
 import { useIsMobile } from "@/hooks";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { lenis } from "@/lib/lenis";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -19,6 +20,7 @@ interface LenisScrollEvent {
 
 const CustomScrollbar: React.FC = () => {
   const isMobile = useIsMobile();
+  const tier = usePerformanceTier();
   const location = useLocation();
   
   const [isVisible, setIsVisible] = useState(false);
@@ -186,8 +188,8 @@ const CustomScrollbar: React.FC = () => {
     return () => clearTimeout(timer);
   }, [location.pathname, updateDimensions, showScrollbar, hideScrollbar]);
 
-  // Не показываем, если нет скролла или меню открыто
-  if (scrollableHeightRef.current <= 0 || document.body.classList.contains('menu-open')) {
+  // Не показываем, если нет скролла, меню открыто или low tier
+  if (tier === 'low' || scrollableHeightRef.current <= 0 || document.body.classList.contains('menu-open')) {
     return null;
   }
 

@@ -187,3 +187,8 @@
 .unbutton.button-close:hover .neon-arrow-path {
   stroke: #fff;
 }
+
+/* Отключение анимации плиток для low performance */
+.low-performance .tiles__line {
+  animation: none !important;
+}

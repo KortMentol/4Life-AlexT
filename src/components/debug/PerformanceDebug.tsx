@@ -12,12 +12,10 @@ import {
   Gauge,
   HardDrive,
   Info,
-  Monitor,
   Move,
   PieChart,
   Smartphone,
   Star,
-  Wifi,
   X,
   Zap,
 } from "lucide-react";
@@ -386,14 +384,14 @@ const PerformanceDebug: React.FC = () => {
             </div>
             <div
               className={styles.infoRow}
-              title={`CPU: ${deviceSpecs.cpuCores} cores @ ${deviceSpecs.cpuFrequency}`}
+              title={`CPU: ${deviceSpecs.cpuCores} cores`}
             >
               <div className={styles.infoIcon}>
                 <Cpu size={14} />
               </div>
               <strong>CPU:</strong>
               <span className={styles.infoValue}>
-                {deviceSpecs.cpuCores} cores @ {deviceSpecs.cpuFrequency}
+                {deviceSpecs.cpuCores} cores
               </span>
             </div>
             <div className={styles.infoRow} title={`GPU: ${deviceSpecs.gpu}`}>
@@ -417,19 +415,7 @@ const PerformanceDebug: React.FC = () => {
             </div>
             <div
               className={styles.infoRow}
-              title={`Screen: ${deviceSpecs.screenResolution}`}
-            >
-              <div className={styles.infoIcon}>
-                <Monitor size={14} />
-              </div>
-              <strong>Screen:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.screenResolution}
-              </span>
-            </div>
-            <div
-              className={styles.infoRow}
-              title={`Touch Support: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}
+              title={`Touch: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}
             >
               <div className={styles.infoIcon}>
                 <Smartphone size={14} />
@@ -437,18 +423,6 @@ const PerformanceDebug: React.FC = () => {
               <strong>Touch:</strong>
               <span className={styles.infoValue}>
                 {deviceSpecs.touchSupport ? "Yes" : "No"}
-              </span>
-            </div>
-            <div
-              className={styles.infoRow}
-              title={`Connection: ${deviceSpecs.connectionType}`}
-            >
-              <div className={styles.infoIcon}>
-                <Wifi size={14} />
-              </div>
-              <strong>Connection:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.connectionType}
               </span>
             </div>
           </div>

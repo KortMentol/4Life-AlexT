@@ -66,15 +66,14 @@ const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolea
 };
 
 const FluidEffect: React.FC = () => {
+  const tier = usePerformanceTier();
   const containerRef = useRef<HTMLDivElement>(null);
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
   const stopTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isRunningRef = useRef<boolean>(false);
 
-  // ▼▼▼ ГЛАВНОЕ ИЗМЕНЕНИЕ: Получаем resetKey для принудительного обновления ▼▼▼
   const { setFluidInstance, resetKey } = useFluid();
   const { theme } = useTheme();
-  const tier = usePerformanceTier();
 
   const isTouchDevice = useMemo(
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
@@ -279,7 +278,7 @@ const FluidEffect: React.FC = () => {
     };
   }, [startAnimation]);
 
-  if (DISABLE_FLUID_EFFECT) {
+  if (DISABLE_FLUID_EFFECT || tier !== 'high') {
     return null;
   }
 

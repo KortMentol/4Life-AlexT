@@ -4,9 +4,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 
 const ScrollToTopButton: React.FC = () => {
   const isMobile = useIsMobile();
+  const tier = usePerformanceTier();
   const [isVisible, setIsVisible] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -221,20 +223,34 @@ const ScrollToTopButton: React.FC = () => {
     }
     setIsActivated(true);
     setScrollProgress(0);
-    createParticles();
+    
+    // Частицы только для high tier
+    if (tier === 'high') {
+      createParticles();
+    }
     const scrollDuration = 1500;
-    const startTime = performance.now();
-    progressIntervalRef.current = window.setInterval(() => {
-      const elapsed = performance.now() - startTime;
-      const progress = Math.min(elapsed / scrollDuration, 1);
-      setScrollProgress(progress);
-      if (progress >= 1) {
-        clearInterval(progressIntervalRef.current!);
-        progressIntervalRef.current = null;
+    
+    // Прогресс-бар только для medium и high
+    if (tier !== 'low') {
+      const startTime = performance.now();
+      progressIntervalRef.current = window.setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / scrollDuration, 1);
+        setScrollProgress(progress);
+        if (progress >= 1) {
+          clearInterval(progressIntervalRef.current!);
+          progressIntervalRef.current = null;
+          setScrollProgress(0);
+          setIsActivated(false);
+        }
+      }, 16);
+    } else {
+      // Для low tier просто сбрасываем состояние через 1.5с
+      setTimeout(() => {
         setScrollProgress(0);
         setIsActivated(false);
-      }
-    }, 16);
+      }, scrollDuration);
+    }
     lenisScrollTo(0, { duration: scrollDuration / 1000 });
   };
 

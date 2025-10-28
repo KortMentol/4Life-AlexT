@@ -10,75 +10,28 @@
  * <MorphingVideoSection />
  */
 
-import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
+import { motion, useMotionValue, useScroll } from "framer-motion";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Media imports
 import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
 
 // Components
-import ScrollNumber from "@/components/ui/ScrollNumber";
 import { Button } from "@/components/ui";
+import ScrollNumber from "@/components/ui/ScrollNumber";
+import ScrollText from "@/components/ui/ScrollText";
 import { Icons } from "@/utils/icons";
 
 // Hooks
-import { useTheme } from "@/hooks";
+import { usePerformanceTier } from "@/hooks";
 
 // Глобальные типы для GSAP
 declare global {
-  interface Window { 
+  interface Window {
     gsap: any;
     ScrollTrigger: any;
   }
 }
-
-// Компонент для текста с эффектом окрашивания при скролле
-const ScrollText: React.FC<{ children: string; className?: string }> = ({ children, className = "" }) => {
-  const containerRef = useRef<HTMLParagraphElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 1", "end 0.6"],
-  });
-
-  const words = children.split(" ");
-
-  return (
-    <p ref={containerRef} className={`relative ${className}`}>
-      {words.map((word, i) => {
-        const start = i / words.length;
-        const end = start + 1 / words.length;
-        return (
-          <Word key={i} progress={scrollYProgress} range={[start, end]}>
-            {word}
-          </Word>
-        );
-      })}
-    </p>
-  );
-};
-
-const Word: React.FC<{ children: string; progress: any; range: [number, number] }> = ({
-  children,
-  progress,
-  range,
-}) => {
-  const { theme } = useTheme();
-  const opacity = useTransform(progress, range, [theme === "dark" ? 0.1 : 0.2, 1]);
-
-  return (
-    <span className="relative mr-3 mt-3 inline-block">
-      <span className="absolute opacity-0">{children}</span>
-      <motion.span
-        style={{
-          opacity,
-          color: theme === "dark" ? "#00d4ff" : "#0066ff",
-        }}
-      >
-        {children}
-      </motion.span>
-    </span>
-  );
-};
 
 // Компонент для парящего видео с правильной логикой для трех блоков
 const FloatingVideo: React.FC<{
@@ -375,16 +328,47 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
 
 // Основной компонент секции
 const MorphingVideoSection: React.FC = () => {
+  const tier = usePerformanceTier();
   const sectionRef = useRef<HTMLDivElement>(null);
   const block1Ref = useRef<HTMLDivElement>(null);
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
-  const parallaxY = useTransform(scrollYProgress, [0, 1], [-100, 100]);
+  const isOnMobile = useMemo(() => window.innerWidth < 768, []);
+
+  useEffect(() => {
+    if (isOnMobile) return;
+
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+
+      let strength = 60;
+      if (tier === "medium") strength = 30;
+      if (tier === "low") strength = 0;
+
+      const yPos = (scrolled - 0.5) * strength;
+      const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
+      if (bg) {
+        bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
+      }
+    };
+
+    let ticking = false;
+    const optimizedScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", optimizedScroll, { passive: true });
+    return () => window.removeEventListener("scroll", optimizedScroll);
+  }, [isOnMobile, tier]);
 
   useEffect(() => {
     const preloadVideos = () => {
@@ -402,13 +386,14 @@ const MorphingVideoSection: React.FC = () => {
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
       {/* Параллакс фон */}
       <div className="absolute inset-0 -z-30 overflow-hidden">
-        <motion.div
+        <div
           className="parallax-bg absolute inset-0 w-full"
           style={{
-            y: parallaxY,
             height: "calc(100% + 200px)",
             top: "-100px",
+            transform: "translate3d(0, 0, 0)",
             willChange: "transform",
+            backfaceVisibility: "hidden",
             contain: window.innerWidth < 768 ? "layout style paint" : "none",
           }}
         >
@@ -434,7 +419,7 @@ const MorphingVideoSection: React.FC = () => {
               filter: "brightness(0.7) contrast(1.1)",
             }}
           />
-        </motion.div>
+        </div>
       </div>
 
       {/* Заголовок секции */}
@@ -514,7 +499,7 @@ const MorphingVideoSection: React.FC = () => {
             </div>
           </div>
           <div className="relative z-10 min-h-[200vh] lg:min-h-[180vh]">
-            <Grid3D type={1} triggerRef={block1Ref} />
+            {tier === "high" && <Grid3D type={1} triggerRef={block1Ref} />}
           </div>
         </div>
 
@@ -553,7 +538,7 @@ const MorphingVideoSection: React.FC = () => {
             </div>
           </div>
           <div className="relative z-10 min-h-[200vh] lg:min-h-[180vh]">
-            <Grid3D type={2} triggerRef={block2Ref} />
+            {tier === "high" && <Grid3D type={2} triggerRef={block2Ref} />}
           </div>
         </div>
 
@@ -591,7 +576,7 @@ const MorphingVideoSection: React.FC = () => {
             </div>
           </div>
           <div className="relative z-10 min-h-[200vh] lg:min-h-[180vh]">
-            <Grid3D type={3} triggerRef={block3Ref} />
+            {tier === "high" && <Grid3D type={3} triggerRef={block3Ref} />}
           </div>
         </div>
 
