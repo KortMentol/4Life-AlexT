@@ -1,0 +1,85 @@
+/* src/styles/components/product-catalog.css */
+
+/**
+ * @module src/styles/components/product-catalog.css
+ * @description E-commerce Pro: CSS-only анимации для максимального FPS
+ * @author Kort
+ * @version 1.0.0
+ */
+
+/* Fade-in анимация */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Карточки продуктов */
+.product-card {
+  animation: fadeIn 0.4s ease-out forwards;
+  opacity: 0;
+  contain: layout style paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.product-card,
+.product-card *,
+.product-card > div {
+  pointer-events: auto;
+}
+
+.product-card button {
+  transition: background-color 0.2s ease;
+}
+
+/* Оптимизация для touch устройств */
+@media (hover: none) and (pointer: coarse) {
+  .product-card {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+
+
+/* Dimmed состояние */
+.product-card-dimmed {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Grid оптимизация */
+.product-grid {
+  contain: layout;
+  transform: translateZ(0);
+}
+
+/* Плавный скролл только на desktop */
+@media (min-width: 1024px) and (hover: hover) {
+  .product-grid {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Производительность */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .product-card * {
+    transition: none !important;
+  }
+}

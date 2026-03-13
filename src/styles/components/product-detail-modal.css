@@ -1,0 +1,131 @@
+/* src/styles/components/product-detail-modal.css */
+
+/**
+ * @module src/styles/components/product-detail-modal.css
+ * @description Premium Modal Styles - Awwwards 2025 (v4.0.0 with Masking)
+ * @author Kort
+ * @version 4.0.0
+ */
+
+/* Premium Scrollbar - appears only when scrolling */
+.premium-scroll {
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.premium-scroll.is-scrolling {
+  scrollbar-color: rgba(6, 182, 212, 0.8) rgba(17, 24, 39, 0.3);
+}
+
+.premium-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.premium-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+  transition: background 0.5s ease;
+}
+
+.premium-scroll.is-scrolling::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.3);
+}
+
+.premium-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s ease;
+}
+
+.premium-scroll.is-scrolling::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.7), rgba(59, 130, 246, 0.8));
+}
+
+.premium-scroll.is-scrolling::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 1), rgba(59, 130, 246, 1));
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+}
+
+/* Scroll Arrow Indicator */
+.scroll-arrow-indicator {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.2));
+  border: 1.5px solid rgba(6, 182, 212, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 11;
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.3), inset 0 0 20px rgba(6, 182, 212, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.scroll-arrow-indicator:hover {
+  transform: translateX(-50%) scale(1.15);
+}
+
+.scroll-arrow-indicator:active {
+  transform: translateX(-50%) scale(0.9);
+}
+
+/* CSS Mask для проявления контента */
+.premium-scroll.has-scroll {
+  mask-image: linear-gradient(to bottom, black calc(100% - 300px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 300px), transparent 100%);
+  transition: mask-image 0.8s cubic-bezier(0.4, 0, 0.2, 1), -webkit-mask-image 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-scroll.has-scroll.scroll-started {
+  mask-image: linear-gradient(to bottom, black, black);
+  -webkit-mask-image: linear-gradient(to bottom, black, black);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .scroll-arrow-indicator {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-scroll.has-scroll {
+    mask-image: linear-gradient(to bottom, black calc(100% - 200px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 200px), transparent 100%);
+  }
+  
+  .scroll-arrow-indicator {
+    width: 32px;
+    height: 32px;
+    bottom: 20px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .premium-scroll {
+    transition: scrollbar-color 0.2s ease;
+  }
+  
+  .premium-scroll.has-scroll {
+    mask-image: none;
+    -webkit-mask-image: none;
+    transition: none;
+  }
+  
+  .scroll-arrow-indicator {
+    animation: none;
+    transition: all 0.2s ease;
+  }
+}

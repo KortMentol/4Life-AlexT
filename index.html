@@ -17,8 +17,6 @@
       rel="stylesheet"
     />
 
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
@@ -34,22 +32,20 @@
         --preloader-track-color-light: rgba(100, 116, 139, 0.15);
         --preloader-track-color-dark: rgba(203, 213, 225, 0.1);
       }
-      
+
       html {
         scrollbar-gutter: stable;
       }
-      
-      /* ▼▼▼ НАЧАЛО КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №1 ▼▼▼ */
+
       #root {
         /* По умолчанию скрываем основной контейнер приложения.
            Это не даст Chrome показать пустой скелет страницы
            до того, как React будет готов. */
         opacity: 0;
         /* Плавное появление, когда GSAP изменит opacity на 1 */
-        transition: opacity 0.6s ease; 
+        transition: opacity 0.6s ease;
       }
-      /* ▲▲▲ КОНЕЦ КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №1 ▲▲▲ */
-      
+
       #preloader {
         position: fixed;
         inset: 0;
@@ -63,7 +59,7 @@
         backface-visibility: hidden;
         perspective: 1000px;
       }
-      
+
       @media (prefers-color-scheme: dark) {
         #preloader {
           background: var(--preloader-bg-dark);
@@ -87,7 +83,7 @@
         will-change: transform, opacity;
         transform-style: preserve-3d;
       }
-      
+
       .preloader-text-group {
         position: absolute;
         top: 160px;
@@ -117,26 +113,26 @@
         overflow: visible;
         will-change: transform;
       }
-      
+
       .progress-ring__track,
       .progress-ring__progress {
         transform: rotate(-90deg);
         transform-origin: 50% 50%;
         will-change: stroke-dashoffset;
       }
-      
+
       .progress-ring__track {
         stroke: var(--preloader-track-color-light);
         stroke-width: 3;
         fill: none;
       }
-      
+
       @media (prefers-color-scheme: dark) {
         .progress-ring__track {
           stroke: var(--preloader-track-color-dark);
         }
       }
-      
+
       .progress-ring__progress {
         stroke: var(--preloader-neon-color);
         stroke-width: 3;
@@ -153,7 +149,7 @@
         justify-content: center;
         will-change: transform;
       }
-      
+
       .preloader-logo {
         width: 96px;
         height: 48px;
@@ -176,7 +172,7 @@
         color: var(--preloader-text-light);
         margin: 0;
       }
-      
+
       @media (prefers-color-scheme: dark) {
         .preloader-text {
           color: var(--preloader-text-dark);
@@ -190,7 +186,7 @@
         color: var(--preloader-percent-light);
         margin: 0;
       }
-      
+
       @media (prefers-color-scheme: dark) {
         .preloader-percentage {
           color: var(--preloader-percent-dark);
@@ -239,34 +235,34 @@
         const logo = document.querySelector(".preloader-logo");
         const percentageEl = document.getElementById("preloader-percentage");
         const ring = document.getElementById("progress-ring-circle");
-        
+
         // Прогресс кольцо
         const radius = 68;
         const circumference = 2 * Math.PI * radius;
-        
+
         // Начальные состояния
         gsap.set([stage, ringContainer, textGroup], { opacity: 0 });
         gsap.set(stage, { scale: 0.6, rotationX: 45, z: -200 });
         gsap.set(textGroup, { y: 40 });
         gsap.set(logo, { scale: 0.8 });
         gsap.set(haze, { opacity: 0, scale: 0.8 });
-        gsap.set(ring, { 
-          strokeDasharray: circumference, 
+        gsap.set(ring, {
+          strokeDasharray: circumference,
           strokeDashoffset: circumference,
-          opacity: 0
+          opacity: 0,
         });
-        
+
         // Прогресс объект
         const progress = { value: 0, display: 0 };
         let assetsReady = false;
         let canFinish = false;
 
         // 🎭 Awwwards хореография
-        const masterTl = gsap.timeline({ 
+        const masterTl = gsap.timeline({
           onComplete: () => {
             canFinish = true;
             checkFinish();
-          }
+          },
         });
 
         // ✨ Нежное материализация из эфира (0.9s)
@@ -276,73 +272,105 @@
           rotationX: 0,
           z: 0,
           duration: 0.9,
-          ease: "expo.out"
+          ease: "expo.out",
         });
-        
+
         // 🌸 Синхронное появление всех элементов
-        masterTl.to(ringContainer, {
-          opacity: 1,
-          duration: 0.6,
-          ease: "power2.out"
-        }, "-=0.7");
-        
-        masterTl.to([ring, haze], {
-          opacity: 1,
-          duration: 0.5,
-          ease: "power2.out"
-        }, "-=0.4");
-        
-        masterTl.to(logo, {
-          scale: 1,
-          duration: 0.7,
-          ease: "back.out(1.1)"
-        }, "-=0.5");
-        
-        masterTl.to(textGroup, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power3.out"
-        }, "-=0.3");
-        
+        masterTl.to(
+          ringContainer,
+          {
+            opacity: 1,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          "-=0.7"
+        );
+
+        masterTl.to(
+          [ring, haze],
+          {
+            opacity: 1,
+            duration: 0.5,
+            ease: "power2.out",
+          },
+          "-=0.4"
+        );
+
+        masterTl.to(
+          logo,
+          {
+            scale: 1,
+            duration: 0.7,
+            ease: "back.out(1.1)",
+          },
+          "-=0.5"
+        );
+
+        masterTl.to(
+          textGroup,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power3.out",
+          },
+          "-=0.3"
+        );
+
         // 🌊 Одновременный старт прогресса с текстом
-        masterTl.to(progress, {
-          value: 99.5,
-          duration: 2.2,
-          ease: "power1.inOut",
-          onUpdate: updateProgress
-        }, "-=0.6");
-        
+        masterTl.to(
+          progress,
+          {
+            value: 99.5,
+            duration: 2.2,
+            ease: "power1.inOut",
+            onUpdate: updateProgress,
+          },
+          "-=0.6"
+        );
+
         // 💫 Плавные проценты
-        masterTl.to(progress, {
-          display: 99.5,
-          duration: 2.2,
-          ease: "power1.inOut",
-          onUpdate: () => {
-            if (percentageEl) {
-              percentageEl.textContent = `${Math.round(progress.display)}%`;
-            }
-          }
-        }, "-=2.2");
-        
+        masterTl.to(
+          progress,
+          {
+            display: 99.5,
+            duration: 2.2,
+            ease: "power1.inOut",
+            onUpdate: () => {
+              if (percentageEl) {
+                percentageEl.textContent = `${Math.round(progress.display)}%`;
+              }
+            },
+          },
+          "-=2.2"
+        );
+
         // 🌟 Живое дыхание свечения
-        gsap.to(haze, {
-          opacity: 0.3,
-          scale: 1.15,
-          duration: 1.8,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1
-        }, 1.0);
-        
+        gsap.to(
+          haze,
+          {
+            opacity: 0.3,
+            scale: 1.15,
+            duration: 1.8,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          },
+          1.0
+        );
+
         // 💎 Тонкая пульсация лого
-        gsap.to(logo, {
-          scale: 1.02,
-          duration: 2.2,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1
-        }, 1.2);
+        gsap.to(
+          logo,
+          {
+            scale: 1.02,
+            duration: 2.2,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          },
+          1.2
+        );
 
         function updateProgress() {
           const offset = circumference - (progress.value / 100) * circumference;
@@ -351,13 +379,13 @@
 
         function checkFinish() {
           if (!assetsReady || !canFinish) return;
-          
+
           // ▼ Добавляем эту строку, чтобы получить доступ к #root
-          const rootEl = document.getElementById('root');
-          
+          const rootEl = document.getElementById("root");
+
           // 🌅 Элегантное растворение
           const outroTl = gsap.timeline();
-          
+
           // Финальный штрих до 100%
           outroTl.to(progress, {
             value: 100,
@@ -367,53 +395,73 @@
             onUpdate: () => {
               updateProgress();
               if (percentageEl) percentageEl.textContent = `${Math.round(progress.display)}%`;
-            }
+            },
           });
-          
+
           // Нежное исчезновение текста
-          outroTl.to(textGroup, {
-            opacity: 0,
-            y: -20,
-            duration: 0.5,
-            ease: "power2.inOut"
-          }, "+=0.2");
-          
+          outroTl.to(
+            textGroup,
+            {
+              opacity: 0,
+              y: -20,
+              duration: 0.5,
+              ease: "power2.inOut",
+            },
+            "+=0.2"
+          );
+
           /* ▼▼▼ НАЧАЛО КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №2 ▼▼▼ */
           // В этот момент приложение React уже отрендерено в невидимый #root.
           // Мы плавно показываем его прямо перед тем, как прелоадер исчезнет.
           if (rootEl) {
-            outroTl.to(rootEl, {
-              opacity: 1,
-              duration: 0.6,
-              ease: "power2.inOut",
-            }, "-=0.5"); // Начинаем анимацию появления немного раньше для бесшовного перехода
+            outroTl.to(
+              rootEl,
+              {
+                opacity: 1,
+                duration: 0.6,
+                ease: "power2.inOut",
+              },
+              "-=0.5"
+            ); // Начинаем анимацию появления немного раньше для бесшовного перехода
           }
           /* ▲▲▲ КОНЕЦ КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №2 ▲▲▲ */
-          
+
           // Затухание свечения и кольца
-          outroTl.to([haze, ring], {
-            opacity: 0,
-            duration: 0.4,
-            ease: "power2.inOut"
-          }, "-=0.3");
-          
+          outroTl.to(
+            [haze, ring],
+            {
+              opacity: 0,
+              duration: 0.4,
+              ease: "power2.inOut",
+            },
+            "-=0.3"
+          );
+
           // Растворение в эфире
-          outroTl.to(stage, {
-            scale: 0.7,
-            rotationX: -30,
-            z: -150,
-            opacity: 0,
-            duration: 0.8,
-            ease: "expo.inOut"
-          }, "-=0.2");
-          
+          outroTl.to(
+            stage,
+            {
+              scale: 0.7,
+              rotationX: -30,
+              z: -150,
+              opacity: 0,
+              duration: 0.8,
+              ease: "expo.inOut",
+            },
+            "-=0.2"
+          );
+
           // Финальное затемнение
-          outroTl.to(preloader, {
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.inOut",
-            onComplete: () => preloader.remove()
-          }, "-=0.4");
+          outroTl.to(
+            preloader,
+            {
+              opacity: 0,
+              duration: 0.6,
+              ease: "power2.inOut",
+              onComplete: () => preloader.remove(),
+            },
+            "-=0.4"
+          );
         }
 
         // Загрузка критичных ресурсов

@@ -276,7 +276,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
 
   return (
     <div className="theodore-menu-container">
-      <div ref={menuWrapRef} className="menu-wrap" style={{ willChange: 'opacity, transform' }}>
+      <div ref={menuWrapRef} className="menu-wrap">
         <div className="menu-header">
           <NeonArrowButton onClick={onClose} />
         </div>
@@ -325,13 +325,12 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
           <SciFiThemeToggle />
         </div>
       </div>
-      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ willChange: 'transform' }}>
+      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path
           ref={overlayPathRef}
           className="overlay__path"
           vectorEffect="non-scaling-stroke"
           d="M 0 100 V 100 Q 50 100 100 100 V 100 z"
-          style={{ willChange: 'd' }}
         />
       </svg>
     </div>

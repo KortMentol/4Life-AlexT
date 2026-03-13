@@ -1,208 +1,143 @@
-import { scrollLockState } from "@/lib/scrollLockState";
+// src/hooks/useNativeScroll.ts (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
 import { useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
 
+const throttle = (func: (...args: any[]) => void, limit: number) => {
+  let inThrottle: boolean;
+  return function(this: any, ...args: any[]) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+};
+
 export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
-  const headerY = useMotionValue(0);
-  const headerYSmooth = useSpring(headerY, {
-    stiffness: 400,
-    damping: 40,
-    mass: 0.8,
-  });
-
   const isMobile = useIsMobile();
-  const scrollCount = useRef(0);
-  const scrollTimer = useRef<NodeJS.Timeout | null>(null);
-  const isTouching = useRef(false);
-  const touchStartY = useRef(0);
-  const headerStartY = useRef(0);
-  const prevScrollPos = useRef(0);
-  const lastScrollTime = useRef(0);
-  const isNavigating = useRef(false);
-  const isAppMounted = useRef(false);
+  const headerY = useMotionValue(0);
+  const headerYSmooth = useSpring(headerY, { stiffness: 300, damping: 30 });
 
-  // Переменные для дросселирования (throttling)
-  const lastTouchMoveTime = useRef(0);
-  // Обновляем не чаще, чем раз в ~16.67 мс (что соответствует ~60 FPS)
-  const THROTTLE_INTERVAL = 16;
-
-  // Слушатель глобального события для принудительного показа хедера
-  useEffect(() => {
-    const handleForceShow = () => {
-      forceShowHeader();
-    };
-    window.addEventListener("force-header-show", handleForceShow);
-    return () => {
-      window.removeEventListener("force-header-show", handleForceShow);
-    };
-  }, []);
-
-  // Слушатель события монтирования приложения от прелоадера
-  useEffect(() => {
-    const handleAppReady = () => {
-      isAppMounted.current = true;
-      forceShowHeader();
-    };
-    window.addEventListener("app-mounted", handleAppReady, { once: true });
-    return () => {
-      window.removeEventListener("app-mounted", handleAppReady);
-    };
-  }, []);
+  const prevScrollPos = useRef(window.scrollY);
+  const wheelCount = useRef(0);
+  const wheelTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (disabled) return;
+    if (isMobile || disabled) return;
 
-
-
-    // Десктопная логика для wheel (защищена от скролла во время прелоадера)
-    const handleWheel = (event: WheelEvent) => {
-      if (!isAppMounted.current || isNavigating.current) return;
+    const handleWheel = (e: WheelEvent) => {
+      if (window.scrollY <= 50) return;
       
-      const direction = event.deltaY > 0 ? "down" : "up";
+      const isScrollingDown = e.deltaY > 0;
 
-      if (direction === "down") {
-        if (scrollTimer.current) clearTimeout(scrollTimer.current);
-        scrollCount.current++;
-
-        if (scrollCount.current >= 2 && window.scrollY > 50) {
-          headerY.set(-100);
+      if (isScrollingDown) {
+        wheelCount.current++;
+        
+        if (wheelCount.current >= 2) {
+          headerY.set(-120);
         }
 
-        scrollTimer.current = setTimeout(() => {
-          scrollCount.current = 0;
-        }, 300);
+        if (wheelTimer.current) clearTimeout(wheelTimer.current);
+        wheelTimer.current = setTimeout(() => {
+          wheelCount.current = 0;
+        }, 400);
       } else {
-        if (scrollTimer.current) clearTimeout(scrollTimer.current);
-        scrollCount.current = 0;
+        wheelCount.current = 0;
         headerY.set(0);
+        if (wheelTimer.current) clearTimeout(wheelTimer.current);
       }
     };
 
-    // Логика для ручного перетаскивания скроллбара (работает всегда)
     const handleScroll = () => {
-      if (isNavigating.current) return;
-      
-      const now = performance.now();
-      if (now - lastScrollTime.current < 16) return;
-      lastScrollTime.current = now;
-
       const currentScrollPos = window.scrollY;
       const isScrollingUp = prevScrollPos.current > currentScrollPos;
       const scrollDelta = Math.abs(currentScrollPos - prevScrollPos.current);
       
-      if (scrollDelta < 2) {
+      if (scrollDelta < 5) {
         prevScrollPos.current = currentScrollPos;
         return;
       }
       
-      if (isScrollingUp) {
-        if (scrollTimer.current) clearTimeout(scrollTimer.current);
-        scrollCount.current = 0;
+      if (currentScrollPos <= 50) {
         headerY.set(0);
-      } else {
-        if (scrollTimer.current) clearTimeout(scrollTimer.current);
-        scrollCount.current++;
-
-        if (scrollCount.current >= 2 && currentScrollPos > 50) {
-          headerY.set(-100);
-        }
-
-        scrollTimer.current = setTimeout(() => {
-          scrollCount.current = 0;
-        }, 300);
+      } else if (isScrollingUp) {
+        headerY.set(0);
+      } else if (scrollDelta > 20) {
+        headerY.set(-120);
       }
 
       prevScrollPos.current = currentScrollPos;
     };
 
-    // Мобильная логика с оптимизацией
-    const handleTouchStart = (event: TouchEvent) => {
-      if (!event.touches[0]) return;
-      isTouching.current = true;
-      touchStartY.current = event.touches[0].clientY;
-      headerStartY.current = headerY.get();
-      headerY.stop(); // Останавливаем spring-анимацию для мгновенного отклика
+    const throttledScroll = throttle(handleScroll, 16);
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("scroll", throttledScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("scroll", throttledScroll);
+      if (wheelTimer.current) clearTimeout(wheelTimer.current);
+    };
+  }, [isMobile, disabled, headerY]);
+
+  useEffect(() => {
+    if (!isMobile || disabled) return;
+
+    let lastTouchY = 0;
+    let lastMoveTime = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      lastTouchY = touch.clientY;
+      lastMoveTime = Date.now();
+      headerYSmooth.stop();
     };
 
-    const handleTouchMove = (event: TouchEvent) => {
-      const now = performance.now();
-      if (now - lastTouchMoveTime.current < THROTTLE_INTERVAL) {
-        return; // Пропускаем вызов, если прошло слишком мало времени
-      }
-      lastTouchMoveTime.current = now;
-
-      if (!isTouching.current || !event.touches[0]) return;
-      if (scrollLockState.isLocked) return;
-
-      const currentTouchY = event.touches[0].clientY;
-      const deltaY = currentTouchY - touchStartY.current;
-      const newHeaderY = headerStartY.current + deltaY;
-      const clampedY = Math.max(-100, Math.min(0, newHeaderY));
-
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      
+      const now = Date.now();
+      if (now - lastMoveTime < 16) return; // 60fps throttle
+      
+      const currentY = touch.clientY;
+      const deltaY = currentY - lastTouchY;
+      const currentHeaderY = headerY.get();
+      
+      // Движение пальца вверх (скролл страницы вниз) = скрываем хедер
+      // Движение пальца вниз (скролл страницы вверх) = показываем хедер
+      const newHeaderY = currentHeaderY + deltaY * 0.5; // 0.5 для плавности
+      const clampedY = Math.max(-120, Math.min(0, newHeaderY));
+      
       headerY.set(clampedY);
+      lastTouchY = currentY;
+      lastMoveTime = now;
     };
-
+    
     const handleTouchEnd = () => {
-      if (!isTouching.current) return;
-      isTouching.current = false;
-      if (scrollLockState.isLocked) return;
-
       const currentY = headerY.get();
       const velocity = headerY.getVelocity();
-
-      if (Math.abs(velocity) > 150) {
-        headerY.set(velocity < 0 ? -100 : 0);
+      
+      if (Math.abs(velocity) > 200) {
+        headerY.set(velocity < 0 ? -120 : 0);
       } else {
-        // Используем порог в 50% для "прилипания"
-        headerY.set(currentY < -50 ? -100 : 0);
+        headerY.set(currentY < -60 ? -120 : 0);
       }
     };
 
-    if (isMobile) {
-      window.addEventListener("touchstart", handleTouchStart, { passive: true });
-      window.addEventListener("touchmove", handleTouchMove, { passive: true });
-      window.addEventListener("touchend", handleTouchEnd, { passive: true });
-      window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
-    } else {
-      // На ПК слушаем и wheel (колесико), и scroll (ручное перетаскивание)
-      window.addEventListener("wheel", handleWheel, { passive: true });
-      window.addEventListener("scroll", handleScroll, { passive: true });
-    }
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
-      if (isMobile) {
-        window.removeEventListener("touchstart", handleTouchStart);
-        window.removeEventListener("touchmove", handleTouchMove);
-        window.removeEventListener("touchend", handleTouchEnd);
-        window.removeEventListener("touchcancel", handleTouchEnd);
-      } else {
-        window.removeEventListener("wheel", handleWheel);
-        window.removeEventListener("scroll", handleScroll);
-      }
-      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [disabled, isMobile, headerY]);
-
-  const forceShowHeader = () => {
-    // Устанавливаем флаг навигации
-    isNavigating.current = true;
-    
-    // Принудительно показываем хедер
-    headerY.set(0);
-    scrollCount.current = 0;
-    if (scrollTimer.current) {
-      clearTimeout(scrollTimer.current);
-      scrollTimer.current = null;
-    }
-    
-    // Снимаем флаг через короткую задержку
-    setTimeout(() => {
-      // Обновляем позицию скролла ПОСЛЕ снятия флага
-      prevScrollPos.current = window.scrollY;
-      isNavigating.current = false;
-    }, 300);
-  };
-
-  return { headerY: headerYSmooth, forceShowHeader };
+  }, [isMobile, disabled, headerY, headerYSmooth]);
+  
+  return { headerY: headerYSmooth };
 }

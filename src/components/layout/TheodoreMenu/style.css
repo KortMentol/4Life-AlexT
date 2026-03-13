@@ -188,7 +188,32 @@
   stroke: #fff;
 }
 
-/* Отключение анимации плиток для low performance */
+/* Awwwards-level деградация для LOW tier */
 .low-performance .tiles__line {
-  animation: none !important;
+  /* Анимация в 2 раза медленнее = в 2 раза меньше нагрузка */
+  animation-duration: 20s !important;
+}
+
+.low-performance .tiles__line:nth-child(2) {
+  animation-duration: 32s !important;
+}
+
+.low-performance .tiles__line:nth-child(3) {
+  animation-duration: 44s !important;
+}
+
+.low-performance .tiles__line-img {
+  /* Плитки на 33% меньше = в 2 раза меньше пикселей для рендера */
+  width: 20vh;
+  height: 20vh;
+}
+
+.low-performance .tiles__line-img--large {
+  width: 66vh; /* Пропорционально уменьшено */
+  border-radius: 13vh;
+}
+
+.low-performance .tiles {
+  /* Чуть меньше opacity = меньше blend операций */
+  opacity: 0.35;
 }

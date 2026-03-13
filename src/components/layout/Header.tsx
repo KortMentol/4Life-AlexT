@@ -32,20 +32,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   const headerRef = useRef<HTMLElement>(null);
 
-  const { headerY, forceShowHeader } = useNativeScroll({
-    disabled: isMenuOpen,
-  });
-
-  // Этот useEffect слушает наше кастомное событие и показывает хедер
-  useEffect(() => {
-    const handleForceShow = () => {
-      forceShowHeader();
-    };
-    window.addEventListener("force-header-show", handleForceShow);
-    return () => {
-      window.removeEventListener("force-header-show", handleForceShow);
-    };
-  }, [forceShowHeader]);
+  const { headerY } = useNativeScroll({ disabled: isMenuOpen });
 
   useEffect(() => {
     if (!headerRef.current) return;
@@ -67,10 +54,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }, [isMenuOpen]);
 
-  useEffect(() => {
-    // При смене страницы плавно показываем хедер
-    forceShowHeader();
-  }, [location.pathname, location.search, location.hash, forceShowHeader]);
+
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
@@ -106,7 +90,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       style={{
         y: headerY,
         ...cssVars,
-        willChange: 'transform',
         contain: 'layout style paint',
       }}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
@@ -128,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 variants={logoVariants}
                 initial="initial"
                 animate="animate"
-                whileHover={isMobile ? undefined : "hover"}
+                whileHover={undefined}
               >
                 <img src={isDark ? logoLight : logoDark} alt="4Life Logo" className="h-8 w-auto relative z-10" />
               </motion.div>
@@ -205,41 +188,28 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               }}
               style={{ color: isDark ? "white" : "#1e293b" }}
             >
-              <motion.div
-                whileHover={isMobile ? undefined : { scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                style={{ willChange: isMobile ? 'transform' : 'auto' }}
-              >
+              <div>
                 <ProductListIcon />
-              </motion.div>
+              </div>
               <div className="w-px h-6 mx-1 bg-slate-700 dark:bg-slate-100" />
-              <motion.button
+              <button
                 type="button"
                 onClick={toggleTheme}
                 className="p-2 rounded-full transition-colors duration-200"
                 aria-label="Переключить тему"
-                whileHover={isMobile ? undefined : { scale: 1.1, rotate: 15 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                style={{ willChange: isMobile ? 'transform' : 'auto' }}
               >
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
-              </motion.button>
+              </button>
             </motion.div>
-            <motion.div
+            <div
               className="md:hidden"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileTap={{ scale: 0.95 }}
               style={{ 
                 color: isDark ? "white" : "#1e293b",
-                willChange: 'transform',
                 contain: 'layout style paint'
               }}
             >
               <ProductListIcon />
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

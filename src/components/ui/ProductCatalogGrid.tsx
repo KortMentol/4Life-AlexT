@@ -1,43 +1,41 @@
 /**
  * @module src/components/ui/ProductCatalogGrid.tsx
- * @description Каталог продуктов, готовый для Awwwards-анимаций.
- * Каждая карточка содержит data-атрибуты для настройки эффекта RepeatingImageTransition.
+ * @description E-commerce Pro: Максимальный FPS с CSS-only анимациями
  * @author Kort
- * @version 3.0.0
+ * @version 4.0.0 - Performance Optimized
  */
 
 import { DetailedProduct } from "@/data/productsData";
 import { useImageOptimization } from "@/hooks/useImageOptimization";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { useVirtualization } from "@/hooks/useVirtualization";
 import { Icons } from "@/utils/icons";
-import { AnimatePresence, motion } from "framer-motion";
-import React, { forwardRef, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import React, { forwardRef, memo, useEffect, useRef } from "react";
 
 type ProductCatalogGridProps = {
   products: DetailedProduct[];
-  onProductClick: (product: DetailedProduct, element: HTMLDivElement) => void;
-  onAddToCart: (product: DetailedProduct, element: HTMLElement) => void;
+  onProductClick: (product: DetailedProduct) => void;
+  onAddToCart: (product: DetailedProduct) => void;
   loading?: boolean;
   dimmedCardId?: string | null;
-  isAnimating: boolean; // Новый пропс для блокировки взаимодействий
+  isAnimating: boolean;
 };
 
 type ProductCardProps = {
   product: DetailedProduct;
-  index: number;
   isDimmed: boolean;
   isAnimating: boolean;
-  onProductClick: (product: DetailedProduct, element: HTMLDivElement) => void;
-  onAddToCart: (product: DetailedProduct, element: HTMLElement) => void;
+  onProductClick: (product: DetailedProduct) => void;
+  onAddToCart: (product: DetailedProduct) => void;
 };
 
 const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(
-  ({ product, index, isDimmed, isAnimating, onProductClick, onAddToCart }, ref) => {
+  ({ product, isDimmed, isAnimating, onProductClick, onAddToCart }, ref) => {
     const cardRef = useRef<HTMLDivElement>(null);
+    const mouseDownOnCardRef = useRef(false);
     const { optimizedSrc, isLoaded, imageRef } = useImageOptimization({
       src: product.image,
-      lazy: true,
+      lazy: false,
     });
 
     useEffect(() => {
@@ -45,62 +43,86 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(
       else if (ref) ref.current = cardRef.current;
     }, [ref]);
 
-    const handleCardClick = () => {
-      if (cardRef.current && !isAnimating) {
-        onProductClick(product, cardRef.current);
+    const handleCardClick = (e: React.MouseEvent) => {
+      // Проверяем что курсор всё ещё на карточке
+      const target = e.currentTarget;
+      const rect = target.getBoundingClientRect();
+      const isInsideCard =
+        e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+      if (!isAnimating && mouseDownOnCardRef.current && isInsideCard) {
+        onProductClick(product);
       }
+      mouseDownOnCardRef.current = false;
     };
 
     const handleAddToCart = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (cardRef.current && !isAnimating) {
-        onAddToCart(product, cardRef.current);
+      if (!isAnimating) {
+        onAddToCart(product);
       }
     };
 
-    const cardClasses = `group relative cursor-pointer product-card ${isDimmed ? "product-card-dimmed" : ""} ${isAnimating ? "pointer-events-none" : ""}`;
+    const cardClasses = `product-card group relative cursor-pointer ${isDimmed ? "product-card-dimmed" : ""} ${isAnimating ? "pointer-events-none" : ""}`;
+
+    // Firefox оптимизация
+    const cardStyle = {
+      transform: "translateZ(0)",
+      backfaceVisibility: "hidden" as const,
+      WebkitBackfaceVisibility: "hidden" as const,
+    };
 
     return (
-      <motion.div
+      <div
         ref={cardRef}
-        layout
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8 }}
-        transition={{
-          duration: 0.6,
-          delay: index * 0.05,
-          layout: { duration: 0.4, ease: "easeOut" },
-        }}
         className={cardClasses}
+        style={cardStyle}
+        onMouseDown={() => {
+          mouseDownOnCardRef.current = true;
+        }}
+        onMouseLeave={() => {
+          mouseDownOnCardRef.current = false;
+        }}
+        onMouseUp={(e) => {
+          // Дополнительная проверка для Firefox
+          const target = e.currentTarget;
+          const rect = target.getBoundingClientRect();
+          const isInsideCard =
+            e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+          if (!isInsideCard) {
+            mouseDownOnCardRef.current = false;
+          }
+        }}
         onClick={handleCardClick}
         data-product-id={product.id}
-        // --- НОВОЕ: Data-атрибуты для анимации в стиле Codrops ---
-        data-steps="8"
-        data-step-duration="0.3"
-        data-path-motion="sine"
-        data-sine-amplitude="40"
-        data-step-interval="0.04"
-        data-mover-enter-ease="power2.in"
-        data-mover-exit-ease="power3.out"
       >
-        <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-900 border border-white/10 transition-all duration-500 group-hover:border-cyan-400/50 group-hover:shadow-2xl group-hover:shadow-cyan-500/20">
-          <img
-            ref={imageRef}
-            src={optimizedSrc}
-            alt={product.name}
-            loading="lazy"
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${isLoaded ? "opacity-100" : "opacity-0"}`}
-            data-img-main // Маркер для GSAP
-          />
+        <div
+          className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-900 border border-white/10 transition-transform duration-200"
+          style={{ contain: "layout style paint" }}
+          onMouseEnter={(e) => (e.currentTarget.style.willChange = "transform")}
+          onMouseLeave={(e) => (e.currentTarget.style.willChange = "auto")}
+        >
+          <motion.div layoutId={`card-image-${product.id}`} className="absolute inset-0">
+            <img
+              ref={imageRef}
+              src={optimizedSrc}
+              alt={product.name}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+              style={{ transform: "translateZ(0)", aspectRatio: "3/4" }}
+              data-img-main
+            />
+          </motion.div>
 
-          {!isLoaded && <div className="absolute inset-0 bg-gray-800 animate-pulse" />}
+          {!isLoaded && <div className="absolute inset-0 bg-gray-800" />}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,rgba(0,255,255,0.1),transparent_70%)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
           <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-            <motion.div className="transform transition-transform duration-300 group-hover:-translate-y-2">
+            <div>
               <h3 className="text-xl font-bold mb-2 line-clamp-2">{product.name}</h3>
               <p className="text-sm text-gray-300 mb-4 line-clamp-3">{product.shortDescription}</p>
 
@@ -119,45 +141,36 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(
                 <div className="text-2xl font-bold text-cyan-400">{product.lp} LP</div>
                 <button
                   onClick={handleAddToCart}
-                  className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25"
+                  className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-semibold rounded-lg transition-colors duration-200"
                 >
-                  <Icons.ShoppingCart className="w-4 h-4" />В корзину
+                  <Icons.ShoppingCart className="w-4 h-4" />
+                  <span>В корзину</span>
                 </button>
               </div>
-            </motion.div>
-          </div>
-
-          <div className="absolute top-4 right-4 w-10 h-10 bg-black/30 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
-            <Icons.Eye className="w-5 h-5 text-white" />
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 );
 ProductCard.displayName = "ProductCard";
+const MemoizedProductCard = memo(ProductCard);
 
 const ProductCatalogGrid = forwardRef<HTMLDivElement, ProductCatalogGridProps>(
   ({ products, onProductClick, onAddToCart, loading = false, dimmedCardId, isAnimating }, ref) => {
     const isMobile = useIsMobile();
-    const gridCols = isMobile ? 1 : "repeat(auto-fill, minmax(300px, 1fr))";
-
-    const { visibleItems, containerRef: virtualContainerRef } = useVirtualization({
-      items: products,
-      itemHeight: isMobile ? 500 : 400,
-      containerHeight: 800,
-      overscan: 3,
-      enabled: products.length > 20,
-    });
+    const gridCols = isMobile ? "1fr" : "repeat(auto-fill, minmax(280px, 1fr))";
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-      if (typeof ref === "function") ref(virtualContainerRef.current);
-      else if (ref) ref.current = virtualContainerRef.current;
-    }, [ref, virtualContainerRef]);
+      if (typeof ref === "function") ref(containerRef.current);
+      else if (ref) ref.current = containerRef.current;
+    }, [ref]);
 
     if (loading) {
       return (
-        <div className="grid gap-8" style={{ gridTemplateColumns: gridCols }}>
+        <div className="grid gap-6 md:gap-8" style={{ gridTemplateColumns: gridCols }}>
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="aspect-[3/4] bg-gray-800/50 rounded-2xl animate-pulse" />
           ))}
@@ -165,55 +178,36 @@ const ProductCatalogGrid = forwardRef<HTMLDivElement, ProductCatalogGridProps>(
       );
     }
 
-    const itemsToRender = products.length > 20 ? visibleItems : products.map((p, index) => ({ data: p, index }));
-
     return (
       <div className="space-y-8">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+        <div className="text-center fade-in">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Каталог продуктов</h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Откройте для себя инновационные продукты 4Life с Трансфер Факторами
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          ref={virtualContainerRef}
-          layout
-          className="grid gap-8 product-grid"
-          style={{ gridTemplateColumns: gridCols }}
-        >
-          <AnimatePresence>
-            {itemsToRender.map((item) => {
-              const product = ("data" in item ? item.data : item) as DetailedProduct;
-              const index = "index" in item ? item.index : products.indexOf(product);
-
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  onProductClick={onProductClick}
-                  onAddToCart={onAddToCart}
-                  isDimmed={!!dimmedCardId && dimmedCardId !== product.id}
-                  isAnimating={isAnimating}
-                />
-              );
-            })}
-          </AnimatePresence>
-        </motion.div>
+        <div ref={containerRef} className="grid gap-6 md:gap-8 product-grid" style={{ gridTemplateColumns: gridCols }}>
+          {products.map((product) => (
+            <MemoizedProductCard
+              key={product.id}
+              product={product}
+              onProductClick={onProductClick}
+              onAddToCart={onAddToCart}
+              isDimmed={!!dimmedCardId && dimmedCardId !== product.id}
+              isAnimating={isAnimating}
+            />
+          ))}
+        </div>
 
         {products.length === 0 && !loading && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16"
-          >
+          <div className="text-center py-16 fade-in">
             <div className="w-24 h-24 mx-auto mb-6 bg-gray-800/50 rounded-full flex items-center justify-center">
               <Icons.Search className="w-12 h-12 text-gray-500" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">Продукты не найдены</h3>
             <p className="text-gray-400">Попробуйте изменить фильтры или поисковый запрос</p>
-          </motion.div>
+          </div>
         )}
       </div>
     );

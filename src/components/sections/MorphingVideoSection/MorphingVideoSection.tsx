@@ -116,7 +116,7 @@ const FloatingVideo: React.FC<{
           if (progress >= disappearStart) {
             const localProgress = Math.max(
               0,
-              Math.min(1, (progress - disappearStart) / (disappearEnd - disappearStart))
+              Math.min(1, (progress - disappearStart) / (disappearEnd - disappearStart)),
             );
             return { y: -localProgress * vh, opacity: Math.max(0, 1 - localProgress) };
           }
@@ -147,6 +147,8 @@ const FloatingVideo: React.FC<{
     };
 
     const unsubscribe = scrollY.on("change", calculateState);
+    // Вызываем calculateState с задержкой после монтирования, чтобы DOM успел отрисоваться
+    setTimeout(() => calculateState(scrollY.get()), 100);
     return () => unsubscribe();
   }, [scrollY, y, opacity, isMobile]); // Убираем ref'ы из зависимостей
 
@@ -236,7 +238,7 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
           .fromTo(
             gridItems,
             { xPercent: () => window.gsap.utils.random(-1000, -500) },
-            { xPercent: () => window.gsap.utils.random(500, 1000), ease: "none" }
+            { xPercent: () => window.gsap.utils.random(500, 1000), ease: "none" },
           );
         break;
 
@@ -261,7 +263,7 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
               rotationY: 45,
               filter: "brightness(50%)",
             },
-            0
+            0,
           )
           .fromTo(gridWrap, { rotationZ: -5 }, { rotationX: -20, rotationZ: 10, scale: 1.2 }, 0);
         break;
@@ -299,7 +301,7 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
   const imageCount = useMemo(() => (window.innerWidth >= 1024 ? 20 : 8), []);
   const images = useMemo(
     () => Array.from({ length: imageCount }, (_, i) => `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`),
-    [imageCount]
+    [imageCount],
   );
 
   return (
