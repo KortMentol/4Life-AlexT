@@ -1,6 +1,7 @@
 // src/hooks/useNativeScroll.ts (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
 import { useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { scrollLockState } from "@/lib/scrollLockState";
 import { useIsMobile } from "./useIsMobile";
 
 const throttle = (func: (...args: any[]) => void, limit: number) => {
@@ -104,6 +105,17 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       if (now - lastMoveTime < 16) return; // 60fps throttle
       
       const currentY = touch.clientY;
+
+      // --- CORE FIX: GUARD CLAUSE ---
+      // Если скролл заблокирован глобально (идет горизонтальный свайп),
+      // мы не анимируем хедер, но ОБЯЗАНЫ обновить координаты, 
+      // чтобы не было резкого прыжка (teleport) при разблокировке.
+      if (scrollLockState.isLocked || disabled) {
+        lastTouchY = currentY;
+        lastMoveTime = now;
+        return;
+      }
+      
       const deltaY = currentY - lastTouchY;
       const currentHeaderY = headerY.get();
       

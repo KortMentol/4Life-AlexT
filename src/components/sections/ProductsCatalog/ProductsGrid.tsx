@@ -35,7 +35,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   // Apple's signature easing curves
   const layoutEasing = [0.43, 0.13, 0.23, 0.96]; // Плавное перемещение (Magic Move)
   const fadeEasing = [0.25, 0.46, 0.45, 0.94]; // Мягкое появление/исчезновение
-  const shouldAnimateLayout = tier !== 'low';
+  const shouldAnimateLayout = tier === 'high';
 
   const getGridConfig = () => {
     // Awwwards-style: фиксированные колонки, карточки НЕ растягиваются

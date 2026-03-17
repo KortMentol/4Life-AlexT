@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, ReactNode, startTransition, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PixelTransition, TransitionHandle as PixelTransitionHandle } from "@/components/transitions/PixelTransition";
 import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "@/components/transitions/WaveTransition";
@@ -34,14 +34,15 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children
     const overlay = isMobile ? waveOverlayRef.current : pixelOverlayRef.current;
 
     overlay?.play("in").then(() => {
-      navigate(path);
-      // Небольшая задержка, чтобы React успел начать рендеринг новой страницы "под капотом"
+      startTransition(() => {
+        navigate(path);
+      });
       setTimeout(() => {
-        resetFluid(); // Сбрасываем fluid-эффект на черном экране
+        resetFluid();
         overlay.play("out").then(() => {
           setIsTransitioning(false);
         });
-      }, 150);
+      }, 250);
     });
   };
 

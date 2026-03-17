@@ -25,10 +25,7 @@ const Layout: React.FC = () => {
   return (
     <>
       <CustomScrollbar />
-      {/* WebGL полностью удаляется из памяти на странице продуктов */}
-      {!location.pathname.startsWith('/products') && <FluidEffect />}
-      {/* Header теперь находится в App.tsx и рендерится над Layout */}
-      {/* ИЗМЕНЕНИЕ: Убираем pt-20 отсюда */}
+      <FluidEffect />
       <main id="main-content" className="flex-grow">
         <AnimatePresence mode="wait">
           <Outlet key={location.pathname} />
