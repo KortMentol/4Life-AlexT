@@ -12,8 +12,8 @@
  *   <App />
  * </ProductListProvider>
  */
-import { DetailedProduct } from "@/data/productsData"; // <-- ИЗМЕНЕНИЕ: Импортируем DetailedProduct
-import React, { useEffect, useState } from "react";
+import { DetailedProduct } from "@/data/productsData";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ProductListContext, ProductListContextType, ProductListItem } from "./ProductListContext.helpers";
 import { loadFromStorage, saveToStorage } from "./ProductListUtils";
 
@@ -24,8 +24,7 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveToStorage(items);
   }, [items]);
 
-  // --- ИЗМЕНЕНИЕ: Тип product теперь DetailedProduct ---
-  const addToList = (product: DetailedProduct, quantity: number = 1) => {
+  const addToList = useCallback((product: DetailedProduct, quantity: number = 1) => {
     setItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -33,31 +32,34 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [...prev, { ...product, quantity }];
     });
-  };
+  }, []);
 
-  const removeFromList = (productId: string) => {
+  const removeFromList = useCallback((productId: string) => {
     setItems((prev) => prev.filter((i) => i.id !== productId));
-  };
+  }, []);
 
-  const updateItemQuantity = (productId: string, quantity: number) => {
+  const updateItemQuantity = useCallback((productId: string, quantity: number) => {
     setItems((prev) => {
       if (quantity <= 0) return prev.filter((i) => i.id !== productId);
       return prev.map((item) => (item.id === productId ? { ...item, quantity } : item));
     });
-  };
+  }, []);
 
-  const clearList = () => setItems([]);
+  const clearList = useCallback(() => setItems([]), []);
 
-  const getTotalItems = () => items.reduce((total, item) => total + item.quantity, 0);
+  const getTotalItems = useCallback(() => items.reduce((total, item) => total + item.quantity, 0), [items]);
 
-  const value: ProductListContextType = {
-    items,
-    addToList,
-    removeFromList,
-    updateItemQuantity,
-    clearList,
-    getTotalItems,
-  };
+  const value = useMemo<ProductListContextType>(
+    () => ({
+      items,
+      addToList,
+      removeFromList,
+      updateItemQuantity,
+      clearList,
+      getTotalItems,
+    }),
+    [items, addToList, removeFromList, updateItemQuantity, clearList, getTotalItems]
+  );
 
   return <ProductListContext.Provider value={value}>{children}</ProductListContext.Provider>;
 };

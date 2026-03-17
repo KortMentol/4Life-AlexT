@@ -8,7 +8,7 @@ import { headerVariants, logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 import { useTransition } from "@/context";
-import { useIsMobile, useNativeScroll, useTheme } from "@/hooks";
+import { useIsMobile, useNativeScroll, usePerformanceTier, useTheme } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
 import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
@@ -29,10 +29,30 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const isDark = theme === "dark";
   const { transitionTo } = useTransition();
   const isMobile = useIsMobile();
+  const tier = usePerformanceTier();
 
   const headerRef = useRef<HTMLElement>(null);
 
   const { headerY } = useNativeScroll({ disabled: isMenuOpen });
+
+  // Принудительно показываем хедер при переходах и перезагрузке
+  useEffect(() => {
+    // При монтировании компонента (перезагрузка страницы) - хедер всегда виден
+    headerY.set(0);
+
+    // Слушаем event от RouteChangeHandler
+    const handleForceShow = () => {
+      headerY.set(0);
+    };
+
+    window.addEventListener('force-header-show', handleForceShow);
+    return () => window.removeEventListener('force-header-show', handleForceShow);
+  }, [headerY]);
+
+  // Слушаем изменения маршрута - всегда показываем хедер
+  useEffect(() => {
+    headerY.set(0);
+  }, [location.pathname, headerY]);
 
   useEffect(() => {
     if (!headerRef.current) return;
@@ -82,6 +102,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   return (
     <motion.header
+      data-tier={tier}
       ref={headerRef}
       role="banner"
       variants={headerVariants}

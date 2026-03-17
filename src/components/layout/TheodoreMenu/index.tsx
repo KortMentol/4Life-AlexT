@@ -19,16 +19,9 @@ import img8 from "@/assets/images/MobileMenu/8.jpg";
 import img9 from "@/assets/images/MobileMenu/9.jpg";
 
 // === Константы таймингов анимации волн (секунды) ===
-// Используются для метки "чёрного" кадра и синхронизации префетча.
+// Используются для метки "чёрного" кадра.
 const WAVE_OPEN_DOWN_1 = 0.8; // вниз до полуэкрана (открытие)
 const WAVE_OPEN_DOWN_2 = 0.3; // вниз до полного чёрного (открытие)
-const WAVE_OPEN_UP_1 = 0.3; // вверх до полуэкрана (открытие)
-const WAVE_OPEN_UP_2 = 0.8; // вверх до исчезновения (открытие)
-
-const NAVIGATION_EPS = 0.06; // небольшой буфер, чтобы навигация началась строго «на чёрном»
-
-// Полное время анимации открытия меню (для старта префетча после завершения)
-const OPEN_TOTAL = WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2 + WAVE_OPEN_UP_1 + WAVE_OPEN_UP_2; // 2.2с
 
 // Типизация глобального окна для флага перехода меню
 declare global {
@@ -38,23 +31,7 @@ declare global {
   }
 }
 
-// --- Утилиты префетча на уровне модуля (стабильные ссылки) ---
-const routePrefetchers: Record<string, () => Promise<unknown>> = {
-  "/": () => import("@/pages/HomePage"),
-  "/products": () => import("@/pages/ProductsPage"),
-  "/about": () => import("@/pages/AboutPage"),
-  "/about-me": () => import("@/pages/AboutMePage"),
-  "/contact": () => import("@/pages/ContactPage"),
-  "/partnership": () => import("@/pages/PartnershipPage"),
-  "/how-to-buy": () => import("@/pages/HowToBuyPage"),
-};
 
-function prefetchAllRoutesExcept(currentPath: string) {
-  const entries = Object.entries(routePrefetchers).filter(([path]) => path !== currentPath);
-  entries.forEach(([, loader]) => {
-    loader().catch(() => {});
-  });
-}
 
 interface TheodoreMenuProps {
   isOpen: boolean;
@@ -136,6 +113,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
         document.body.classList.add('menu-open');
         document.documentElement.classList.add('menu-open');
         lenis.stop();
+        window.dispatchEvent(new CustomEvent("custom-scrollbar-update", { detail: { action: "hide" } }));
       },
       onReverseComplete: () => {
         gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
@@ -146,6 +124,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
         // Сообщаем глобально, что переход завершён (включая случай закрытия по стрелке)
         window.dispatchEvent(new CustomEvent("menu-transition-complete"));
         window.__menuTransitionInProgress = false;
+        window.dispatchEvent(new CustomEvent("custom-scrollbar-update", { detail: { action: "show" } }));
       },
     });
 
@@ -221,21 +200,25 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
     const targetHref = pendingHrefRef.current;
 
     const atBlack = () => {
-      // Пауза на чёрном кадре и навигация
+      // 1. Пауза на чёрном кадре
       tl.pause(labelTime);
       const href = targetHref!;
       const isSame = location.pathname === href;
       window.__menuTransitionInProgress = true;
       window.dispatchEvent(new CustomEvent("menu-transition-start"));
+      
+      // 2. Навигация (Рендер новой страницы)
       navigateFromMenu(href, isSame);
 
-      // Небольшой буфер, чтобы чёрный кадр гарантированно попал на экран и DOM успел обновиться
-      gsap.delayedCall(NAVIGATION_EPS, () => {
-        // Снятие обработчика onUpdate, чтобы не триггериться снова
-        tl.eventCallback("onUpdate", prevUpdate || null);
-        // Продолжаем обратное проигрывание (2-я волна) после навигации
-        tl.resume();
-        pendingHrefRef.current = null;
+      // 3. Прячем лаг рендера в темноте (пауза 150мс)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            tl.eventCallback("onUpdate", prevUpdate || null);
+            tl.resume();
+            pendingHrefRef.current = null;
+          }, 150);
+        });
       });
     };
 
@@ -257,20 +240,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
     };
   }, [isOpen, navigateFromMenu, location.pathname]);
 
-  // --- Префетч модулей страниц, когда меню полностью открылось ---
-  // Стартуем после завершения анимации открытия, чтобы не мешать ей.
-  useEffect(() => {
-    if (!isOpen) return;
-    const current = location.pathname;
-    const tl = timelineRef.current;
-    const delay = (tl?.totalDuration?.() ?? OPEN_TOTAL) + 0.15;
-    const delayed = gsap.delayedCall(delay, () => {
-      prefetchAllRoutesExcept(current);
-    });
-    return () => {
-      delayed.kill();
-    };
-  }, [isOpen, location.pathname]);
+
 
   // --- Утилиты префетча перенесены на уровень модуля ---
 

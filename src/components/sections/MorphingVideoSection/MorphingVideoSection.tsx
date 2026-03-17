@@ -10,7 +10,7 @@
  * <MorphingVideoSection />
  */
 
-import { motion, useMotionValue, useScroll } from "framer-motion";
+import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Media imports
@@ -30,6 +30,7 @@ declare global {
   interface Window {
     gsap: any;
     ScrollTrigger: any;
+    __menuTransitionInProgress?: boolean;
   }
 }
 
@@ -42,6 +43,7 @@ const FloatingVideo: React.FC<{
   const videoRef = useRef<HTMLVideoElement>(null);
   const [canPlay, setCanPlay] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
   const isMobile = useMemo(() => typeof window !== "undefined" && window.innerWidth < 768, []);
 
   // Создаем motion values для y и opacity
@@ -153,21 +155,59 @@ const FloatingVideo: React.FC<{
   }, [scrollY, y, opacity, isMobile]); // Убираем ref'ы из зависимостей
 
   useEffect(() => {
+    if (!isTransitioning) return;
+    const handleComplete = () => setIsTransitioning(false);
+    window.addEventListener("menu-transition-complete", handleComplete, { once: true });
+    return () => window.removeEventListener("menu-transition-complete", handleComplete);
+  }, [isTransitioning]);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Existing buffer state management
     const handleCanPlay = () => {
       setCanPlay(true);
       setIsBuffering(false);
     };
     const handleWaiting = () => setIsBuffering(true);
     const handlePlaying = () => setIsBuffering(false);
+    
     video.addEventListener("canplay", handleCanPlay);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
+
+    // --- HARDWARE DECODER OPTIMIZATION ---
+    // Pause video when out of viewport to free up GPU & VRAM
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Pre-warm / Play when entering viewport (with 200px buffer)
+            video.play().catch(() => {
+              // Catch DOMException (e.g., if interrupted by rapid scrolling)
+            });
+          } else {
+            // Hard pause to release resources
+            video.pause();
+          }
+        });
+      },
+      { 
+        threshold: 0, 
+        rootMargin: "200px" // Buffer to prevent black frames on fast scroll
+      }
+    );
+
+    observer.observe(video);
+
+    // Cleanup
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
+      observer.disconnect();
+      video.pause(); // Ensure it doesn't keep playing if unmounted
     };
   }, []);
 
@@ -186,8 +226,9 @@ const FloatingVideo: React.FC<{
               className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${showPoster ? "opacity-100" : "opacity-0"}`}
               style={{ backgroundImage: `url(/images/backgrounds/HomePage/img/1.jpg)` }}
             />
-            <video ref={videoRef} className="h-full w-full object-cover" autoPlay loop muted playsInline preload="auto">
-              <source src={productionVideo} type="video/mp4" />
+            <video ref={videoRef} className="h-full w-full object-cover" autoPlay loop muted playsInline preload="none">
+              {/* Рендерим источник только после завершения анимации волн */}
+              {!isTransitioning && <source src={productionVideo} type="video/mp4" />}
             </video>
           </div>
         </motion.div>
@@ -218,79 +259,92 @@ const Grid3D: React.FC<{ type: 1 | 2 | 3; triggerRef: React.RefObject<HTMLElemen
 
     let timeline: any;
 
-    const scrollTriggerConfig = {
-      trigger: triggerRef.current,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: 0.5,
-      ease: "none",
-      invalidateOnRefresh: true,
+    // ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ТЯЖЕЛОЙ МАТЕМАТИКИ
+    const initGSAP = () => {
+      const scrollTriggerConfig = {
+        trigger: triggerRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.5,
+        ease: "none",
+        invalidateOnRefresh: true,
+      };
+
+      switch (type) {
+        case 1:
+          grid.style.setProperty("--perspective", "1000px");
+          grid.style.setProperty("--grid-inner-scale", "0.5");
+          timeline = window.gsap
+            .timeline({ scrollTrigger: scrollTriggerConfig })
+            .set(gridWrap, { rotationY: 25, force3D: true })
+            .set(gridItems, { z: () => window.gsap.utils.random(-1600, 200), force3D: true })
+            .fromTo(
+              gridItems,
+              { xPercent: () => window.gsap.utils.random(-1000, -500) },
+              { xPercent: () => window.gsap.utils.random(500, 1000), ease: "none" },
+            );
+          break;
+        case 2:
+          grid.style.setProperty("--grid-width", "160%");
+          grid.style.setProperty("--perspective", "2000px");
+          grid.style.setProperty("--grid-inner-scale", "0.5");
+          grid.style.setProperty("--grid-item-ratio", "0.8");
+          grid.style.setProperty("--grid-columns", "6");
+          grid.style.setProperty("--grid-gap", "14vw");
+
+          timeline = window.gsap
+            .timeline({ defaults: { ease: "none" }, scrollTrigger: scrollTriggerConfig })
+            .set(gridWrap, { rotationX: 20, force3D: true })
+            .set(gridItems, { z: () => window.gsap.utils.random(-3000, -1000), force3D: true })
+            .fromTo(
+              gridItems,
+              { yPercent: () => window.gsap.utils.random(100, 1000), rotationY: -45, filter: "brightness(200%)" },
+              {
+                ease: "power2",
+                yPercent: () => window.gsap.utils.random(-1000, -100),
+                rotationY: 45,
+                filter: "brightness(50%)",
+              },
+              0,
+            )
+            .fromTo(gridWrap, { rotationZ: -5 }, { rotationX: -20, rotationZ: 10, scale: 1.2 }, 0);
+          break;
+        case 3:
+          grid.style.setProperty("--grid-width", "105%");
+          grid.style.setProperty("--grid-columns", "8");
+          grid.style.setProperty("--perspective", "1500px");
+          grid.style.setProperty("--grid-inner-scale", "0.5");
+          timeline = window.gsap
+            .timeline({ scrollTrigger: scrollTriggerConfig })
+            .set(gridItems, {
+              transformOrigin: "50% 0%",
+              z: () => window.gsap.utils.random(-5000, -2000),
+              rotationX: () => window.gsap.utils.random(-65, -25),
+              filter: "brightness(0%)",
+              force3D: true,
+            })
+            .to(gridItems, {
+              xPercent: () => window.gsap.utils.random(-150, 150),
+              yPercent: () => window.gsap.utils.random(-300, 300),
+              rotationX: 0,
+              filter: "brightness(200%)",
+              ease: "none",
+            })
+            .to(gridWrap, { z: 6500, ease: "none" }, 0);
+          break;
+      }
     };
 
-    switch (type) {
-      case 1:
-        grid.style.setProperty("--perspective", "1000px");
-        grid.style.setProperty("--grid-inner-scale", "0.5");
-        timeline = window.gsap
-          .timeline({ scrollTrigger: scrollTriggerConfig })
-          .set(gridWrap, { rotationY: 25, force3D: true })
-          .set(gridItems, { z: () => window.gsap.utils.random(-1600, 200), force3D: true })
-          .fromTo(
-            gridItems,
-            { xPercent: () => window.gsap.utils.random(-1000, -500) },
-            { xPercent: () => window.gsap.utils.random(500, 1000), ease: "none" },
-          );
-        break;
-
-      case 2:
-        grid.style.setProperty("--grid-width", "160%");
-        grid.style.setProperty("--perspective", "2000px");
-        grid.style.setProperty("--grid-inner-scale", "0.5");
-        grid.style.setProperty("--grid-item-ratio", "0.8");
-        grid.style.setProperty("--grid-columns", "6");
-        grid.style.setProperty("--grid-gap", "14vw");
-
-        timeline = window.gsap
-          .timeline({ defaults: { ease: "none" }, scrollTrigger: scrollTriggerConfig })
-          .set(gridWrap, { rotationX: 20, force3D: true })
-          .set(gridItems, { z: () => window.gsap.utils.random(-3000, -1000), force3D: true })
-          .fromTo(
-            gridItems,
-            { yPercent: () => window.gsap.utils.random(100, 1000), rotationY: -45, filter: "brightness(200%)" },
-            {
-              ease: "power2",
-              yPercent: () => window.gsap.utils.random(-1000, -100),
-              rotationY: 45,
-              filter: "brightness(50%)",
-            },
-            0,
-          )
-          .fromTo(gridWrap, { rotationZ: -5 }, { rotationX: -20, rotationZ: 10, scale: 1.2 }, 0);
-        break;
-
-      case 3:
-        grid.style.setProperty("--grid-width", "105%");
-        grid.style.setProperty("--grid-columns", "8");
-        grid.style.setProperty("--perspective", "1500px");
-        grid.style.setProperty("--grid-inner-scale", "0.5");
-        timeline = window.gsap
-          .timeline({ scrollTrigger: scrollTriggerConfig })
-          .set(gridItems, {
-            transformOrigin: "50% 0%",
-            z: () => window.gsap.utils.random(-5000, -2000),
-            rotationX: () => window.gsap.utils.random(-65, -25),
-            filter: "brightness(0%)",
-            force3D: true,
-          })
-          .to(gridItems, {
-            xPercent: () => window.gsap.utils.random(-150, 150),
-            yPercent: () => window.gsap.utils.random(-300, 300),
-            rotationX: 0,
-            filter: "brightness(200%)",
-            ease: "none",
-          })
-          .to(gridWrap, { z: 6500, ease: "none" }, 0);
-        break;
+    // AWWWARDS HACK: Если меню сейчас анимируется, откладываем GSAP
+    if (window.__menuTransitionInProgress) {
+      const onComplete = () => {
+        initGSAP();
+        window.removeEventListener("menu-transition-complete", onComplete);
+      };
+      window.addEventListener("menu-transition-complete", onComplete);
+    } else {
+      // Обычная загрузка - стартуем сразу
+      initGSAP();
     }
 
     return () => {
@@ -338,39 +392,14 @@ const MorphingVideoSection: React.FC = () => {
 
   const isOnMobile = useMemo(() => window.innerWidth < 768, []);
 
-  useEffect(() => {
-    if (isOnMobile) return;
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
 
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-
-      let strength = 60;
-      if (tier === "medium") strength = 30;
-      if (tier === "low") strength = 0;
-
-      const yPos = (scrolled - 0.5) * strength;
-      const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
-      if (bg) {
-        bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
-      }
-    };
-
-    let ticking = false;
-    const optimizedScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", optimizedScroll, { passive: true });
-    return () => window.removeEventListener("scroll", optimizedScroll);
-  }, [isOnMobile, tier]);
+  // Hardware-accelerated parallax logic based on performance tier
+  const strength = isOnMobile || tier === "low" ? 0 : (tier === "medium" ? 30 : 60);
+  const bgY = useTransform(scrollYProgress, [0, 1], [`-${strength / 2}%`, `${strength / 2}%`]);
 
   useEffect(() => {
     const preloadVideos = () => {
@@ -388,15 +417,15 @@ const MorphingVideoSection: React.FC = () => {
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
       {/* Параллакс фон */}
       <div className="absolute inset-0 -z-30 overflow-hidden">
-        <div
+        <motion.div
           className="parallax-bg absolute inset-0 w-full"
           style={{
+            y: bgY,
             height: "calc(100% + 200px)",
             top: "-100px",
-            transform: "translate3d(0, 0, 0)",
             willChange: "transform",
             backfaceVisibility: "hidden",
-            contain: window.innerWidth < 768 ? "layout style paint" : "none",
+            contain: isOnMobile ? "layout style paint" : "none",
           }}
         >
           <div
@@ -421,7 +450,7 @@ const MorphingVideoSection: React.FC = () => {
               filter: "brightness(0.7) contrast(1.1)",
             }}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Заголовок секции */}

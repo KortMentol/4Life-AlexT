@@ -11,11 +11,16 @@ import { useTouchScrollLock } from "@/hooks/useTouchScrollLock";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
 import { scrollToTop } from "@/utils/navigationUtils";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import React, { createContext, Suspense, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
-// Lazy-loaded...
+// Register ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
+// Lazy-loaded pages
 import HomePage from "@/pages/HomePage";
 const ProductsPage = React.lazy(() => import("@/pages/ProductsPage"));
 const AboutPage = React.lazy(() => import("@/pages/AboutPage"));
@@ -183,6 +188,32 @@ function App() {
     return () => {
       window.removeEventListener("load", updateScroll);
       window.removeEventListener("resize", updateScroll);
+    };
+  }, []);
+
+  // --- ENGINE SYNCHRONIZATION (Lenis + GSAP) ---
+  // Unifies the animation pipelines to prevent layout jitter during smooth scrolling.
+  useEffect(() => {
+    if (typeof window === "undefined" || !lenis) return;
+
+    // 1. Force ScrollTrigger to update strictly on Lenis scroll tick
+    lenis.on("scroll", ScrollTrigger.update);
+
+    // 2. Add Lenis RAF to GSAP's global ticker
+    // GSAP's time is in seconds, Lenis expects milliseconds
+    const ticker = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(ticker);
+
+    // 3. Disable GSAP's internal lag smoothing because Lenis manages the timeline
+    gsap.ticker.lagSmoothing(0);
+
+    // 4. Proper cleanup to prevent memory leaks on unmount
+    return () => {
+      lenis.off("scroll", ScrollTrigger.update);
+      gsap.ticker.remove(ticker);
     };
   }, []);
 

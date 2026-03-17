@@ -59,7 +59,8 @@ const CustomScrollbar: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [thumbHeight, setThumbHeight] = useState(50);
-  const [thumbY, setThumbY] = useState(0);
+  const [hasScroll, setHasScroll] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,6 +70,10 @@ const CustomScrollbar: React.FC = () => {
   const dragStartThumbYRef = useRef(0);
   const maxThumbYRef = useRef(0);
   const scrollableHeightRef = useRef(0);
+  const thumbYRef = useRef(0);
+  const isInitialMountRef = useRef(true);
+
+  const TRACK_PADDING = isMobile ? 1 : 0; // 8px safe zone for mobile
 
   /**
    * @function updateDimensions
@@ -88,16 +93,21 @@ const CustomScrollbar: React.FC = () => {
 
     scrollableHeightRef.current = sh;
 
+    setHasScroll(sh > 0);
     if (sh <= 0) return;
 
-    const ratio = vh / ch;
+    // Apply safe padding to track height calculation
+    const trackHeight = vh - (TRACK_PADDING * 2);
+    const ratio = trackHeight / ch;
+    
     const minHeight = isMobile ? 32 : 40;
-    const maxHeight = vh * 0.9;
-    const newThumbHeight = Math.max(minHeight, Math.min(maxHeight, vh * ratio));
+    const maxHeight = trackHeight * 0.9;
+    
+    const newThumbHeight = Math.max(minHeight, Math.min(maxHeight, trackHeight * ratio));
 
     setThumbHeight(newThumbHeight);
-    maxThumbYRef.current = vh - newThumbHeight;
-  }, [isMobile]);
+    maxThumbYRef.current = trackHeight - newThumbHeight;
+  }, [isMobile, TRACK_PADDING]);
 
   /**
    * @function showScrollbar
@@ -113,14 +123,14 @@ const CustomScrollbar: React.FC = () => {
 
   /**
    * @function hideScrollbar
-   * @description Скрывает скроллбар через 1200ms, если не hovering/dragging
+   * @description Скрывает скроллбар через 1500ms (Apple-style timing), если не hovering/dragging
    */
   const hideScrollbar = useCallback(() => {
     if (isDragging || isHovering) return;
 
     hideTimeoutRef.current = setTimeout(() => {
       setIsVisible(false);
-    }, 1200);
+    }, 1500);
   }, [isDragging, isHovering]);
 
   /**
@@ -133,23 +143,29 @@ const CustomScrollbar: React.FC = () => {
    * @performance
    * - Прямое обновление style.transform без setState
    * - Пропускает обновление при dragging для предотвращения конфликтов
+   * - ЕДИНСТВЕННЫЙ триггер показа скроллбара (Apple UX)
    */
   const handleScroll = useCallback(
     (e: LenisScrollEvent) => {
-      if (isDragging) return;
+      if (isDragging || isMenuOpen) return;
+
+      // Игнорируем первый scroll event от Lenis при монтировании (Apple UX)
+      if (isInitialMountRef.current) {
+        isInitialMountRef.current = false;
+        return;
+      }
 
       const newThumbY = e.progress * maxThumbYRef.current;
 
-      // Мгновенное обновление без setState для максимальной плавности
       if (thumbRef.current) {
-        thumbRef.current.style.transform = `translateY(${newThumbY}px)`;
+        thumbRef.current.style.transform = `translateX(-50%) translateY(${newThumbY}px)`;
       }
-      setThumbY(newThumbY);
+      thumbYRef.current = newThumbY;
 
       showScrollbar();
       hideScrollbar();
     },
-    [isDragging, showScrollbar, hideScrollbar]
+    [isDragging, isMenuOpen, showScrollbar, hideScrollbar]
   );
 
   /**
@@ -172,17 +188,16 @@ const CustomScrollbar: React.FC = () => {
 
       setIsDragging(true);
       dragStartYRef.current = e.clientY;
-      dragStartThumbYRef.current = thumbY;
+      dragStartThumbYRef.current = thumbYRef.current;
 
       const handleMouseMove = (e: MouseEvent) => {
         const deltaY = e.clientY - dragStartYRef.current;
         const newThumbY = Math.max(0, Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY));
 
-        // Мгновенное обновление позиции ползунка
         if (thumbRef.current) {
-          thumbRef.current.style.transform = `translateY(${newThumbY}px)`;
+          thumbRef.current.style.transform = `translateX(-50%) translateY(${newThumbY}px)`;
         }
-        setThumbY(newThumbY);
+        thumbYRef.current = newThumbY;
 
         // Вычисляем и применяем скролл
         const progress = maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
@@ -205,7 +220,7 @@ const CustomScrollbar: React.FC = () => {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     },
-    [thumbY, hideScrollbar]
+    [hideScrollbar, showScrollbar]
   );
 
   /**
@@ -239,43 +254,41 @@ const CustomScrollbar: React.FC = () => {
 
     lenis.on("scroll", handleScroll);
 
-    // Показ при активности пользователя
-    const handleActivity = () => {
-      // Не показываем кастомный скроллбар если меню открыто
-      if (document.body.classList.contains("menu-open")) return;
-      showScrollbar();
-      hideScrollbar();
-    };
-
-    window.addEventListener("wheel", handleActivity, { passive: true });
-
     return () => {
       resizeObserver.disconnect();
       lenis.off("scroll", handleScroll);
-      window.removeEventListener("wheel", handleActivity);
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }
     };
-  }, [handleScroll, updateDimensions, showScrollbar, hideScrollbar, isMobile]);
+  }, [handleScroll, updateDimensions]);
 
-  // Пересчет при смене страницы
+  // Пересчет при смене страницы + сброс видимости
   useEffect(() => {
+    // Apple-style: мгновенно скрываем скроллбар при переходе
+    setIsVisible(false);
+    isInitialMountRef.current = true; // Сброс флага при переходе
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+
     const timer = setTimeout(() => {
       updateDimensions();
-      if (window.scrollY > 0) {
-        showScrollbar();
-        hideScrollbar();
-      }
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [location.pathname, updateDimensions, showScrollbar, hideScrollbar]);
+  }, [location.pathname, updateDimensions]);
 
-  // Не показываем, если нет скролла или меню открыто
-  if (scrollableHeightRef.current <= 0 || document.body.classList.contains("menu-open")) {
-    return null;
-  }
+  // Слушатель событий меню
+  useEffect(() => {
+    const handleMenuUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setIsMenuOpen(customEvent.detail.action === "hide");
+    };
+    window.addEventListener("custom-scrollbar-update", handleMenuUpdate);
+    return () => window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
+  }, []);
 
   const trackWidth = isMobile ? 2 : 3;
   const thumbWidth = isMobile ? 4 : 6;
@@ -299,21 +312,27 @@ const CustomScrollbar: React.FC = () => {
       {/* Основной скроллбар */}
       <div
         ref={containerRef}
-        className="fixed top-0 right-0 h-full z-[9999]"
+        className="fixed right-0 z-[9999]"
         style={{
           width: containerWidth,
-          opacity: isVisible ? 1 : 0,
-          transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-          pointerEvents: isVisible ? "auto" : "none",
+          top: 0,
+          bottom: 0,
+          // Smoothly hide if menu is open, or if there's no scroll, or if inactive
+          opacity: (isVisible && hasScroll && !isMenuOpen) ? 1 : 0,
+          transition: "opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
+          pointerEvents: (isVisible && hasScroll && !isMenuOpen) ? "auto" : "none",
         }}
       >
         {/* Дорожка - Как у Immersive Garden */}
         <div
           ref={trackRef}
-          className="absolute inset-y-0 rounded-full"
+          className="absolute rounded-full"
           style={{
             width: trackWidth,
-            left: `calc(50% - ${trackWidth / 2}px)`,
+            top: TRACK_PADDING,
+            bottom: TRACK_PADDING,
+            left: '50%',
+            transform: 'translateX(-50%)',
             backgroundColor: "rgba(255, 255, 255, 0.2)",
           }}
         />
@@ -325,12 +344,12 @@ const CustomScrollbar: React.FC = () => {
           style={{
             width: thumbWidth,
             height: thumbHeight,
-            left: `calc(50% - ${thumbWidth / 2}px)`,
-            top: 0,
-            transform: `translateY(${thumbY}px)`,
+            left: '50%',
+            top: TRACK_PADDING,
+            transform: `translateX(-50%) translateY(0px)`,
             backgroundColor: isHovering || isDragging ? "#FFFFFF" : "#F5F5F5",
             boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)",
-            transition: "background-color 0.15s ease",
+            transition: "background-color 0.2s ease",
             willChange: "transform",
           }}
           onMouseDown={handleMouseDown}

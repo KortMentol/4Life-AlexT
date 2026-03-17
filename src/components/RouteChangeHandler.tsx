@@ -63,20 +63,21 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
   const { setIsPopping } = useNavigation();
   const isHandlingPop = useRef(false);
 
-  // Эффект сохранения позиции (без изменений)
+  // Эффект сохранения позиции (debounced)
   useEffect(() => {
-    let ticking = false;
+    let timeoutId: NodeJS.Timeout;
     const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
         const currentPath = location.pathname + location.search;
         saveScrollPosition(currentPath, window.scrollY);
-        ticking = false;
-      });
+      }, 150);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [location.pathname, location.search]);
 
   // ПЕРЕХВАТЧИК POP-СОБЫТИЙ (ДО React Router)
@@ -111,6 +112,9 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
       // Минимальная пауза для отрисовки вуали, затем навигируем
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          // Принудительно показываем хедер при POP-переходе
+          window.dispatchEvent(new CustomEvent("force-header-show"));
+          
           // Делаем навигацию за вуалью
           navigate(targetPath, { replace: true });
           

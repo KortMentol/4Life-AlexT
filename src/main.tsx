@@ -54,8 +54,19 @@ const initApp = () => {
     //</React.StrictMode> - временно отключен
   );
 
-  // Dispatch event to signal app is mounted
-  window.dispatchEvent(new CustomEvent("app-mounted"));
+  // Preload all page chunks before signaling app is ready
+  Promise.allSettled([
+    import("@/pages/HomePage"),
+    import("@/pages/ProductsPage"),
+    import("@/pages/AboutPage"),
+    import("@/pages/AboutMePage"),
+    import("@/pages/ContactPage"),
+    import("@/pages/PartnershipPage"),
+    import("@/pages/HowToBuyPage")
+  ]).then(() => {
+    // Dispatch event only when all chunks are loaded in RAM
+    window.dispatchEvent(new CustomEvent("app-mounted"));
+  });
 };
 
 // Initialize app when DOM is ready

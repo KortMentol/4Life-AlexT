@@ -22,7 +22,7 @@ const isMobile = () => {
 export const lenis = new Lenis({
   syncTouch: true,
   lerp: 0.07, // Ключевой параметр: 0.05-0.08 дает ощущение "тягучести"
-  duration: isMobile() ? 1.5 : 2.2, // mobile: 1.5, desktop: 1.7
+  duration: isMobile() ? 1.5 : 2.2, // mobile: 1.5, desktop: 2.2
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Плавное замедление
   smoothWheel: true,
   normalizeWheel: true,
@@ -34,6 +34,9 @@ export const lenis = new Lenis({
 
 // Добавляем кастомное свойство, если оно нужно для вашего типа
 lenis.velocity = 0;
+
+// AWWWARDS IMMERSIVE: Не блокируем pointer events во время скролла
+// Это позволяет hover работать всегда (как на Tibico Health)
 
 // 2. Запускаем цикл анимации СРАЗУ ЖЕ при загрузке этого модуля
 // Это гарантирует, что `lenis` всегда будет 'живым'

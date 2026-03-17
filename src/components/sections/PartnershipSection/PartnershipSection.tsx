@@ -14,7 +14,8 @@ import { Button, ScrollNumber } from "@/components/ui";
 import ScrollText from "@/components/ui/ScrollText";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { Icons } from "@/utils/icons";
-import React, { useEffect, useMemo, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useMemo, useRef } from "react";
 
 // Проверка на мобильное устройство
 const isMobile = () => window.innerWidth < 768;
@@ -29,54 +30,28 @@ const PartnershipSection: React.FC = () => {
   // Мемоизируем проверку мобильного устройства
   const isOnMobile = useMemo(() => isMobile(), []);
 
-  useEffect(() => {
-    // Отключаем параллакс на мобильных для производительности
-    if (isOnMobile) return;
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
 
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const scrolled = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-
-      let strength = 60;
-      if (tier === "medium") strength = 30;
-      if (tier === "low") strength = 0;
-
-      const yPos = (scrolled - 0.5) * strength;
-      const bg = sectionRef.current.querySelector(".parallax-bg") as HTMLElement;
-      if (bg) {
-        bg.style.transform = `translate3d(0, ${yPos}%, 0)`;
-      }
-    };
-
-    let ticking = false;
-    const optimizedScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", optimizedScroll, { passive: true });
-    return () => window.removeEventListener("scroll", optimizedScroll);
-  }, [isOnMobile, tier]);
+  // Hardware-accelerated parallax logic based on performance tier
+  const strength = isOnMobile || tier === "low" ? 0 : (tier === "medium" ? 30 : 60);
+  const bgY = useTransform(scrollYProgress, [0, 1], [`-${strength / 2}%`, `${strength / 2}%`]);
 
   return (
     <section ref={sectionRef} className="relative min-h-[300vh] overflow-hidden bg-transparent">
       {/* Параллакс фон - плитки как у MorphingVideoSection */}
       <div className="absolute inset-0 -z-30 overflow-hidden">
-        <div
+        <motion.div
           className="parallax-bg absolute inset-0 w-full"
           style={{
+            y: bgY,
             height: "calc(100% + 200px)",
             top: "-100px",
-            transform: "translate3d(0, 0, 0)",
             willChange: "transform",
             backfaceVisibility: "hidden",
-            contain: window.innerWidth < 768 ? "layout style paint" : "none",
+            contain: isOnMobile ? "layout style paint" : "none",
           }}
         >
           <div
@@ -105,7 +80,7 @@ const PartnershipSection: React.FC = () => {
               filter: "brightness(0.7) contrast(1.1)",
             }}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Заголовок секции */}
