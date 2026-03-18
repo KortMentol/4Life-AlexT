@@ -21,6 +21,10 @@ interface ImportMetaEnv {
   readonly VITE_DISTRIBUTOR_PHONE: string;
 }
 
+interface Window {
+  __menuTransitionInProgress?: boolean;
+}
+
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }

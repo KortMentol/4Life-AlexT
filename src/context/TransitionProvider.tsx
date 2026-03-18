@@ -31,18 +31,30 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children
     if (isTransitioning || location.pathname === path) return;
     setIsTransitioning(true);
 
+    // Broadcast transition start — heavy components pause their init to free the Main Thread.
+    window.__menuTransitionInProgress = true;
+    window.dispatchEvent(new CustomEvent("menu-transition-start"));
+
     const overlay = isMobile ? waveOverlayRef.current : pixelOverlayRef.current;
 
     overlay?.play("in").then(() => {
       startTransition(() => {
         navigate(path);
       });
+
+      // Old mobile CPUs (Snapdragon 845) need extra dark-screen time to finish layout/paint.
+      const delay = isMobile ? 400 : 250;
+
       setTimeout(() => {
         resetFluid();
         overlay.play("out").then(() => {
           setIsTransitioning(false);
+
+          // Wave is done — GPU/CPU is free. Safe to init heavy GSAP/WebGL.
+          window.__menuTransitionInProgress = false;
+          window.dispatchEvent(new CustomEvent("menu-transition-complete"));
         });
-      }, 250);
+      }, delay);
     });
   };
 
