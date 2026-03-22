@@ -1,91 +1,61 @@
 // src/components/RouteChangeHandler.tsx
-// AWWWARDS 2026 — BULLETPROOF SCROLL RESTORATION
 import { useNavigation } from "@/App";
 import { lenis } from "@/lib/lenis";
 import { RefObject, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useNavigationType } from "react-router-dom";
 
-const STORAGE_KEY = "4life_scroll_pos_v2"; // v2 для сброса старого localStorage
+// Возвращаем старый ключ localStorage, как было в вашей рабочей версии
+const STORAGE_KEY = "scroll_positions_v_final";
 
 interface RouteChangeHandlerProps {
   isMenuActionRef: RefObject<boolean>;
   wasMenuOpenRef: RefObject<boolean>;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// 1. ХРАНИЛИЩЕ: sessionStorage (изолирует вкладки)
-// ═════════════════════════════════════════════════════════════════════════════
 const saveScrollPosition = (path: string, position: number) => {
   try {
-    const positions = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
+    const positions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     positions[path] = Math.round(position);
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
-  } catch {}
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+  } catch (error) {
+    console.warn("RouteChangeHandler: Failed to save position.", error);
+  }
 };
 
-const getScrollPosition = (path: string): number => {
+const getScrollPosition = (path: string): number | null => {
   try {
-    const positions = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
-    return typeof positions[path] === "number" ? positions[path] : 0;
+    const positions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    return positions[path] ?? null;
   } catch {
-    return 0;
+    return null;
   }
 };
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 2. ЧТЕНИЕ: Правильный источник для каждого устройства
+// ИДЕАЛЬНАЯ ФУНКЦИЯ ВОССТАНОВЛЕНИЯ (ИЗ ВАШЕГО СТАРОГО РАБОЧЕГО КОДА)
 // ═════════════════════════════════════════════════════════════════════════════
-const getCurrentScrollY = (): number => {
-  const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  if (isTouchDevice) {
-    return window.scrollY || 0;
-  }
-  if (lenis && typeof lenis.scroll === "number") {
-    return lenis.scroll;
-  }
-  return window.scrollY || 0;
-};
+const restoreScrollPosition = (y: number, retries = 5) => {
+  lenis?.stop();
 
-// ═════════════════════════════════════════════════════════════════════════════
-// 3. ВОССТАНОВЛЕНИЕ: «Freeze, Wait, Teleport» с ResizeObserver
-// ═════════════════════════════════════════════════════════════════════════════
-const restoreScrollPosition = (targetY: number): Promise<void> => {
-  return new Promise((resolve) => {
-    if (!lenis) {
-      window.scrollTo({ top: targetY, behavior: "auto" });
-      requestAnimationFrame(() => resolve());
+  const attemptScroll = (attempt: number) => {
+    if (attempt <= 0) {
+      lenis?.start(); // Если не получилось за все попытки, просто запускаем скролл
       return;
     }
 
-    lenis.stop();
-
-    let debounceTimer: NodeJS.Timeout;
-    let fallbackTimer: NodeJS.Timeout;
-
-    const finalize = () => {
-      observer.disconnect();
-      clearTimeout(debounceTimer);
-      clearTimeout(fallbackTimer);
-
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const safeY = Math.min(targetY, Math.max(0, maxScroll));
-
-      lenis.scrollTo(safeY, { immediate: true, force: true });
-
+    // Проверяем, готова ли страница
+    if (document.documentElement.scrollHeight > y) {
+      lenis?.scrollTo(y, { immediate: true, force: true });
       requestAnimationFrame(() => {
-        lenis.start();
-        resolve();
+        lenis?.start();
       });
-    };
+    } else {
+      // Если нет, пробуем еще раз через небольшой интервал
+      setTimeout(() => attemptScroll(attempt - 1), 50);
+    }
+  };
 
-    const observer = new ResizeObserver(() => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(finalize, 150);
-    });
-
-    observer.observe(document.body);
-    fallbackTimer = setTimeout(finalize, 1000);
-  });
+  attemptScroll(retries);
 };
 
 const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHandlerProps) => {
@@ -95,122 +65,126 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
   const isFirstLoad = useRef(true);
   const { setIsPopping } = useNavigation();
   const isHandlingPop = useRef(false);
-  const navigationLock = useRef(false);
 
+  // ═════════════════════════════════════════════════════════════════════════════
+  // ЭФФЕКТ СОХРАНЕНИЯ ПОЗИЦИИ (С ЗАЩИТОЙ ОТ ПЕРЕЗАПИСИ)
+  // ═════════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
-    const handleMenuTransitionComplete = () => {
-      navigationLock.current = false;
-      isHandlingPop.current = false;
-    };
-    window.addEventListener("menu-transition-complete", handleMenuTransitionComplete);
-    return () => window.removeEventListener("menu-transition-complete", handleMenuTransitionComplete);
-  }, []);
+    let ticking = false;
+    const handleScroll = () => {
+      // КРИТИЧЕСКИ ВАЖНО: блокируем сохранение, если идет pop-переход или загрузка.
+      // Это полностью решает баг, когда 0px стирались и заменялись на 200px!
+      if (ticking || isHandlingPop.current || isFirstLoad.current) return;
 
-  useEffect(() => {
-    const currentPath = location.pathname + location.search;
-    const saveCurrentPosition = () => {
-      saveScrollPosition(currentPath, getCurrentScrollY());
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentPath = location.pathname + location.search;
+        saveScrollPosition(currentPath, window.scrollY);
+        ticking = false;
+      });
     };
-    window.addEventListener("beforeunload", saveCurrentPosition);
-    window.addEventListener("pagehide", saveCurrentPosition);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") saveCurrentPosition();
-    });
+
+    // Экстренное сохранение при закрытии/перезагрузке
+    const emergencySave = () => {
+      if (isHandlingPop.current || isFirstLoad.current) return;
+      saveScrollPosition(location.pathname + location.search, window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("beforeunload", emergencySave);
+
     return () => {
-      saveCurrentPosition();
-      window.removeEventListener("beforeunload", saveCurrentPosition);
-      window.removeEventListener("pagehide", saveCurrentPosition);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("beforeunload", emergencySave);
     };
   }, [location.pathname, location.search]);
 
+  // ═════════════════════════════════════════════════════════════════════════════
+  // ПЕРЕХВАТЧИК POP-СОБЫТИЙ (С ТЯГУЧЕЙ ВУАЛЬЮ)
+  // ═════════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    const handlePopState = async (event: PopStateEvent) => {
-      if (
-        isMenuActionRef.current ||
-        navigationLock.current ||
-        window.__menuTransitionInProgress ||
-        isHandlingPop.current
-      )
-        return;
-      if (wasMenuOpenRef.current && (!event.state || !event.state.menuOpen)) return;
+    const handlePopState = (event: PopStateEvent) => {
+      if (isMenuActionRef.current) return;
+      if (wasMenuOpenRef.current && !event.state?.menuOpen) return;
+      if (isHandlingPop.current) return;
 
+      event.preventDefault();
       isHandlingPop.current = true;
-      navigationLock.current = true;
 
-      try {
-        // ШАГ 1: FREEZE. Мгновенно убиваем инерцию Lenis.
-        if (lenis) {
-          lenis.stop();
-          // @ts-ignore - внутренний API Lenis для сброса скорости
-          if (lenis.velocity !== undefined) lenis.velocity = 0;
-        }
+      // 1. Показываем вуаль немедленно
+      setIsPopping(true);
+      lenis?.stop();
 
-        // ШАГ 2: READ. Теперь позиция точна.
-        saveScrollPosition(location.pathname + location.search, getCurrentScrollY());
+      const targetPath = event.state?.path || window.location.pathname + window.location.search;
+      const targetScroll = getScrollPosition(targetPath) ?? 0;
 
-        let targetPath = event.state?.path;
-        if (!targetPath) {
-          // Тип-сейф ожидание следующего кадра
-          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-          targetPath = window.location.pathname + window.location.search;
-        }
+      // 2. Двойной RAF гарантирует, что браузер отрендерит черную вуаль
+      // ДО того, как React заблокирует поток навигацией
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          navigate(targetPath, { replace: true });
 
-        const targetY = getScrollPosition(targetPath);
+          // 3. Ждем пока React вставит новую страницу в DOM
+          setTimeout(() => {
+            restoreScrollPosition(targetScroll);
 
-        setIsPopping(true); // Включаем вуаль
-        window.dispatchEvent(new CustomEvent("force-header-show"));
-
-        navigate(targetPath, { replace: true });
-
-        // ШАГ 3: WAIT & TELEPORT. Ждем отрисовки DOM и телепортируемся.
-        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-        await restoreScrollPosition(targetY);
-
-        setIsPopping(false); // Убираем вуаль
-      } finally {
-        isHandlingPop.current = false;
-        navigationLock.current = false;
-      }
+            // 4. ТАЙМИНГ ВУАЛИ (AWWWARDS FEEL)
+            // Задержка в 350мс держит вуаль закрытой, скрывая прыжки скролла и контента.
+            // Только после этого мы отключаем вуаль, и она ПЛАВНО растворяется за 0.5s.
+            setTimeout(() => {
+              setIsPopping(false);
+              lenis?.start();
+              isHandlingPop.current = false;
+            }, 350);
+          }, 50); // 50ms - время на рендер
+        });
+      });
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [location.pathname, location.search, navigate, setIsPopping, isMenuActionRef, wasMenuOpenRef]);
+  }, [navigate, setIsPopping, isMenuActionRef, wasMenuOpenRef]);
 
+  // ═════════════════════════════════════════════════════════════════════════════
+  // ПЕРВАЯ ЗАГРУЗКА И ОБЫЧНЫЕ ПЕРЕХОДЫ
+  // ═════════════════════════════════════════════════════════════════════════════
   useEffect(() => {
     const currentPath = location.pathname + location.search;
+
     if (isFirstLoad.current) {
-      isFirstLoad.current = false;
-      const restoreAfterPreloader = async () => {
-        const savedY = getScrollPosition(currentPath);
-        if (savedY > 0) {
-          await restoreScrollPosition(savedY);
+      const savedY = getScrollPosition(currentPath);
+
+      const performRestore = () => {
+        if (savedY !== null && savedY > 0) {
+          restoreScrollPosition(savedY);
         } else {
           lenis?.start();
         }
-        window.removeEventListener("app-mounted", restoreAfterPreloader);
+        // Снимаем блокировку первой загрузки с небольшой задержкой
+        setTimeout(() => {
+          isFirstLoad.current = false;
+        }, 300);
       };
 
-      // Логика прелоадера: если он уже скрыт, запускаем сразу.
-      if (document.getElementById("preloader") === null) {
-        restoreAfterPreloader();
+      if (document.getElementById("preloader")) {
+        setTimeout(performRestore, 2500); // Точно как в вашем старом коде
       } else {
-        window.addEventListener("app-mounted", restoreAfterPreloader, { once: true });
+        performRestore();
       }
       return;
     }
 
-    if (navigationType === "POP" && isHandlingPop.current) return;
-
-    if (!navigationLock.current) {
-      window.dispatchEvent(new CustomEvent("force-header-show"));
-      lenis?.scrollTo(0, { immediate: true });
+    if (navigationType === "POP" && isHandlingPop.current) {
+      return;
     }
+
+    // ОБЫЧНЫЕ ПЕРЕХОДЫ (клики по ссылкам)
+    window.dispatchEvent(new CustomEvent("force-header-show"));
+    lenis?.scrollTo(0, { immediate: true });
+    lenis?.start();
   }, [location.pathname, location.search, navigationType]);
 
+  // Синхронизация пути
   useEffect(() => {
     const currentPath = location.pathname + location.search;
     if (window.history.state?.path !== currentPath) {
