@@ -153,7 +153,7 @@ const HomePage: React.FC = () => {
             <div className="container max-w-7xl mx-auto px-6">
               <div className="opacity-100">
                 <div className="flex justify-center mb-8">
-                  <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30"></div>
+                  <div className="h-1.5 w-[120px] bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200 rounded-full shadow-sm shadow-blue-500/30 anti-pixel-snap"></div>
                 </div>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 text-center">
                   <span className="block mb-2 text-lg md:text-xl font-medium text-white">

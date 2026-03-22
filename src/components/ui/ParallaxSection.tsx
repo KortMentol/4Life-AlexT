@@ -168,11 +168,15 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
         }}
       >
         <motion.div
-          className={`relative w-full h-full ${imageBrightness}`}
+          className={`relative w-full h-full ${imageBrightness} gpu-smooth-scroll`}
           style={{ 
             y,
             willChange: 'transform',
             contain: isMobile ? 'layout style paint' : 'none'
+          }}
+          transformTemplate={(_, generated) => {
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            return isTouchDevice ? generated : `translateZ(0.01px) ${generated}`;
           }}
         >
           {backgroundVideo ? (

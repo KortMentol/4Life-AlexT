@@ -81,13 +81,21 @@ function App() {
   // Следим за popstate (кнопки вперед/назад)
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      // Синхронизируем состояние меню с состоянием в истории
-      setIsMenuOpen(event.state?.menuOpen === true);
+      // Проверяем, это переход меню или обычная навигация
+      const hasMenuState = event.state && 'menuOpen' in event.state;
+      
+      if (hasMenuState) {
+        // Это переход связанный с меню
+        setIsMenuOpen(event.state.menuOpen === true);
+      } else if (isMenuOpen) {
+        // Если меню открыто, а в state нет menuOpen - значит это обычный переход назад, закрываем меню
+        setIsMenuOpen(false);
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [isMenuOpen]);
 
   const toggleMenu = useCallback(() => {
     const currentPath = location.pathname + location.search;

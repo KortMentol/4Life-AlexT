@@ -64,16 +64,10 @@ html.menu-open {
   overflow: hidden !important;
 }
 
-/* Smooth scrolling - оптимизация для Firefox */
+/* AWWWARDS 2026: Отключаем scroll-behavior для корректных телепортов
+   Lenis управляет плавностью на ПК, нативная физика на мобильных */
 html {
-  scroll-behavior: smooth;
-}
-
-/* Firefox-специфичная оптимизация */
-@-moz-document url-prefix() {
-  * {
-    scroll-behavior: auto !important;
-  }
+  scroll-behavior: auto;
 }
 
 /* Animation utilities */
@@ -667,4 +661,288 @@ a {
   border-radius: inherit;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
   pointer-events: none;
+}
+
+/* AWWWARDS 2026: Anti-Jitter & Sub-pixel Rendering Fixes */
+.gpu-smooth-scroll {
+  /* Форсируем 3D слой и предотвращаем схлопывание слоев при низком opacity */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  
+  /* Фикс для Firefox: прозрачный outline предотвращает sub-pixel snapping (дребезжание границ) */
+  outline: 1px solid transparent;
+  
+  /* Изолируем расчет смешивания (blending) для прозрачных видео */
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+/* Фикс мерцающей рамки (выносим бордер за пределы контента) */
+.decoupled-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(59, 130, 246, 0.3); /* border-blue-500/30 */
+  pointer-events: none;
+  transform: translateZ(0.01px); /* Форсируем рендер поверх всего без z-index */
+}
+/* AWWWARDS 2026: COMPOSITE LAYER ISOLATION (только для desktop) */
+@media (hover: hover) and (pointer: fine) {
+  /* Принудительная GPU изоляция для прозрачных элементов */
+  .composite-isolation {
+    /* Создаем отдельный композитный слой */
+    will-change: transform, opacity;
+    transform: translateZ(0.001px); /* Микро-смещение для форсирования GPU слоя */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    
+    /* Изолируем blending calculations */
+    isolation: isolate;
+    contain: layout style paint;
+    
+    /* Принудительная стабилизация рендеринга */
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    
+    /* Предотвращаем layer collapse при изменении opacity */
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+  }
+
+  /* Специальная изоляция для видео с прозрачностью */
+  .video-composite-fix {
+    /* Форсируем постоянный GPU слой независимо от opacity */
+    will-change: transform, opacity, filter;
+    transform: translate3d(0, 0, 0.01px) scale(1.001); /* Микро-трансформация */
+    
+    /* Стабилизация границ */
+    outline: 1px solid transparent;
+    border-radius: inherit;
+    
+    /* Предотвращаем software fallback */
+    filter: blur(0px) brightness(1) contrast(1);
+    
+    /* Изоляция от родительских слоев */
+    isolation: isolate;
+    contain: layout style paint;
+  }
+
+  /* Фикс для рамок прозрачных элементов */
+  .border-stabilizer::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: inherit;
+    pointer-events: none;
+    
+    /* Принудительный GPU рендеринг рамки */
+    transform: translateZ(0.02px);
+    will-change: transform;
+    backface-visibility: hidden;
+    
+    /* Стабилизация цвета рамки */
+    opacity: 1;
+    isolation: isolate;
+  }
+}
+
+/* Мобильные устройства - минимальные фиксы */
+@media (hover: none) and (pointer: coarse) {
+  .composite-isolation,
+  .video-composite-fix {
+    /* Только базовая GPU оптимизация для тач */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+/* AWWWARDS 2026: PROFESSIONAL VIDEO OPACITY STABILIZATION (только desktop) */
+@media (hover: hover) and (pointer: fine) {
+  /* Стабилизация прозрачных видео - метод топовых студий */
+  .video-opacity-stabilizer {
+    /* Принудительный GPU слой для стабильного opacity рендеринга */
+    will-change: opacity, transform;
+    transform: translate3d(0, 0, 0) scale(1.0001); /* Микро-масштаб для GPU активации */
+    
+    /* Изоляция от родительских слоев */
+    isolation: isolate;
+    contain: layout style paint;
+    
+    /* Стабилизация рендеринга границ */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    
+    /* Предотвращение software fallback при opacity < 1 */
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+  }
+
+  /* Фикс для видео контейнеров с rounded углами */
+  .video-container-fix {
+    /* Принудительная изоляция overflow для сохранения border-radius */
+    isolation: isolate;
+    contain: layout style;
+    
+    /* Стабилизация overflow: hidden с border-radius */
+    -webkit-mask: radial-gradient(white, white);
+    mask: radial-gradient(white, white);
+    
+    /* GPU оптимизация для overflow + border-radius */
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Специальный фикс для видео элементов внутри прозрачных контейнеров */
+  .video-container-fix video {
+    /* Принудительное наследование border-radius от родителя */
+    border-radius: inherit;
+    
+    /* Стабилизация рендеринга видео */
+    transform: translateZ(0.001px);
+    will-change: transform;
+    
+    /* Предотвращение мерцания при opacity анимациях */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* Мобильные устройства - минимальные фиксы */
+@media (hover: none) and (pointer: coarse) {
+  .video-opacity-stabilizer,
+  .video-container-fix {
+    /* Только базовая GPU оптимизация */
+    transform: translateZ(0);
+  }
+}
+/* IMMERSIVE GARDEN 2026: MODERN VIDEO CONTAINER DESIGN (только desktop) */
+@media (hover: hover) and (pointer: fine) {
+  /* Современный минималистичный контейнер видео */
+  .immersive-video-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* Современная тонкая рамка через box-shadow (НЕ МЕРЦАЕТ!) */
+    box-shadow: 
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.08);
+    
+    /* GPU стабилизация */
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    isolation: isolate;
+    contain: layout style paint;
+    
+    /* Плавные переходы */
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Темная тема - более контрастная рамка */
+  .dark .immersive-video-container {
+    background: rgba(0, 0, 0, 0.05);
+    box-shadow: 
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 12px 40px rgba(0, 0, 0, 0.25),
+      0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Hover эффект - как у Immersive Garden */
+  .immersive-video-container:hover {
+    transform: translateZ(0) scale(1.02);
+    box-shadow: 
+      inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+      0 16px 64px rgba(0, 0, 0, 0.2),
+      0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .dark .immersive-video-container:hover {
+    box-shadow: 
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+      0 20px 80px rgba(0, 0, 0, 0.4),
+      0 12px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Видео внутри контейнера */
+  .immersive-video-container video {
+    /* Стабилизация рендеринга */
+    transform: translateZ(0.001px);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    
+    /* Наследование border-radius */
+    border-radius: inherit;
+    
+    /* Плавные переходы */
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Subtle внутреннее свечение */
+  .immersive-video-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .immersive-video-container:hover::before {
+    opacity: 1;
+  }
+
+  /* Современный loading state */
+  .immersive-video-container[data-loading="true"] {
+    background: rgba(255, 255, 255, 0.05);
+    animation: pulse-modern 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-modern {
+    0%, 100% {
+      box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+    50% {
+      box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+/* Мобильные устройства - упрощенный дизайн */
+@media (hover: none) and (pointer: coarse) {
+  .immersive-video-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    box-shadow: 
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+    
+    transform: translateZ(0);
+    border-radius: inherit;
+  }
+
+  .dark .immersive-video-container {
+    background: rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+      0 6px 20px rgba(0, 0, 0, 0.2);
+  }
 }

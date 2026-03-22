@@ -40,7 +40,9 @@ const Word: React.FC<WordProps> = ({ word, progress, range, theme }) => {
   return (
     <span className="relative mr-3 mt-3 inline-block">
       <span className="absolute opacity-0">{word}</span>
-      <motion.span style={{ opacity, color: theme === "dark" ? "#00d4ff" : "#0066ff" }}>
+      <motion.span 
+        style={{ opacity, color: theme === "dark" ? "#00d4ff" : "#0066ff" }}
+      >
         {word}
       </motion.span>
     </span>
@@ -65,7 +67,11 @@ const ScrollText: React.FC<ScrollTextProps> = ({ children, className = "" }) => 
 
   if (tier === "medium") {
     return (
-      <motion.p ref={container} className={`relative ${className}`} style={{ opacity }}>
+      <motion.p 
+        ref={container} 
+        className={`relative ${className}`}
+        style={{ opacity }}
+      >
         {children}
       </motion.p>
     );

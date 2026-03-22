@@ -204,14 +204,23 @@ const BlockVideo: React.FC<{
           scale,
           willChange: 'transform, opacity'
         }}
-        className="w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto"
+        transformTemplate={(_, generated) => {
+          // Убрали грязный хак с translateZ(0.01px), так как он ломает stacking context
+          return generated;
+        }}
+        // ДОБАВЛЕН anti-pixel-snap ДЛЯ ПК
+        className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? 'anti-pixel-snap' : ''}`}
         transition={{
-          type: 'tween', // Всегда tween для синхронизации с Lenis
-          duration: isTouchDevice ? 1.5 : 1.2, // Синхронизация с Lenis duration
-          ease: [0.25, 0.1, 0.25, 1.0] // Immersive Garden easing - тягучий и плавный
+          type: 'tween',
+          duration: isTouchDevice ? 1.5 : 1.2,
+          ease: [0.25, 0.1, 0.25, 1.0]
         }}
       >
-        <div className="relative aspect-video overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-md shadow-2xl">
+        {/* ДОБАВЛЕН gpu-mask-radius ДЛЯ ИДЕАЛЬНЫХ УГЛОВ ПРИ СКРОЛЛЕ */}
+        <div className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+          
+          {/* Контейнер рамки вынесен ОТДЕЛЬНО от видео, чтобы не мерцать */}
+          <div className="absolute inset-0 rounded-2xl border border-blue-500/30 z-10 pointer-events-none" />
           {/* Фоновое изображение */}
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
@@ -224,7 +233,7 @@ const BlockVideo: React.FC<{
           {/* Видео */}
           <video
             ref={videoRef}
-            className="h-full w-full object-cover rounded-2xl"
+            className="h-full w-full object-cover"
             autoPlay
             loop
             muted
@@ -237,11 +246,17 @@ const BlockVideo: React.FC<{
             {!isTransitioning && <source src={videoSrc} type="video/mp4" />}
           </video>
 
-          {/* Overlay эффекты */}
+          {/* Современные overlay эффекты */}
           {tier === 'high' && (
             <>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-black/5 pointer-events-none" />
-              <div className="absolute inset-0 ring-1 ring-white/20 rounded-2xl pointer-events-none" />
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none" />
+              {/* Inner glow effect */}
+              <div className="absolute inset-0 rounded-2xl pointer-events-none" 
+                style={{
+                  background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)'
+                }} 
+              />
             </>
           )}
         </div>

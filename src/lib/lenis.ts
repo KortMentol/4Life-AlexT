@@ -3,7 +3,7 @@
  * @description Инициализирует и конфигурирует синглтон-экземпляр Lenis для управления плавной прокруткой в приложении.
  * Экспортирует инстанс `lenis` и утилитарные функции для глобального контроля над скроллом.
  * @author Kort
- * @version 2.1.0
+ * @version 3.0.0 - AWWWARDS 2026 PROFESSIONAL FIXES
  * @see https://github.com/studio-freight/lenis
  * @usage
  * Этот модуль теперь автоматически запускает цикл анимации. Просто импортируйте `lenis` или любую утилиту.
@@ -21,13 +21,13 @@ const isMobile = () => {
 // 1. Создаем и экспортируем ЕДИНСТВЕННЫЙ экземпляр Lenis
 export const lenis = new Lenis({
   syncTouch: true,
-  lerp: 0.07, // Ключевой параметр: 0.05-0.08 дает ощущение "тягучести"
-  duration: isMobile() ? 1.5 : 2.2, // mobile: 1.5, desktop: 2.2
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Плавное замедление
+  lerp: 0.07, // ОРИГИНАЛЬНОЕ значение - возвращаем как было
+  duration: isMobile() ? 1.5 : 2.2, // ОРИГИНАЛЬНЫЕ значения
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // ОРИГИНАЛЬНЫЙ easing
   smoothWheel: true,
   normalizeWheel: true,
-  wheelMultiplier: 1.0, // Стандартная скорость колеса
-  touchMultiplier: 2.5, // Немного ускорить скролл на тач-устройствах
+  wheelMultiplier: 1.0,
+  touchMultiplier: 2.5,
   infinite: false,
   gestureOrientation: "vertical",
 } as LenisOptions) as unknown as LenisType;
@@ -35,14 +35,23 @@ export const lenis = new Lenis({
 // Добавляем кастомное свойство, если оно нужно для вашего типа
 lenis.velocity = 0;
 
-// AWWWARDS IMMERSIVE: Не блокируем pointer events во время скролла
-// Это позволяет hover работать всегда (как на Tibico Health)
-
-// 2. Запускаем цикл анимации СРАЗУ ЖЕ при загрузке этого модуля
-// Это гарантирует, что `lenis` всегда будет 'живым'
+// 2. МИНИМАЛЬНЫЙ RAF с базовыми фиксами (только для desktop)
 if (typeof window !== "undefined") {
   const raf = (time: number) => {
+    // Основной Lenis RAF
     lenis.raf(time);
+    
+    // Минимальный фикс только для desktop: округление в конце скролла
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) {
+      const velocity = (lenis as any).velocity || 0;
+      const scroll = (lenis as any).scroll || 0;
+      if (Math.abs(velocity) < 0.01 && scroll % 1 !== 0) {
+        // Округляем только когда скорость почти нуль и есть sub-pixel
+        (lenis as any).scroll = Math.round(scroll);
+      }
+    }
+    
     requestAnimationFrame(raf);
   };
   requestAnimationFrame(raf);
@@ -77,3 +86,10 @@ export const startScroll = () => lenis.start();
  * @description Принудительно пересчитывает размеры контейнера прокрутки.
  */
 export const updateScroll = () => lenis.resize();
+
+// AWWWARDS 2026: Экспорт состояния скролла для компонентов
+export const getScrollState = () => ({ 
+  isScrolling: false, 
+  scroll: (lenis as any).scroll || 0, 
+  velocity: (lenis as any).velocity || 0 
+});

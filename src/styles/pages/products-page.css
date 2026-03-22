@@ -1,3 +1,20 @@
+/* AWWWARDS FIX: Предотвращает вылет острых углов у видео при GPU-трансформациях */
+.gpu-mask-radius {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* AWWWARDS FIX: Убивает субпиксельные рывки в конце инерции Lenis на ПК */
+.anti-pixel-snap {
+  filter: blur(0px);
+  -webkit-filter: blur(0px);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
 /* Внешний контейнер (управляется Framer Motion) */
 .product-card-wrapper {
   contain: layout style paint;
