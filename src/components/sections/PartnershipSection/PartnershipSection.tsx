@@ -1,276 +1,163 @@
-/**
- * @module src/components/sections/PartnershipSection/PartnershipSection.tsx
- * @description Awwwards-уровень секция о партнерстве с 4Life в sci-fi стиле будущего.
- * Использует параллакс фон из плиток, ScrollText эффекты и футуристичный дизайн.
- * @author Kort
- * @version 2.0.0
- * @usage
- * 1. src/pages/HomePage.tsx - Секция 4 между MorphingVideoSection и финальной CTA секцией
- * @example
- * <PartnershipSection />
- */
-
-import { Button, ScrollNumber } from "@/components/ui";
-import ScrollText from "@/components/ui/ScrollText";
+import { Button } from "@/components/ui";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { useTheme } from "@/hooks/useTheme";
 import { Icons } from "@/utils/icons";
 import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useMemo, useRef } from "react";
-
-// Проверка на мобильное устройство
-const isMobile = () => window.innerWidth < 768;
+import React, { useRef } from "react";
 
 const PartnershipSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const block1Ref = useRef<HTMLDivElement>(null);
-  const block2Ref = useRef<HTMLDivElement>(null);
-  const block3Ref = useRef<HTMLDivElement>(null);
+  
   const tier = usePerformanceTier();
-
-  // Мемоизируем проверку мобильного устройства
-  const isOnMobile = useMemo(() => isMobile(), []);
+  const isMobile = useIsMobile();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"],
+    offset:["start end", "end start"],
   });
 
-  // Hardware-accelerated parallax logic based on performance tier
-  const strength = isOnMobile || tier === "low" ? 0 : (tier === "medium" ? 30 : 60);
-  const bgY = useTransform(scrollYProgress, [0, 1], [`-${strength / 2}%`, `${strength / 2}%`]);
+  // --- МАТЕМАТИКА ПАРАЛЛАКСА (Только CSS transforms, 0 нагрузки на CPU) ---
+  const isLowPerf = isMobile || tier === "low";
+  
+  const bgY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    isLowPerf ? ["-8%", "8%"] : ["-35%", "35%"]
+  );
+  
+  const contentY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    isLowPerf ? ["-4%", "4%"] : ["20%", "-20%"]
+  );
 
-  return (
-    <section ref={sectionRef} className="relative min-h-[300vh] overflow-hidden bg-transparent">
-      {/* Параллакс фон - плитки как у MorphingVideoSection */}
-      <div className="absolute inset-0 -z-30 overflow-hidden">
-        <motion.div
-          className="parallax-bg absolute inset-0 w-full"
-          style={{
-            y: bgY,
-            height: "calc(100% + 200px)",
-            top: "-100px",
-            willChange: "transform",
-            backfaceVisibility: "hidden",
-            contain: isOnMobile ? "layout style paint" : "none",
-          }}
-        >
-          <div
-            className="w-full h-full bg-repeat opacity-100 dark:opacity-0 transition-opacity duration-500"
-            style={{
-              backgroundImage: `url(/images/backgrounds/light-pattern.webp)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.9) contrast(1.05)",
-            }}
-          />
-          {/* ПК версия темного фона */}
-          <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 hidden md:block"
-            style={{
-              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.6) contrast(1.1)",
-            }}
-          />
-          {/* Мобильная версия темного фона (светлее на 10%) */}
-          <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 block md:hidden"
-            style={{
-              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.7) contrast(1.1)",
-            }}
-          />
-        </motion.div>
-      </div>
+  const bgImageLight = "https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=1920&auto=format&fit=crop";
+  const bgImageDark = "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop";
+  const activeBg = isDark ? bgImageDark : bgImageLight;
 
-      {/* Заголовок секции */}
-      <div className="relative z-30 px-4 pt-24 pb-12 text-center">
-        <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-4 text-sm font-medium uppercase tracking-[0.2em]"
-            style={{
-              background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
-              backgroundSize: "200% 100%",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              // Убираем анимацию на мобильных
-              animation: isOnMobile ? "none" : "gradient-shift 6s ease-in-out infinite",
-              // Упрощаем эффекты на мобильных
-              textShadow: isOnMobile ? "none" : "0 0 20px rgba(14, 165, 233, 0.3)",
-              filter: isOnMobile ? "none" : "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
-            }}
-          >
-            Возможности • Развитие • Сообщество
-          </h2>
-          <h3
-            className="mb-8 text-4xl font-semibold md:text-6xl"
-            style={{
-              background: "linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #1e293b 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              // Убираем тени на мобильных
-              filter: isOnMobile ? "none" : "drop-shadow(0 0 2px rgba(59, 130, 246, 0.4))",
-              position: "relative",
-              lineHeight: "1.2",
-              paddingBottom: "0.1em",
-            }}
-          >
+  if (tier === "low") {
+    return (
+      <section className={`relative min-h-screen py-24 overflow-hidden ${isDark ? 'bg-gray-950' : 'bg-gray-100'}`}>
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url(${activeBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <div className="relative z-10 container mx-auto px-4 max-w-5xl text-center">
+          <h2 className={`text-4xl md:text-6xl font-serif tracking-tight mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Путь к новым горизонтам
-          </h3>
-          <ScrollText className="mx-auto max-w-4xl text-lg leading-relaxed">
-            Откройте для себя мир возможностей, где ваша страсть к здоровому образу жизни становится источником дохода и
-            личностного роста. Присоединяйтесь к глобальному сообществу единомышленников.
-          </ScrollText>
-        </div>
-      </div>
-
-      <div className="relative">
-        {/* Блок 01 - Возможности */}
-        <div ref={block1Ref} className="relative">
-          <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-3 order-2 lg:order-1">
-                  <ScrollNumber
-                    number="01"
-                    className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none"
-                  />
-                </div>
-                <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
-                  <h4
-                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight"
-                    style={{
-                      background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: isOnMobile ? "none" : "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-                      position: "relative",
-                    }}
-                  >
-                    Дополнительные источники дохода
-                  </h4>
-                  <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl">
-                    Дополнительные источники дохода открываются перед теми, кто готов делиться знаниями о здоровье. Это
-                    не просто продажи — это миссия помочь людям обрести лучшую версию себя, получая за это достойное
-                    вознаграждение.
-                  </ScrollText>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative z-10 min-h-[100vh]"></div>
-        </div>
-
-        {/* Блок 02 - Развитие */}
-        <div ref={block2Ref} className="relative">
-          <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-9 order-1 space-y-6 text-right">
-                  <h4
-                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight"
-                    style={{
-                      background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: isOnMobile ? "none" : "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-                      position: "relative",
-                    }}
-                  >
-                    Личностный рост и экспертность
-                  </h4>
-                  <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl ml-auto">
-                    Погружение в мир здорового образа жизни становится частью вашего личностного роста. Изучение
-                    принципов питания, иммунитета, биохимии организма расширяет горизонты и формирует экспертность в
-                    области, которая всегда будет актуальна.
-                  </ScrollText>
-                </div>
-                <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
-                  <ScrollNumber
-                    number="02"
-                    className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none lg:translate-x-8"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative z-10 min-h-[100vh]"></div>
-        </div>
-
-        {/* Блок 03 - Сообщество */}
-        <div ref={block3Ref} className="relative">
-          <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
-              <div className="text-center space-y-8">
-                <ScrollNumber
-                  number="03"
-                  className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none"
-                />
-                <div className="space-y-6">
-                  <h4
-                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight max-w-4xl mx-auto"
-                    style={{
-                      background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: isOnMobile ? "none" : "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-                      position: "relative",
-                    }}
-                  >
-                    Сообщество единомышленников
-                  </h4>
-                  <ScrollText className="text-base md:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-cyan-300 max-w-4xl mx-auto">
-                    Вокруг вас формируется круг единомышленников — людей, которые ценят качество жизни и стремятся к
-                    совершенству. Это не просто бизнес-партнеры, это команда, которая поддерживает друг друга на пути к
-                    общим целям.
-                  </ScrollText>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative z-10 min-h-[100vh]"></div>
-        </div>
-
-        {/* Пространство после секции */}
-        <div className="h-[36vh] lg:h-[45vh]"></div>
-      </div>
-
-      {/* CTA секция */}
-      <div className="relative z-30 px-4 py-24 text-center">
-        <div className="mx-auto max-w-4xl">
-          <h3
-            className="mb-8 text-3xl font-semibold md:text-4xl"
-            style={{
-              background: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              filter: isOnMobile ? "none" : "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-            }}
-          >
-            Готовы узнать о возможностях?
-          </h3>
-          <ScrollText className="mx-auto mb-12 max-w-3xl text-lg leading-relaxed">
-            Узнайте, как стать частью глобального сообщества 4Life и открыть для себя новые горизонты развития и дохода.
-          </ScrollText>
-
-          <Button
-            to="/partnership"
-            variant="primary"
-            size="lg"
-            className="from-cyan-600 to-blue-600 shadow-lg"
-            icon={<Icons.Users className="w-5 h-5" />}
-          >
-            <span className="hidden sm:inline">Узнать о возможностях партнерства</span>
-            <span className="inline sm:hidden">Узнать о партнерстве</span>
+          </h2>
+          <p className={`text-lg md:text-xl leading-relaxed mb-12 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Откройте для себя мир возможностей, где ваша страсть к здоровому образу жизни становится источником дохода.
+          </p>
+          <Button to="/partnership" variant="primary" size="lg" className="from-cyan-600 to-blue-600" icon={<Icons.ArrowRight className="w-5 h-5" />}>
+            Узнать о партнерстве
           </Button>
         </div>
-      </div>
+      </section>
+    );
+  }
+
+  return (
+    <section 
+      ref={sectionRef} 
+      className={`relative overflow-hidden scene-3d-container ${isDark ? 'bg-[#050505]' : 'bg-[#e5e7eb]'}`}
+      style={{ minHeight: isMobile ? "auto" : "220vh", paddingBottom: isMobile ? "6rem" : "0" }}
+    >
+      {/* === СЛОЙ 1: ГЛУБОКИЙ ФОН === */}
+      <motion.div 
+        className="absolute inset-0 gpu-layer-bg pointer-events-none"
+        style={{ y: bgY }}
+      >
+        <div
+          className="w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${activeBg})`,
+            // Статичный блюр - рендерится 1 раз, не грузит GPU при скролле
+            filter: isDark ? "brightness(0.35) blur(6px)" : "brightness(0.95) blur(6px)",
+            transform: "scale(1.1)" 
+          }}
+        />
+      </motion.div>
+
+      {/* === СЛОЙ 2: КОНТЕНТ НА СТЕКЛЕ === */}
+      <motion.div 
+        className={`relative z-10 container mx-auto px-4 ${isMobile ? 'pt-24' : 'pt-40'} gpu-layer-text`}
+        style={{ y: contentY }}
+      >
+        <div className="text-center max-w-5xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease:[0.16, 1, 0.3, 1] }}
+          >
+            <span className={`text-xs md:text-sm font-semibold uppercase tracking-[0.3em] mb-6 block ${isDark ? 'text-cyan-500' : 'text-blue-600'}`}>
+              Независимость • Экспертность • Сообщество
+            </span>
+            <h2 className={`text-5xl md:text-7xl lg:text-[7rem] font-serif leading-[0.9] mb-8 text-glass-engraved ${isDark ? 'dark' : ''}`}>
+              Путь к новым<br />горизонтам
+            </h2>
+            <p className={`text-lg md:text-2xl font-light leading-relaxed max-w-3xl mx-auto mb-20 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Откройте для себя мир, где страсть к здоровому образу жизни 
+              трансформируется в стабильный доход и личностный рост.
+            </p>
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-6xl mx-auto mb-32">
+          {[
+            {
+              title: "Свобода действий",
+              desc: "Стройте бизнес в своем ритме. Превратите знания о здоровье в стабильный источник дохода без привязки к офису.",
+              icon: Icons.Globe,
+            },
+            {
+              title: "Профессиональный рост",
+              desc: "Развивайте экспертность в области нутрициологии и построения команд под руководством опытных наставников.",
+              icon: Icons.Award,
+            },
+            {
+              title: "Глобальное сообщество",
+              desc: "Станьте частью международной команды единомышленников, объединенных целью улучшать качество жизни людей.",
+              icon: Icons.Users,
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: i * 0.15, ease:[0.16, 1, 0.3, 1] }}
+              className={`p-8 md:p-10 rounded-2xl backdrop-blur-md transition-transform duration-500 hover:-translate-y-2 ${
+                isDark 
+                  ? 'bg-white/[0.02] border border-white/10' 
+                  : 'bg-black/[0.02] border border-black/10'
+              }`}
+              style={{ contain: "layout paint" }}
+            >
+              <item.icon strokeWidth={1} className={`w-10 h-10 mb-8 ${isDark ? 'text-cyan-400' : 'text-blue-600'}`} />
+              <h3 className={`text-2xl font-serif mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {item.title}
+              </h3>
+              <p className={`font-light leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                {item.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease:[0.16, 1, 0.3, 1] }}
+          className="text-center pb-24"
+        >
+          <Button to="/partnership" variant="primary" size="lg" className="from-cyan-600 to-blue-600 shadow-2xl px-12 py-5 text-lg font-medium rounded-full" icon={<Icons.ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />}>
+            Стать партнером 4Life
+          </Button>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

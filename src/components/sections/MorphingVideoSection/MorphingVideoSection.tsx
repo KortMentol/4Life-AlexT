@@ -220,7 +220,7 @@ const BlockVideo: React.FC<{
         <div className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
           
           {/* Контейнер рамки вынесен ОТДЕЛЬНО от видео, чтобы не мерцать */}
-          <div className="absolute inset-0 rounded-2xl border border-blue-500/30 z-10 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl border border-blue-500/0 z-10 pointer-events-none" />
           {/* Фоновое изображение */}
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"

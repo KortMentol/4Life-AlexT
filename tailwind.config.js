@@ -27,8 +27,8 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        serif: ["Merriweather", "serif"],
-        heading: ["Merriweather", "serif"],
+        serif: ["Cormorant Garamond", "serif"],
+        heading: ["Cormorant Garamond", "serif"],
         display: ["Inter", "sans-serif"],
       },
       boxShadow: {

@@ -671,14 +671,14 @@ a {
   -webkit-backface-visibility: hidden;
   perspective: 1000px;
   -webkit-perspective: 1000px;
-  
+
   /* Фикс для Firefox: прозрачный outline предотвращает sub-pixel snapping (дребезжание границ) */
   outline: 1px solid transparent;
-  
+
   /* Изолируем расчет смешивания (blending) для прозрачных видео */
   isolation: isolate;
   contain: layout style paint;
-  
+
   /* КРИТИЧЕСКИЙ ФИКС: Принудительное округление transform значений */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: optimizeQuality;
@@ -694,39 +694,39 @@ a {
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    
+
     /* Предотвращение sub-pixel рендеринга */
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     perspective: 1000px;
     -webkit-perspective: 1000px;
-    
+
     /* Изоляция от родительских слоев */
     isolation: isolate;
     contain: layout style paint;
-    
+
     /* Стабилизация границ */
     outline: 1px solid transparent;
-    
+
     /* Принудительное сглаживание */
     -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: auto;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: optimizeQuality;
   }
-  
+
   /* Фикс для элементов с transform анимациями */
   .transform-stabilizer {
     /* Микро-смещение для активации GPU слоя */
     transform: translate3d(0, 0, 0.001px) scale(1.0001);
     will-change: transform;
-    
+
     /* Предотвращение layer collapse */
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
-    
+
     /* Изоляция расчетов */
     isolation: isolate;
     contain: layout style paint;
@@ -752,15 +752,15 @@ a {
     transform: translateZ(0.001px); /* Микро-смещение для форсирования GPU слоя */
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    
+
     /* Изолируем blending calculations */
     isolation: isolate;
     contain: layout style paint;
-    
+
     /* Принудительная стабилизация рендеринга */
     -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: auto;
-    
+
     /* Предотвращаем layer collapse при изменении opacity */
     transform-style: preserve-3d;
     perspective: 1000px;
@@ -772,14 +772,14 @@ a {
     /* Форсируем постоянный GPU слой независимо от opacity */
     will-change: transform, opacity, filter;
     transform: translate3d(0, 0, 0.01px) scale(1.001); /* Микро-трансформация */
-    
+
     /* Стабилизация границ */
     outline: 1px solid transparent;
     border-radius: inherit;
-    
+
     /* Предотвращаем software fallback */
     filter: blur(0px) brightness(1) contrast(1);
-    
+
     /* Изоляция от родительских слоев */
     isolation: isolate;
     contain: layout style paint;
@@ -793,12 +793,12 @@ a {
     border-radius: inherit;
     border: inherit;
     pointer-events: none;
-    
+
     /* Принудительный GPU рендеринг рамки */
     transform: translateZ(0.02px);
     will-change: transform;
     backface-visibility: hidden;
-    
+
     /* Стабилизация цвета рамки */
     opacity: 1;
     isolation: isolate;
@@ -821,15 +821,15 @@ a {
     /* Принудительный GPU слой для стабильного opacity рендеринга */
     will-change: opacity, transform;
     transform: translate3d(0, 0, 0) scale(1.0001); /* Микро-масштаб для GPU активации */
-    
+
     /* Изоляция от родительских слоев */
     isolation: isolate;
     contain: layout style paint;
-    
+
     /* Стабилизация рендеринга границ */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    
+
     /* Предотвращение software fallback при opacity < 1 */
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
@@ -840,11 +840,11 @@ a {
     /* Принудительная изоляция overflow для сохранения border-radius */
     isolation: isolate;
     contain: layout style;
-    
+
     /* Стабилизация overflow: hidden с border-radius */
     -webkit-mask: radial-gradient(white, white);
     mask: radial-gradient(white, white);
-    
+
     /* GPU оптимизация для overflow + border-radius */
     transform: translateZ(0);
     will-change: transform;
@@ -854,11 +854,11 @@ a {
   .video-container-fix video {
     /* Принудительное наследование border-radius от родителя */
     border-radius: inherit;
-    
+
     /* Стабилизация рендеринга видео */
     transform: translateZ(0.001px);
     will-change: transform;
-    
+
     /* Предотвращение мерцания при opacity анимациях */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
@@ -881,19 +881,19 @@ a {
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    
+
     /* Современная тонкая рамка через box-shadow (НЕ МЕРЦАЕТ!) */
-    box-shadow: 
+    box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.08),
       0 8px 32px rgba(0, 0, 0, 0.12),
       0 2px 8px rgba(0, 0, 0, 0.08);
-    
+
     /* GPU стабилизация */
     transform: translateZ(0);
     will-change: transform, opacity;
     isolation: isolate;
     contain: layout style paint;
-    
+
     /* Плавные переходы */
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
@@ -901,7 +901,7 @@ a {
   /* Темная тема - более контрастная рамка */
   .dark .immersive-video-container {
     background: rgba(0, 0, 0, 0.05);
-    box-shadow: 
+    box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.12),
       0 12px 40px rgba(0, 0, 0, 0.25),
       0 4px 12px rgba(0, 0, 0, 0.15);
@@ -910,14 +910,14 @@ a {
   /* Hover эффект - как у Immersive Garden */
   .immersive-video-container:hover {
     transform: translateZ(0) scale(1.02);
-    box-shadow: 
+    box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.15),
       0 16px 64px rgba(0, 0, 0, 0.2),
       0 8px 24px rgba(0, 0, 0, 0.12);
   }
 
   .dark .immersive-video-container:hover {
-    box-shadow: 
+    box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.2),
       0 20px 80px rgba(0, 0, 0, 0.4),
       0 12px 32px rgba(0, 0, 0, 0.25);
@@ -930,10 +930,10 @@ a {
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    
+
     /* Наследование border-radius */
     border-radius: inherit;
-    
+
     /* Плавные переходы */
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
@@ -944,12 +944,7 @@ a {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.05) 100%
-    );
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%);
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -966,13 +961,14 @@ a {
   }
 
   @keyframes pulse-modern {
-    0%, 100% {
-      box-shadow: 
+    0%,
+    100% {
+      box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.08),
         0 8px 32px rgba(0, 0, 0, 0.12);
     }
     50% {
-      box-shadow: 
+      box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.12),
         0 12px 40px rgba(0, 0, 0, 0.15);
     }
@@ -984,17 +980,17 @@ a {
   .immersive-video-container {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
-    box-shadow: 
+    box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.1),
       0 4px 16px rgba(0, 0, 0, 0.1);
-    
+
     transform: translateZ(0);
     border-radius: inherit;
   }
 
   .dark .immersive-video-container {
     background: rgba(0, 0, 0, 0.1);
-    box-shadow: 
+    box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.15),
       0 6px 20px rgba(0, 0, 0, 0.2);
   }
