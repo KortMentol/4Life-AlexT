@@ -678,6 +678,59 @@ a {
   /* Изолируем расчет смешивания (blending) для прозрачных видео */
   isolation: isolate;
   contain: layout style paint;
+  
+  /* КРИТИЧЕСКИЙ ФИКС: Принудительное округление transform значений */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimizeQuality;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* DESKTOP ONLY: Агрессивное устранение микро-рывков */
+@media (hover: hover) and (pointer: fine) {
+  .scroll-stabilizer {
+    /* Принудительная стабилизация скролла */
+    transform: translate3d(0, 0, 0.01px);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    
+    /* Предотвращение sub-pixel рендеринга */
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    
+    /* Изоляция от родительских слоев */
+    isolation: isolate;
+    contain: layout style paint;
+    
+    /* Стабилизация границ */
+    outline: 1px solid transparent;
+    
+    /* Принудительное сглаживание */
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimizeQuality;
+  }
+  
+  /* Фикс для элементов с transform анимациями */
+  .transform-stabilizer {
+    /* Микро-смещение для активации GPU слоя */
+    transform: translate3d(0, 0, 0.001px) scale(1.0001);
+    will-change: transform;
+    
+    /* Предотвращение layer collapse */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    
+    /* Изоляция расчетов */
+    isolation: isolate;
+    contain: layout style paint;
+  }
 }
 
 /* Фикс мерцающей рамки (выносим бордер за пределы контента) */

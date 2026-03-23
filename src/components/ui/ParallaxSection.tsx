@@ -89,6 +89,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
     
     window.addEventListener("resize", throttledResize, { passive: true });
+    
     return () => {
       window.removeEventListener("resize", throttledResize);
       clearTimeout(resizeTimeout);
@@ -171,8 +172,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
           className={`relative w-full h-full ${imageBrightness} gpu-smooth-scroll`}
           style={{ 
             y,
-            willChange: 'transform',
-            contain: isMobile ? 'layout style paint' : 'none'
+            willChange: tier === 'low' ? 'auto' : 'transform',
+            contain: isMobile ? 'layout style paint' : 'none',
+            backfaceVisibility: 'hidden',
+            perspective: 1000
           }}
           transformTemplate={(_, generated) => {
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;

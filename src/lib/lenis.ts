@@ -35,20 +35,31 @@ export const lenis = new Lenis({
 // Добавляем кастомное свойство, если оно нужно для вашего типа
 lenis.velocity = 0;
 
-// 2. МИНИМАЛЬНЫЙ RAF с базовыми фиксами (только для desktop)
+// 2. МИНИМАЛЬНЫЙ RAF с фиксом микро-рывков (только для desktop)
 if (typeof window !== "undefined") {
   const raf = (time: number) => {
     // Основной Lenis RAF
     lenis.raf(time);
     
-    // Минимальный фикс только для desktop: округление в конце скролла
+    // КРИТИЧЕСКИЙ ФИКС: Устранение микро-рывков на desktop
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (!isTouchDevice) {
-      const velocity = (lenis as any).velocity || 0;
+      const velocity = Math.abs((lenis as any).velocity || 0);
       const scroll = (lenis as any).scroll || 0;
-      if (Math.abs(velocity) < 0.01 && scroll % 1 !== 0) {
-        // Округляем только когда скорость почти нуль и есть sub-pixel
-        (lenis as any).scroll = Math.round(scroll);
+      
+      // Более агрессивное округление при низкой скорости
+      if (velocity < 0.02) {
+        const rounded = Math.round(scroll);
+        const diff = Math.abs(scroll - rounded);
+        
+        // Если разница меньше 0.3px - принудительно округляем
+        if (diff < 0.3) {
+          (lenis as any).scroll = rounded;
+          // Обнуляем velocity для полной остановки
+          if (velocity < 0.005) {
+            (lenis as any).velocity = 0;
+          }
+        }
       }
     }
     
