@@ -29,8 +29,6 @@ const pageVariants = {
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
-  const GLOBAL_PARALLAX_STRENGTH = 40;
-
   const popularProducts = [
     {
       id: 1,
@@ -75,7 +73,6 @@ const HomePage: React.FC = () => {
         backgroundImagePC={heroBgPC}
         altText="Здоровье и благополучие с 4Life"
         height="h-screen"
-        parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
         contentClasses="flex flex-col items-center justify-center text-center py-8 pt-24"
         skipPreload={true}
       >
@@ -141,7 +138,6 @@ const HomePage: React.FC = () => {
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
-          parallaxStrength={GLOBAL_PARALLAX_STRENGTH}
           skipPreload={true}
         >
           <div className="py-12 sm:py-16">

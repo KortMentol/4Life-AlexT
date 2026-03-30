@@ -4,7 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import React, { useEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
-import { headerVariants, logoVariants } from "@/animations/headerAnimations";
+import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 import { useTransition } from "@/context";
@@ -23,7 +23,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
-  const headerTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
@@ -33,48 +32,32 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   const headerRef = useRef<HTMLElement>(null);
 
-  const { headerY } = useNativeScroll({ disabled: isMenuOpen });
+  const { showHeader } = useNativeScroll({ disabled: isMenuOpen });
 
   // Принудительно показываем хедер при переходах и перезагрузке
   useEffect(() => {
-    // При монтировании компонента (перезагрузка страницы) - хедер всегда виден
-    headerY.set(0);
+    showHeader();
+    const handleForceShow = () => showHeader();
+    window.addEventListener("force-header-show", handleForceShow);
+    return () => window.removeEventListener("force-header-show", handleForceShow);
+  }, [showHeader]);
 
-    // Слушаем event от RouteChangeHandler
-    const handleForceShow = () => {
-      headerY.set(0);
-    };
-
-    window.addEventListener('force-header-show', handleForceShow);
-    return () => window.removeEventListener('force-header-show', handleForceShow);
-  }, [headerY]);
-
-  // Слушаем изменения маршрута - всегда показываем хедер
+  // Слушаем изменения маршрута — всегда показываем хедер
   useEffect(() => {
-    headerY.set(0);
-  }, [location.pathname, headerY]);
+    showHeader();
+  }, [location.pathname, showHeader]);
 
+  // GSAP для скрытия хедера при открытии меню
+  // overwrite:true — не конфликтует с useNativeScroll style.transform
   useEffect(() => {
-    if (!headerRef.current) return;
-    headerTimelineRef.current = gsap.timeline({ paused: true }).to(headerRef.current, {
-      y: "-120%",
-      duration: 0.8,
-      ease: "power4.inOut",
-    });
-    return () => {
-      headerTimelineRef.current?.kill();
-    };
-  }, []);
-
-  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
     if (isMenuOpen) {
-      headerTimelineRef.current?.play();
+      gsap.to(header, { y: "-120%", duration: 0.8, ease: "power4.inOut", overwrite: true });
     } else {
-      headerTimelineRef.current?.reverse();
+      gsap.to(header, { y: "0%", duration: 0.6, ease: "power4.out", overwrite: true });
     }
   }, [isMenuOpen]);
-
-
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
@@ -97,25 +80,17 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     () => ({
       "--header-glow-rgb": isDark ? "0, 212, 255" : "59, 130, 246",
     }),
-    [isDark]
+    [isDark],
   );
 
   return (
-    <motion.header
+    <header
       data-tier={tier}
       ref={headerRef}
       role="banner"
-      variants={headerVariants}
-      initial="visible"
-      animate="visible"
-      style={{
-        y: headerY,
-        ...cssVars,
-        contain: 'layout style paint',
-      }}
+      style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >
-
       <div className="header-content">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
@@ -128,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               aria-label="Главная страница"
             >
               <motion.div
-                className={`relative z-10 transition-transform duration-200 ${isMobile ? '' : 'group-hover:scale-105'}`}
+                className={`relative z-10 transition-transform duration-200 ${isMobile ? "" : "group-hover:scale-105"}`}
                 variants={logoVariants}
                 initial="initial"
                 animate="animate"
@@ -224,9 +199,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
             </motion.div>
             <div
               className="md:hidden"
-              style={{ 
+              style={{
                 color: isDark ? "white" : "#1e293b",
-                contain: 'layout style paint'
+                contain: "layout style paint",
               }}
             >
               <ProductListIcon />
@@ -234,7 +209,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
           </div>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 };
 

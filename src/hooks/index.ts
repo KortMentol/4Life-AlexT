@@ -2,6 +2,7 @@ export { useFluid } from "./useFluid";
 export { useIsMobile } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNativeScroll } from "./useNativeScroll";
+export { useParallaxLenis } from "./useParallaxLenis";
 export { usePerformanceTier } from "./usePerformanceTier";
 export { useProductFilters } from "./useProductFilters";
 export { useProductList } from "./useProductList";

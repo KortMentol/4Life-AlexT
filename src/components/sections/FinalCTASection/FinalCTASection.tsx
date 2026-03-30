@@ -13,27 +13,20 @@
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Button, ParallaxSection } from "@/components/ui";
 import { Icons } from "@/utils/icons";
-import React, { useMemo } from "react";
+import React from "react";
 
 // Импорт фонового изображения
 import bg5Img from "@/assets/images/backgrounds/HomePage/5.jpg";
 
-// Проверка на мобильное устройство
-const isMobile = () => window.innerWidth < 768;
+// Проверка на мобильное устройство (модульная константа — не меняется)
+const IS_MOBILE = typeof window !== "undefined" && window.innerWidth < 768;
 
 const FinalCTASection: React.FC = () => {
-  // Мемоизируем проверку мобильного устройства
-  const isOnMobile = useMemo(() => isMobile(), []);
-
-  // Отключаем параллакс на мобильных для производительности
-  const PARALLAX_STRENGTH = isOnMobile ? 0 : 40;
-
   return (
     <ParallaxSection
       backgroundImage={bg5Img}
       altText="Готовы сделать первый шаг к здоровью"
       height="h-[120vh]"
-      parallaxStrength={PARALLAX_STRENGTH}
       contentClasses="flex flex-col items-center justify-center text-center py-24"
       imageBrightness="brightness-[.4] dark:brightness-[.3]"
     >
@@ -46,7 +39,7 @@ const FinalCTASection: React.FC = () => {
               style={{
                 background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
                 // Убираем тяжелые тени на мобильных
-                boxShadow: isOnMobile ? "none" : "0 0 20px rgba(14, 165, 233, 0.4)",
+                boxShadow: IS_MOBILE ? "none" : "0 0 20px rgba(14, 165, 233, 0.4)",
               }}
             ></div>
           </div>
@@ -69,9 +62,9 @@ const FinalCTASection: React.FC = () => {
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
               // Отключаем анимацию и эффекты на мобильных
-              animation: isOnMobile ? "none" : "gradient-shift 6s ease-in-out infinite",
-              textShadow: isOnMobile ? "none" : "0 0 20px rgba(14, 165, 233, 0.3)",
-              filter: isOnMobile ? "none" : "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
+              animation: IS_MOBILE ? "none" : "gradient-shift 6s ease-in-out infinite",
+              textShadow: IS_MOBILE ? "none" : "0 0 20px rgba(14, 165, 233, 0.3)",
+              filter: IS_MOBILE ? "none" : "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
             }}
           >
             Ваше преображение начинается здесь
@@ -111,7 +104,9 @@ const FinalCTASection: React.FC = () => {
             <div className="flex items-center justify-center w-12 h-12 md:w-auto md:h-auto rounded-full bg-cyan-500/10 md:bg-transparent border border-cyan-400/30 md:border-0 backdrop-blur-sm md:backdrop-blur-0">
               <Icons.Shield className="w-5 h-5 md:mr-2 text-cyan-300" />
             </div>
-            <span className="text-sm md:text-base text-center md:text-left">Присоединяйтесь к миллионам людей в 50+ странах мира</span>
+            <span className="text-sm md:text-base text-center md:text-left">
+              Присоединяйтесь к миллионам людей в 50+ странах мира
+            </span>
           </div>
         </div>
       </div>

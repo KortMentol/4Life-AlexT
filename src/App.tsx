@@ -59,8 +59,7 @@ function App() {
   const isMobile = useIsMobile();
 
   // Theodore Menu management with history API integration
-  const { isMenuOpen, toggleMenu, closeMenu, navigateFromMenu, isMenuActionRef, wasMenuOpenRef } =
-    useTheodoreMenu();
+  const { isMenuOpen, toggleMenu, closeMenu, navigateFromMenu, isMenuActionRef, wasMenuOpenRef } = useTheodoreMenu();
 
   // Aggressive native scroll lock (when menu is closed)
   useTouchScrollLock(!isMenuOpen);
@@ -69,55 +68,74 @@ function App() {
     if (isMenuOpen) lenis.stop();
     else lenis.start();
 
+    // Определение горизонтального свайпа для блокировки Lenis
+    // Используем только touchstart + touchend — минимум обработчиков на main thread
     let touchStartX = 0;
     let touchStartY = 0;
-    let scrollDirectionDetermined = false;
-    const SENSITIVITY_THRESHOLD = 5;
-    const HORIZONTAL_SWIPE_BIAS = 1.7;
+
     const handleTouchStart = (e: TouchEvent) => {
       if (isMenuOpen) return;
       const touch = e.touches[0];
       if (!touch) return;
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
-      scrollDirectionDetermined = false;
     };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (isMenuOpen) return;
+
+      // Разблокируем Lenis при завершении любого тача
+      if (scrollLockState.isLocked) {
+        lenis.start();
+        scrollLockState.isLocked = false;
+      }
+
+      // Определяем был ли это горизонтальный свайп по changedTouches
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - touchStartY);
+
+      // Если был горизонтальный свайп — Lenis уже разблокирован выше
+      // Если вертикальный — ничего не делаем, Lenis работает
+      if (deltaX > deltaY * 1.7 && deltaX > 5) {
+        // горизонтальный свайп завершён — Lenis уже запущен
+      }
+    };
+
+    // Блокировка Lenis при горизонтальном свайпе — через один passive touchmove
+    // Только первый move определяет направление, дальше флаг не меняется
+    let directionLocked = false;
     const handleTouchMove = (e: TouchEvent) => {
-      if (isMenuOpen || scrollDirectionDetermined) return;
+      if (isMenuOpen || directionLocked) return;
       const touch = e.touches[0];
       if (!touch) return;
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
-      if (deltaX > SENSITIVITY_THRESHOLD || deltaY > SENSITIVITY_THRESHOLD) {
-        if (deltaX > deltaY * HORIZONTAL_SWIPE_BIAS) {
-          if (!scrollLockState.isLocked) {
-            lenis.stop();
-            scrollLockState.isLocked = true;
-          }
-        } else {
-          if (scrollLockState.isLocked) {
-            lenis.start();
-            scrollLockState.isLocked = false;
-          }
+      if (deltaX < 5 && deltaY < 5) return;
+
+      directionLocked = true;
+      if (deltaX > deltaY * 1.7) {
+        // горизонтальный — стопаем Lenis
+        if (!scrollLockState.isLocked) {
+          lenis.stop();
+          scrollLockState.isLocked = true;
         }
-        scrollDirectionDetermined = true;
       }
     };
-    const handleTouchEnd = () => {
-      if (isMenuOpen) return;
-      if (scrollLockState.isLocked) {
-        setTimeout(() => {
-          lenis.start();
-          scrollLockState.isLocked = false;
-        }, 50);
-      }
+
+    const handleTouchStartReset = (e: TouchEvent) => {
+      directionLocked = false;
+      handleTouchStart(e);
     };
-    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+
+    document.addEventListener("touchstart", handleTouchStartReset, { passive: true });
     document.addEventListener("touchmove", handleTouchMove, { passive: true });
     document.addEventListener("touchend", handleTouchEnd, { passive: true });
     document.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
     return () => {
-      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchstart", handleTouchStartReset);
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
       document.removeEventListener("touchcancel", handleTouchEnd);

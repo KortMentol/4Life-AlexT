@@ -1,155 +1,76 @@
-// src/hooks/useNativeScroll.ts (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
-import { useMotionValue, useSpring } from "framer-motion";
+/**
+ * Хедер через глобальный RAF синглтон.
+ * Lerp-интерполяция: тягуче на десктопе, чуть живее на тач.
+ */
+import { rafLoop } from "@/lib/rafLoop";
 import { useEffect, useRef } from "react";
-import { scrollLockState } from "@/lib/scrollLockState";
 import { useIsMobile } from "./useIsMobile";
 
-const throttle = (func: (...args: any[]) => void, limit: number) => {
-  let inThrottle: boolean;
-  return function(this: any, ...args: any[]) {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-};
+const HEADER_HEIGHT = 80;
+const LERP_DESKTOP = 0.06;
+const LERP_TOUCH = 0.085; // на 30% быстрее чем десктоп
+const SNAP_TRANSITION = "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)";
+
+function getHeader(): HTMLElement | null {
+  return document.querySelector(".header-premium");
+}
+
+function getLiveY(el: HTMLElement): number {
+  const t = getComputedStyle(el).transform;
+  if (!t || t === "none") return 0;
+  return new DOMMatrix(t).m42;
+}
 
 export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const isMobile = useIsMobile();
-  const headerY = useMotionValue(0);
-  const headerYSmooth = useSpring(headerY, { stiffness: 300, damping: 30 });
-
-  const prevScrollPos = useRef(window.scrollY);
-  const wheelCount = useRef(0);
-  const wheelTimer = useRef<NodeJS.Timeout | null>(null);
+  const targetYRef = useRef(0);
+  const displayYRef = useRef(0);
 
   useEffect(() => {
-    if (isMobile || disabled) return;
+    if (disabled) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      if (window.scrollY <= 50) return;
-      
-      const isScrollingDown = e.deltaY > 0;
+    const lerp = isMobile ? LERP_TOUCH : LERP_DESKTOP;
+    let prevScroll = window.scrollY;
 
-      if (isScrollingDown) {
-        wheelCount.current++;
-        
-        if (wheelCount.current >= 2) {
-          headerY.set(-120);
+    const h = getHeader();
+    if (h) {
+      displayYRef.current = getLiveY(h);
+      targetYRef.current = displayYRef.current;
+    }
+
+    const unsub = rafLoop.subscribe((scroll) => {
+      const delta = scroll - prevScroll;
+      prevScroll = scroll;
+
+      if (scroll <= 60) {
+        targetYRef.current = 0;
+      } else if (Math.abs(delta) > 1) {
+        targetYRef.current = delta > 0 ? -HEADER_HEIGHT : 0;
+      }
+
+      const diff = targetYRef.current - displayYRef.current;
+      if (Math.abs(diff) > 0.1) {
+        displayYRef.current += diff * lerp;
+        const header = getHeader();
+        if (header) {
+          header.style.transition = "none";
+          header.style.transform = `translateY(${displayYRef.current}px)`;
         }
-
-        if (wheelTimer.current) clearTimeout(wheelTimer.current);
-        wheelTimer.current = setTimeout(() => {
-          wheelCount.current = 0;
-        }, 400);
-      } else {
-        wheelCount.current = 0;
-        headerY.set(0);
-        if (wheelTimer.current) clearTimeout(wheelTimer.current);
       }
-    };
+    });
 
-    const handleScroll = () => {
-      const currentScrollPos = window.scrollY;
-      const isScrollingUp = prevScrollPos.current > currentScrollPos;
-      const scrollDelta = Math.abs(currentScrollPos - prevScrollPos.current);
-      
-      if (scrollDelta < 5) {
-        prevScrollPos.current = currentScrollPos;
-        return;
-      }
-      
-      if (currentScrollPos <= 50) {
-        headerY.set(0);
-      } else if (isScrollingUp) {
-        headerY.set(0);
-      } else if (scrollDelta > 20) {
-        headerY.set(-120);
-      }
+    return unsub;
+  }, [disabled, isMobile]);
 
-      prevScrollPos.current = currentScrollPos;
-    };
+  const showHeader = () => {
+    targetYRef.current = 0;
+    const h = getHeader();
+    if (h) {
+      h.style.transition = SNAP_TRANSITION;
+      h.style.transform = "translateY(0px)";
+      displayYRef.current = 0;
+    }
+  };
 
-    const throttledScroll = throttle(handleScroll, 16);
-
-    window.addEventListener("wheel", handleWheel, { passive: true });
-    window.addEventListener("scroll", throttledScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("scroll", throttledScroll);
-      if (wheelTimer.current) clearTimeout(wheelTimer.current);
-    };
-  }, [isMobile, disabled, headerY]);
-
-  useEffect(() => {
-    if (!isMobile || disabled) return;
-
-    let lastTouchY = 0;
-    let lastMoveTime = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (!touch) return;
-      lastTouchY = touch.clientY;
-      lastMoveTime = Date.now();
-      headerYSmooth.stop();
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (!touch) return;
-      
-      const now = Date.now();
-      if (now - lastMoveTime < 16) return; // 60fps throttle
-      
-      const currentY = touch.clientY;
-
-      // --- CORE FIX: GUARD CLAUSE ---
-      // Если скролл заблокирован глобально (идет горизонтальный свайп),
-      // мы не анимируем хедер, но ОБЯЗАНЫ обновить координаты, 
-      // чтобы не было резкого прыжка (teleport) при разблокировке.
-      if (scrollLockState.isLocked || disabled) {
-        lastTouchY = currentY;
-        lastMoveTime = now;
-        return;
-      }
-      
-      const deltaY = currentY - lastTouchY;
-      const currentHeaderY = headerY.get();
-      
-      // Движение пальца вверх (скролл страницы вниз) = скрываем хедер
-      // Движение пальца вниз (скролл страницы вверх) = показываем хедер
-      const newHeaderY = currentHeaderY + deltaY * 0.5; // 0.5 для плавности
-      const clampedY = Math.max(-120, Math.min(0, newHeaderY));
-      
-      headerY.set(clampedY);
-      lastTouchY = currentY;
-      lastMoveTime = now;
-    };
-    
-    const handleTouchEnd = () => {
-      const currentY = headerY.get();
-      const velocity = headerY.getVelocity();
-      
-      if (Math.abs(velocity) > 200) {
-        headerY.set(velocity < 0 ? -120 : 0);
-      } else {
-        headerY.set(currentY < -60 ? -120 : 0);
-      }
-    };
-
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
-
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [isMobile, disabled, headerY, headerYSmooth]);
-  
-  return { headerY: headerYSmooth };
+  return { showHeader };
 }

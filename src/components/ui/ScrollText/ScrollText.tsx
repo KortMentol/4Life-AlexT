@@ -17,10 +17,10 @@
  * </ScrollText>
  */
 
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
-import React, { useRef } from "react";
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useTheme } from "@/hooks";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { motion, MotionValue, useScroll, useTransform } from "framer-motion";
+import React, { useRef } from "react";
 
 interface ScrollTextProps {
   children: string;
@@ -40,11 +40,7 @@ const Word: React.FC<WordProps> = ({ word, progress, range, theme }) => {
   return (
     <span className="relative mr-3 mt-3 inline-block">
       <span className="absolute opacity-0">{word}</span>
-      <motion.span 
-        style={{ opacity, color: theme === "dark" ? "#00d4ff" : "#0066ff" }}
-      >
-        {word}
-      </motion.span>
+      <motion.span style={{ opacity, color: theme === "dark" ? "#00d4ff" : "#0066ff" }}>{word}</motion.span>
     </span>
   );
 };
@@ -54,24 +50,27 @@ const ScrollText: React.FC<ScrollTextProps> = ({ children, className = "" }) => 
   const { theme } = useTheme();
   const container = useRef<HTMLParagraphElement>(null);
 
+  // На тач-устройствах всегда используем упрощённую анимацию
+  // Пословная анимация создаёт ~30-50 MotionValue одновременно — слишком тяжело для тача
+  const isTouchDevice =
+    typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+
+  const effectiveTier = isTouchDevice && tier === "high" ? "medium" : tier;
+
   const { scrollYProgress } = useScroll({
     target: container,
-    offset: ["start 0.9", tier === "medium" ? "start 0.4" : "start 0.25"],
+    offset: ["start 0.9", effectiveTier === "medium" ? "start 0.4" : "start 0.25"],
   });
 
   const opacity = useTransform(scrollYProgress, [0, 1], [0.2, 1]);
 
-  if (tier === "low") {
+  if (effectiveTier === "low") {
     return <p className={`relative ${className}`}>{children}</p>;
   }
 
-  if (tier === "medium") {
+  if (effectiveTier === "medium") {
     return (
-      <motion.p 
-        ref={container} 
-        className={`relative ${className}`}
-        style={{ opacity }}
-      >
+      <motion.p ref={container} className={`relative ${className}`} style={{ opacity }}>
         {children}
       </motion.p>
     );

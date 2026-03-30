@@ -23,7 +23,7 @@ import ScrollText from "@/components/ui/ScrollText";
 import { Icons } from "@/utils/icons";
 
 // Hooks
-import { usePerformanceTier } from "@/hooks";
+import { useParallaxLenis, usePerformanceTier } from "@/hooks";
 
 // Глобальные типы для GSAP
 declare global {
@@ -37,10 +37,10 @@ declare global {
 // AWWWARDS ПРОФЕССИОНАЛЬНАЯ СИСТЕМА УСТРОЙСТВ
 const useDeviceType = () => {
   return useMemo(() => {
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     return {
       isTouchDevice,
-      isDesktop: !isTouchDevice
+      isDesktop: !isTouchDevice,
     };
   }, []);
 };
@@ -49,38 +49,38 @@ const useDeviceType = () => {
 const BLOCK_CONFIG = {
   // ВЫСОТЫ БЛОКОВ (vh = % от высоты экрана)
   heights: {
-    touch: 180,    // Все тач устройства (телефоны + планшеты)
-    desktop: 200   // Только десктоп с мышкой
+    touch: 180, // Все тач устройства (телефоны + планшеты)
+    desktop: 200, // Только десктоп с мышкой
   },
-  
+
   // ТАЙМИНГИ ДЛЯ ТАЧА (0.0 - 1.0) - НАСТРАИВАЙ ЗДЕСЬ! IMMERSIVE GARDEN STYLE
   touchTimings: {
     block1: {
-      fadeInStart: 0.05,   // Позже на 10% - после текста
-      fadeInEnd: 0.55,     // ТЯГУЧЕЕ появление (37% времени!) 
-      stickStart: 0.55,    // Начало прилипания в центре
-      stickEnd: 0.80,      // Конец прилипания (20% времени)
-      fadeOutStart: 0.80,  // Начало исчезновения вверх
-      fadeOutEnd: 0.999    // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
+      fadeInStart: 0.05, // Позже на 10% - после текста
+      fadeInEnd: 0.55, // ТЯГУЧЕЕ появление (37% времени!)
+      stickStart: 0.55, // Начало прилипания в центре
+      stickEnd: 0.8, // Конец прилипания (20% времени)
+      fadeOutStart: 0.8, // Начало исчезновения вверх
+      fadeOutEnd: 0.999, // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
     },
     block2: {
-      fadeInStart: 0.05,    // Позже на 10% //0.2
-      fadeInEnd: 0.57,     // ТЯГУЧЕЕ появление (37% времени!)
+      fadeInStart: 0.05, // Позже на 10% //0.2
+      fadeInEnd: 0.57, // ТЯГУЧЕЕ появление (37% времени!)
       stickStart: 0.57,
-      stickEnd: 0.80,      // Конец прилипания (18% времени)
-      fadeOutStart: 0.80,
-      fadeOutEnd: 0.999    // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
+      stickEnd: 0.8, // Конец прилипания (18% времени)
+      fadeOutStart: 0.8,
+      fadeOutEnd: 0.999, // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
     },
     block3: {
-      fadeInStart: 0.05,   // Позже на 10%
-      fadeInEnd: 0.59,     // ТЯГУЧЕЕ появление (37% времени!)
+      fadeInStart: 0.05, // Позже на 10%
+      fadeInEnd: 0.59, // ТЯГУЧЕЕ появление (37% времени!)
       stickStart: 0.59,
-      stickEnd: 0.80,      // Конец прилипания (16% времени)
-      fadeOutStart: 0.80,
-      fadeOutEnd: 0.999    // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
-    }
+      stickEnd: 0.8, // Конец прилипания (16% времени)
+      fadeOutStart: 0.8,
+      fadeOutEnd: 0.999, // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
+    },
   },
-  
+
   // ТАЙМИНГИ ДЛЯ ДЕСКТОПА (ХОРОШО НАСТРОЕННЫЕ - НЕ ТРОГАТЬ!)
   desktopTimings: {
     block1: {
@@ -89,7 +89,7 @@ const BLOCK_CONFIG = {
       stickStart: 0.47,
       stickEnd: 0.72,
       fadeOutStart: 0.72,
-      fadeOutEnd: 0.985
+      fadeOutEnd: 0.985,
     },
     block2: {
       fadeInStart: 0.14,
@@ -97,7 +97,7 @@ const BLOCK_CONFIG = {
       stickStart: 0.49,
       stickEnd: 0.72,
       fadeOutStart: 0.72,
-      fadeOutEnd: 0.985
+      fadeOutEnd: 0.985,
     },
     block3: {
       fadeInStart: 0.16,
@@ -105,9 +105,9 @@ const BLOCK_CONFIG = {
       stickStart: 0.51,
       stickEnd: 0.72,
       fadeOutStart: 0.72,
-      fadeOutEnd: 0.985
-    }
-  }
+      fadeOutEnd: 0.985,
+    },
+  },
 };
 
 // Компонент для одного видео блока с AWWWARDS 2026 анимацией
@@ -118,48 +118,43 @@ const BlockVideo: React.FC<{
 }> = ({ blockRef, videoSrc, blockIndex }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
+  // isVisible: true когда блок в зоне видимости — только тогда включаем willChange
+  const [isVisible, setIsVisible] = useState(false);
   const tier = usePerformanceTier();
   const { isTouchDevice } = useDeviceType();
+
+  // Тайминги всегда вычисляем до любых условных return (Rules of Hooks)
+  const timings = useMemo(() => {
+    const blockKey = `block${blockIndex + 1}` as keyof typeof BLOCK_CONFIG.touchTimings;
+    return isTouchDevice ? BLOCK_CONFIG.touchTimings[blockKey] : BLOCK_CONFIG.desktopTimings[blockKey];
+  }, [blockIndex, isTouchDevice]);
 
   // Scroll progress для этого блока
   const { scrollYProgress } = useScroll({
     target: blockRef,
-    offset: ["start 90%", "end 10%"]
+    offset: ["start 90%", "end 10%"],
   });
 
-  // AWWWARDS ПРОФЕССИОНАЛЬНЫЕ ТАЙМИНГИ - ЕДИНАЯ СИСТЕМА!
-  const timings = useMemo(() => {
-    const blockKey = `block${blockIndex + 1}` as keyof typeof BLOCK_CONFIG.touchTimings;
-    
-    return isTouchDevice 
-      ? BLOCK_CONFIG.touchTimings[blockKey]
-      : BLOCK_CONFIG.desktopTimings[blockKey];
-  }, [blockIndex, isTouchDevice]);
+  // Все useTransform вызываем безусловно — Rules of Hooks
+  const fallbackTimings = BLOCK_CONFIG.touchTimings.block1;
+  const t = timings ?? fallbackTimings;
 
-  // Проверяем что timings загрузились корректно
-  if (!timings) {
-    return null;
-  }
-
-  // Y-позиция
   const y = useTransform(
     scrollYProgress,
-    [timings.fadeInStart, timings.fadeInEnd, timings.stickStart, timings.stickEnd, timings.fadeOutStart, timings.fadeOutEnd],
-    ["100vh", "0vh", "0vh", "0vh", "0vh", "-100vh"]
+    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
+    ["100vh", "0vh", "0vh", "0vh", "0vh", "-100vh"],
   );
 
-  // Opacity
   const opacity = useTransform(
     scrollYProgress,
-    [timings.fadeInStart, timings.fadeInEnd, timings.stickStart, timings.stickEnd, timings.fadeOutStart, timings.fadeOutEnd],
-    [0, 1, 1, 1, 1, 0]
+    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
+    [0, 1, 1, 1, 1, 0],
   );
 
-  // 3D эффект масштабирования через translateZ (GPU-ускоренный)
   const translateZ = useTransform(
     scrollYProgress,
-    [timings.fadeInStart, timings.fadeInEnd, timings.stickStart, timings.stickEnd, timings.fadeOutStart, timings.fadeOutEnd],
-    tier === 'high' ? [-400, 0, 0, 0, 0, -400] : [-200, 0, 0, 0, 0, -200]
+    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
+    tier === "high" ? [-400, 0, 0, 0, 0, -400] : [-200, 0, 0, 0, 0, -200],
   );
 
   // Обработка переходов меню
@@ -170,14 +165,17 @@ const BlockVideo: React.FC<{
     return () => window.removeEventListener("menu-transition-complete", handleComplete);
   }, [isTransitioning]);
 
-  // Intersection Observer для автоплея
+  // Intersection Observer: управляет willChange и автоплеем видео
+  // willChange включается только когда блок близко к экрану — экономим GPU память
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    const block = blockRef.current;
+    if (!video || !block) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
           if (entry.isIntersecting) {
             video.play().catch(() => {});
           } else {
@@ -185,49 +183,50 @@ const BlockVideo: React.FC<{
           }
         });
       },
-      { threshold: 0.1, rootMargin: "100px" }
+      // 200px буфер — видео начинает грузиться чуть раньше чем появится на экране
+      { threshold: 0, rootMargin: "200px" },
     );
 
-    observer.observe(video);
+    observer.observe(block);
     return () => {
       observer.disconnect();
       video.pause();
     };
-  }, []);
+  }, [blockRef]);
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none" style={{ perspective: '1200px' }}>
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
+      style={{ perspective: "1200px" }}
+    >
       <motion.div
         style={{
           y,
           opacity,
           translateZ,
-          willChange: 'transform, opacity'
+          // willChange только когда блок виден — не держим 3 GPU слоя постоянно
+          willChange: isVisible ? "transform, opacity" : "auto",
         }}
-        transformTemplate={(_, generated) => {
-          return generated;
-        }}
-        className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? 'anti-pixel-snap' : ''}`}
+        className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
         transition={{
-          type: 'tween',
+          type: "tween",
           duration: isTouchDevice ? 1.5 : 1.2,
-          ease: [0.25, 0.1, 0.25, 1.0]
+          ease: [0.25, 0.1, 0.25, 1.0],
         }}
       >
         {/* ДОБАВЛЕН gpu-mask-radius ДЛЯ ИДЕАЛЬНЫХ УГЛОВ ПРИ СКРОЛЛЕ */}
         <div className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-          
           {/* Контейнер рамки вынесен ОТДЕЛЬНО от видео, чтобы не мерцать */}
           <div className="absolute inset-0 rounded-2xl border border-blue-500/0 z-10 pointer-events-none" />
           {/* Фоновое изображение */}
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-            style={{ 
+            style={{
               backgroundImage: `url(/images/backgrounds/HomePage/img/${blockIndex + 1}.jpg)`,
-              opacity: isTransitioning ? 1 : 0
+              opacity: isTransitioning ? 1 : 0,
             }}
           />
-          
+
           {/* Видео */}
           <video
             ref={videoRef}
@@ -236,24 +235,27 @@ const BlockVideo: React.FC<{
             loop
             muted
             playsInline
-            preload={tier === 'high' ? 'auto' : 'metadata'}
-            style={{
-              imageRendering: tier === 'low' ? 'auto' : 'optimizeQuality'
-            } as React.CSSProperties}
+            preload={tier === "high" ? "auto" : "metadata"}
+            style={
+              {
+                imageRendering: tier === "low" ? "auto" : "optimizeQuality",
+              } as React.CSSProperties
+            }
           >
             {!isTransitioning && <source src={videoSrc} type="video/mp4" />}
           </video>
 
           {/* Современные overlay эффекты */}
-          {tier === 'high' && (
+          {tier === "high" && (
             <>
               {/* Subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none" />
               {/* Inner glow effect */}
-              <div className="absolute inset-0 rounded-2xl pointer-events-none" 
+              <div
+                className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
-                  background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)'
-                }} 
+                  background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)",
+                }}
               />
             </>
           )}
@@ -413,6 +415,7 @@ const MorphingVideoSection: React.FC = () => {
   const tier = usePerformanceTier();
   const { isTouchDevice } = useDeviceType();
   const sectionRef = useRef<HTMLDivElement>(null);
+  const parallaxBgRef = useRef<HTMLDivElement>(null);
   const block1Ref = useRef<HTMLDivElement>(null);
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
@@ -422,9 +425,21 @@ const MorphingVideoSection: React.FC = () => {
     offset: ["start end", "end start"],
   });
 
-  // AWWWARDS ПРОФЕССИОНАЛЬНЫЙ ПАРАЛЛАКС - ТОЛЬКО ДЛЯ ДЕСКТОПА!
-  const parallaxStrength = isTouchDevice || tier === "low" ? 0 : (tier === "medium" ? 30 : 60);
-  const bgY = useTransform(scrollYProgress, [0, 1], [`-${parallaxStrength / 2}%`, `${parallaxStrength / 2}%`]);
+  // Сила параллакса: на тач используем useParallaxLenis, на десктоп — Framer Motion
+  const parallaxStrength = tier === "low" ? 0 : tier === "medium" ? 30 : 60;
+
+  // ТАЧ: параллакс через Lenis RAF — compositor-only, 60fps
+  useParallaxLenis(parallaxBgRef, sectionRef, {
+    strength: parallaxStrength * 2, // *2 т.к. фон занимает 100%+200px
+    disabled: !isTouchDevice || tier === "low",
+  });
+
+  // ДЕСКТОП: Framer Motion useTransform
+  const bgY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    isTouchDevice || tier === "low" ? ["0%", "0%"] : [`-${parallaxStrength / 2}%`, `${parallaxStrength / 2}%`],
+  );
 
   useEffect(() => {
     const preloadVideos = () => {
@@ -443,14 +458,14 @@ const MorphingVideoSection: React.FC = () => {
       {/* Параллакс фон */}
       <div className="absolute inset-0 -z-30 overflow-hidden">
         <motion.div
+          ref={parallaxBgRef}
           className="parallax-bg absolute inset-0 w-full"
           style={{
             y: bgY,
             height: "calc(100% + 200px)",
             top: "-100px",
-            willChange: "transform",
+            willChange: isTouchDevice ? "auto" : "transform",
             backfaceVisibility: "hidden",
-            contain: isTouchDevice ? "layout style paint" : "none",
           }}
         >
           <div
@@ -554,7 +569,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className={`relative z-10 ${isTouchDevice ? 'min-h-[180vh]' : 'min-h-[200vh]'}`}>
+          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
             {tier === "high" && <Grid3D type={1} triggerRef={block1Ref} />}
           </div>
         </div>
@@ -593,7 +608,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className={`relative z-10 ${isTouchDevice ? 'min-h-[180vh]' : 'min-h-[200vh]'}`}>
+          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
             {tier === "high" && <Grid3D type={2} triggerRef={block2Ref} />}
           </div>
         </div>
@@ -631,7 +646,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className={`relative z-10 ${isTouchDevice ? 'min-h-[180vh]' : 'min-h-[200vh]'}`}>
+          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
             {tier === "high" && <Grid3D type={3} triggerRef={block3Ref} />}
           </div>
         </div>
@@ -655,21 +670,9 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </div>
       {/* Все три видео компонента */}
-      <BlockVideo 
-        blockRef={block1Ref} 
-        videoSrc={productionVideo} 
-        blockIndex={0}
-      />
-      <BlockVideo 
-        blockRef={block2Ref} 
-        videoSrc={productionVideo} 
-        blockIndex={1}
-      />
-      <BlockVideo 
-        blockRef={block3Ref} 
-        videoSrc={productionVideo} 
-        blockIndex={2}
-      />
+      <BlockVideo blockRef={block1Ref} videoSrc={productionVideo} blockIndex={0} />
+      <BlockVideo blockRef={block2Ref} videoSrc={productionVideo} blockIndex={1} />
+      <BlockVideo blockRef={block3Ref} videoSrc={productionVideo} blockIndex={2} />
     </section>
   );
 };

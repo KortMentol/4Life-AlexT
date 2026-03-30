@@ -1,37 +1,29 @@
 /**
  * @module src/hooks/useTouchScrollLock.ts
- * @description Хук для агрессивной блокировки нативного поведения браузера при тач-скролле.
- * Предотвращает pull-to-refresh, скрытие адресной строки и другие нативные UI-действия,
- * позволяя Lenis полностью контролировать прокрутку.
+ * @description Блокировка нативного скролла через CSS touch-action вместо preventDefault().
+ * CSS-подход не блокирует compositor thread — браузер может оптимизировать скролл нативно.
  * @author Kort
- * @version 2.0.0 - Добавлена поддержка исключений с data-атрибутом.
+ * @version 3.0.0 - CSS touch-action вместо passive:false preventDefault
  * @usage
  * 1. `src/App.tsx`: Используется для блокировки нативного скролла, когда меню закрыто.
  * @param {boolean} isEnabled - Флаг активации блокировки
- * @example
- * useTouchScrollLock(!isMenuOpen);
  */
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 export const useTouchScrollLock = (isEnabled: boolean) => {
   useEffect(() => {
-    if (!isEnabled) {
-      return;
+    const html = document.documentElement;
+
+    if (isEnabled) {
+      // CSS touch-action: none блокирует нативный скролл без JS-обработчика
+      // Это не трогает compositor thread — браузер сам обрабатывает тач
+      html.style.touchAction = "none";
+    } else {
+      html.style.touchAction = "";
     }
 
-    const handleTouchMove = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-allow-native-scroll="true"]')) {
-        return;
-      }
-
-      e.preventDefault();
-    };
-
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-
     return () => {
-      document.removeEventListener('touchmove', handleTouchMove);
+      html.style.touchAction = "";
     };
   }, [isEnabled]);
 };

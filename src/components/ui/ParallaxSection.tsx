@@ -1,8 +1,21 @@
-// === Файл: src/components/ui/ParallaxSection.tsx (НАДЕЖНАЯ ВЕРСИЯ) ===
+// === Файл: src/components/ui/ParallaxSection.tsx ===
+/**
+ * Параллакс секция с двумя стратегиями рендеринга:
+ *
+ * ДЕСКТОП (hover:hover pointer:fine):
+ *   Паттерн Oliviera Larose — position:fixed + Framer Motion useScroll/useTransform
+ *   Полный эффект глубины, плавный параллакс.
+ *
+ * ТАЧ (touch device):
+ *   useParallaxLenis — прямой DOM transform в Lenis RAF callback.
+ *   Compositor-only, 60fps, тот же визуальный эффект.
+ *   position:absolute вместо fixed — нет лишнего GPU слоя.
+ */
 
+import { useParallaxLenis } from "@/hooks/useParallaxLenis";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 
 export interface ParallaxSectionProps {
   backgroundImage?: string;
@@ -13,7 +26,6 @@ export interface ParallaxSectionProps {
   children?: ReactNode;
   height?: string;
   contentClasses?: string;
-  parallaxStrength?: number;
   imageBrightness?: string;
   blendMode?: string;
   clipPath?: string;
@@ -21,41 +33,9 @@ export interface ParallaxSectionProps {
   lazyLoad?: boolean;
 }
 
-/**
- * @module src/components/ui/ParallaxSection.tsx
- * @description Создает полноэкранную или кастомной высоты секцию с эффектом параллакса для фонового изображения или видео. Компонент оптимизирован для максимальной производительности, используя ленивую (lazy-loading) загрузку ассетов по мере их появления в области видимости.
- * @author Kort
- * @version 1.1.0
- * @param {string} [backgroundImage] - Резервный путь к фоновому изображению, если не указаны версии для ПК/мобильных.
- * @param {string} [backgroundImageMobile] - Путь к фоновому изображению для мобильных устройств (ширина < 768px).
- * @param {string} [backgroundImagePC] - Путь к фоновому изображению для десктопных устройств.
- * @param {string} [backgroundVideo] - Путь к фоновому видео в формате .webm. Компонент автоматически попытается загрузить .mp4 версию, заменив расширение.
- * @param {string} altText - Альтернативный текст для фона, важен для доступности (accessibility).
- * @param {React.ReactNode} [children] - Дочерние элементы, которые будут отображаться поверх фоновой секции.
- * @param {string} [height='h-screen'] - Высота секции в Tailwind классах. По умолчанию занимает весь экран.
- * @param {string} [contentClasses='flex items-center justify-center'] - Tailwind классы для стилизации контейнера с дочерними элементами.
- * @param {number} [parallaxStrength=40] - Сила эффекта параллакса в vh. Чем выше значение, тем сильнее смещение фона при скролле.
- * @param {string} [imageBrightness='brightness-[.6] dark:brightness-[.4]'] - Яркость фонового изображения/видео. Позволяет сделать текст более читаемым.
- * @param {string} [blendMode=''] - CSS-свойство `mix-blend-mode` для наложения фона на другие элементы.
- * @param {string} [clipPath='polygon(0% 0, 100% 0%, 100% 100%, 0 100%)'] - CSS-свойство `clip-path` для создания нестандартных форм секции.
- * @param {boolean} [skipPreload=false] - Если `true`, компонент не будет пытаться предзагрузить фоновое изображение. Полезно, если ассет уже загружен другим скриптом (например, прелоадером в index.html).
- * @param {boolean} [lazyLoad=true] - Включает/отключает ленивую загрузку. Если `true`, ассеты грузятся только при попадании в зону видимости.
- * @usage
- * 1. `src/pages/HomePage.tsx` - Используется в качестве главной hero-секции с видеофоном, отображающей основной оффер сайта.
- * 2. `src/pages/HomePage.tsx` - Используется в качестве фона для секции "Продукты", применяется статичное изображение с ленивой загрузкой.
- * 3. `src/pages/HomePage.tsx` - Используется в качестве фона для секции призыва к действию (CTA) в конце страницы.
- * @example
- * <ParallaxSection
- *   backgroundVideo="/videos/hero-background.webm"
- *   backgroundImagePC="/images/hero-poster-pc.jpg"
- *   backgroundImageMobile="/images/hero-poster-mobile.jpg"
- *   altText="Фон с природой для демонстрации продуктов"
- *   height="h-screen"
- *   parallaxStrength={50}
- * >
- *   <h1 className="text-white text-5xl">Ваш контент здесь</h1>
- * </ParallaxSection>
- */
+// Определяем тач один раз на уровне модуля — не меняется
+const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
   backgroundImageMobile,
@@ -65,7 +45,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   children,
   height = "h-screen",
   contentClasses = "flex items-center justify-center",
-  parallaxStrength = 40,
   imageBrightness = "brightness-[.6] dark:brightness-[.4]",
   blendMode = "",
   clipPath = "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)",
@@ -73,6 +52,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   lazyLoad = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const parallaxBgRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
@@ -81,32 +61,50 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    
-    let resizeTimeout: number;
-    const throttledResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = window.setTimeout(checkMobile, isMobile ? 250 : 100);
+    let t: number;
+    const onResize = () => {
+      clearTimeout(t);
+      t = window.setTimeout(checkMobile, 250);
     };
-    
-    window.addEventListener("resize", throttledResize, { passive: true });
-    
+    window.addEventListener("resize", onResize, { passive: true });
     return () => {
-      window.removeEventListener("resize", throttledResize);
-      clearTimeout(resizeTimeout);
+      window.removeEventListener("resize", onResize);
+      clearTimeout(t);
     };
-  }, [isMobile]);
+  }, []);
 
+  // Сила параллакса в px — насколько фон смещается относительно контента
+  // Больше = сильнее эффект глубины. На FPS не влияет — только математика.
+  // Тач: 300px high / 180px medium — заметный эффект погружения
+  // Десктоп: 400px high / 200px medium — сильное ощущение глубины
+  const finalStrength = IS_TOUCH
+    ? tier === "low"
+      ? 0
+      : tier === "medium"
+        ? 180
+        : 300
+    : tier === "low"
+      ? 0
+      : tier === "medium"
+        ? 200
+        : 400;
+
+  // --- ТАЧ: параллакс через RAF loop ---
+  useParallaxLenis(parallaxBgRef, containerRef, {
+    strength: IS_TOUCH ? finalStrength : 0,
+    disabled: !IS_TOUCH || tier === "low",
+  });
+
+  // --- ДЕСКТОП: Framer Motion useScroll (паттерн Oliviera) ---
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  const finalParallaxStrength = tier === 'low' ? 0 : (tier === 'medium' ? parallaxStrength / 2 : parallaxStrength);
-
-  const y = useTransform(
+  const desktopY = useTransform(
     scrollYProgress,
     [0, 1],
-    [`-${finalParallaxStrength / 2}vh`, `${finalParallaxStrength / 2}vh`],
+    IS_TOUCH || tier === "low" ? ["0vh", "0vh"] : [`-${finalStrength / 2}px`, `${finalStrength / 2}px`],
   );
 
   const finalBackgroundImage = isMobile
@@ -120,89 +118,137 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     }
   }, [finalBackgroundImage, skipPreload]);
 
-  // Intersection Observer для паузы видео при скролле (Awwwards уровень)
+  // Intersection Observer для паузы/воспроизведения видео
   useEffect(() => {
     const video = videoRef.current;
     const container = containerRef.current;
-    
     if (!video || !container || !backgroundVideo) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Пользователь в зоне секции + 300px буфер - включаем видео
             video.play().catch(() => {});
           } else {
-            // Пользователь за пределами зоны - ВСЕГДА пауза
             video.pause();
           }
         });
       },
-      {
-        threshold: 0,
-        rootMargin: '300px 0px 300px 0px' // 300px буфер со всех сторон
-      }
+      { threshold: 0, rootMargin: "300px 0px 300px 0px" },
     );
 
     observer.observe(container);
-
     return () => {
       observer.disconnect();
       video.pause();
     };
   }, [backgroundVideo, inView]);
 
+  // ТАЧ: position:absolute + useParallaxLenis двигает bgRef напрямую
+  if (IS_TOUCH) {
+    return (
+      <section
+        ref={containerRef}
+        className={`relative overflow-hidden ${height} ${blendMode}`}
+        style={{ clipPath, WebkitClipPath: clipPath }}
+      >
+        <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
+
+        {/* Фон: position:absolute, увеличен чтобы параллакс не обнажал края */}
+        <div
+          className="absolute left-0 w-full -z-10"
+          style={{
+            top: `-${finalStrength / 2}px`,
+            height: `calc(100% + ${finalStrength}px)`,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            ref={parallaxBgRef}
+            className={`relative w-full h-full ${imageBrightness}`}
+            style={{ backfaceVisibility: "hidden" }}
+          >
+            {backgroundVideo ? (
+              <video
+                ref={videoRef}
+                key={inView ? "loaded" : "unloaded"}
+                className="absolute inset-0 h-full w-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                disablePictureInPicture
+                poster={isMobile ? backgroundImageMobile : undefined}
+              >
+                {inView && (
+                  <>
+                    <source src={backgroundVideo} type="video/webm" />
+                    <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
+                  </>
+                )}
+              </video>
+            ) : (
+              finalBackgroundImage && (
+                <img
+                  src={lazyLoad && !inView ? undefined : finalBackgroundImage}
+                  alt={altText}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+              )
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ДЕСКТОП: паттерн Oliviera — position:fixed + Framer Motion
   return (
     <section
       ref={containerRef}
       className={`relative overflow-hidden ${height} ${blendMode}`}
-      style={{ clipPath: clipPath, WebkitClipPath: clipPath }}
+      style={{ clipPath, WebkitClipPath: clipPath }}
     >
       <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
 
       <div
-        className="fixed left-0 w-full -z-10"
+        className="-z-10"
         style={{
-          height: `calc(100vh + ${finalParallaxStrength}vh)`,
-          top: `-${finalParallaxStrength / 2}vh`,
+          position: "fixed",
+          left: 0,
+          width: "100%",
+          height: `calc(100vh + ${finalStrength}px)`,
+          top: `-${finalStrength / 2}px`,
         }}
       >
         <motion.div
-          className={`relative w-full h-full ${imageBrightness} gpu-smooth-scroll`}
-          style={{ 
-            y,
-            willChange: tier === 'low' ? 'auto' : 'transform',
-            contain: isMobile ? 'layout style paint' : 'none',
-            backfaceVisibility: 'hidden',
-            perspective: 1000
-          }}
-          transformTemplate={(_, generated) => {
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            return isTouchDevice ? generated : `translateZ(0.01px) ${generated}`;
+          ref={parallaxBgRef}
+          className={`relative w-full h-full ${imageBrightness}`}
+          style={{
+            y: desktopY,
+            willChange: tier === "low" ? "auto" : "transform",
+            backfaceVisibility: "hidden",
           }}
         >
           {backgroundVideo ? (
             <video
               ref={videoRef}
-              key={inView ? "video-loaded" : "video-unloaded"}
-              className="absolute top-0 left-0 h-full w-full object-cover"
+              key={inView ? "loaded" : "unloaded"}
+              className="absolute inset-0 h-full w-full object-cover"
               autoPlay
               loop
               muted
               playsInline
               preload="metadata"
               disablePictureInPicture
-              poster={isMobile ? backgroundImageMobile : undefined}
+              poster={backgroundImageMobile}
             >
-              {/* Загружаем источники только когда видео в зоне видимости */}
               {inView && (
                 <>
                   <source src={backgroundVideo} type="video/webm" />
-                  <source
-                    src={backgroundVideo.replace(".webm", ".mp4")}
-                    type="video/mp4"
-                  />
+                  <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
                 </>
               )}
             </video>
@@ -211,7 +257,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               <img
                 src={lazyLoad && !inView ? undefined : finalBackgroundImage}
                 alt={altText}
-                className="absolute top-0 left-0 h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
                 loading="lazy"
               />
             )
