@@ -12,7 +12,6 @@ import "./styles/base/animations.css";
 import "./styles/base/base.css";
 import "./styles/base/fixes.css";
 import "./styles/base/modern-design.css";
-import "./styles/base/theme-variables.css";
 import "./styles/globals.css";
 import "./styles/image-rendering.css";
 
@@ -54,9 +53,9 @@ const initApp = () => {
     //</React.StrictMode> - временно отключен
   );
 
-  // Preload all page chunks before signaling app is ready
+  // Preload lazy-loaded page chunks before signaling app is ready
+  // HomePage excluded - loaded synchronously in App.tsx for instant FCP
   Promise.allSettled([
-    import("@/pages/HomePage"),
     import("@/pages/ProductsPage"),
     import("@/pages/AboutPage"),
     import("@/pages/AboutMePage"),

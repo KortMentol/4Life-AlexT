@@ -1,9 +1,7 @@
 "use client";
 
 import React, { memo, useMemo } from "react";
-
-// Проверка на мобильное устройство
-const isMobile = () => window.innerWidth < 768;
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 
 interface AuroraTextProps {
   children: React.ReactNode;
@@ -15,10 +13,10 @@ interface AuroraTextProps {
 /**
  * @module components/magicui/aurora-text
  * @description Компонент для отображения текста с анимированным градиентом, создающим эффект "северного сияния" (Aurora).
- * Эффект достигается за счет анимированного линейного градиента, примененного к тексту.
+ * Эффект адаптируется под производительность устройства через usePerformanceTier().
  *
  * @author Kort
- * @version 1.1.0
+ * @version 2.0.0 (2026 Performance Optimized)
  *
  * @param {React.ReactNode} children - Текстовый узел, к которому применяется эффект.
  * @param {string} [className] - Дополнительные CSS-классы для стилизации контейнера.
@@ -26,10 +24,11 @@ interface AuroraTextProps {
  * @param {number} [speed=1] - Множитель скорости анимации.
  *
  * @see React.memo - Компонент обернут в `memo` для оптимизации рендеринга.
+ * @see usePerformanceTier - Адаптивная логика под производительность устройства.
  *
  * @usage
  * Компонент используется для создания анимированного градиентного текста в ключевых заголовках на главной странице.
- * На мобильных устройствах анимация отключается для оптимизации производительности.
+ * Анимация адаптируется под производительность: HIGH (полная), MEDIUM (упрощенная), LOW (статичная).
  *
  * **Точное использование в проекте:**
  * 1. **Главная страница (`src/pages/HomePage.tsx`), главный экран `Hero`:**
@@ -55,8 +54,28 @@ const AuroraTextComponent = memo(
     colors = ["#FF0080", "#7928CA", "#0070F3", "#38bdf8"],
     speed = 1,
   }: AuroraTextProps) => {
-    // Мемоизируем проверку мобильного устройства
-    const isOnMobile = useMemo(() => isMobile(), []);
+    // 2026 PERFORMANCE TIER SYSTEM
+    const performanceTier = usePerformanceTier();
+    
+    // Мемоизируем класс анимации на основе производительности
+    const animationClass = useMemo(() => {
+      switch (performanceTier) {
+        case 'high':
+          return 'animate-aurora-high';
+        case 'medium':
+          return 'animate-aurora-medium';
+        case 'low':
+        default:
+          return 'animate-aurora-low'; // Статичный градиент для слабых устройств
+      }
+    }, [performanceTier]);
+    
+    // Адаптивная скорость анимации
+    const adaptiveSpeed = useMemo(() => {
+      if (performanceTier === 'low') return 0; // Отключаем анимацию
+      if (performanceTier === 'medium') return speed * 0.7; // Замедляем на 30%
+      return speed; // Полная скорость для HIGH
+    }, [performanceTier, speed]);
     
     const gradientStyle = {
       backgroundImage: `linear-gradient(135deg, ${colors.join(", ")}, ${
@@ -64,8 +83,8 @@ const AuroraTextComponent = memo(
       })`,
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
-      // Отключаем анимацию на мобильных для производительности
-      animationDuration: isOnMobile ? "0s" : `${10 / speed}s`,
+      // Адаптивная длительность анимации
+      animationDuration: adaptiveSpeed > 0 ? `${10 / adaptiveSpeed}s` : "0s",
     };
 
     return (
@@ -73,7 +92,7 @@ const AuroraTextComponent = memo(
         <span className="sr-only">{children}</span>
         <span
           className={`relative bg-[length:200%_auto] bg-clip-text text-transparent ${
-            isOnMobile ? "" : "animate-aurora"
+            performanceTier !== 'low' ? animationClass : 'animate-aurora-low'
           }`}
           style={gradientStyle}
           aria-hidden="true"

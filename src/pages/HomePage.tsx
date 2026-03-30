@@ -7,14 +7,14 @@ import { motion } from "framer-motion";
 import React, { lazy, Suspense } from "react";
 
 // Media imports
+import bg2Img from "@/assets/images/backgrounds/HomePage/2.jpg";
+import renuvoImg from "@/assets/images/products/renuvo.webp";
 import tfPlusImg from "@/assets/images/products/tf-plus.webp";
 import tfTrifactorImg from "@/assets/images/products/tf-trifactor.webp";
-import renuvoImg from "@/assets/images/products/renuvo.webp";
-import bg2Img from "@/assets/images/backgrounds/HomePage/2.jpg";
 
-import heroVideoWebm from "@/assets/videos/backgrounds/HomePage/Hero-section/Why 4Life Transfer Factor®_.webm";
 import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.webp";
 import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
+import heroVideoWebm from "@/assets/videos/backgrounds/HomePage/Hero-section/Why 4Life Transfer Factor®_.webm";
 
 // --- LAZY LOADED COMPONENTS ---
 const KineticProductCarousel = lazy(() => import("@/components/ui/KineticProductCarousel"));
@@ -29,12 +29,7 @@ const pageVariants = {
 
 // Определяем компонент HomePage
 const HomePage: React.FC = () => {
-
-
-
-
   const GLOBAL_PARALLAX_STRENGTH = 40;
-
 
   const popularProducts = [
     {
@@ -185,20 +180,22 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               </Suspense>
-              <div className="mt-16 mb-10 text-center px-6" style={{ contain: 'layout style paint' }}>
+              <div className="mt-16 mb-10 text-center px-6" style={{ contain: "layout style paint" }}>
                 <Button
                   to="/products"
                   variant="secondary"
                   size="lg"
                   className="group bg-white/20 border-white/30 backdrop-blur-sm hover:bg-white/30 transition-colors duration-150"
                   icon={
-                    <Icons.ArrowRight className="w-5 h-5 relative z-10 transition-transform duration-150 group-hover:translate-x-1" style={{ willChange: 'transform' }} />
+                    <Icons.ArrowRight
+                      className="w-5 h-5 relative z-10 transition-transform duration-150 group-hover:translate-x-1"
+                      style={{ willChange: "transform" }}
+                    />
                   }
                 >
                   Посмотреть все
                 </Button>
               </div>
-
             </div>
           </div>
         </ParallaxSection>

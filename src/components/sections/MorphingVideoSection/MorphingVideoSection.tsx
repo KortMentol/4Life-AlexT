@@ -155,11 +155,11 @@ const BlockVideo: React.FC<{
     [0, 1, 1, 1, 1, 0]
   );
 
-  // Scale эффект
-  const scale = useTransform(
+  // 3D эффект масштабирования через translateZ (GPU-ускоренный)
+  const translateZ = useTransform(
     scrollYProgress,
     [timings.fadeInStart, timings.fadeInEnd, timings.stickStart, timings.stickEnd, timings.fadeOutStart, timings.fadeOutEnd],
-    tier === 'high' ? [0.8, 1, 1, 1, 1, 0.8] : [0.95, 1, 1, 1, 1, 0.95]
+    tier === 'high' ? [-400, 0, 0, 0, 0, -400] : [-200, 0, 0, 0, 0, -200]
   );
 
   // Обработка переходов меню
@@ -196,19 +196,17 @@ const BlockVideo: React.FC<{
   }, []);
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none">
+    <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none" style={{ perspective: '1200px' }}>
       <motion.div
         style={{
           y,
           opacity,
-          scale,
+          translateZ,
           willChange: 'transform, opacity'
         }}
         transformTemplate={(_, generated) => {
-          // Убрали грязный хак с translateZ(0.01px), так как он ломает stacking context
           return generated;
         }}
-        // ДОБАВЛЕН anti-pixel-snap ДЛЯ ПК
         className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? 'anti-pixel-snap' : ''}`}
         transition={{
           type: 'tween',

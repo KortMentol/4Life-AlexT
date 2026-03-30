@@ -1,3 +1,12 @@
+/**
+ * @module src/styles/filter-capsule.css
+ * @description Premium 3D капсула фильтров с glassmorphism эффектом
+ * @author Kort
+ * @version 1.0.0
+ * @usage ProductsFilters.tsx - фиксированная панель фильтров внизу экрана
+ * @features Темная/светлая темы, backdrop-filter blur, 3D градиенты, адаптивность
+ */
+
 :root {
   /* Dark Theme - Ultra Modern Capsule */
   --filter-dark-bg: #0a0f1c;

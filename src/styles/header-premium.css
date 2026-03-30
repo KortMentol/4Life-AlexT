@@ -1,3 +1,13 @@
+/**
+ * @module src/styles/header-premium.css
+ * @description Premium 3D капсула хедера с glassmorphism эффектом и адаптивной производительностью
+ * @author Kort
+ * @version 2.0.0 - Optimized (2026)
+ * @usage Header.tsx - фиксированный хедер вверху экрана
+ * @features Темная/светлая темы, backdrop-filter blur, 3D градиенты, smart degradation для low/medium tier
+ * @performance Автоматическое отключение backdrop-filter на слабых устройствах через data-tier атрибут
+ */
+
 :root {
   /* Dark Theme - Ultra Modern Capsule */
   --header-dark-bg: #0a0f1c;
@@ -111,7 +121,7 @@
   border: 1px solid rgba(var(--header-light-glow-rgb), 0.3);
 }
 
-/* 3D Capsule Enhancement */
+/* 3D Capsule Enhancement - верхний блик для глубины */
 .header-premium::before {
   content: "";
   position: absolute;
@@ -122,10 +132,6 @@
   border-radius: inherit;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
   pointer-events: none;
-}
-
-.header-premium::after {
-  display: none;
 }
 
 .header-content {
@@ -150,20 +156,20 @@
   }
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations + Smart Degradation Fallback */
 @media (max-width: 768px) {
   .header-premium {
     padding: 0.5rem 1.5rem;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
-}
-/*
- * === AWWWARDS 2026 - SMART DEGRADATION FALLBACK ===
- * Replaces expensive backdrop-filter with a lightweight "frosted glass"
- * effect for low/medium tier mobile devices to guarantee 60 FPS scroll.
- */
-@media (max-width: 768px) {
+
+  /*
+   * === AWWWARDS 2026 - SMART DEGRADATION FALLBACK ===
+   * Replaces expensive backdrop-filter with a lightweight "frosted glass"
+   * effect for low/medium tier mobile devices to guarantee 60 FPS scroll.
+   */
+  
   /* This selector targets the header ONLY on devices flagged as low or medium performance */
   .header-premium[data-tier="low"],
   .header-premium[data-tier="medium"] {

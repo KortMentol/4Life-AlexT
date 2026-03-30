@@ -1,44 +1,34 @@
 /**
  * @module src/styles/fixes.css
- * @description Содержит набор CSS-правил для исправления специфичных проблем на мобильных устройствах и в разных браузерах.
- * Включает стили для скроллбаров, исправления для iOS Safari, управление оверскроллом и оптимизации для библиотеки Lenis.
+ * @description Критические фиксы для браузеров и мобильных устройств.
  * @author Kort
- * @version 1.1.0
- * @usage
- * 1. `src/main.tsx`: Импортируется глобально для применения фиксов ко всему приложению.
+ * @version 2.0.0 (2026 Optimized)
+ * @usage Импортируется в main.tsx, применяется глобально ко всему сайту
+ * @fixes iOS Safari zoom, overflow-x, Lenis smooth scroll, scrollbar hiding
  */
 
-/* Исправления для различных браузеров и устройств */
-
-/* Исправление для iOS Safari - предотвращение масштабирования при фокусе на инпутах */
+/* iOS Safari - предотвращение масштабирования при фокусе */
 @supports (-webkit-touch-callout: none) {
-  input,
-  textarea,
-  select {
+  input, textarea, select {
     font-size: 16px;
   }
 }
 
-
-
-/* Исправление для мобильных устройств - предотвращение горизонтального скролла */
-html,
-body {
-  overflow-x: hidden; /* Отключает горизонтальную прокрутку */
-  max-width: 100%; /* Ограничивает ширину страницы до 100% видимой области */
-
-  /* ЗАМЕНА: Полностью запрещает браузеру любые действия при оверскролле */
+/* Основные фиксы для стабильности */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
   overscroll-behavior: contain;
-
-  touch-action: pan-y; /* Указывает, что элемент обрабатывает только вертикальные свайпы */
+  touch-action: pan-y;
 }
 
-/* Исправление для Safari - предотвращение проблем с фиксированным позиционированием */
+/* Safari - фикс для fixed элементов */
 .fixed {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
-/* Оптимизация скроллинга для современных браузеров */
+
+/* Lenis smooth scroll оптимизация */
 html.lenis {
   height: auto;
 }
@@ -59,36 +49,13 @@ html.lenis {
   pointer-events: none;
 }
 
-/* Предотвращение скачков при переходе между страницами */
+/* Предотвращение скачков скроллбара */
 html {
   scrollbar-gutter: stable;
+  scrollbar-width: none; /* Firefox */
 }
 
-
-
-/* --- НОВЫЙ КОД: Класс для блокировки скролла при открытом меню --- */
-/*
-  Применяется к <body> для максимальной совместимости,
-  особенно на iOS устройствах, где `overflow: hidden`
-  может быть недостаточно.
-*/
-body.scroll-lock {
-  position: fixed;
-  overflow: hidden;
-  /* Предотвращает "прыжок" контента из-за исчезновения скроллбара */
-  width: 100%;
-  left: 0;
-  right: 0;
-}
-
-/* === СКРЫТИЕ СИСТЕМНОГО СКРОЛЛБАРА ДЛЯ РАБОТЫ КАСТОМНОГО === */
-
-/* Для Firefox */
-html {
-  scrollbar-width: none;
-}
-
-/* Для WebKit-браузеров (Chrome, Safari, Edge) */
+/* Скрытие системного скроллбара */
 body::-webkit-scrollbar {
   display: none;
 }

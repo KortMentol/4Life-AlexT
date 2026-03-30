@@ -1,281 +1,311 @@
+/**
+ * @module src/pages/HowToBuyPage.tsx
+ * @description Immersive Garden 2026 - Как приобрести продукцию 4Life
+ * Профессиональная страница с пошаговой инструкцией и FAQ
+ * @author Kort
+ * @version 2.0.0
+ */
+
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import React, { useState } from "react";
-
-import {
-  buttonVariants,
-  containerVariants,
-  itemVariants,
-} from "@/animations/variants";
-import TextShineEffect from "@/components/effects/TextShineEffect";
-import { FAQItem } from "@/components/ui";
+import { usePerformanceTier } from "@/hooks";
+import { Button, FAQItem } from "@/components/ui";
 import { Icons } from "@/utils/icons";
-import { SectionHeading } from "@/components/ui";
 
-// Варианты анимации для страницы
 const pageVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
   exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
 };
 
-// Страница описывает процесс покупки 4Life в 2 шага и преимущества ПК
-const HowToBuyPage = () => {
+const HowToBuyPage: React.FC = () => {
+  const tier = usePerformanceTier();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const handleFAQToggle = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
 
-  // Преимущества для Приоритетного Клиента
-  const pcBenefits = [
+  const benefits = [
     {
       icon: Icons.BadgePercent,
-      title: "Скидка 25% на все продукты",
-      desc: "Покупайте напрямую у 4Life по привилегированной цене.",
+      title: "Скидка 25%",
+      description: "Покупайте напрямую у 4Life по привилегированной цене Приоритетного Клиента",
     },
     {
       icon: Icons.Gift,
       title: "Бонусы и акции",
-      desc: "Участвуйте в ежемесячных акциях и получайте подарки.",
+      description: "Участвуйте в ежемесячных акциях и получайте подарки от компании",
     },
     {
       icon: Icons.Truck,
-      title: "Доставка по всей России",
-      desc: "Быстрая и надёжная доставка в любой регион России.",
+      title: "Доставка по России",
+      description: "Быстрая и надёжная доставка в любой регион через офис в Москве",
     },
   ];
 
-  // 4. JSX-разметка компонента
+  const steps = [
+    {
+      number: "01",
+      title: "Зарегистрируйтесь как Приоритетный Клиент",
+      description: "Пройдите быструю регистрацию на официальном сайте 4Life. Мой ID уже указан автоматически — вы получите доступ к скидкам и программе лояльности.",
+      action: {
+        text: "Зарегистрироваться",
+        link: "https://russia.4life.com/12299550/signup/PC",
+        external: true,
+      },
+    },
+    {
+      number: "02",
+      title: "Свяжитесь со мной для консультации",
+      description: "Напишите мне в удобный мессенджер. Я помогу подобрать продукты, расскажу о дозировках и отвечу на все вопросы.",
+      action: {
+        text: "Написать в WhatsApp",
+        link: "https://wa.me/79152561177",
+        external: true,
+      },
+    },
+    {
+      number: "03",
+      title: "Оформите заказ через офис",
+      description: "С вашим ID Приоритетного Клиента свяжитесь с офисом в Москве для оформления заказа. Вы получите скидку и сможете выбрать удобный способ получения.",
+      action: {
+        text: "Контакты офиса",
+        link: "/contact",
+        external: false,
+      },
+    },
+  ];
+
+  const faqData = [
+    {
+      question: "Зачем регистрироваться как Приоритетный Клиент?",
+      answer: "Регистрация дает вам скидку 25% на все продукты, доступ к эксклюзивным акциям и программе лояльности. Это бесплатно и занимает 2 минуты.",
+    },
+    {
+      question: "Как получить продукцию после заказа?",
+      answer: "После оформления заказа через офис вы можете выбрать доставку курьером или самовывоз из офиса в Москве. Доставка осуществляется по всей России.",
+    },
+    {
+      question: "Могу ли я купить без регистрации?",
+      answer: "Да, но без регистрации вы не получите скидку 25% и доступ к программе лояльности. Регистрация занимает всего 2 минуты и дает значительные преимущества.",
+    },
+    {
+      question: "Как долго действует статус Приоритетного Клиента?",
+      answer: "Статус действует бессрочно. Вы сохраняете все привилегии и скидки на протяжении всего времени сотрудничества с 4Life.",
+    },
+  ];
+
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-    >
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <SEO
         title="Как приобрести продукцию 4Life - Александр Тощев"
-        description="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам. Свяжитесь для консультации."
+        description="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам 25%. Пошаговая инструкция."
         path="/how-to-buy"
         type="website"
       />
 
-      {/* Hero */}
-      <section className="relative py-28 md:py-40 bg-gradient-to-br from-blue-50/40 to-purple-100/20 dark:from-gray-800/50 dark:to-gray-900/20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.15),transparent_70%)]" />
+      {/* Hero Section */}
+      <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-950 dark:to-gray-900 overflow-hidden">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute inset-0" style={{
+            backgroundImage: "radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.3) 1px, transparent 0)",
+            backgroundSize: "32px 32px",
+          }} />
+        </div>
+
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.h1
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7 }}
-            className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <TextShineEffect
-              text="Как Приобрести Продукты 4Life"
-              duration={8}
-            />
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
-          >
-            Получите лучшие условия и экспертную поддержку, следуя простым
-            шагам.
-          </motion.p>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Как приобрести
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                продукты 4Life
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Получите лучшие условия и экспертную поддержку, следуя простым шагам
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* Основная секция страницы */}
-      <section className="py-16 bg-gradient-to-br from-gray-50/0 to-white/0 dark:from-gray-900/0 dark:to-gray-800/0 text-gray-900 dark:text-white">
-        <div className="container mx-auto px-4 max-w-4xl">
-          {/* Анимированный контейнер для всего содержимого страницы */}
+      {/* Benefits Section */}
+      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-4 max-w-6xl">
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="bg-white/0 dark:bg-gray-700/0 rounded-lg shadow-2xl p-8 md:p-12 border border-gray-200/30 dark:border-gray-600/30 backdrop-blur-sm text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
           >
-            {/* Заголовок секции с описанием */}
-            <SectionHeading
-              title="Приобретение продукции 4Life"
-              description="Получите доступ к эксклюзивным скидкам и преимуществам, став Приоритетным Клиентом 4Life через мой ID. Это быстро и просто!"
-              centered={true}
-            />
-
-            {/* Блок с инструкциями и ID */}
-            <div className="flex flex-col items-center space-y-8">
-              <motion.div
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-                className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl relative z-10"
-              >
-                <p className="mb-4">
-                  Для максимально выгодного приобретения продукции 4Life и
-                  получения доступа к специальным ценам, я рекомендую
-                  зарегистрироваться в статусе **Приоритетного Клиента**. Это
-                  бесплатная регистрация, которая позволит вам покупать напрямую
-                  у компании, используя мой дистрибьюторский ID.
-                </p>
-                <p className="mb-4 font-semibold text-blue-600 dark:text-blue-400">
-                  Мой ID: 12299550
-                </p>
-                <p>
-                  Вы можете зарегистрироваться, перейдя по прямой ссылке, или
-                  связаться со мной для получения подробной консультации и
-                  помощи с регистрацией.
-                </p>
-              </motion.div>
-
-              {/* Контейнер для кнопок призыва к действию */}
-              <div className="flex flex-col md:flex-row gap-4 w-full justify-center mt-6">
-                {/* Кнопка 1: Регистрация Приоритетного Клиента */}
-                <motion.a
-                  href="https://russia.4life.com/12299550/signup/PC"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-bold rounded-lg shadow-xl hover:bg-blue-700 transition-all duration-300 transform group text-lg md:text-xl flex-1 max-w-xs md:max-w-none"
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                >
-                  Зарегистрироваться как Приоритетный Клиент{" "}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </motion.a>
-
-                {/* Кнопка 2: Перейти в магазин с ID */}
-                <motion.a
-                  href="https://russia.4life.com/12299550"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-lg hover:bg-gray-300 transition-all duration-300 transform group text-lg md:text-xl flex-1 max-w-xs md:max-w-none dark:bg-gray-800 dark:text-white dark:hover:bg-gray-900"
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                >
-                  Перейти в мой магазин 4Life{" "}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </motion.a>
-              </div>
-
-              {/* Блок для консультации */}
-              <motion.div
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-                className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mt-8 relative z-10"
-              >
-                <p className="mb-4">
-                  Если у вас возникнут вопросы по выбору продукции, процессу
-                  регистрации или вы захотите обсудить преимущества продуктов
-                  более подробно, не стесняйтесь связаться со мной.
-                </p>
-                <motion.a
-                  href="/contact"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-all duration-300 transform group text-base md:text-lg"
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                >
-                  Получить консультацию{" "}
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </motion.a>
-              </motion.div>
-            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Преимущества Приоритетного Клиента
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Зарегистрируйтесь один раз и получайте выгоду от каждой покупки
+            </p>
           </motion.div>
-          {/* Преимущества ПК */}
-          <motion.div
-            className="mt-20 grid grid-cols-1 sm:grid-cols-2 gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            {pcBenefits.map((card, idx) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {benefits.map((benefit, index) => (
               <motion.div
-                key={idx}
-                variants={itemVariants}
-                className="flex items-start p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200/30 dark:border-gray-600/30"
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={tier !== "low" ? { y: -8 } : {}}
+                className="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800 border border-blue-100 dark:border-gray-700"
               >
-                <card.icon className="w-8 h-8 text-purple-600 flex-shrink-0 mr-4" />
-                <div>
-                  <h3 className="font-bold text-lg mb-1">{card.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    {card.desc}
-                  </p>
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
+                  <benefit.icon className="w-8 h-8 text-blue-600 dark:text-cyan-400" strokeWidth={1.5} />
                 </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  {benefit.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {benefit.description}
+                </p>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Steps Section */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Три простых шага
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
+              От регистрации до получения продукции
+            </p>
           </motion.div>
 
-          {/* Шаг 1 */}
+          <div className="space-y-12">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8 }}
+                className="relative"
+              >
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  {/* Number */}
+                  <div className="flex-shrink-0">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                      <span className="text-3xl font-bold text-white">{step.number}</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                      {step.title}
+                    </h3>
+                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                      {step.description}
+                    </p>
+                    <Button
+                      to={step.action.link}
+                      variant="primary"
+                      size="lg"
+                      className="from-blue-600 to-cyan-600"
+                      icon={<Icons.ArrowRight className="w-5 h-5" />}
+                      {...(step.action.external && {
+                        onClick: (e: React.MouseEvent) => {
+                          e.preventDefault();
+                          window.open(step.action.link, "_blank", "noopener,noreferrer");
+                        },
+                      })}
+                    >
+                      {step.action.text}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <div className="hidden md:block absolute left-10 top-20 w-0.5 h-12 bg-gradient-to-b from-blue-600 to-cyan-600" />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-4 max-w-4xl">
           <motion.div
-            className="mt-24"
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
           >
-            <SectionHeading
-              title="Шаг 1. Станьте Приоритетным Клиентом"
-              description="Регистрация займёт 2 минуты и откроет доступ к скидкам и программе лояльности."
-              centered
-            />
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Часто задаваемые вопросы
+            </h2>
           </motion.div>
-          {/* (Кнопки остаются как были) */}
 
-          {/* Шаг 2 */}
+          <div className="space-y-4">
+            {faqData.map((item, index) => (
+              <FAQItem
+                key={index}
+                question={item.question}
+                answer={item.answer}
+                index={index}
+                isOpen={openFAQ === index}
+                onToggle={handleFAQToggle}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-900 dark:to-cyan-900 text-white">
+        <div className="container mx-auto px-4 text-center">
           <motion.div
-            className="mt-24"
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl mx-auto"
           >
-            <SectionHeading
-              title="Шаг 2. Как оформить заказ?"
-              description="Следуйте простым подсказкам в интерактивном гайде."
-              centered
-            />
-
-            <div className="mt-8 space-y-4">
-              <FAQItem
-                question="1. Добавьте продукты в корзину"
-                answer="На странице «Продукты» нажмите «Добавить в корзину» на интересующих позициях. Количество можно изменить в любое время."
-                index={0}
-                isOpen={openFAQ === 0}
-                onToggle={handleFAQToggle}
-              />
-              <FAQItem
-                question="2. Укажите мой ID 12299550"
-                answer="В форме оформления заказа введите мой ID дистрибьютора, чтобы сохранить скидку и получить персональную поддержку."
-                index={1}
-                isOpen={openFAQ === 1}
-                onToggle={handleFAQToggle}
-              />
-              <FAQItem
-                question="3. Выберите способ доставки и оплаты"
-                answer="Доступны карта, СБП и другие методы оплаты. Доставка курьером или в пункт выдачи Boxberry / СДЭК."
-                index={2}
-                isOpen={openFAQ === 2}
-                onToggle={handleFAQToggle}
-              />
-              <FAQItem
-                question="4. Получите подтверждение и наслаждайтесь результатом"
-                answer="После оплаты вы получите трек-номер. Я буду на связи, чтобы ответить на любые вопросы."
-                index={3}
-                isOpen={openFAQ === 3}
-                onToggle={handleFAQToggle}
-              />
-            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Остались вопросы?
+            </h2>
+            <p className="text-xl text-white/90 mb-10 leading-relaxed">
+              Свяжитесь со мной, и я помогу разобраться со всеми деталями
+            </p>
+            <Button
+              to="/contact"
+              variant="secondary"
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-gray-900 dark:text-cyan-400 dark:hover:bg-gray-800"
+              icon={<Icons.MessageCircle className="w-5 h-5" />}
+            >
+              Получить консультацию
+            </Button>
           </motion.div>
         </div>
       </section>

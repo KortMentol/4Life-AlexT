@@ -17,7 +17,7 @@ const runIdle = (cb: () => void) => {
   }
 };
 
-const DISABLE_FLUID_EFFECT = true;
+const DISABLE_FLUID_EFFECT = false;
 
 const getFluidConfig = (tier: string, isMobile: boolean) => ({
   dyeResolution: isMobile ? 512 : 1024,

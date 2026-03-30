@@ -10,8 +10,6 @@ export const siteConfig = {
   links: {
     telegram: import.meta.env.VITE_TELEGRAM_URL || "https://t.me/username",
     whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",
-    phone: import.meta.env.VITE_CONTACT_PHONE || "+7 (XXX) XXX-XX-XX",
-    email: import.meta.env.VITE_CONTACT_EMAIL || "mailto:contact@example.com",
   },
   distributor: {
     name: "Александр Тощев",

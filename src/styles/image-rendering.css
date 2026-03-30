@@ -2,51 +2,41 @@
  * @module src/styles/image-rendering.css
  * @description Глобальные CSS правила для устранения пикселизации изображений во всех браузерах
  * @author Kort
- * @version 1.0.0
- * @usage Импортировать в main.tsx или App.tsx
+ * @version 2.0.0 - Fixed (2026)
+ * @usage Импортируется в main.tsx, применяется глобально ко всем изображениям
+ * @logic Fallback chain: auto → smooth (современные браузеры используют smooth)
  */
 
-/* 🎯 УНИВЕРСАЛЬНОЕ РЕШЕНИЕ для всех браузеров */
+/* Глобальные правила для всех изображений */
 img,
 video,
 canvas,
 svg,
 [style*="background-image"] {
-  /* Современный стандарт */
+  /* Fallback для старых браузеров */
   image-rendering: auto;
-  image-rendering: smooth;
-
-  /* Webkit (Chrome, Safari, Edge) */
   -webkit-image-rendering: auto;
-  -webkit-image-rendering: smooth;
-
-  /* Firefox */
   -moz-image-rendering: auto;
-
-  /* IE/Edge Legacy */
   -ms-image-rendering: auto;
-
-  /* Дополнительная оптимизация для высокого DPI */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
-
-  /* Приоритет: smooth > auto > crisp-edges */
+  
+  /* Современный стандарт (перезаписывает auto) */
   image-rendering: smooth;
+  -webkit-image-rendering: smooth;
+  /* Firefox не поддерживает smooth, оставляем auto */
 }
 
-/* 🔧 Специально для background-image элементов */
-.bg-cover,
-.bg-contain,
-.bg-center,
+/* Tailwind bg-* классы (bg-cover, bg-contain, bg-center и т.д.) */
 [class*="bg-"] {
   image-rendering: auto;
   -webkit-image-rendering: auto;
   -moz-image-rendering: auto;
   -ms-image-rendering: auto;
+  
+  image-rendering: smooth;
+  -webkit-image-rendering: smooth;
 }
 
-/* 🎨 Для анимированных/трансформируемых изображений */
+/* Анимированные/трансформируемые изображения - максимальная плавность */
 .will-change-transform img,
 .will-change-transform [style*="background-image"],
 [style*="transform"] img,

@@ -1,4 +1,7 @@
 /// <reference types="vite/client" />
+/// <reference path="./types/headlessui-react.d.ts" />
+/// <reference path="./types/external-modules.d.ts" />
+/// <reference path="./types/emotion.d.ts" />
 
 interface ImportMetaEnv {
   /** @description Основной URL-адрес сайта. */

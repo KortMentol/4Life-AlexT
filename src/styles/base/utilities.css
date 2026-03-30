@@ -2,19 +2,14 @@
 
 /**
  * @module src/styles/base/utilities.css
- * @description Utility classes for common UI patterns
+ * @description Утилиты для общих UI паттернов - обрезка текста и GPU оптимизация
  * @author Kort
- * @version 1.0.0
+ * @version 2.0.0 - Cleaned (2026)
+ * @usage ProductsGrid.tsx, InteractiveProductCard.tsx, ProductListIcon.tsx, ShoppingCartAnimation.tsx, ScrollNumber.tsx
+ * @classes .line-clamp-2, .line-clamp-3, .will-change-transform
  */
 
-/* Line clamp utilities */
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
+/* Line clamp utilities - используются в ProductsGrid, InteractiveProductCard, ProductListIcon, ShoppingCartAnimation */
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -29,63 +24,7 @@
   -webkit-line-clamp: 3;
 }
 
-/* Fallback for browsers that don't support line-clamp */
-@supports not (-webkit-line-clamp: 2) {
-  .line-clamp-1 {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  
-  .line-clamp-2,
-  .line-clamp-3 {
-    max-height: 3em;
-    line-height: 1.5;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .line-clamp-2::after,
-  .line-clamp-3::after {
-    content: "...";
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: inherit;
-    padding-left: 1em;
-  }
-}
-
-/* Performance utilities */
-.gpu-accelerated {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
+/* Performance utilities - используется в ScrollNumber */
 .will-change-transform {
   will-change: transform;
-}
-
-.will-change-auto {
-  will-change: auto;
-}
-
-/* Smooth transitions */
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.transition-fast {
-  transition: all 0.15s ease-out;
-}
-
-/* Focus utilities */
-.focus-ring {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-}
-
-.focus-ring:focus {
-  outline: 2px solid rgba(6, 182, 212, 0.5);
-  outline-offset: 2px;
 }

@@ -1,10 +1,17 @@
+/**
+ * @module src/pages/ContactPage.tsx
+ * @description Immersive Garden 2026 - Страница контактов
+ * Минималистичный дизайн с адаптацией под все устройства
+ * @author Kort
+ * @version 2.0.0
+ */
+
 import { SEO } from "@/seo/SEO";
 import { motion } from "framer-motion";
 import React from "react";
-import { FaPhone, FaTelegram, FaWhatsapp } from "react-icons/fa";
-import { fadeIn, headingVariants, itemVariants } from "@/animations/variants";
+import { usePerformanceTier } from "@/hooks";
+import { Icons } from "@/utils/icons";
 
-// Варианты анимации для страницы
 const pageVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
@@ -12,93 +19,153 @@ const pageVariants = {
 };
 
 const ContactPage: React.FC = () => {
+  const tier = usePerformanceTier();
+
   const contactMethods = [
     {
       name: "WhatsApp",
-      icon: FaWhatsapp,
+      icon: Icons.MessageCircle,
       link: "https://wa.me/79152561177",
-      colorClass: "bg-green-500 hover:bg-green-600",
+      color: "from-green-500 to-green-600",
+      description: "Быстрый ответ в мессенджере",
     },
     {
       name: "Telegram",
-      icon: FaTelegram,
+      icon: Icons.Send,
       link: "https://t.me/+79152561177",
-      colorClass: "bg-blue-500 hover:bg-blue-600",
+      color: "from-blue-500 to-blue-600",
+      description: "Удобное общение в Telegram",
     },
     {
       name: "Позвонить",
-      icon: FaPhone,
+      icon: Icons.Phone,
       link: "tel:+79152561177",
-      colorClass: "bg-purple-600 hover:bg-purple-700",
+      color: "from-purple-500 to-purple-600",
+      description: "Прямой звонок для консультации",
     },
   ];
 
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-    >
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <SEO
         title="Свяжитесь с Александром Тощевым - 4Life | Контакты"
-        description="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. Прямые ссылки на WhatsApp, Telegram, Email."
+        description="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. WhatsApp, Telegram, Телефон."
         path="/contact"
         type="website"
       />
 
-      <section className="min-h-screen py-16 md:py-24 bg-gradient-to-br from-blue-50/0 to-indigo-100/0 dark:from-gray-900/0 dark:to-gray-800/0 text-gray-800 dark:text-gray-200 flex items-center">
-        <div className="container mx-auto px-4 text-center">
-          <motion.h1
-            className="text-5xl md:text-6xl font-extrabold mb-8 text-blue-800 dark:text-blue-400"
-            variants={headingVariants}
-            initial="hidden"
-            animate="show"
-          >
-            Свяжитесь со мной
-          </motion.h1>
-          <motion.p
-            className="text-lg md:text-xl max-w-3xl mx-auto mb-12"
-            variants={fadeIn("up", "tween", 0.2, 0.6)}
-            initial="hidden"
-            animate="show"
-          >
-            Готовы начать свой путь к здоровью и благополучию? У меня есть
-            ответы на ваши вопросы и я готов помочь на каждом этапе.
-          </motion.p>
-
+      <section className="min-h-screen flex items-center justify-center py-20 px-4 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+        <div className="container mx-auto max-w-5xl">
+          {/* Header */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
-            variants={fadeIn("up", "spring", 0.4, 0.8)}
-            initial="hidden"
-            animate="show"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
           >
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              Свяжитесь со мной
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Готовы начать свой путь к здоровью и благополучию? У меня есть ответы на ваши вопросы, и я готов помочь на каждом этапе
+            </p>
+          </motion.div>
+
+          {/* Contact Methods */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             {contactMethods.map((method, index) => (
               <motion.a
                 key={index}
                 href={method.link}
-                target={method.link.startsWith("mailto:") ? "_self" : "_blank"}
-                rel={
-                  method.link.startsWith("mailto:") ? "" : "noopener noreferrer"
-                }
-                className={`flex flex-col items-center p-8 rounded-lg shadow-xl ${method.colorClass} text-white font-bold transition-all duration-300 transform hover:scale-105`}
-                variants={itemVariants}
+                target={method.link.startsWith("tel:") ? "_self" : "_blank"}
+                rel={method.link.startsWith("tel:") ? "" : "noopener noreferrer"}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={tier !== "low" ? { y: -8, scale: 1.02 } : {}}
+                whileTap={{ scale: 0.98 }}
+                className={`group relative p-8 rounded-2xl bg-gradient-to-br ${method.color} text-white shadow-xl overflow-hidden`}
               >
-                <method.icon size={48} className="mb-4" />
-                <span className="text-3xl">{method.name}</span>
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                    backgroundSize: "24px 24px",
+                  }} />
+                </div>
+
+                {/* Content */}
+                <div className="relative z-10">
+                  <method.icon className="w-12 h-12 mb-4 transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+                  <h3 className="text-2xl font-bold mb-2">{method.name}</h3>
+                  <p className="text-white/90 text-sm">{method.description}</p>
+                </div>
+
+                {/* Hover Effect */}
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </motion.a>
             ))}
+          </div>
+
+          {/* Additional Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center"
+          >
+            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Icons.Clock className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+              <p className="text-gray-700 dark:text-gray-300">
+                Отвечаю в течение нескольких часов. Выберите удобный способ связи
+              </p>
+            </div>
           </motion.div>
 
-          <motion.p
-            className="text-md mt-16 max-w-3xl mx-auto text-gray-600 dark:text-gray-400"
-            variants={fadeIn("up", "tween", 0.6, 0.8)}
-            initial="hidden"
-            animate="show"
-          >
-            Я стремлюсь к оперативному общению. Выберите наиболее удобный для
-            вас способ связи, и я отвечу в ближайшее время!
-          </motion.p>
+          {/* Info Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Icons.MessageCircle className="w-6 h-6 text-blue-600 dark:text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Консультация по продуктам
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                    Помогу подобрать оптимальные продукты 4Life для ваших целей и объясню, как они работают
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Icons.Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Партнерство
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                    Расскажу о возможностях построения бизнеса с 4Life и помогу начать
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
     </motion.div>

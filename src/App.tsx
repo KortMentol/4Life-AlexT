@@ -7,15 +7,15 @@ import RouteChangeHandler from "@/components/RouteChangeHandler";
 import PopTransitionOverlay from "@/components/transitions/PopTransitionOverlay";
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useTheodoreMenu } from "@/hooks/useTheodoreMenu";
 import { useTouchScrollLock } from "@/hooks/useTouchScrollLock";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
-import { scrollToTop } from "@/utils/navigationUtils";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import React, { createContext, Suspense, useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, Suspense, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
@@ -57,70 +57,13 @@ const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
 function App() {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  // --- НАЧАЛО ИСПРАВЛЕННОЙ ЛОГИКИ МЕНЮ ---
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Theodore Menu management with history API integration
+  const { isMenuOpen, toggleMenu, closeMenu, navigateFromMenu, isMenuActionRef, wasMenuOpenRef } =
+    useTheodoreMenu();
 
-  // Агрессивная блокировка нативного скролла (когда меню закрыто)
+  // Aggressive native scroll lock (when menu is closed)
   useTouchScrollLock(!isMenuOpen);
-  const isMenuActionRef = useRef(false);
-  const wasMenuOpenRef = useRef(false);
-
-  useEffect(() => {
-    // Сбрасываем флаг после того, как состояние меню обновилось,
-    // чтобы не мешать реальным pop-переходам.
-    isMenuActionRef.current = false;
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    wasMenuOpenRef.current = isMenuOpen;
-  }, [isMenuOpen]);
-
-  // Следим за popstate (кнопки вперед/назад)
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      // Элегантная синхронизация состояния меню с историей браузера
-      setIsMenuOpen(event.state?.menuOpen === true);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []); // Убираем isMenuOpen из зависимостей для стабильности
-
-  const toggleMenu = useCallback(() => {
-    const currentPath = location.pathname + location.search;
-
-    isMenuActionRef.current = true;
-
-    if (isMenuOpen) {
-      // Если меню открыто, закрываем его, возвращаясь назад по истории
-      navigate(-1);
-    } else {
-      // Используем history.pushState чтобы добавить запись в историю без навигации и сброса скролла.
-      const currentState = window.history.state || {};
-      window.history.pushState({ ...currentState, menuOpen: true }, "", currentPath);
-      setIsMenuOpen(true);
-    }
-  }, [isMenuOpen, navigate, location.pathname, location.search]);
-
-  const closeMenu = useCallback(() => {
-    if (isMenuOpen) {
-      isMenuActionRef.current = true;
-      navigate(-1);
-    }
-  }, [isMenuOpen, navigate]);
-
-  const navigateFromMenu = (href: string, isSame: boolean) => {
-    if (isSame) {
-      scrollToTop({ immediate: false });
-      // Если страница та же, нужно закрыть меню вручную
-      closeMenu();
-    } else {
-      navigate(href);
-    }
-  };
 
   useEffect(() => {
     if (isMenuOpen) lenis.stop();
@@ -270,9 +213,10 @@ function App() {
             />
           </Routes>
         </Suspense>
-        {isMobile
-          ? createPortal(<PerformanceDebugMobile />, document.body)
-          : createPortal(<PerformanceDebug />, document.body)}
+        {import.meta.env.DEV &&
+          (isMobile
+            ? createPortal(<PerformanceDebugMobile />, document.body)
+            : createPortal(<PerformanceDebug />, document.body))}
       </ProductListProvider>
     </NavigationProvider>
   );
