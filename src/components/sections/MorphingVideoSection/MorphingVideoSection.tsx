@@ -183,8 +183,9 @@ const BlockVideo: React.FC<{
           }
         });
       },
-      // 200px буфер — видео начинает грузиться чуть раньше чем появится на экране
-      { threshold: 0, rootMargin: "200px" },
+      // 400px буфер — willChange и автоплей активируются заранее
+      // Видео успевает "прогреться" до того как появится на экране
+      { threshold: 0, rootMargin: "400px" },
     );
 
     observer.observe(block);

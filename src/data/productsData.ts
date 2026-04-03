@@ -14,6 +14,15 @@ export interface DetailedProduct extends Product {
   keyBenefits: string[];
   scientificEvidence: string;
   uniqueFeatures?: string[];
+  // Галерея медиа для модалки (фото + видео)
+  gallery?: GalleryItem[];
+}
+
+export interface GalleryItem {
+  type: "image" | "video";
+  src: string;
+  poster?: string; // для видео — превью
+  alt?: string;
 }
 
 // Импорт изображений (остается без изменений)
@@ -63,8 +72,30 @@ export const productsData: DetailedProduct[] = [
       "Трансфер факторы — это молекулы-посредники, которые переносят иммунную информацию незрелым клеткам, обучая их и помогая 'настроить' иммунную систему для слаженной работы.",
     uniqueFeatures: ["Первый продукт линии 4Life", "Идеален для знакомства с технологией"],
     categories: ["Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80",
+        alt: "Капсулы иммунитета",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&auto=format&fit=crop&q=80",
+        alt: "Молозиво — источник трансфер факторов",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Научные исследования",
+      },
+    ],
   },
-  // 2. TF Tri-Factor
   {
     id: "tf-trifactor",
     name: "4Life Трансфер Фактор Трай-Фактор",
@@ -90,8 +121,30 @@ export const productsData: DetailedProduct[] = [
       "Эксклюзивность формулы защищена патентами США (№ 6 468 534 и № 6 866 868), которые охватывают процесс экстракции и соединения трансфер факторов из двух источников.",
     uniqueFeatures: ["Наивысшая концентрация ТФ", "Двойной источник", "Основа для целевых продуктов"],
     categories: ["Иммунитет", "Защита клеток"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Лаборатория 4Life",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&auto=format&fit=crop&q=80",
+        alt: "Иммунные клетки",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80",
+        alt: "Научные исследования",
+      },
+    ],
   },
-  // 3. TF Plus
   {
     id: "tf-plus",
     name: "4Life Трансфер Фактор Плюс",
@@ -117,8 +170,30 @@ export const productsData: DetailedProduct[] = [
       "Клинически изучено: формула способствует защите иммунной системы, повышая количество защитных антител IgA в слюне на 73% у 100% участников исследования.",
     uniqueFeatures: ["Фирменная смесь 'Кордивант'", "Адаптогенные грибы", "Клинически подтвержденный эффект"],
     categories: ["Иммунитет", "Баланс и анти-стресс"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&auto=format&fit=crop&q=80",
+        alt: "Здоровье и иммунитет",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Грибы шиитаке",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80",
+        alt: "Капсулы",
+      },
+    ],
   },
-  // 4. RioVida Burst
   {
     id: "riovida-burst",
     name: "4Life РиоВида Бёрст",
@@ -130,7 +205,8 @@ export const productsData: DetailedProduct[] = [
     servings: 15,
     mainSupport: ["Иммунная система", "Антиоксидантная поддержка"],
     secondarySupport: ["Мозговая функция", "Сердечная функция", "Энергия"],
-    howToUse: "Взрослым принимать по 1 пакету в день во время еды. Продолжительность приёма 1 месяц. Для достижения максимального эффекта рекомендуется регулярное применение курсами по 3-6 месяцев. Можно употреблять как самостоятельно, так и добавлять в йогурты, смузи или другие напитки. Не требует хранения в холодильнике, что делает продукт идеальным спутником в путешествиях, на работе или в спортзале.",
+    howToUse:
+      "Взрослым принимать по 1 пакету в день во время еды. Продолжительность приёма 1 месяц. Для достижения максимального эффекта рекомендуется регулярное применение курсами по 3-6 месяцев. Можно употреблять как самостоятельно, так и добавлять в йогурты, смузи или другие напитки. Не требует хранения в холодильнике, что делает продукт идеальным спутником в путешествиях, на работе или в спортзале.",
     composition:
       "Вода очищенная, концентрированные соки (яблочный, виноградный, черничный, гранатовый, бузины черной), 4Life Трай-Фактор формула (концентрат трансфер факторов из коровьего молозива и желтка куриного яйца), порошок ягод асаи (Euterpe oleracea), аскорбиновая кислота (витамин C), монолаурин (из кокосового масла), натуральные ароматизаторы, пектин (загуститель), лимонная кислота (регулятор кислотности), стевиозид (натуральный подсластитель).",
     keyIngredients: ["4Life Трай-Фактор", "Витамин C", "Смесь суперфруктов"],
@@ -148,10 +224,37 @@ export const productsData: DetailedProduct[] = [
     ],
     scientificEvidence:
       "Независимые исследования, проведенные в аккредитованных лабораториях, показали, что 4Life Трай-Фактор формула способна усиливать активность естественных клеток-киллеров (NK-клеток) до 283%. NK-клетки являются ключевым компонентом врожденного иммунитета и играют критическую роль в защите организма от вирусов и патогенных микроорганизмов. Кроме того, клинические исследования подтвердили, что регулярное употребление антиоксидантов из ягод асаи, граната и черники снижает уровень окислительного стресса, улучшает липидный профиль крови и поддерживает здоровье сердечно-сосудистой системы. Витамин C в составе продукта усиливает синтез коллагена, поддерживает барьерную функцию кожи и слизистых оболочек, а также повышает биодоступность железа из пищи.",
-    uniqueFeatures: ["Единственное желе в мире с ТФ", "Портативная упаковка", "Антиоксидантный комплекс", "Без искусственных добавок"],
+    uniqueFeatures: [
+      "Единственное желе в мире с ТФ",
+      "Портативная упаковка",
+      "Антиоксидантный комплекс",
+      "Без искусственных добавок",
+    ],
     categories: ["Иммунитет", "Энергия и тонус", "Защита клеток"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&auto=format&fit=crop&q=80",
+        alt: "Ягоды асаи и суперфрукты",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80",
+        alt: "Антиоксиданты",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&auto=format&fit=crop&q=80",
+        alt: "Желе РиоВида",
+      },
+    ],
   },
-  // 5. Pro-TF Chocolate
   {
     id: "protf-chocolate",
     name: "ПРО-ТФ Шоколад",
@@ -179,8 +282,30 @@ export const productsData: DetailedProduct[] = [
       "Исследования Обернского университета подтвердили превосходство ПРО-ТФ над обычным сывороточным протеином в стимуляции мышечного синтеза на 283%.",
     uniqueFeatures: ["Содержит Трансфер Фактор", "Высокогидролизованный белок", "Клинически изучен"],
     categories: ["Спорт и фитнес", "Контроль веса", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Спорт и фитнес",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&auto=format&fit=crop&q=80",
+        alt: "Протеиновый коктейль",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&auto=format&fit=crop&q=80",
+        alt: "Тренировка",
+      },
+    ],
   },
-  // 6. Pro-TF Vanilla
   {
     id: "protf-vanilla",
     name: "ПРО-ТФ Ванильный Крем",
@@ -208,8 +333,30 @@ export const productsData: DetailedProduct[] = [
       "Исследования Обернского университета подтвердили превосходство ПРО-ТФ над обычным сывороточным протеином в стимуляции мышечного синтеза на 283%.",
     uniqueFeatures: ["Содержит Трансфер Фактор", "Изысканный вкус", "Клинически изучен"],
     categories: ["Спорт и фитнес", "Контроль веса", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&auto=format&fit=crop&q=80",
+        alt: "Ванильный протеин",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Спорт и фитнес",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&auto=format&fit=crop&q=80",
+        alt: "Тренировка",
+      },
+    ],
   },
-  // 7. Burn
   {
     id: "burn",
     name: "4LifeTransform Бёрн",
@@ -236,8 +383,30 @@ export const productsData: DetailedProduct[] = [
       "Содержит научно изученные термогенные компоненты, включая синефрин и цитрусовые флавоноиды, которые способствуют ускорению метаболизма.",
     uniqueFeatures: ["Фирменная термогенная смесь", "Без перевозбуждения ЦНС", "Усиливает эффект тренировок"],
     categories: ["Контроль веса", "Энергия и тонус", "Спорт и фитнес"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=800&auto=format&fit=crop&q=80",
+        alt: "Термогенез и сжигание жира",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Фитнес",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Натуральные ингредиенты",
+      },
+    ],
   },
-  // 8. Transform Men
   {
     id: "transform-men",
     name: "4LifeTransform для Мужчин",
@@ -264,8 +433,30 @@ export const productsData: DetailedProduct[] = [
       "Эффективность формулы основана на L-цитруллине для улучшения кровотока, женьшене для сексуальной функции и витамине D для поддержки уровня тестостерона и мышц.",
     uniqueFeatures: ["Целевая поддержка мужского здоровья", "Синергия L-цитруллина и женьшеня", "Витамин D для силы"],
     categories: ["Мужское здоровье", "Энергия и тонус", "Спорт и фитнес"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80",
+        alt: "Мужское здоровье",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Энергия и сила",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&auto=format&fit=crop&q=80",
+        alt: "Витамины и минералы",
+      },
+    ],
   },
-  // 9. Renuvo
   {
     id: "renuvo",
     name: "4Life Трансфер Фактор Ренуво",
@@ -292,8 +483,30 @@ export const productsData: DetailedProduct[] = [
       "Запатентованная формула (патент США № 9 566 305), чей состав и метод действия направлены на поддержку молодой реакции организма на факторы стресса.",
     uniqueFeatures: ["Запатентованный адаптогенный комплекс", "Анти-стресс формула", "Содержит Трай-Фактор"],
     categories: ["Активное долголетие", "Защита клеток", "Баланс и анти-стресс"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80",
+        alt: "Активное долголетие",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Зелёный чай и куркума",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Антиоксиданты",
+      },
+    ],
   },
-  // 10. Cardio
   {
     id: "cardio",
     name: "4Life Трансфер Фактор Кардио",
@@ -320,8 +533,30 @@ export const productsData: DetailedProduct[] = [
       "Эксклюзивность формулы защищена патентом США № 7 815 943. Продукт сочетает трансфер факторы с клинически изученными ингредиентами для здоровья сердца, такими как красный дрожжевой рис и CoQ10.",
     uniqueFeatures: ["Целевой Трансфер Фактор для сердца", "Запатентованный состав", "Комплекс витаминов и минералов"],
     categories: ["Сердце и сосуды", "Защита клеток", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=800&auto=format&fit=crop&q=80",
+        alt: "Здоровье сердца",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&auto=format&fit=crop&q=80",
+        alt: "Коэнзим Q10",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Сердечно-сосудистая система",
+      },
+    ],
   },
-  // 11. GluCoach
   {
     id: "glucoach",
     name: "4Life Трансфер Фактор ГлюКоуч",
@@ -348,8 +583,30 @@ export const productsData: DetailedProduct[] = [
       "Клинические исследования показали, что хром улучшает чувствительность организма к инсулину, а джимнема обыкновенная способствует снижению уровня глюкозы в крови.",
     uniqueFeatures: ["Целевой Трансфер Фактор", "Синергия трав и минералов", "Поддержка эндокринной системы"],
     categories: ["Контроль веса", "Защита клеток", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&auto=format&fit=crop&q=80",
+        alt: "Метаболизм глюкозы",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Растительные экстракты",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80",
+        alt: "Капсулы",
+      },
+    ],
   },
-  // 12. ReCall
   {
     id: "recall",
     name: "4Life Трансфер Фактор Реколл",
@@ -376,8 +633,30 @@ export const productsData: DetailedProduct[] = [
       "Формула основана на синергии Трансфер Факторов с фосфатидилсерином — ключевым компонентом клеточных мембран мозга, и гинкго билоба, чьё положительное влияние на когнитивные функции подтверждено исследованиями.",
     uniqueFeatures: ["Поддержка нейронов", "Синергия для мозга", "Антиоксидантная защита"],
     categories: ["Память и фокус", "Активное долголетие", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&auto=format&fit=crop&q=80",
+        alt: "Мозг и когнитивные функции",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Нейроны",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80",
+        alt: "Научные исследования",
+      },
+    ],
   },
-  // 13. Belle Vie
   {
     id: "bellevie",
     name: "4Life Трансфер Фактор Белл Ви",
@@ -404,8 +683,30 @@ export const productsData: DetailedProduct[] = [
       "Формула объединяет Трансфер Факторы с фитоэстрогенами (растительными аналогами эстрогена) и индолами, которые поддерживают здоровый рост клеток и помогают организму в процессах детоксикации.",
     uniqueFeatures: ["Целевая поддержка женщин", "Гормональный баланс", "Комплекс фитоэстрогенов"],
     categories: ["Женское здоровье", "Детокс и очищение"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Женское здоровье",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Фитоэстрогены",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&auto=format&fit=crop&q=80",
+        alt: "Антиоксиданты",
+      },
+    ],
   },
-  // 14. Energy Go Stix
   {
     id: "energy-go-stix",
     name: "Энерджи Гоу Стикс",
@@ -432,8 +733,30 @@ export const productsData: DetailedProduct[] = [
       "Формула использует изомальтулозу — функциональный сахар, который медленнее усваивается, обеспечивая стабильный уровень энергии без резких скачков глюкозы в крови.",
     uniqueFeatures: ["Энергия без спада", "Природные стимуляторы", "Поддержка иммунитета"],
     categories: ["Энергия и тонус", "Спорт и фитнес", "Память и фокус"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&auto=format&fit=crop&q=80",
+        alt: "Энергия и активность",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Мате и гуарана",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&auto=format&fit=crop&q=80",
+        alt: "Активный образ жизни",
+      },
+    ],
   },
-  // 15. Super Detox
   {
     id: "super-detox",
     name: "Супер Детокс",
@@ -460,8 +783,30 @@ export const productsData: DetailedProduct[] = [
       "Формула содержит клинически изученный силимарин из расторопши, который показал гепатопротекторные свойства, и сульфорафан из брокколи, активирующий ферменты детоксикации.",
     uniqueFeatures: ["Синергия 5 трав для печени", "Без Трансфер Факторов", "Целенаправленное действие"],
     categories: ["Детокс и очищение", "Пищеварение"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&auto=format&fit=crop&q=80",
+        alt: "Детокс и очищение",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+        alt: "Расторопша и артишок",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Здоровье печени",
+      },
+    ],
   },
-  // 16. Pre/o Biotics
   {
     id: "pre-o-biotics",
     name: "Пре/о Биотики",
@@ -489,8 +834,30 @@ export const productsData: DetailedProduct[] = [
       "Университетское исследование in vitro показало, что Трай-Фактор Формула обладает пребиотическим действием, усиливая рост полезных пробиотиков на 868%.",
     uniqueFeatures: ["Единственный синбиотик с ТФ", "Технология микрошариков", "Университетски протестирован"],
     categories: ["Пищеварение", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&auto=format&fit=crop&q=80",
+        alt: "Пробиотики и пребиотики",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&auto=format&fit=crop&q=80",
+        alt: "Здоровье кишечника",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80",
+        alt: "Микробиом",
+      },
+    ],
   },
-  // 17. Collagen
   {
     id: "collagen",
     name: "4Life Трансфер Фактор Коллаген",
@@ -520,5 +887,28 @@ export const productsData: DetailedProduct[] = [
       "Клинически изученные ингредиенты",
     ],
     categories: ["Красота и уход", "Активное долголетие", "Иммунитет"],
+    gallery: [
+      {
+        type: "video",
+        src: "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&auto=format&fit=crop&q=80",
+        alt: "Видео о продукте",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&auto=format&fit=crop&q=80",
+        alt: "Красота и уход за кожей",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
+        alt: "Коллаген и молодость",
+      },
+      {
+        type: "image",
+        src: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&auto=format&fit=crop&q=80",
+        alt: "Витамины красоты",
+      },
+    ],
   },
 ];

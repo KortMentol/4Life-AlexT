@@ -1,114 +1,136 @@
 /**
- * @module src/components/sections/FinalCTASection/FinalCTASection.tsx
- * @description Awwwards-уровень финальная CTA секция с параллакс фоном в sci-fi стиле будущего.
- * Использует ParallaxSection с фоновым изображением и центрированным контентом.
- * @author Kort
- * @version 1.0.0
- * @usage
- * 1. src/pages/HomePage.tsx - Финальная секция 5 после PartnershipSection для призыва к действию
- * @example
- * <FinalCTASection />
+ * @module FinalCTASection
+ * @description Awwwards 2026 — Final CTA with stats, immersive parallax, tier-aware.
+ * @version 2.0.0
  */
 
-import { AuroraText } from "@/components/magicui/aurora-text";
 import { Button, ParallaxSection } from "@/components/ui";
+import { usePerformanceTier } from "@/hooks";
 import { Icons } from "@/utils/icons";
-import React from "react";
+import { motion, useInView } from "framer-motion";
+import React, { useRef } from "react";
 
-// Импорт фонового изображения
 import bg5Img from "@/assets/images/backgrounds/HomePage/5.jpg";
 
-// Проверка на мобильное устройство (модульная константа — не меняется)
-const IS_MOBILE = typeof window !== "undefined" && window.innerWidth < 768;
+const stats = [
+  { value: "50+", label: "стран мира" },
+  { value: "25+", label: "лет науки" },
+  { value: "283%", label: "рост NK-клеток" },
+];
 
 const FinalCTASection: React.FC = () => {
+  const tier = usePerformanceTier();
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-15%" });
+
+  const staggerDelay = tier === "low" ? 0 : 0.1;
+
   return (
     <ParallaxSection
       backgroundImage={bg5Img}
       altText="Готовы сделать первый шаг к здоровью"
-      height="h-[120vh]"
-      contentClasses="flex flex-col items-center justify-center text-center py-24"
-      imageBrightness="brightness-[.4] dark:brightness-[.3]"
+      height="auto"
+      contentClasses="flex flex-col items-center justify-center text-center py-20 md:py-28"
+      imageBrightness="brightness-[.35] dark:brightness-[.25]"
+      edgeFade={{ top: 160 }}
     >
-      <div className="container max-w-7xl mx-auto px-6 text-center">
-        <div className="max-w-4xl mx-auto">
-          {/* Декоративная линия */}
-          <div className="flex justify-center mb-8">
-            <div
-              className="h-1.5 w-[120px] rounded-full shadow-sm"
-              style={{
-                background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
-                // Убираем тяжелые тени на мобильных
-                boxShadow: IS_MOBILE ? "none" : "0 0 20px rgba(14, 165, 233, 0.4)",
-              }}
-            ></div>
-          </div>
+      <div ref={ref} className="container max-w-5xl mx-auto px-6">
+        {/* Stats row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="flex justify-center gap-8 md:gap-16 mb-12"
+        >
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * staggerDelay, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center gap-1"
+            >
+              <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                {stat.value}
+              </span>
+              <span className="text-xs md:text-sm text-white/50 uppercase tracking-wider font-medium">
+                {stat.label}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
 
-          {/* Заголовок */}
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-            <span className="block mb-2">Готовы сделать</span>
-            <AuroraText colors={["#0ea5e9", "#FFFFFF", "#06b6d4", "#38BDF8"]} speed={1.4}>
-              первый шаг?
-            </AuroraText>
-          </h2>
+        {/* Divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={isInView ? { scaleX: 1 } : {}}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="h-px w-32 mx-auto mb-12 origin-center"
+          style={{ background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)" }}
+        />
 
-          {/* Подзаголовок */}
-          <h3
-            className="text-xl md:text-2xl font-medium mb-8"
-            style={{
-              background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
-              backgroundSize: "200% 100%",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              // Отключаем анимацию и эффекты на мобильных
-              animation: IS_MOBILE ? "none" : "gradient-shift 6s ease-in-out infinite",
-              textShadow: IS_MOBILE ? "none" : "0 0 20px rgba(14, 165, 233, 0.3)",
-              filter: IS_MOBILE ? "none" : "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
-            }}
+        {/* Heading */}
+        <motion.h2
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-tight mb-6 tracking-tight"
+        >
+          Готовы сделать{" "}
+          <span className="font-semibold bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-400 bg-clip-text text-transparent">
+            первый шаг?
+          </span>
+        </motion.h2>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="text-lg md:text-xl text-white/70 mb-10 leading-relaxed max-w-2xl mx-auto font-light"
+        >
+          Получите персональную консультацию. Я помогу подобрать продукты под ваши цели и объясню как они работают — без
+          давления и обязательств.
+        </motion.p>
+
+        {/* CTA buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row justify-center gap-4 items-center"
+        >
+          <Button
+            to="/contact"
+            variant="primary"
+            size="lg"
+            className="from-cyan-500 to-blue-600 shadow-2xl shadow-cyan-500/20 rounded-full px-8"
+            icon={<Icons.MessageCircle className="w-5 h-5" />}
           >
-            Ваше преображение начинается здесь
-          </h3>
+            Получить консультацию
+          </Button>
 
-          {/* Основной текст */}
-          <p className="text-lg md:text-xl text-white/90 mb-12 leading-relaxed max-w-3xl mx-auto">
-            Получите персональную консультацию, и я помогу вам понять, как продукты 4Life могут стать частью вашей
-            истории успеха, подобрав оптимальные решения и объяснив все нюансы.
-          </p>
+          <Button
+            to="/products"
+            variant="secondary"
+            size="lg"
+            className="bg-white/10 border-white/25 backdrop-blur-sm rounded-full px-8 hover:bg-white/20"
+            icon={<Icons.ArrowRight className="w-5 h-5" />}
+          >
+            Изучить продукты
+          </Button>
+        </motion.div>
 
-          {/* Кнопки CTA */}
-          <div className="flex flex-col sm:flex-row justify-center gap-6 items-center">
-            <Button
-              to="/contact"
-              variant="primary"
-              size="lg"
-              className="from-cyan-600 to-blue-600 shadow-xl !px-4 sm:!px-8"
-              icon={<Icons.MessageCircle className="w-5 h-5" />}
-            >
-              Получить консультацию
-            </Button>
-
-            <Button
-              to="/products"
-              variant="secondary"
-              size="lg"
-              className="bg-white/10 border-white/30 backdrop-blur-sm !px-[2.5rem] sm:!px-8"
-              icon={<Icons.ArrowRight className="w-5 h-5" />}
-            >
-              Изучить продукты
-            </Button>
-          </div>
-
-          {/* Дополнительная информация */}
-          <div className="mt-12 flex flex-col md:flex-row items-center justify-center text-white/70 gap-3 md:gap-0">
-            <div className="flex items-center justify-center w-12 h-12 md:w-auto md:h-auto rounded-full bg-cyan-500/10 md:bg-transparent border border-cyan-400/30 md:border-0 backdrop-blur-sm md:backdrop-blur-0">
-              <Icons.Shield className="w-5 h-5 md:mr-2 text-cyan-300" />
-            </div>
-            <span className="text-sm md:text-base text-center md:text-left">
-              Присоединяйтесь к миллионам людей в 50+ странах мира
-            </span>
-          </div>
-        </div>
+        {/* Trust line */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-10 flex items-center justify-center gap-2 text-white/40 text-sm"
+        >
+          <Icons.Shield className="w-4 h-4 text-cyan-400/60 flex-shrink-0" />
+          <span>Консультация бесплатна и ни к чему не обязывает</span>
+        </motion.div>
       </div>
     </ParallaxSection>
   );

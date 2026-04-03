@@ -15,12 +15,6 @@ function getHeader(): HTMLElement | null {
   return document.querySelector(".header-premium");
 }
 
-function getLiveY(el: HTMLElement): number {
-  const t = getComputedStyle(el).transform;
-  if (!t || t === "none") return 0;
-  return new DOMMatrix(t).m42;
-}
-
 export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const isMobile = useIsMobile();
   const targetYRef = useRef(0);
@@ -32,11 +26,13 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     const lerp = isMobile ? LERP_TOUCH : LERP_DESKTOP;
     let prevScroll = window.scrollY;
 
-    const h = getHeader();
-    if (h) {
-      displayYRef.current = getLiveY(h);
-      targetYRef.current = displayYRef.current;
-    }
+    // Не читаем getComputedStyle — просто стартуем с 0
+    // getLiveY вызывал forced layout при каждом mount
+    displayYRef.current = 0;
+    targetYRef.current = 0;
+
+    // Кэшируем header один раз — не вызываем querySelector каждый кадр
+    const header = getHeader();
 
     const unsub = rafLoop.subscribe((scroll) => {
       const delta = scroll - prevScroll;
@@ -51,7 +47,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       const diff = targetYRef.current - displayYRef.current;
       if (Math.abs(diff) > 0.1) {
         displayYRef.current += diff * lerp;
-        const header = getHeader();
+        // Кэшируем header ref — не вызываем querySelector каждый кадр
         if (header) {
           header.style.transition = "none";
           header.style.transform = `translateY(${displayYRef.current}px)`;

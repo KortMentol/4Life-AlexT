@@ -1,15 +1,12 @@
 // === Файл: src/components/ui/ParallaxSection.tsx ===
 /**
- * Параллакс секция с двумя стратегиями рендеринга:
+ * Параллакс секция с двумя стратегиями рендеринга.
  *
- * ДЕСКТОП (hover:hover pointer:fine):
- *   Паттерн Oliviera Larose — position:fixed + Framer Motion useScroll/useTransform
- *   Полный эффект глубины, плавный параллакс.
- *
- * ТАЧ (touch device):
- *   useParallaxLenis — прямой DOM transform в Lenis RAF callback.
- *   Compositor-only, 60fps, тот же визуальный эффект.
- *   position:absolute вместо fixed — нет лишнего GPU слоя.
+ * ВАРИАНТ 2 — mask-image для бесшовных переходов:
+ * Проп `edgeFade` добавляет CSS mask-image на секцию.
+ * Верх/низ фото растворяются в прозрачность автоматически,
+ * без привязки к цвету соседней секции. Работает в обеих темах.
+ * Compositor-only, 0 JS, 0 FPS cost.
  */
 
 import { useParallaxLenis } from "@/hooks/useParallaxLenis";
@@ -31,10 +28,31 @@ export interface ParallaxSectionProps {
   clipPath?: string;
   skipPreload?: boolean;
   lazyLoad?: boolean;
+  /**
+   * Растворяет края секции в прозрачность через CSS mask-image.
+   * top/bottom — высота зоны растворения в px (default 120).
+   * Не зависит от цвета соседних секций — работает везде.
+   */
+  edgeFade?: { top?: number; bottom?: number };
 }
 
-// Определяем тач один раз на уровне модуля — не меняется
 const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+
+/** Строит CSS mask-image для растворения краёв */
+function buildMask(top: number, bottom: number): string {
+  const t = top > 0 ? `${top}px` : "0px";
+  const b = bottom > 0 ? `${bottom}px` : "0px";
+  if (top > 0 && bottom > 0) {
+    return `linear-gradient(to bottom, transparent 0px, black ${t}, black calc(100% - ${b}), transparent 100%)`;
+  }
+  if (top > 0) {
+    return `linear-gradient(to bottom, transparent 0px, black ${t})`;
+  }
+  if (bottom > 0) {
+    return `linear-gradient(to top, transparent 0px, black ${b})`;
+  }
+  return "none";
+}
 
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
@@ -50,13 +68,18 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   clipPath = "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)",
   skipPreload = false,
   lazyLoad = true,
+  edgeFade,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const parallaxBgRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
+  const [isNearViewport, setIsNearViewport] = useState(true);
   const tier = usePerformanceTier();
+
+  // mask-image строка — вычисляем один раз
+  const maskStyle = edgeFade ? buildMask(edgeFade.top ?? 0, edgeFade.bottom ?? 0) : undefined;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -73,10 +96,18 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
   }, []);
 
-  // Сила параллакса в px — насколько фон смещается относительно контента
-  // Больше = сильнее эффект глубины. На FPS не влияет — только математика.
-  // Тач: 300px high / 180px medium — заметный эффект погружения
-  // Десктоп: 400px high / 200px medium — сильное ощущение глубины
+  useEffect(() => {
+    if (IS_TOUCH) return;
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((e) => setIsNearViewport(e.isIntersecting)),
+      { threshold: 0, rootMargin: "300px 0px 300px 0px" },
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   const finalStrength = IS_TOUCH
     ? tier === "low"
       ? 0
@@ -89,13 +120,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
         ? 200
         : 400;
 
-  // --- ТАЧ: параллакс через RAF loop ---
   useParallaxLenis(parallaxBgRef, containerRef, {
     strength: IS_TOUCH ? finalStrength : 0,
     disabled: !IS_TOUCH || tier === "low",
   });
 
-  // --- ДЕСКТОП: Framer Motion useScroll (паттерн Oliviera) ---
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
@@ -118,25 +147,18 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     }
   }, [finalBackgroundImage, skipPreload]);
 
-  // Intersection Observer для паузы/воспроизведения видео
   useEffect(() => {
     const video = videoRef.current;
     const container = containerRef.current;
     if (!video || !container || !backgroundVideo) return;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) video.play().catch(() => {});
+          else video.pause();
+        }),
       { threshold: 0, rootMargin: "300px 0px 300px 0px" },
     );
-
     observer.observe(container);
     return () => {
       observer.disconnect();
@@ -144,24 +166,25 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
   }, [backgroundVideo, inView]);
 
-  // ТАЧ: position:absolute + useParallaxLenis двигает bgRef напрямую
+  // Общий стиль секции с mask-image
+  const sectionStyle: React.CSSProperties = {
+    clipPath,
+    WebkitClipPath: clipPath,
+    ...(maskStyle
+      ? {
+          maskImage: maskStyle,
+          WebkitMaskImage: maskStyle,
+        }
+      : {}),
+  };
+
   if (IS_TOUCH) {
     return (
-      <section
-        ref={containerRef}
-        className={`relative overflow-hidden ${height} ${blendMode}`}
-        style={{ clipPath, WebkitClipPath: clipPath }}
-      >
+      <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
         <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
-
-        {/* Фон: position:absolute, увеличен чтобы параллакс не обнажал края */}
         <div
           className="absolute left-0 w-full -z-10"
-          style={{
-            top: `-${finalStrength / 2}px`,
-            height: `calc(100% + ${finalStrength}px)`,
-            overflow: "hidden",
-          }}
+          style={{ top: `-${finalStrength / 2}px`, height: `calc(100% + ${finalStrength}px)`, overflow: "hidden" }}
         >
           <div
             ref={parallaxBgRef}
@@ -204,31 +227,25 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     );
   }
 
-  // ДЕСКТОП: паттерн Oliviera — position:fixed + Framer Motion
   return (
-    <section
-      ref={containerRef}
-      className={`relative overflow-hidden ${height} ${blendMode}`}
-      style={{ clipPath, WebkitClipPath: clipPath }}
-    >
+    <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
       <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
-
       <div
         className="-z-10"
         style={{
-          position: "fixed",
+          position: isNearViewport ? "fixed" : "absolute",
           left: 0,
           width: "100%",
-          height: `calc(100vh + ${finalStrength}px)`,
-          top: `-${finalStrength / 2}px`,
+          height: isNearViewport ? `calc(100vh + ${finalStrength}px)` : "100%",
+          top: isNearViewport ? `-${finalStrength / 2}px` : 0,
         }}
       >
         <motion.div
           ref={parallaxBgRef}
           className={`relative w-full h-full ${imageBrightness}`}
           style={{
-            y: desktopY,
-            willChange: tier === "low" ? "auto" : "transform",
+            y: isNearViewport ? desktopY : 0,
+            willChange: isNearViewport && tier !== "low" ? "transform" : "auto",
             backfaceVisibility: "hidden",
           }}
         >

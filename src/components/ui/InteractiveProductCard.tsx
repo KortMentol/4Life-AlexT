@@ -1,6 +1,14 @@
-import { motion } from "framer-motion";
+/**
+ * @module InteractiveProductCard
+ * @description Awwwards 2026 — Premium product card for HomePage featured section.
+ * Magnetic hover (medium+high desktop), tier-aware, 60fps.
+ * @version 3.0.0
+ */
+
+import { usePerformanceTier } from "@/hooks";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import React, { memo } from "react";
+import React, { memo, useRef } from "react";
 import { Link } from "react-router-dom";
 
 interface ProductData {
@@ -17,91 +25,121 @@ interface InteractiveProductCardProps {
   isHoverEffectDisabled?: boolean;
 }
 
-/**
- * @module components/ui/InteractiveProductCard
- * @description Премиум карточка продукта Immersive Garden Level: 60 FPS стабильно.
- * Tier-aware анимации, адаптивная типографика, оптимизация под устройства.
- *
- * @author Kort
- * @version 2.0.0 - Zero Frame Drops
- *
- * @param {ProductData} product - Объект с данными о продукте (id, title, description, image, link).
- * @param {boolean} [opaque=false] - Если `true`, фон карточки будет непрозрачным. По умолчанию - полупрозрачный.
- * @param {boolean} [isHoverEffectDisabled=false] - Если `true`, отключает основной 3D-эффект при наведении.
- *
- * @see motion - Компонент из `framer-motion` для анимаций.
- * @see Link - Компонент из `react-router-dom` для навигации.
- * @see memo - HOC из React для мемоизации компонента.
- *
- * @usage
- * Используется для эффектного представления продуктов.
- *
- * 1. **На главной странице (`src/pages/HomePage.tsx`):**
- *    - Для отображения избранных товаров.
- * 2. **В карусели (`src/components/ui/KineticProductCarousel.tsx`):**
- *    - Как элемент кинетической карусели продуктов.
- *
- * @example
- * const product = {
- *   id: 1,
- *   title: 'Название продукта',
- *   description: 'Краткое описание продукта...',
- *   image: '/path/to/image.jpg',
- *   link: '/products/1'
- * };
- *
- * <InteractiveProductCard product={product} />
- */
+const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+
+const MAGNETIC_SPRING = {
+  stiffness: 120,
+  damping: 20,
+  mass: 0.6,
+  restDelta: 0.001,
+  restSpeed: 0.001,
+};
+
 const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
   product,
   opaque = false,
   isHoverEffectDisabled = false,
 }) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  
+  const tier = usePerformanceTier();
+  const ref = useRef<HTMLDivElement>(null);
+
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const x = useSpring(rawX, MAGNETIC_SPRING);
+  const y = useSpring(rawY, MAGNETIC_SPRING);
+
+  const magnetEnabled = !isHoverEffectDisabled && !IS_TOUCH && tier !== "low";
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!magnetEnabled || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    rawX.set((e.clientX - (rect.left + rect.width / 2)) * 0.08);
+    rawY.set((e.clientY - (rect.top + rect.height / 2)) * 0.08);
+  };
+
+  const handleMouseLeave = () => {
+    rawX.set(0);
+    rawY.set(0);
+  };
+
   return (
     <motion.div
-      className="h-full"
-      whileHover={isHoverEffectDisabled || isMobile ? {} : { y: -4, scale: 1.01 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={{
-        contain: 'layout style paint',
+        x: magnetEnabled ? x : 0,
+        y: magnetEnabled ? y : 0,
+        isolation: "isolate",
       }}
+      className="h-full"
     >
-      <div
-        className={`relative z-10 ${isMobile ? 'h-[380px]' : 'h-[420px]'} ${
-          opaque ? "bg-white dark:bg-gray-900" : "bg-white/80 dark:bg-gray-900/80"
-        } rounded-none lg:rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/50 ${
-          isMobile ? '' : 'hover:border-white/40 dark:hover:border-gray-600/70 hover:shadow-2xl'
-        } transition-all duration-200 flex flex-col`}
+      <Link
+        to={product.link}
+        className="group block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-2xl"
+        style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <Link to={product.link}>
-          <img
-            src={product.image}
-            alt={product.title}
-            loading="lazy"
-            className={`w-full ${isMobile ? 'h-44' : 'h-48'} object-cover transition-transform duration-300 ${
-              isMobile ? '' : 'hover:scale-105'
-            }`}
-          />
-        </Link>
-        <div className={`${isMobile ? 'p-4' : 'p-6'} flex flex-col flex-grow`}>
-          <h3 className={`font-bold ${isMobile ? 'text-lg' : 'text-xl'} text-gray-800 dark:text-white mb-2 leading-tight`}>{product.title}</h3>
-          <p className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-xs' : 'text-sm'} mb-4 line-clamp-3 leading-relaxed`}>{product.description}</p>
-          <Link
-            to={product.link}
-            className={`inline-flex items-center text-primary font-semibold transition-colors group ${isMobile ? 'text-xs' : 'text-sm'} mt-auto self-start ${
-              isMobile ? '' : 'hover:text-blue-700'
-            }`}
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            <span>В корзину</span>
-            <ArrowRight className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} ml-1 transition-transform duration-200 ${
-              isMobile ? '' : 'group-hover:translate-x-1'
-            }`} />
-          </Link>
+        <div
+          className={`relative h-full rounded-2xl overflow-hidden transition-all duration-500 ${
+            opaque ? "bg-white dark:bg-gray-900" : "bg-white/90 dark:bg-gray-900/80"
+          } border border-white/40 dark:border-white/8 ${
+            !IS_TOUCH ? "hover:border-cyan-400/30 dark:hover:border-cyan-400/20" : ""
+          }`}
+          style={{
+            contain: "layout paint",
+            boxShadow: "0 4px 24px -8px rgba(0,0,0,0.12)",
+          }}
+        >
+          {/* Image container */}
+          <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+            <img
+              src={product.image}
+              alt={product.title}
+              loading="lazy"
+              decoding="async"
+              className={`w-full h-full object-contain p-4 transition-transform duration-700 ease-out ${
+                !IS_TOUCH ? "group-hover:scale-105" : ""
+              }`}
+            />
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+          </div>
+
+          {/* Content */}
+          <div className="p-5 flex flex-col gap-2">
+            <h3 className="font-semibold text-base leading-snug text-gray-900 dark:text-white line-clamp-2">
+              {product.title}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
+
+            {/* CTA */}
+            <div
+              className={`mt-3 flex items-center gap-1.5 text-sm font-semibold text-cyan-600 dark:text-cyan-400 transition-all duration-200 ${
+                !IS_TOUCH ? "group-hover:gap-2.5" : ""
+              }`}
+            >
+              <span>Подробнее</span>
+              <ArrowRight
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  !IS_TOUCH ? "group-hover:translate-x-0.5" : ""
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* High tier: subtle glow on hover */}
+          {tier === "high" && !IS_TOUCH && (
+            <div
+              className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              style={{
+                background: "radial-gradient(circle at 50% 0%, rgba(6,182,212,0.06) 0%, transparent 60%)",
+              }}
+            />
+          )}
         </div>
-      </div>
+      </Link>
     </motion.div>
   );
 };

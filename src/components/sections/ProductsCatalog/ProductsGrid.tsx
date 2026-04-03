@@ -1,7 +1,22 @@
+/**
+ * @module ProductsGrid
+ * @description Three distinct grid layouts — Tibico-exact structure
+ *
+ * Grid 4 — "Обзор": 4 col, image + name only. Быстрый взгляд.
+ * Grid 3 — "Каталог": 3 col, image + name + description.
+ * Grid 2 — "Детали": 2 col, horizontal (image left ~40%, text right on page bg).
+ *
+ * Tibico structure:
+ * - Image = standalone rounded block (no card wrapper bg)
+ * - Text = below image, on page background (no card bg)
+ * - Icon = circle inset into bottom-right corner, bg = page bg color
+ * - Hover: image swaps bottom-to-top via CSS (.product-card-tibico)
+ */
+
 import { DetailedProduct } from "@/data/productsData";
-import { usePerformanceTier, useTheme } from "@/hooks";
-import { Icons } from "@/utils/icons";
+import { useTheme } from "@/hooks";
 import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 import React from "react";
 
 interface ProductsGridProps {
@@ -13,6 +28,203 @@ interface ProductsGridProps {
   onProductClick: (product: DetailedProduct) => void;
 }
 
+// ─── Tibico icon: circle inset into bottom-right corner ──────────────────────
+// bg of outer wrapper = page bg → creates "cut corner" illusion
+// bg of inner circle = slightly elevated surface
+const TibicoIcon: React.FC<{ isDark: boolean }> = ({ isDark }) => (
+  <div
+    className="absolute bottom-0 right-0 z-10 w-14 h-14 rounded-tl-3xl flex items-center justify-center"
+    style={{ backgroundColor: isDark ? "#020617" : "#ffffff" }}
+  >
+    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isDark ? "bg-slate-800" : "bg-gray-100"}`}>
+      <svg
+        className={`w-4 h-4 ${isDark ? "text-slate-400" : "text-gray-500"}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        viewBox="0 0 24 24"
+      >
+        <line x1="5" y1="8" x2="19" y2="8" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <line x1="5" y1="16" x2="19" y2="16" />
+      </svg>
+    </div>
+  </div>
+);
+
+// ─── Grid 3 & 4: Tibico-style card ───────────────────────────────────────────
+// image block standalone + text below on page bg
+const TibicoCard: React.FC<{
+  product: DetailedProduct;
+  isDark: boolean;
+  idx: number;
+  gridMode: 3 | 4;
+  onClick: () => void;
+}> = ({ product, isDark, idx, gridMode, onClick }) => (
+  <div
+    data-product-id={product.id}
+    className="product-card-wrapper product-card-tibico"
+    style={{ "--card-delay": `${Math.min(idx * 30, 350)}ms` } as React.CSSProperties}
+    onClick={onClick}
+  >
+    {/* Image block — rounded, standalone */}
+    <div className={`product-image-container rounded-2xl overflow-hidden ${isDark ? "bg-[#111827]" : "bg-gray-100"}`}>
+      <img
+        src={product.image}
+        alt={product.name}
+        loading="lazy"
+        decoding="async"
+        className="product-image-primary w-full h-full object-contain p-4"
+      />
+      <img
+        src={product.image}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        aria-hidden="true"
+        className="product-image-secondary w-full h-full object-contain p-4"
+      />
+      {/* LP badge */}
+      <div
+        className={`absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+          isDark
+            ? "bg-black/50 text-white/80 border border-white/10"
+            : "bg-white/90 text-gray-700 border border-black/10 shadow-sm"
+        }`}
+      >
+        {product.lp} LP
+      </div>
+      {/* Tibico icon */}
+      <TibicoIcon isDark={isDark} />
+    </div>
+
+    {/* Text — on page background, no card bg */}
+    <div className="pt-3 px-0.5">
+      <div className="flex flex-wrap gap-x-2 mb-1">
+        {product.categories.slice(0, gridMode === 4 ? 1 : 2).map((cat) => (
+          <span
+            key={cat}
+            className={`text-[9px] uppercase tracking-[0.14em] font-semibold ${
+              isDark ? "text-slate-500" : "text-gray-400"
+            }`}
+          >
+            {cat}
+          </span>
+        ))}
+      </div>
+      <h3
+        className={`font-bold leading-snug line-clamp-2 ${
+          gridMode === 3 ? "text-base" : "text-sm min-h-[2.5rem]"
+        } ${isDark ? "text-white" : "text-gray-900"}`}
+      >
+        {product.name}
+      </h3>
+      {gridMode === 3 && (
+        <p
+          className={`text-xs leading-relaxed line-clamp-2 mt-1 mb-[1.5rem] ${isDark ? "text-slate-500" : "text-gray-400"}`}
+        >
+          {product.shortDescription}
+        </p>
+      )}
+    </div>
+  </div>
+);
+
+// ─── Grid 2: Horizontal — image left, text right on page bg ──────────────────
+// Like Tibico list view: image standalone rounded, text beside it on page bg
+const DetailCard: React.FC<{
+  product: DetailedProduct;
+  isDark: boolean;
+  idx: number;
+  onClick: () => void;
+}> = ({ product, isDark, idx, onClick }) => {
+  const qty = product.capsules ? `${product.capsules} капс.` : product.servings ? `${product.servings} порц.` : null;
+
+  return (
+    <div
+      data-product-id={product.id}
+      className="product-card-wrapper product-card-tibico cursor-pointer flex flex-row gap-4 items-start"
+      style={{ "--card-delay": `${Math.min(idx * 35, 400)}ms` } as React.CSSProperties}
+      onClick={onClick}
+    >
+      {/* Image — standalone rounded square, ~40% width */}
+      <div
+        className={`product-image-container rounded-2xl overflow-hidden flex-shrink-0 ${
+          isDark ? "bg-[#111827]" : "bg-gray-100"
+        }`}
+        style={{ width: "42%", aspectRatio: "1/1" }}
+      >
+        <img
+          src={product.image}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          className="product-image-primary w-full h-full object-contain p-4"
+        />
+        <img
+          src={product.image}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+          className="product-image-secondary w-full h-full object-contain p-4"
+        />
+        {/* LP badge */}
+        <div
+          className={`absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+            isDark
+              ? "bg-black/50 text-white/70 border border-white/10"
+              : "bg-white/90 text-gray-600 border border-black/10 shadow-sm"
+          }`}
+        >
+          {product.lp} LP
+        </div>
+        {/* Tibico icon */}
+        <TibicoIcon isDark={isDark} />
+      </div>
+
+      {/* Text — on page background, no card bg */}
+      <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
+        <div className="flex flex-wrap gap-x-2">
+          {product.categories.slice(0, 2).map((cat) => (
+            <span
+              key={cat}
+              className={`text-[9px] uppercase tracking-[0.14em] font-semibold ${
+                isDark ? "text-slate-500" : "text-gray-400"
+              }`}
+            >
+              {cat}
+            </span>
+          ))}
+        </div>
+        <h3 className={`text-sm font-bold leading-snug line-clamp-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+          {product.name}
+        </h3>
+        <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? "text-slate-500" : "text-gray-400"}`}>
+          {product.shortDescription}
+        </p>
+        <div className="flex flex-wrap gap-1">
+          {product.mainSupport.slice(0, 2).map((s) => (
+            <span
+              key={s}
+              className={`px-2 py-0.5 text-[10px] rounded-lg font-medium ${
+                isDark
+                  ? "bg-white/5 text-slate-400 border border-white/8"
+                  : "bg-gray-100 text-gray-500 border border-gray-200"
+              }`}
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+        {qty && <span className={`text-[10px] ${isDark ? "text-slate-600" : "text-gray-400"}`}>{qty}</span>}
+      </div>
+    </div>
+  );
+};
+
+// ─── Main Grid ────────────────────────────────────────────────────────────────
 const ProductsGrid: React.FC<ProductsGridProps> = ({
   products,
   gridMode,
@@ -21,45 +233,14 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   onClearFilters,
   onProductClick,
 }) => {
-  const tier = usePerformanceTier();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Apple/Awwwards 2026: Масляная физика анимаций
-  const timings = {
-    low: { layout: 0, fade: 0.3, scale: 0.3, stagger: 0 },
-    medium: { layout: 0.65, fade: 0.4, scale: 0.4, stagger: 0.04 },
-    high: { layout: 0.75, fade: 0.45, scale: 0.45, stagger: 0.05 },
-  }[tier];
-
-  // Apple's signature easing curves
-  const layoutEasing = [0.43, 0.13, 0.23, 0.96]; // Плавное перемещение (Magic Move)
-  const fadeEasing = [0.25, 0.46, 0.45, 0.94]; // Мягкое появление/исчезновение
-  const shouldAnimateLayout = tier === 'high';
-
-  const getGridConfig = () => {
-    // Awwwards-style: фиксированные колонки, карточки НЕ растягиваются
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const isTablet = typeof window !== 'undefined' && window.innerWidth < 1024;
-    
-    if (isMobile) return { columns: 1, maxWidth: '100%' };
-    
-    if (gridMode === 2) {
-      return { columns: 2, maxWidth: isTablet ? '100%' : '600px' };
-    }
-    if (gridMode === 3) {
-      return { columns: isTablet ? 2 : 3, maxWidth: '420px' };
-    }
-    return { columns: isTablet ? 3 : 4, maxWidth: '350px' };
-  };
-
-  const gridConfig = getGridConfig();
-
   return (
     <>
-      {/* МИНИМАЛИСТИЧНЫЙ APPLE-HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 relative z-20">
-        <div className="flex items-center gap-4">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             Коллекция
           </h2>
@@ -75,27 +256,28 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
                 transition={{ duration: 0.2 }}
                 onClick={onClearFilters}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors mt-2 ${
-                  isDark
-                    ? "bg-white/10 text-gray-300 hover:bg-white/20"
-                    : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                  isDark ? "bg-white/10 text-gray-300 hover:bg-white/20" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                 }`}
               >
-                <Icons.X className="w-3 h-3" /> Сбросить
+                <X className="w-3 h-3" /> Сбросить
               </motion.button>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Правая часть: Переключатель сетки */}
-        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-          {/* Grid Switcher (2/3/4) */}
-          <div
-            className={`hidden md:flex items-center gap-1 p-1 rounded-xl ${isDark ? "bg-gray-900/80 border border-gray-800" : "bg-gray-200/50"}`}
-          >
-            {[2, 3, 4].map((num) => (
+        {/* Grid switcher */}
+        <div
+          className={`hidden md:flex items-center gap-1 p-1 rounded-xl ${
+            isDark ? "bg-gray-900/80 border border-gray-800" : "bg-gray-100"
+          }`}
+        >
+          {([2, 3, 4] as const).map((num) => {
+            const labels: Record<number, string> = { 2: "Детали", 3: "Каталог", 4: "Обзор" };
+            return (
               <button
                 key={num}
-                onClick={() => setGridMode(num as 2 | 3 | 4)}
+                onClick={() => setGridMode(num)}
+                title={labels[num]}
                 className={`p-2 rounded-lg transition-all duration-200 ${
                   gridMode === num
                     ? isDark
@@ -105,14 +287,13 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
                       ? "text-gray-500 hover:text-gray-300"
                       : "text-gray-500 hover:text-gray-800"
                 }`}
-                aria-label={`Сетка ${num}`}
+                aria-label={labels[num]}
               >
-                {/* Иконки сетки */}
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   {num === 2 && (
                     <>
-                      <rect x="3" y="3" width="8" height="18" rx="1" />
-                      <rect x="13" y="3" width="8" height="18" rx="1" />
+                      <rect x="3" y="3" width="8" height="18" rx="1.5" />
+                      <rect x="13" y="3" width="8" height="18" rx="1.5" />
                     </>
                   )}
                   {num === 3 && (
@@ -132,124 +313,57 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
                   )}
                 </svg>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* СЕТКА КАРТОЧЕК */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${gridConfig.columns}, minmax(0, ${gridConfig.maxWidth}))`,
-          gap: "clamp(1.5rem, 3vw, 2rem)",
-          justifyContent: products.length < gridConfig.columns ? "start" : "center",
-          alignItems: "start",
-          minHeight: gridMode === 2 ? "auto" : "60vh"
-        }}
-        className="relative z-20"
-      >
-        <AnimatePresence mode="popLayout">
-          {products.map((product, idx) => {
-            const layoutDelay = idx * timings.stagger;
+      {/* ── GRID 4: Compact overview ── */}
+      {gridMode === 4 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          {products.map((product, idx) => (
+            <TibicoCard
+              key={product.id}
+              product={product}
+              isDark={isDark}
+              idx={idx}
+              gridMode={4}
+              onClick={() => onProductClick(product)}
+            />
+          ))}
+        </div>
+      )}
 
-            return (
-              // 1. ВНЕШНИЙ СЛОЙ: Только Framer Motion (Layout + Opacity/Scale при появлении)
-              <motion.div
-                layout={shouldAnimateLayout}
-                layoutId={shouldAnimateLayout ? `product-${product.id}` : undefined}
-                key={product.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  transition: {
-                    opacity: { duration: timings.fade, ease: fadeEasing, delay: layoutDelay },
-                    scale: { duration: timings.scale, ease: fadeEasing, delay: layoutDelay },
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  scale: 0.9,
-                  transition: {
-                    opacity: { duration: timings.fade * 0.6, ease: fadeEasing },
-                    scale: { duration: timings.scale * 0.6, ease: fadeEasing },
-                  },
-                }}
-                transition={{
-                  layout: { duration: timings.layout, ease: layoutEasing },
-                }}
-                className="product-card-wrapper"
-                style={{
-                  maxWidth: gridMode === 2 ? '100%' : 'none',
-                  width: gridMode === 2 ? '100%' : 'auto',
-                }}
-              >
-                {/* 2. ВНУТРЕННИЙ СЛОЙ: Только CSS (Ховеры, тени, клики). Никакого JS! */}
-                <div
-                  onClick={() => onProductClick(product)}
-                  className={`product-card-inner cursor-pointer ${
-                    isDark ? "bg-gray-900/50" : "bg-white"
-                  } ${gridMode === 2 ? "md:flex-row" : ""}`}
-                >
-                  {/* APPLE-STYLE IMAGE CONTAINER */}
-                  <div
-                    className={`product-image-container ${gridMode === 2 ? "md:w-2/5" : "w-full"} aspect-[4/5] bg-white ${
-                      gridMode === 2 ? "md:rounded-l-2xl md:rounded-tr-none" : ""
-                    }`}
-                    style={{ flexShrink: 0 }}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="product-image-primary w-full h-full object-contain"
-                    />
-                    <img
-                      src={product.image}
-                      alt={`${product.name} hover`}
-                      loading="lazy"
-                      decoding="async"
-                      className="product-image-secondary w-full h-full object-contain"
-                    />
-                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide z-10 bg-gray-900/90 text-white border border-white/10 shadow-lg">
-                      {product.lp} LP
-                    </div>
-                  </div>
+      {/* ── GRID 3: Catalog ── */}
+      {gridMode === 3 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {products.map((product, idx) => (
+            <TibicoCard
+              key={product.id}
+              product={product}
+              isDark={isDark}
+              idx={idx}
+              gridMode={3}
+              onClick={() => onProductClick(product)}
+            />
+          ))}
+        </div>
+      )}
 
-                  {/* КОНТЕНТ */}
-                  <div className={`p-6 flex flex-col flex-grow ${gridMode === 2 ? "md:w-3/5 justify-center" : ""}`}>
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {product.categories.slice(0, 2).map((cat) => (
-                        <span
-                          key={cat}
-                          className={`text-[10px] uppercase tracking-wider font-bold ${isDark ? "text-gray-500" : "text-gray-400"}`}
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
-                    <h3
-                      className={`font-bold ${gridMode === 2 ? "text-2xl" : "text-xl"} mb-2 leading-snug line-clamp-2 ${isDark ? "text-white" : "text-gray-900"}`}
-                    >
-                      {product.name}
-                    </h3>
-                    <p className={`text-sm line-clamp-2 mb-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                      {product.shortDescription}
-                    </p>
-                    <div
-                      className={`mt-auto flex items-center font-bold text-sm transition-colors ${isDark ? "text-cyan-400 hover:text-cyan-300" : "text-blue-600 hover:text-blue-800"}`}
-                    >
-                      Подробнее <Icons.ArrowRight className="w-4 h-4 ml-1" />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
+      {/* ── GRID 2: Detail horizontal ── */}
+      {gridMode === 2 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+          {products.map((product, idx) => (
+            <DetailCard
+              key={product.id}
+              product={product}
+              isDark={isDark}
+              idx={idx}
+              onClick={() => onProductClick(product)}
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 };

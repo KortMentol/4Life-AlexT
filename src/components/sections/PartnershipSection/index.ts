@@ -1,1 +1,1 @@
-export { default } from './PartnershipSection';
+export { default } from "./PartnershipSection";

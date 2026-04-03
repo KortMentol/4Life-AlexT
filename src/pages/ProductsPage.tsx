@@ -7,11 +7,12 @@
 import { ProductDetailModal } from "@/components/ui";
 import { DetailedProduct, productsData } from "@/data/productsData";
 import { useTheme } from "@/hooks";
+import { lenis } from "@/lib/lenis";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { lenis } from "@/lib/lenis";
+import { useSearchParams } from "react-router-dom";
 
 // Секции
 import ProductsFAQ from "@/components/sections/ProductsCatalog/ProductsFAQ";
@@ -24,18 +25,28 @@ import "@/styles/pages/products-page.css";
 const ProductsPage: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // --- STATE ---
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  // Category synced with URL ?cat=... for browser back/forward support
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<DetailedProduct | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFloatingFilter, setShowFloatingFilter] = useState(false);
-  const [gridMode, setGridMode] = useState<2 | 3 | 4>(4);
+  // Grid mode persisted in localStorage
+  const [gridMode, setGridMode] = useState<2 | 3 | 4>(() => {
+    try {
+      const saved = localStorage.getItem("products-grid-mode");
+      if (saved === "2" || saved === "3" || saved === "4") return Number(saved) as 2 | 3 | 4;
+    } catch {}
+    return 4;
+  });
 
   // --- REFS ---
   const catalogRef = useRef<HTMLDivElement>(null);
   const gridAnchorRef = useRef<HTMLDivElement>(null);
+  const lastClickedCardRef = useRef<string | null>(null);
 
   // --- DATA ---
   const categories = useMemo(() => {
@@ -50,24 +61,39 @@ const ProductsPage: React.FC = () => {
   }, [selectedCategory]);
 
   // --- HANDLERS ---
-  const handleCategoryChange = useCallback((category: string | null) => {
-    if (gridAnchorRef.current) {
-      lenis.scrollTo(gridAnchorRef.current, {
-        offset: -100,
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        force: true,
-        lock: false
-      });
-    }
-    
-    setTimeout(() => {
-      setSelectedCategory(category);
-    }, 150);
-  }, []);
+  const handleCategoryChange = useCallback(
+    (category: string | null) => {
+      if (gridAnchorRef.current) {
+        lenis.scrollTo(gridAnchorRef.current, {
+          offset: -100,
+          duration: 1.2,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          force: true,
+          lock: false,
+        });
+      }
+      setTimeout(() => {
+        setSelectedCategory(category);
+        if (category) {
+          setSearchParams({ cat: category }, { replace: true });
+        } else {
+          setSearchParams({}, { replace: true });
+        }
+      }, 150);
+    },
+    [setSearchParams],
+  );
 
   const clearFilters = useCallback(() => {
     setSelectedCategory(null);
+    setSearchParams({}, { replace: true });
+  }, [setSearchParams]);
+
+  const handleSetGridMode = useCallback((mode: 2 | 3 | 4) => {
+    setGridMode(mode);
+    try {
+      localStorage.setItem("products-grid-mode", String(mode));
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -81,8 +107,8 @@ const ProductsPage: React.FC = () => {
       {
         root: null,
         threshold: 0,
-        rootMargin: "-20% 0px -20% 0px"
-      }
+        rootMargin: "-20% 0px -20% 0px",
+      },
     );
 
     observer.observe(catalogElement);
@@ -90,7 +116,7 @@ const ProductsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-black">
+    <div className="relative min-h-screen bg-black dark:bg-black bg-white">
       <SEO
         title="Коллекция 4Life - Каталог здоровья"
         description="Полный каталог инновационных продуктов 4Life с Трансфер Факторами."
@@ -101,26 +127,32 @@ const ProductsPage: React.FC = () => {
       <ProductsHero />
 
       {/* 2. КАТАЛОГ */}
-      <div ref={catalogRef} className="relative z-10 w-full bg-white dark:bg-black">
+      <div
+        ref={catalogRef}
+        className="relative z-10 w-full bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-black"
+      >
         {/* Градиент-Ластик */}
         <div className="absolute left-0 right-0 h-[300px] md:h-[400px] -top-[300px] md:-top-[400px] bg-gradient-to-b from-transparent to-white dark:to-black pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16 relative z-20">
-          
+        <div className="py-12 relative z-20">
           {/* ИДЕАЛЬНЫЙ ЯКОРЬ В НОРМАЛЬНОМ ПОТОКЕ */}
           <div ref={gridAnchorRef} className="w-full h-0 pointer-events-none" aria-hidden="true" />
 
-          <ProductsGrid
-            products={filteredProducts}
-            gridMode={gridMode}
-            setGridMode={setGridMode}
-            selectedCategory={selectedCategory}
-            onClearFilters={clearFilters}
-            onProductClick={(p) => {
-              setSelectedProduct(p);
-              setIsModalOpen(true);
-            }}
-          />
+          {/* Заголовок с отступами */}
+          <div className="max-w-[1600px] mx-auto px-4 md:px-8">
+            <ProductsGrid
+              products={filteredProducts}
+              gridMode={gridMode}
+              setGridMode={handleSetGridMode}
+              selectedCategory={selectedCategory}
+              onClearFilters={clearFilters}
+              onProductClick={(p) => {
+                lastClickedCardRef.current = p.id;
+                setSelectedProduct(p);
+                setIsModalOpen(true);
+              }}
+            />
+          </div>
         </div>
 
         {/* 3. СЕКЦИЯ FAQ */}
@@ -164,7 +196,20 @@ const ProductsPage: React.FC = () => {
         product={selectedProduct}
         products={filteredProducts}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          // Scroll back to the card that was clicked
+          if (lastClickedCardRef.current) {
+            const cardEl = document.querySelector(
+              `[data-product-id="${lastClickedCardRef.current}"]`,
+            ) as HTMLElement | null;
+            if (cardEl) {
+              setTimeout(() => {
+                lenis.scrollTo(cardEl, { offset: -120, duration: 1.0 });
+              }, 350); // wait for modal exit animation
+            }
+          }
+        }}
       />
     </div>
   );

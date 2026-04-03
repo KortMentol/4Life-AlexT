@@ -1,22 +1,22 @@
 /* src/styles/globals.css */
 /**
  * @module src/styles/globals.css
- * @description Определяет глобальные стили и переменные для всего приложения. Включает базовые стили для `body`, настройки цветовой схемы (light/dark), основной шрифт и плавные переходы.
+ * @description Глобальные стили приложения. Только используемые классы.
  * @author Kort
- * @version 1.0.0
- * @usage
- * 1. `src/main.tsx`: Импортируется сразу после `base.css` для применения глобальных стилей ко всему сайту.
+ * @version 2.0.0 - Cleaned 2026
  */
 
 /* Import component styles - MUST BE FIRST */
 @import "./components/product-detail-modal.css";
 @import "./base/utilities.css";
 
+/* ─── CSS Variables ──────────────────────────────────────────────────────────── */
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-  /* 3D Grid переменные как в Codrops */
+
+  /* 3D Grid variables — used by MorphingVideoSection */
   --perspective: 1500px;
   --grid-item-ratio: 1.5;
   --grid-width: 100%;
@@ -34,7 +34,7 @@
   }
 }
 
-/* Global styles */
+/* ─── Base ───────────────────────────────────────────────────────────────────── */
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
@@ -55,126 +55,37 @@ body {
   overflow-x: hidden;
 }
 
-/* Скрываем нативный скроллбар при открытом меню */
-body.menu-open {
-  overflow: hidden !important;
-}
-
+/* Scroll lock when menu is open */
+body.menu-open,
 html.menu-open {
   overflow: hidden !important;
 }
 
-/* AWWWARDS 2026: Отключаем scroll-behavior для корректных телепортов
-   Lenis управляет плавностью на ПК, нативная физика на мобильных */
+/* Lenis manages smoothness — disable native scroll-behavior */
 html {
   scroll-behavior: auto;
 }
 
-/* Animation utilities */
-.no-flicker {
-  opacity: 0;
+/* Global font smoothing */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.animations-ready .no-flicker {
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Card preload styles */
-.card-preload {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* Иконки и элементы с иконками */
-.mt-10.md\:mt-12.flex.items-start.justify-center.text-white\/70,
-.scientific-proof,
-.scientific-container,
-[class*="scientific"],
-.disclaimer,
-.disclaimer-container,
-[class*="disclaimer"],
-.shield-container,
-[class*="shield"] {
-  display: flex !important;
-  align-items: baseline !important;
-}
-
-/* Стили для иконок */
-.mt-10.md\:mt-12.flex.items-start.justify-center.text-white\/70 .text-blue-300,
-.mt-10.md\:mt-12.flex.items-start.justify-center.text-white\/70 svg,
-.scientific-proof svg,
-.scientific-container svg,
-[class*="scientific"] svg,
-.scientific-proof img,
-.scientific-container img,
-[class*="scientific"] img,
-.shield-icon,
-[class*="shield"] svg,
-[class*="shield"] img {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
-  margin-right: 12px !important;
-  flex-shrink: 0 !important;
-  position: relative !important;
-  top: 0.25em !important;
-}
-
-/* Стили для маленьких иконок (16px) */
-.inline-flex.items-center.gap-2.px-4.py-2.rounded-full svg,
-.inline-flex.items-center.gap-2.px-4.py-2.rounded-full .text-blue-300,
-.disclaimer svg,
-.disclaimer .text-blue-300,
-.disclaimer-container svg,
-.disclaimer-container .text-blue-300 {
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  min-height: 16px !important;
-  margin-right: 8px !important;
-  position: relative !important;
-  top: 0.125em !important;
-}
-
-/* Гарантируем правильное отображение контейнеров с иконками */
-[class*="scientific"],
-[class*="disclaimer"],
-[class*="shield"] {
-  display: flex !important;
-  align-items: baseline !important;
-}
-
-.container-preload {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-
-/* Aurora Text Animation - УДАЛИТЬ ДУБЛИКАТ (уже есть в animations.css) */
-
+/* ─── Theme transitions ──────────────────────────────────────────────────────── */
+/* Scoped to semantic elements only — avoids painting every div on theme switch */
 body,
 main,
 header,
 footer,
-section,
-div,
-button,
-a {
+section {
   transition:
     background-color 0.4s ease,
     color 0.4s ease,
     border-color 0.4s ease;
 }
 
-/* 
-  Этот селектор отменяет transition для элементов Framer Motion, 
-  чтобы не конфликтовать с их собственными анимациями.
-*/
+/* Cancel transitions for Framer Motion elements */
 :not(.swiper, .swiper-wrapper, .swiper-slide) > [style*="--framer-will-change"],
 :not(.swiper, .swiper-wrapper, .swiper-slide) > [style*="transform:"] {
   transition: none;
@@ -184,7 +95,7 @@ a {
   transition-property: transform;
 }
 
-/* Pixel Transition Overlay Styles */
+/* ─── Pixel Transition Overlay — used by PixelTransition.tsx ────────────────── */
 .pixel-overlay {
   position: fixed;
   top: 0;
@@ -193,140 +104,23 @@ a {
   height: 100%;
   z-index: 50;
   display: grid;
-  grid-template-columns: repeat(14, 1fr); /* 14 колонок */
-  grid-template-rows: repeat(8, 1fr); /* 8 рядов */
-  pointer-events: none; /* Не мешает кликам, когда неактивен */
+  grid-template-columns: repeat(14, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  pointer-events: none;
   opacity: 0;
 }
 
 .pixel-overlay .pixel-cell {
-  background-color: #0f172a; /* Цвет пикселей (темный фон вашего сайта) */
+  background-color: #0f172a;
   will-change: opacity, transform;
 }
 
-/* Custom Swiper Navigation for Product Detail View */
-.product-detail-swiper .swiper-button-prev,
-.product-detail-swiper .swiper-button-next {
-  color: #fff;
-  width: 50px;
-  height: 50px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  backdrop-filter: blur(5px);
-  transition: all 0.3s ease;
-}
-
-.product-detail-swiper .swiper-button-prev:hover,
-.product-detail-swiper .swiper-button-next:hover {
-  background-color: rgba(0, 255, 255, 0.2);
-  color: #00ffff;
-}
-
-.product-detail-swiper .swiper-button-prev::after,
-.product-detail-swiper .swiper-button-next::after {
-  font-size: 20px !important;
-  font-weight: bold;
-}
-
+/* ─── Swiper pagination — used by KineticProductCarousel ────────────────────── */
 .swiper-pagination {
-  pointer-events: none; /* Весь блок с точками теперь "прозрачен" для кликов и свайпов */
-}
-
-/* ProductsPage Awwwards Animations */
-.repeating-image-mover {
-  position: fixed;
-  z-index: 9999;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 12px;
   pointer-events: none;
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
-/* AWWWARDS IMMERSIVE: Hover работает всегда (даже во время скролла)
-   Убрали pointer-events: none для иммерсивности как на Tibico Health */
-
-/* Floating animations for quality section */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-.float-animation {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Gradient text animations */
-.gradient-text {
-  background: linear-gradient(45deg, #00ffff, #0080ff, #8000ff, #ff0080);
-  background-size: 400% 400%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 8s ease-in-out infinite;
-}
-
-@keyframes gradient-shift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  25% {
-    background-position: 100% 50%;
-  }
-  50% {
-    background-position: 50% 100%;
-  }
-  75% {
-    background-position: 50% 0%;
-  }
-}
-
-/* Smooth section transitions */
-.section-transition {
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Performance optimizations */
-.gpu-accelerated {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-/* Text scroll effects */
-.scroll-text-word {
-  transition: none;
-}
-
-/* Accordion animations */
-.accordion-content {
-  transition:
-    height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    opacity 0.3s ease;
-}
-
-/* Hover effects for cards */
-.card-hover-effect {
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Blur effects for performance */
-.backdrop-blur-optimized {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* Smooth scrolling improvements - уже определено выше */
-
-/* 3D Grid Animation Styles - Максимальная производительность */
+/* ─── 3D Grid — used by MorphingVideoSection ────────────────────────────────── */
 .grid-wrap {
   height: var(--grid-height);
   width: var(--grid-width);
@@ -344,20 +138,14 @@ a {
   height: auto;
   overflow: hidden;
   position: relative;
-  border-radius: 12px; /* tailwind .rounded-xl */
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  /* 1. Форсируем GPU-ускорение и создаем новый слой рендеринга */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  /* 2. Классический хак для улучшения сглаживания в WebKit и Firefox.
-     Прозрачная обводка заставляет браузер пересчитать границы элемента
-     и применить более качественный anti-aliasing. */
   outline: 1px solid transparent;
-  /* 3. Минимальное размытие, которое визуально незаметно,
-     но запускает другой, более качественный алгоритм рендеринга. */
   filter: blur(0.1px);
 }
 
@@ -369,89 +157,50 @@ a {
   background-position: 50% 50%;
 }
 
-/* ==============================================
-   АНИМАЦИЯ 1: Горизонтальное движение с rotateY(25deg)
-   ============================================== */
 .grid__item--type-1 {
   transform: translateZ(0);
   backface-visibility: hidden;
   filter: blur(0.3px) contrast(1.05);
 }
-
 .grid__item--type-1 .grid__item-inner {
-  /* Дополнительная стабилизация */
   transform: scale(1.01);
 }
 
-/* ==============================================
-   АНИМАЦИЯ 2: Вертикальное движение с rotationY(-45/45)
-   ============================================== */
 .grid__item--type-2 {
   transform: translateZ(0);
   backface-visibility: hidden;
   filter: blur(0.2px) contrast(1.03);
   outline: 1px solid transparent;
 }
-
 .grid__item--type-2 .grid__item-inner {
-  /* Мягкое сглаживание для боковых поворотов */
   -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: auto;
 }
 
-/* ==============================================
-   АНИМАЦИЯ 3: Движение из глубины с rotationX
-   ============================================== */
 .grid__item--type-3 {
   transform: translateZ(0);
   backface-visibility: hidden;
   filter: blur(0.1px);
   outline: 1px solid transparent;
 }
-
 .grid__item--type-3 .grid__item-inner {
-  /* Оптимизация для глубинного движения */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: optimizeQuality;
 }
 
-/* Optimized 3D transforms */
 .grid-3d-container {
   perspective: var(--perspective, 1500px);
   transform-style: preserve-3d;
   backface-visibility: hidden;
 }
 
-/* Параллакс оптимизация */
+/* ─── Parallax — used by ParallaxSection ────────────────────────────────────── */
 .parallax-bg {
   contain: layout style paint;
   isolation: isolate;
 }
 
-/* Оптимизация текстовых эффектов */
-.scroll-text-word {
-  contain: layout style;
-}
-
-/* GPU слои для всех анимируемых элементов */
-.gpu-layer {
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-}
-
-/* ===== AWWWARDS 2025 HEADER OPTIMIZATIONS ===== */
-/* Максимальная производительность хедера */
-.header-optimized {
-  contain: layout style paint;
-  isolation: isolate;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  -webkit-perspective: 1000;
-}
-
-/* Sci-fi эффекты для хедера */
+/* ─── Header — used by header-premium.css ───────────────────────────────────── */
 .header-glow {
   position: relative;
 }
@@ -480,7 +229,6 @@ a {
   }
 }
 
-/* Оптимизация backdrop-blur */
 @supports (backdrop-filter: blur(12px)) {
   .header-blur {
     backdrop-filter: blur(12px);
@@ -492,79 +240,26 @@ a {
   .header-blur {
     background-color: rgba(255, 255, 255, 0.95);
   }
-
   .dark .header-blur {
     background-color: rgba(15, 23, 42, 0.95);
   }
 }
 
-/* Мобильная оптимизация */
 @media (max-width: 767px) {
   .header-blur {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
-
   .header-glow::before {
     animation-duration: 4s;
   }
 }
 
-/* Высокопроизводительные переходы */
 .header-transition {
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Принудительное GPU-ускорение */
-.force-gpu {
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  contain: layout style paint;
-}
-
-/* Глобальная оптимизация для всех браузеров */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .repeating-image-mover,
-  .float-animation,
-  .gradient-text,
-  .section-transition,
-  .card-hover-effect,
-  .grid-wrap,
-  .grid__item,
-  .header-transition,
-  .header-glow::before {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-  }
-}
-
-/* Hide scrollbar for horizontal scroll */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Safe area insets for iOS */
-.safe-area-inset-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Filter Capsule - Same style as header */
+/* ─── Filter Capsule — used by ProductsFilters ───────────────────────────────── */
 .filter-capsule-dark {
   background:
     radial-gradient(ellipse 150% 60% at 50% -10%, rgba(0, 212, 255, 0.2) 0%, transparent 70%),
@@ -578,14 +273,12 @@ a {
       transparent 100%
     ),
     linear-gradient(135deg, #0a0f1c 0%, #1a1f2e 15%, #2a3441 35%, #3a4553 50%, #2a3441 65%, #1a1f2e 85%, #0a0f1c 100%);
-
   box-shadow:
     inset 0 2px 4px rgba(0, 212, 255, 0.3),
     inset 0 -2px 4px rgba(0, 0, 0, 0.8),
     inset 2px 0 4px rgba(0, 212, 255, 0.1),
     inset -2px 0 4px rgba(0, 212, 255, 0.1),
     0 25px 80px rgba(0, 0, 0, 0.6);
-
   border: 1px solid rgba(0, 212, 255, 0.4);
 }
 
@@ -611,7 +304,6 @@ a {
       rgba(248, 250, 252, 0.95) 85%,
       rgba(255, 255, 255, 0.98) 100%
     );
-
   box-shadow:
     0 0 40px rgba(59, 130, 246, 0.2),
     0 0 80px rgba(59, 130, 246, 0.1),
@@ -620,7 +312,6 @@ a {
     inset 2px 0 4px rgba(255, 255, 255, 0.4),
     inset -2px 0 4px rgba(255, 255, 255, 0.4),
     0 20px 60px rgba(0, 0, 0, 0.15);
-
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
@@ -637,335 +328,28 @@ a {
   pointer-events: none;
 }
 
-/* AWWWARDS 2026: Anti-Jitter & Sub-pixel Rendering Fixes */
-.gpu-smooth-scroll {
-  /* Форсируем 3D слой и предотвращаем схлопывание слоев при низком opacity */
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  perspective: 1000px;
-  -webkit-perspective: 1000px;
-
-  /* Фикс для Firefox: прозрачный outline предотвращает sub-pixel snapping (дребезжание границ) */
-  outline: 1px solid transparent;
-
-  /* Изолируем расчет смешивания (blending) для прозрачных видео */
-  isolation: isolate;
-  contain: layout style paint;
-
-  /* КРИТИЧЕСКИЙ ФИКС: Принудительное округление transform значений */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: optimizeQuality;
-  -webkit-font-smoothing: subpixel-antialiased;
-  -moz-osx-font-smoothing: auto;
+/* ─── Scrollbar hide — used by ProductStrip, ThumbnailStrip ─────────────────── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
-/* DESKTOP ONLY: Агрессивное устранение микро-рывков */
-@media (hover: hover) and (pointer: fine) {
-  .scroll-stabilizer {
-    /* Принудительная стабилизация скролла */
-    transform: translate3d(0, 0, 0.01px);
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-
-    /* Предотвращение sub-pixel рендеринга */
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
-    perspective: 1000px;
-    -webkit-perspective: 1000px;
-
-    /* Изоляция от родительских слоев */
-    isolation: isolate;
-    contain: layout style paint;
-
-    /* Стабилизация границ */
-    outline: 1px solid transparent;
-
-    /* Принудительное сглаживание */
-    -webkit-font-smoothing: subpixel-antialiased;
-    -moz-osx-font-smoothing: auto;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: optimizeQuality;
-  }
-
-  /* Фикс для элементов с transform анимациями */
-  .transform-stabilizer {
-    /* Микро-смещение для активации GPU слоя */
-    transform: translate3d(0, 0, 0.001px) scale(1.0001);
-    will-change: transform;
-
-    /* Предотвращение layer collapse */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform-style: preserve-3d;
-    -webkit-transform-style: preserve-3d;
-
-    /* Изоляция расчетов */
-    isolation: isolate;
-    contain: layout style paint;
-  }
+/* ─── Safe area — iOS home indicator ────────────────────────────────────────── */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Фикс мерцающей рамки (выносим бордер за пределы контента) */
-.decoupled-border::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 1px solid rgba(59, 130, 246, 0.3); /* border-blue-500/30 */
-  pointer-events: none;
-  transform: translateZ(0.01px); /* Форсируем рендер поверх всего без z-index */
-}
-/* AWWWARDS 2026: COMPOSITE LAYER ISOLATION (только для desktop) */
-@media (hover: hover) and (pointer: fine) {
-  /* Принудительная GPU изоляция для прозрачных элементов */
-  .composite-isolation {
-    /* Создаем отдельный композитный слой */
-    will-change: transform, opacity;
-    transform: translateZ(0.001px); /* Микро-смещение для форсирования GPU слоя */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-
-    /* Изолируем blending calculations */
-    isolation: isolate;
-    contain: layout style paint;
-
-    /* Принудительная стабилизация рендеринга */
-    -webkit-font-smoothing: subpixel-antialiased;
-    -moz-osx-font-smoothing: auto;
-
-    /* Предотвращаем layer collapse при изменении opacity */
-    transform-style: preserve-3d;
-    perspective: 1000px;
-    -webkit-perspective: 1000px;
-  }
-
-  /* Специальная изоляция для видео с прозрачностью */
-  .video-composite-fix {
-    /* Форсируем постоянный GPU слой независимо от opacity */
-    will-change: transform, opacity, filter;
-    transform: translate3d(0, 0, 0.01px) scale(1.001); /* Микро-трансформация */
-
-    /* Стабилизация границ */
-    outline: 1px solid transparent;
-    border-radius: inherit;
-
-    /* Предотвращаем software fallback */
-    filter: blur(0px) brightness(1) contrast(1);
-
-    /* Изоляция от родительских слоев */
-    isolation: isolate;
-    contain: layout style paint;
-  }
-
-  /* Фикс для рамок прозрачных элементов */
-  .border-stabilizer::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    border: inherit;
-    pointer-events: none;
-
-    /* Принудительный GPU рендеринг рамки */
-    transform: translateZ(0.02px);
-    will-change: transform;
-    backface-visibility: hidden;
-
-    /* Стабилизация цвета рамки */
-    opacity: 1;
-    isolation: isolate;
-  }
-}
-
-/* Мобильные устройства - минимальные фиксы */
-@media (hover: none) and (pointer: coarse) {
-  .composite-isolation,
-  .video-composite-fix {
-    /* Только базовая GPU оптимизация для тач */
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-}
-/* AWWWARDS 2026: PROFESSIONAL VIDEO OPACITY STABILIZATION (только desktop) */
-@media (hover: hover) and (pointer: fine) {
-  /* Стабилизация прозрачных видео - метод топовых студий */
-  .video-opacity-stabilizer {
-    /* Принудительный GPU слой для стабильного opacity рендеринга */
-    will-change: opacity, transform;
-    transform: translate3d(0, 0, 0) scale(1.0001); /* Микро-масштаб для GPU активации */
-
-    /* Изоляция от родительских слоев */
-    isolation: isolate;
-    contain: layout style paint;
-
-    /* Стабилизация рендеринга границ */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-
-    /* Предотвращение software fallback при opacity < 1 */
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
-  }
-
-  /* Фикс для видео контейнеров с rounded углами */
-  .video-container-fix {
-    /* Принудительная изоляция overflow для сохранения border-radius */
-    isolation: isolate;
-    contain: layout style;
-
-    /* Стабилизация overflow: hidden с border-radius */
-    -webkit-mask: radial-gradient(white, white);
-    mask: radial-gradient(white, white);
-
-    /* GPU оптимизация для overflow + border-radius */
-    transform: translateZ(0);
-    will-change: transform;
-  }
-
-  /* Специальный фикс для видео элементов внутри прозрачных контейнеров */
-  .video-container-fix video {
-    /* Принудительное наследование border-radius от родителя */
-    border-radius: inherit;
-
-    /* Стабилизация рендеринга видео */
-    transform: translateZ(0.001px);
-    will-change: transform;
-
-    /* Предотвращение мерцания при opacity анимациях */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-  }
-}
-
-/* Мобильные устройства - минимальные фиксы */
-@media (hover: none) and (pointer: coarse) {
-  .video-opacity-stabilizer,
-  .video-container-fix {
-    /* Только базовая GPU оптимизация */
-    transform: translateZ(0);
-  }
-}
-/* IMMERSIVE GARDEN 2026: MODERN VIDEO CONTAINER DESIGN (только desktop) */
-@media (hover: hover) and (pointer: fine) {
-  /* Современный минималистичный контейнер видео */
-  .immersive-video-container {
-    position: relative;
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-
-    /* Современная тонкая рамка через box-shadow (НЕ МЕРЦАЕТ!) */
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.08);
-
-    /* GPU стабилизация */
-    transform: translateZ(0);
-    will-change: transform, opacity;
-    isolation: isolate;
-    contain: layout style paint;
-
-    /* Плавные переходы */
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  /* Темная тема - более контрастная рамка */
-  .dark .immersive-video-container {
-    background: rgba(0, 0, 0, 0.05);
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-      0 12px 40px rgba(0, 0, 0, 0.25),
-      0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Hover эффект - как у Immersive Garden */
-  .immersive-video-container:hover {
-    transform: translateZ(0) scale(1.02);
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.15),
-      0 16px 64px rgba(0, 0, 0, 0.2),
-      0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  .dark .immersive-video-container:hover {
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-      0 20px 80px rgba(0, 0, 0, 0.4),
-      0 12px 32px rgba(0, 0, 0, 0.25);
-  }
-
-  /* Видео внутри контейнера */
-  .immersive-video-container video {
-    /* Стабилизация рендеринга */
-    transform: translateZ(0.001px);
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-
-    /* Наследование border-radius */
-    border-radius: inherit;
-
-    /* Плавные переходы */
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  /* Subtle внутреннее свечение */
-  .immersive-video-container::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  .immersive-video-container:hover::before {
-    opacity: 1;
-  }
-
-  /* Современный loading state */
-  .immersive-video-container[data-loading="true"] {
-    background: rgba(255, 255, 255, 0.05);
-    animation: pulse-modern 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-modern {
-    0%,
-    100% {
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 8px 32px rgba(0, 0, 0, 0.12);
-    }
-    50% {
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-        0 12px 40px rgba(0, 0, 0, 0.15);
-    }
-  }
-}
-
-/* Мобильные устройства - упрощенный дизайн */
-@media (hover: none) and (pointer: coarse) {
-  .immersive-video-container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 4px 16px rgba(0, 0, 0, 0.1);
-
-    transform: translateZ(0);
-    border-radius: inherit;
-  }
-
-  .dark .immersive-video-container {
-    background: rgba(0, 0, 0, 0.1);
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.15),
-      0 6px 20px rgba(0, 0, 0, 0.2);
+/* ─── prefers-reduced-motion — global override ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

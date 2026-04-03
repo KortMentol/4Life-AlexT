@@ -14,16 +14,10 @@ export default {
         "bg-muted": "var(--bg-muted)",
         border: "var(--border)",
         // Сохраняем старые цвета для обратной совместимости
-        "primary-dark": "#0056b3",
-        "primary-darker": "#003d80",
         background: {
           DEFAULT: "#f9fafb",
           dark: "#1a1a1a",
         },
-        "4life-blue": "#007bff",
-        "4life-green": "#28a745",
-        "4life-purple": "#6f42c1",
-        "4life-yellow": "#ffc107",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

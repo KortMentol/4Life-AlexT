@@ -1,7 +1,6 @@
-
-export { default as FAQItem } from "./FAQItem";
 export { default as Button } from "./Button";
 export { default as DynamicLogo } from "./DynamicLogo";
+export { default as FAQItem } from "./FAQItem";
 export { default as HamburgerButton } from "./HamburgerButton";
 export { default as InteractiveProductCard } from "./InteractiveProductCard";
 export { default as KineticProductCarousel } from "./KineticProductCarousel";
@@ -13,6 +12,7 @@ export { default as SciFiThemeToggle } from "./SciFiThemeToggle";
 export { default as ScrollNumber } from "./ScrollNumber";
 export { default as ScrollText } from "./ScrollText";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";
+export { default as SectionDivider } from "./SectionDivider";
 export { default as SectionHeading } from "./SectionHeading";
 export { default as ShoppingCartAnimation, useShoppingCart } from "./ShoppingCartAnimation";
 export { default as StaticFeature } from "./StaticFeature";

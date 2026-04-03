@@ -12,6 +12,23 @@
   /* Цвета */
   --primary-blue: #0066ff;
 
+  /* Light theme surface tokens */
+  --surface-card: #f8faff;
+  --surface-card-hover: #eef3ff;
+  --surface-border: rgba(59, 130, 246, 0.12);
+  --surface-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.1);
+  --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.18);
+
+  /* Heading colors */
+  --heading-primary: #0f172a;
+  --heading-secondary: #1e293b;
+  --text-muted: #64748b;
+
+  /* Accent */
+  --accent-cyan: #06b6d4;
+  --accent-blue: #3b82f6;
+  --accent-gradient: linear-gradient(135deg, #06b6d4, #3b82f6);
+
   /* Эффекты */
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.12);
@@ -19,17 +36,33 @@
   --glass-blur: 12px;
 
   /* Анимации */
-  --transition-fast: 0.15s ease;
-  --transition-medium: 0.3s ease;
-  --transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-fast: 0.15s var(--ease-out);
+  --transition-medium: 0.3s var(--ease-out);
+  --transition-slow: 0.5s var(--ease-spring);
 
   /* Радиусы */
   --radius-lg: 1rem;
-  
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
   /* Совместимость с браузерами */
   -webkit-text-size-adjust: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Dark theme overrides */
+.dark {
+  --surface-card: rgba(15, 23, 42, 0.8);
+  --surface-card-hover: rgba(30, 41, 59, 0.9);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
+  --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.6);
+  --heading-primary: #f8fafc;
+  --heading-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
 }
 
 /* Modern buttons - используется в Button.tsx, App.tsx */
@@ -47,12 +80,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: var(--transition-slow);
 }
 
@@ -68,7 +96,7 @@
 
 .btn-primary-modern:hover {
   box-shadow: 0 6px 20px rgba(0, 102, 255, 0.35);
-  transform: translateY(-2px);
+  /* transform убран — вызывает layout shift при hover во время скролла */
 }
 
 .btn-secondary-modern {
@@ -121,4 +149,104 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
+}
+
+/* ─── Ripple animation ───────────────────────────────────────────────────────── */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
+}
+
+/* ─── Section accent line — shared motif across all sections ─────────────────── */
+.section-accent-line {
+  display: block;
+  width: 80px;
+  height: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+  margin: 0 auto 1.5rem;
+}
+
+/* ─── Section divider — gradient bridge between sections ─────────────────────── */
+.section-divider {
+  position: relative;
+  height: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.section-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, var(--divider-color, #f9fafb));
+}
+
+.dark .section-divider::before {
+  background: linear-gradient(to bottom, transparent, var(--divider-color-dark, #111827));
+}
+
+/* ─── Light theme card surface ───────────────────────────────────────────────── */
+.card-surface {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--surface-shadow);
+  transition:
+    box-shadow var(--transition-medium),
+    transform var(--transition-medium);
+}
+
+.card-surface:hover {
+  box-shadow: var(--surface-shadow-hover);
+}
+
+/* ─── Heading tokens ─────────────────────────────────────────────────────────── */
+.heading-primary {
+  color: var(--heading-primary);
+}
+
+.heading-secondary {
+  color: var(--heading-secondary);
+}
+
+.text-muted-token {
+  color: var(--text-muted);
+}
+
+/* ─── Focus ring — WCAG 2.1 AA ───────────────────────────────────────────────── */
+.focus-ring:focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 2px;
+}
+
+/* ─── Tap feedback for touch ─────────────────────────────────────────────────── */
+.tap-feedback {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tap-feedback:active {
+  opacity: 0.75;
+  transform: scale(0.97);
+  transition:
+    transform 0.1s ease,
+    opacity 0.1s ease;
+}
+
+/* ─── Safe area bottom padding ───────────────────────────────────────────────── */
+.pb-safe-area {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }

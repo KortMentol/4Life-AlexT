@@ -1,73 +1,83 @@
 /**
  * @module src/styles/pages/products-page.css
- * @description GPU-оптимизированные стили для карточек продуктов с плавными анимациями
- * @author Kort
- * @version 1.0.0
- * @usage ProductsGrid.tsx - анимации карточек при hover, GPU оптимизация для видео
- * @performance Использует GPU acceleration (translate3d, will-change) для 60 FPS анимаций
+ * @version 7.0.0 — Three distinct grid concepts, Awwwards 2026
+ *
+ * PERFORMANCE RULES:
+ * - will-change: NEVER at rest, only on :hover
+ * - box-shadow on hover: via ::after opacity (compositor-only, zero repaint)
+ * - transform: translate3d only (GPU compositor path, Firefox safe)
+ * - contain: paint only on image container
+ * - NO backdrop-filter on cards (Firefox FPS killer)
+ * - NO Framer Motion on cards — pure CSS animations
  */
 
-/* AWWWARDS FIX: Предотвращает вылет острых углов у видео при GPU-трансформациях */
-.gpu-mask-radius {
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  mask-image: radial-gradient(white, black);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+/* ─── Card appear ────────────────────────────────────────────────────────────── */
+@keyframes card-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* AWWWARDS FIX: Убивает субпиксельные рывки в конце инерции Lenis на ПК */
-.anti-pixel-snap {
-  filter: blur(0px);
-  -webkit-filter: blur(0px);
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-}
-
-/* Внешний контейнер (управляется Framer Motion) */
 .product-card-wrapper {
-  contain: layout style paint;
-  z-index: 1;
+  opacity: 0;
+  animation: card-appear 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--card-delay, 0ms);
 }
 
-/* Внутренний контейнер (управляется ТОЛЬКО CSS) */
+/* ─── Grid 3 & 4: Tibico-style (image standalone + text below) ──────────────── */
+.product-card-tibico {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Image swap trigger on tibico card hover */
+@media (hover: hover) and (pointer: fine) {
+  .product-card-tibico:hover .product-image-primary {
+    will-change: transform, opacity;
+    transform: translate3d(0, -100%, 0);
+    opacity: 0;
+  }
+  .product-card-tibico:hover .product-image-secondary {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+/* ─── Grid 3 & 4: Standard card ─────────────────────────────────────────────── */
 .product-card-inner {
   position: relative;
-  display: flex;
-  flex-direction: column;
   height: 100%;
-  border-radius: 1rem; /* 16px */
-  background-clip: padding-box;
-
-  /* Переводим элемент в отдельный слой GPU ДО ховера */
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .product-card-inner:hover {
-    transform: translate3d(0, -6px, 0) scale(1.01);
-    z-index: 10;
+    transform: translateY(-4px);
+    will-change: transform;
   }
 }
 
-/* Оптимизированная тень (Composite) */
+/* Shadow via pseudo — compositor-only opacity, no repaint on transform */
 .product-card-inner::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  opacity: 0;
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.25);
+  z-index: -1;
 }
 
 .dark .product-card-inner::after {
-  border: 1px solid rgba(75, 85, 99, 0.7);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.6);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -76,20 +86,25 @@
   }
 }
 
-/* Анимация картинок */
+/* ─── Image container — square, image dominant ───────────────────────────────── */
 .product-image-container {
   position: relative;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.03);
-  contain: strict;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
+  contain: paint;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  flex-shrink: 0;
 }
 
+/* ─── Image swap — bottom to top (Tibico style) ──────────────────────────────── */
 .product-image-primary,
 .product-image-secondary {
-  transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition:
+    transform 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .product-image-secondary {
@@ -100,16 +115,86 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .product-card-inner:hover .product-image-primary,
-  .product-card-inner:hover .product-image-secondary {
-    will-change: transform, opacity;
-  }
   .product-card-inner:hover .product-image-primary {
-    transform: translate3d(0, -100%, 0) scale(1.05);
+    will-change: transform, opacity;
+    transform: translate3d(0, -100%, 0);
     opacity: 0;
   }
   .product-card-inner:hover .product-image-secondary {
-    transform: translate3d(0, 0, 0) scale(1.02);
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
     opacity: 1;
+  }
+}
+
+/* ─── Grid 2: Horizontal card (image left/right, text right/left) ────────────── */
+.product-card-horizontal {
+  position: relative;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card-horizontal:hover {
+    transform: translateY(-3px);
+    will-change: transform;
+  }
+}
+
+.product-card-horizontal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.22);
+  z-index: -1;
+}
+
+.dark .product-card-horizontal::after {
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.55);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card-horizontal:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Image container for horizontal card — fixed height, no aspect-ratio */
+.product-image-container-h {
+  position: relative;
+  overflow: hidden;
+  contain: paint;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card-horizontal:hover .product-image-primary {
+    will-change: transform, opacity;
+    transform: translate3d(0, -100%, 0);
+    opacity: 0;
+  }
+  .product-card-horizontal:hover .product-image-secondary {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+/* ─── prefers-reduced-motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .product-card-wrapper {
+    animation: none;
+    opacity: 1;
+  }
+  .product-card-inner,
+  .product-card-horizontal {
+    transition: none;
+  }
+  .product-image-primary,
+  .product-image-secondary {
+    transition: none;
   }
 }
