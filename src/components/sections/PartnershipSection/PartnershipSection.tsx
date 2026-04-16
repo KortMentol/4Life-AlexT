@@ -1,77 +1,114 @@
 /**
- * @module src/components/sections/PartnershipSection/PartnershipSection.tsx
- * @description Awwwards 2026 Immersive Partnership Section
- * Scroll-driven параллакс, light/dark тема, 60fps на touch high-tier.
- * @author Kort
- * @version 4.0.0
+ * @module PartnershipSection/PartnershipSection.tsx
+ * Root-компонент секции "Партнёрство".
+ *
+ * Архитектура:
+ *  - usePerformanceTier() → tier (high/medium/low)
+ *  - useTheme()           → isDark → палитра
+ *  - ChapterNav           → фиксированная навигация (desktop, non-touch)
+ *  - 5 глав               → Portal → Ticker → Science → Model → Economics → Invitation
+ *
+ * Tier behaviour:
+ *  high   → scramble text, cursor follower, SVG network (12 nodes), animated counters
+ *  medium → clip reveals, animated counters, SVG network (7 nodes)
+ *  low    → static fade-in only, no springs, no SVG
  */
 
-import { usePerformanceTier, useTheme } from "@/hooks";
-import { useScroll, useSpring } from "framer-motion";
-import React, { useRef } from "react";
-import FeaturesGrid from "./FeaturesGrid";
-import FinalCTA from "./FinalCTA";
-import FloatingParticles from "./FloatingParticles";
-import GradientMeshBackground from "./GradientMeshBackground";
-import HeroIntro from "./HeroIntro";
-import ImmersiveQuote from "./ImmersiveQuote";
-import { IS_TOUCH } from "./types";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { useTheme } from "@/hooks/useTheme";
+import { useInView } from "framer-motion";
+import React, { memo, useCallback, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import Economics from "./chapters/Economics";
+import Invitation from "./chapters/Invitation";
+import Model from "./chapters/Model";
+import Portal from "./chapters/Portal";
+import Science from "./chapters/Science";
+import { getPalette } from "./constants";
+import ChapterNav from "./ui/ChapterNav";
+import Ticker from "./ui/Ticker";
 
-const PartnershipSection: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const PartnershipSection = memo(() => {
   const tier = usePerformanceTier();
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const palette = getPalette(isDark);
+  const location = useLocation();
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
+  // ChapterNav показывается только на /partnership странице
+  // На HomePage он конфликтует с PageNav
+  const isPartnershipPage = location.pathname === "/partnership";
 
-  // На touch — передаём raw scrollYProgress без useSpring
-  // Все дочерние компоненты используют только useTransform (compositor-only)
-  // На desktop — useSpring для плавности
-  const smoothProgress = IS_TOUCH
-    ? scrollYProgress
-    : useSpring(scrollYProgress, {
-        stiffness: tier === "high" ? 100 : tier === "medium" ? 70 : 50,
-        damping: tier === "high" ? 28 : tier === "medium" ? 35 : 40,
-        mass: tier === "high" ? 0.5 : tier === "medium" ? 0.8 : 1,
-      });
+  const [chapter, setChapter] = useState(0);
+  const handleChapter = useCallback((n: number) => setChapter(n), []);
 
-  // Высота секции:
-  // low = auto (нет sticky scroll)
-  // touch = 320vh (контент короче — меньше скролла)
-  // desktop = 380vh (подогнано чтобы не было пустоты после FinalCTA)
-  const sectionHeight = tier === "low" ? "auto" : IS_TOUCH ? "320vh" : "380vh";
+  // Отслеживаем видимость секции для ChapterNav
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionInView = useInView(sectionRef, { margin: "0px" });
+
+  // Refs к главам для кликабельного ChapterNav на /partnership
+  const portalRef = useRef<HTMLDivElement>(null);
+  const scienceRef = useRef<HTMLElement>(null);
+  const modelRef = useRef<HTMLElement>(null);
+  const economicsRef = useRef<HTMLElement>(null);
+  const invitationRef = useRef<HTMLElement>(null);
+
+  const chapterRefs = [portalRef, scienceRef, modelRef, economicsRef, invitationRef];
 
   return (
-    <section ref={containerRef} className="relative bg-transparent" style={{ minHeight: sectionHeight }}>
-      {/* Base background — ниже fluid (fluid fixed z:-10) */}
-      <div className="absolute inset-0 -z-20 pointer-events-none">
-        <div
-          className="w-full h-full transition-colors duration-500"
-          style={{
-            background: isDark ? "#020617" : "#e8f0fe",
-          }}
+    <div
+      ref={sectionRef}
+      style={{
+        background: palette.bg,
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+        position: "relative",
+        transition: "background-color 0.4s ease",
+      }}
+    >
+      {/* ChapterNav — только на /partnership, скрыт когда секция не в viewport */}
+      {isPartnershipPage && (
+        <ChapterNav
+          active={chapter}
+          tier={tier}
+          palette={palette}
+          visible={sectionInView}
+          chapterRefs={chapterRefs as React.RefObject<HTMLElement | HTMLDivElement | null>[]}
         />
-      </div>
+      )}
 
-      {/* Sticky орбы — выше base, ниже fluid */}
-      <div className="sticky top-0 h-screen" style={{ zIndex: -15 }}>
-        <GradientMeshBackground scrollYProgress={smoothProgress} tier={tier} isDark={isDark} />
-        <FloatingParticles tier={tier} isDark={isDark} />
-      </div>
+      {/* Глава 0 — входной экран */}
+      <Portal ref={portalRef} tier={tier} palette={palette} onChapter={handleChapter} />
 
-      {/* Контент — выше fluid (z:10) */}
-      <div className="relative z-10" style={{ marginTop: "-100vh" }}>
-        <HeroIntro scrollYProgress={smoothProgress} tier={tier} isDark={isDark} />
-        <ImmersiveQuote scrollYProgress={smoothProgress} tier={tier} isDark={isDark} />
-        <FeaturesGrid scrollYProgress={smoothProgress} tier={tier} isDark={isDark} />
-        <FinalCTA scrollYProgress={smoothProgress} tier={tier} isDark={isDark} />
-      </div>
-    </section>
+      {/* Бегущая строка */}
+      <Ticker tier={tier} palette={palette} />
+
+      {/* Глава 1 — наука */}
+      <Science ref={scienceRef} tier={tier} palette={palette} onChapter={handleChapter} />
+
+      {/* Разделитель */}
+      <div
+        className="mx-auto"
+        style={{
+          maxWidth: 1400,
+          height: 1,
+          background: `linear-gradient(90deg, transparent, ${palette.overlay10}, transparent)`,
+        }}
+      />
+
+      {/* Глава 2 — модель */}
+      <Model ref={modelRef} tier={tier} palette={palette} onChapter={handleChapter} />
+
+      {/* Глава 3 — экономика */}
+      <Economics ref={economicsRef} tier={tier} palette={palette} onChapter={handleChapter} />
+
+      {/* Глава 4 — приглашение */}
+      <Invitation ref={invitationRef} tier={tier} palette={palette} onChapter={handleChapter} />
+    </div>
   );
-};
+});
 
-export default React.memo(PartnershipSection);
+PartnershipSection.displayName = "PartnershipSection";
+
+export default PartnershipSection;

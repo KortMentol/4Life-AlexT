@@ -99,6 +99,8 @@ const HomePage: React.FC = () => {
         includeWebSiteSearch
       />
 
+      {/* Вертикальная навигация по секциям убрана — на главной есть header */}
+
       <ParallaxSection
         backgroundVideo={heroVideoWebm}
         backgroundImageMobile={heroBgMobile}
