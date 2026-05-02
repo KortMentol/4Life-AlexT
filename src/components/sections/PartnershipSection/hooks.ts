@@ -10,10 +10,16 @@ import { SCRAMBLE_CHARS } from "./constants";
 
 // Проверяем prefers-reduced-motion один раз при загрузке модуля
 const prefersReducedMotion =
-  typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
 
 // ─── useScramble ──────────────────────────────────────────────────────────────
-export function useScramble(target: string, active: boolean, tier: PerformanceTier): string {
+export function useScramble(
+  target: string,
+  active: boolean,
+  tier: PerformanceTier,
+): string {
   const [display, setDisplay] = useState(tier !== "high" ? target : "");
   const frameRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -33,8 +39,11 @@ export function useScramble(target: string, active: boolean, tier: PerformanceTi
           .split("")
           .map((char, idx) => {
             if (char === " ") return " ";
-            if (idx < Math.floor((iteration / total) * target.length)) return char;
-            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+            if (idx < Math.floor((iteration / total) * target.length))
+              return char;
+            return SCRAMBLE_CHARS[
+              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
+            ];
           })
           .join(""),
       );
@@ -53,7 +62,13 @@ export function useScramble(target: string, active: boolean, tier: PerformanceTi
 }
 
 // ─── useCountUp ───────────────────────────────────────────────────────────────
-export function useCountUp(target: number, active: boolean, tier: PerformanceTier, delay = 0, duration = 1.8): number {
+export function useCountUp(
+  target: number,
+  active: boolean,
+  tier: PerformanceTier,
+  delay = 0,
+  duration = 1.8,
+): number {
   const [value, setValue] = useState(tier === "low" ? target : 0);
 
   useEffect(() => {

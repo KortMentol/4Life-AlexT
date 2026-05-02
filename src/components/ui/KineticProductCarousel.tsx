@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 // Импортируем модули и стили для эффекта Куба и Пагинации
 import "swiper/css";
@@ -8,8 +8,8 @@ import "swiper/css/effect-cube";
 import "swiper/css/pagination";
 import { EffectCube, Pagination } from "swiper/modules";
 
-import InteractiveProductCard from "./InteractiveProductCard";
 import { Icons } from "@/utils/icons";
+import InteractiveProductCard from "./InteractiveProductCard";
 
 interface ProductData {
   id: number;
@@ -67,7 +67,9 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
       {/* Куб */}
       <div className="w-full flex justify-center">
         <Swiper
-          onSwiper={(swiper) => { swiperRef.current = swiper; }}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
           effect={"cube"}
           grabCursor={true}
           cubeEffect={{
@@ -99,22 +101,22 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({
           ))}
         </Swiper>
       </div>
-      
+
       {/* Навигационные стрелки под кубом */}
       <div className="flex justify-center gap-4 mt-6">
         <button
           onClick={() => swiperRef.current?.slidePrev()}
-          className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 transition-transform duration-100 active:scale-90 md:hover:bg-white/20 md:dark:hover:bg-white/10 focus:outline-none"
-          style={{ willChange: 'transform', contain: 'layout style paint' }}
+          className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/[0.02] backdrop-blur-sm border border-white/20 dark:border-white/10 transition-transform duration-100 active:scale-90 md:hover:bg-white/20 md:dark:hover:bg-white/10 focus:outline-none"
+          style={{ willChange: "transform", contain: "layout style paint" }}
           aria-label="Предыдущий продукт"
         >
           <Icons.ChevronLeft className="w-5 h-5 text-white/80 dark:text-white/70 mx-auto" />
         </button>
-        
+
         <button
           onClick={() => swiperRef.current?.slideNext()}
-          className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 transition-transform duration-100 active:scale-90 md:hover:bg-white/20 md:dark:hover:bg-white/10 focus:outline-none"
-          style={{ willChange: 'transform', contain: 'layout style paint' }}
+          className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/[0.02] backdrop-blur-sm border border-white/20 dark:border-white/10 transition-transform duration-100 active:scale-90 md:hover:bg-white/20 md:dark:hover:bg-white/10 focus:outline-none"
+          style={{ willChange: "transform", contain: "layout style paint" }}
           aria-label="Следующий продукт"
         >
           <Icons.ChevronRight className="w-5 h-5 text-white/80 dark:text-white/70 mx-auto" />

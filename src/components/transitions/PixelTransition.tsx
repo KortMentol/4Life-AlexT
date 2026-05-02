@@ -4,7 +4,9 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 const ROWS = 8;
 const COLUMNS = 14;
 
-const Cell = forwardRef<HTMLDivElement>((_, ref) => <div className="pixel-cell" ref={ref}></div>);
+const Cell = forwardRef<HTMLDivElement>((_, ref) => (
+  <div className="pixel-cell" ref={ref}></div>
+));
 Cell.displayName = "Cell";
 
 export interface TransitionHandle {
@@ -57,7 +59,7 @@ export const PixelTransition = forwardRef<TransitionHandle>((_, ref) => {
             }
             resolve();
           },
-        }
+        },
       );
     });
   };

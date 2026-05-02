@@ -33,14 +33,22 @@ const ModelStep = memo(
     const inView = useInView(ref, { once: true, margin: "-15%" });
 
     const accentColor =
-      step.accentKey === "blue" ? palette.blue : step.accentKey === "gold" ? palette.gold : palette.cream;
+      step.accentKey === "blue"
+        ? palette.blue
+        : step.accentKey === "gold"
+          ? palette.gold
+          : palette.cream;
 
     return (
       <motion.div
         ref={ref}
         initial={tier !== "low" ? { opacity: 0, y: 50 } : { opacity: 1 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.9, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+        transition={{
+          duration: 0.9,
+          delay: index * 0.12,
+          ease: [0.16, 1, 0.3, 1],
+        }}
         className="relative py-12 md:py-16"
         style={{ borderTop: `1px solid ${palette.overlay10}` }}
       >
@@ -86,8 +94,14 @@ const ModelStep = memo(
           className="absolute bottom-0 left-0 h-px"
           initial={{ width: "0%" }}
           animate={inView ? { width: "100%" } : { width: "0%" }}
-          transition={{ duration: 1.1, delay: index * 0.12 + 0.35, ease: [0.16, 1, 0.3, 1] }}
-          style={{ background: `linear-gradient(90deg, ${accentColor}60, transparent)` }}
+          transition={{
+            duration: 1.1,
+            delay: index * 0.12 + 0.35,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          style={{
+            background: `linear-gradient(90deg, ${accentColor}60, transparent)`,
+          }}
         />
       </motion.div>
     );
@@ -96,56 +110,67 @@ const ModelStep = memo(
 ModelStep.displayName = "ModelStep";
 
 const Model = memo(
-  forwardRef<HTMLElement, ModelProps>(({ tier, palette, onChapter }, forwardedRef) => {
-    const ref = useRef<HTMLElement>(null);
-    const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
-    const inView = useInView(activeRef, { margin: "-35%" });
+  forwardRef<HTMLElement, ModelProps>(
+    ({ tier, palette, onChapter }, forwardedRef) => {
+      const ref = useRef<HTMLElement>(null);
+      const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
+      const inView = useInView(activeRef, { margin: "-35%" });
 
-    useEffect(() => {
-      if (inView) onChapter(2);
-    }, [inView, onChapter]);
+      useEffect(() => {
+        if (inView) onChapter(2);
+      }, [inView, onChapter]);
 
-    return (
-      <section
-        ref={activeRef}
-        className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40"
-        style={{ background: palette.bg }}
-      >
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-start justify-between mb-20 flex-wrap gap-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <span className="text-[9px] uppercase tracking-[0.5em]" style={{ color: palette.gold }}>
-                02 — Модель
-              </span>
-            </motion.div>
-
-            <ClipLine tier={tier} className="max-w-lg">
-              <p
-                className="font-extralight text-right"
-                style={{
-                  fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
-                  color: palette.cream,
-                  letterSpacing: "-0.02em",
-                }}
+      return (
+        <section
+          ref={activeRef}
+          className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40"
+          style={{ background: palette.bg }}
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-start justify-between mb-20 flex-wrap gap-6">
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
               >
-                Три факта о том, <br />
-                как это устроено.
-              </p>
-            </ClipLine>
-          </div>
+                <span
+                  className="text-[9px] uppercase tracking-[0.5em]"
+                  style={{ color: palette.gold }}
+                >
+                  02 — Модель
+                </span>
+              </motion.div>
 
-          {MODEL_STEPS.map((step, i) => (
-            <ModelStep key={step.n} step={step} index={i} tier={tier} palette={palette} />
-          ))}
-        </div>
-      </section>
-    );
-  }),
+              <ClipLine tier={tier} className="max-w-lg">
+                <p
+                  className="font-extralight text-right"
+                  style={{
+                    fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
+                    color: palette.cream,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  Как это устроено —<br />
+                  три простых факта.
+                </p>
+              </ClipLine>
+            </div>
+
+            {MODEL_STEPS.map((step, i) => (
+              <ModelStep
+                key={step.n}
+                step={step}
+                index={i}
+                tier={tier}
+                palette={palette}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    },
+  ),
 );
 
 Model.displayName = "Model";

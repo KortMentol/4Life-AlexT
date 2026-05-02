@@ -6,9 +6,18 @@ import { useLocation } from "react-router-dom";
 
 import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
-import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
+import {
+  HamburgerButton,
+  ProductListIcon,
+  TubelightNavbar,
+} from "@/components/ui";
 import { useTransition } from "@/context";
-import { useIsMobile, useNativeScroll, usePerformanceTier, useTheme } from "@/hooks";
+import {
+  useIsMobile,
+  useNativeScroll,
+  usePerformanceTier,
+  useTheme,
+} from "@/hooks";
 import { siteConfig } from "@/site-config/site";
 import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
@@ -39,7 +48,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     showHeader();
     const handleForceShow = () => showHeader();
     window.addEventListener("force-header-show", handleForceShow);
-    return () => window.removeEventListener("force-header-show", handleForceShow);
+    return () =>
+      window.removeEventListener("force-header-show", handleForceShow);
   }, [showHeader]);
 
   // Слушаем изменения маршрута — всегда показываем хедер
@@ -53,9 +63,19 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     const header = headerRef.current;
     if (!header) return;
     if (isMenuOpen) {
-      gsap.to(header, { y: "-120%", duration: 0.8, ease: "power4.inOut", overwrite: true });
+      gsap.to(header, {
+        y: "-120%",
+        duration: 0.8,
+        ease: "power4.inOut",
+        overwrite: true,
+      });
     } else {
-      gsap.to(header, { y: "0%", duration: 0.6, ease: "power4.out", overwrite: true });
+      gsap.to(header, {
+        y: "0%",
+        duration: 0.6,
+        ease: "power4.out",
+        overwrite: true,
+      });
     }
   }, [isMenuOpen]);
 
@@ -88,14 +108,19 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       data-tier={tier}
       ref={headerRef}
       role="banner"
-      style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
+      style={
+        { ...cssVars, contain: "layout style paint" } as React.CSSProperties
+      }
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >
       <div className="header-content">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
             <div className="md:hidden relative z-[100] no-highlight flex items-center">
-              <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen((prev) => !prev)} />
+              <HamburgerButton
+                isOpen={isMenuOpen}
+                toggle={() => setIsMenuOpen((prev) => !prev)}
+              />
             </div>
             <button
               onClick={handleLogoClick}
@@ -109,12 +134,18 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 animate="animate"
                 whileHover={undefined}
               >
-                <img src={isDark ? logoLight : logoDark} alt="4Life Logo" className="h-8 w-auto relative z-10" />
+                <img
+                  src={isDark ? logoLight : logoDark}
+                  alt="4Life Logo"
+                  className="h-8 w-auto relative z-10"
+                />
               </motion.div>
               <motion.div
                 style={{
                   color: isDark ? "white" : "#1e293b",
-                  textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                  textShadow: isDark
+                    ? "0 1px 2px rgba(0,0,0,0.3)"
+                    : "0 1px 1px rgba(0,0,0,0.1)",
                 }}
                 className="flex flex-col items-center"
               >
@@ -126,7 +157,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   className={"text-xs font-medium mt-0.5"}
                   style={{
                     color: isDark ? "#e6b800" : "#b38600",
-                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 1px rgba(0,0,0,0.25)",
+                    textShadow: isDark
+                      ? "0 1px 2px rgba(0,0,0,0.5)"
+                      : "0 1px 1px rgba(0,0,0,0.25)",
                     fontWeight: 500,
                   }}
                 >
@@ -147,7 +180,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   className="text-center flex flex-col items-center"
                   style={{
                     color: isDark ? "white" : "#1e293b",
-                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                    textShadow: isDark
+                      ? "0 1px 2px rgba(0,0,0,0.3)"
+                      : "0 1px 1px rgba(0,0,0,0.1)",
                   }}
                 >
                   <TextShineEffect
@@ -158,7 +193,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                     className="text-xs font-medium mt-0.5"
                     style={{
                       color: "#e6b800",
-                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "0 1px 2px rgba(0,0,0,0.3)",
+                      textShadow: isDark
+                        ? "0 1px 2px rgba(0,0,0,0.5)"
+                        : "0 1px 2px rgba(0,0,0,0.3)",
                       fontWeight: "500",
                     }}
                   >

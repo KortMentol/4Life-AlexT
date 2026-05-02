@@ -97,13 +97,16 @@ const CustomScrollbar: React.FC = () => {
     if (sh <= 0) return;
 
     // Apply safe padding to track height calculation
-    const trackHeight = vh - (TRACK_PADDING * 2);
+    const trackHeight = vh - TRACK_PADDING * 2;
     const ratio = trackHeight / ch;
-    
+
     const minHeight = isMobile ? 32 : 40;
     const maxHeight = trackHeight * 0.9;
-    
-    const newThumbHeight = Math.max(minHeight, Math.min(maxHeight, trackHeight * ratio));
+
+    const newThumbHeight = Math.max(
+      minHeight,
+      Math.min(maxHeight, trackHeight * ratio),
+    );
 
     setThumbHeight(newThumbHeight);
     maxThumbYRef.current = trackHeight - newThumbHeight;
@@ -165,7 +168,7 @@ const CustomScrollbar: React.FC = () => {
       showScrollbar();
       hideScrollbar();
     },
-    [isDragging, isMenuOpen, showScrollbar, hideScrollbar]
+    [isDragging, isMenuOpen, showScrollbar, hideScrollbar],
   );
 
   /**
@@ -192,7 +195,10 @@ const CustomScrollbar: React.FC = () => {
 
       const handleMouseMove = (e: MouseEvent) => {
         const deltaY = e.clientY - dragStartYRef.current;
-        const newThumbY = Math.max(0, Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY));
+        const newThumbY = Math.max(
+          0,
+          Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY),
+        );
 
         if (thumbRef.current) {
           thumbRef.current.style.transform = `translateX(-50%) translateY(${newThumbY}px)`;
@@ -200,7 +206,8 @@ const CustomScrollbar: React.FC = () => {
         thumbYRef.current = newThumbY;
 
         // Вычисляем и применяем скролл
-        const progress = maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
+        const progress =
+          maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
         const targetScroll = progress * scrollableHeightRef.current;
 
         lenis.scrollTo(targetScroll, { immediate: true });
@@ -220,7 +227,7 @@ const CustomScrollbar: React.FC = () => {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     },
-    [hideScrollbar, showScrollbar]
+    [hideScrollbar, showScrollbar],
   );
 
   /**
@@ -287,7 +294,8 @@ const CustomScrollbar: React.FC = () => {
       setIsMenuOpen(customEvent.detail.action === "hide");
     };
     window.addEventListener("custom-scrollbar-update", handleMenuUpdate);
-    return () => window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
+    return () =>
+      window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
   }, []);
 
   const trackWidth = isMobile ? 2 : 3;
@@ -318,9 +326,10 @@ const CustomScrollbar: React.FC = () => {
           top: 0,
           bottom: 0,
           // Smoothly hide if menu is open, or if there's no scroll, or if inactive
-          opacity: (isVisible && hasScroll && !isMenuOpen) ? 1 : 0,
+          opacity: isVisible && hasScroll && !isMenuOpen ? 1 : 0,
           transition: "opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
-          pointerEvents: (isVisible && hasScroll && !isMenuOpen) ? "auto" : "none",
+          pointerEvents:
+            isVisible && hasScroll && !isMenuOpen ? "auto" : "none",
         }}
       >
         {/* Дорожка - Как у Immersive Garden */}
@@ -331,8 +340,8 @@ const CustomScrollbar: React.FC = () => {
             width: trackWidth,
             top: TRACK_PADDING,
             bottom: TRACK_PADDING,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             backgroundColor: "rgba(255, 255, 255, 0.2)",
           }}
         />
@@ -344,11 +353,12 @@ const CustomScrollbar: React.FC = () => {
           style={{
             width: thumbWidth,
             height: thumbHeight,
-            left: '50%',
+            left: "50%",
             top: TRACK_PADDING,
             transform: `translateX(-50%) translateY(0px)`,
             backgroundColor: isHovering || isDragging ? "#FFFFFF" : "#F5F5F5",
-            boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)",
+            boxShadow:
+              "0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)",
             transition: "background-color 0.2s ease",
             willChange: "transform",
           }}

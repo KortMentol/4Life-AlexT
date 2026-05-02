@@ -36,7 +36,9 @@ const TibicoIcon: React.FC<{ isDark: boolean }> = ({ isDark }) => (
     className="absolute bottom-0 right-0 z-10 w-14 h-14 rounded-tl-3xl flex items-center justify-center"
     style={{ backgroundColor: isDark ? "#020617" : "#ffffff" }}
   >
-    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isDark ? "bg-slate-800" : "bg-gray-100"}`}>
+    <div
+      className={`w-9 h-9 rounded-full flex items-center justify-center ${isDark ? "bg-slate-800" : "bg-gray-100"}`}
+    >
       <svg
         className={`w-4 h-4 ${isDark ? "text-slate-400" : "text-gray-500"}`}
         fill="none"
@@ -65,11 +67,15 @@ const TibicoCard: React.FC<{
   <div
     data-product-id={product.id}
     className="product-card-wrapper product-card-tibico"
-    style={{ "--card-delay": `${Math.min(idx * 30, 350)}ms` } as React.CSSProperties}
+    style={
+      { "--card-delay": `${Math.min(idx * 30, 350)}ms` } as React.CSSProperties
+    }
     onClick={onClick}
   >
     {/* Image block — rounded, standalone */}
-    <div className={`product-image-container rounded-2xl overflow-hidden ${isDark ? "bg-[#111827]" : "bg-gray-100"}`}>
+    <div
+      className={`product-image-container rounded-2xl overflow-hidden ${isDark ? "bg-[#111827]" : "bg-gray-100"}`}
+    >
       <img
         src={product.image}
         alt={product.name}
@@ -139,13 +145,21 @@ const DetailCard: React.FC<{
   idx: number;
   onClick: () => void;
 }> = ({ product, isDark, idx, onClick }) => {
-  const qty = product.capsules ? `${product.capsules} капс.` : product.servings ? `${product.servings} порц.` : null;
+  const qty = product.capsules
+    ? `${product.capsules} капс.`
+    : product.servings
+      ? `${product.servings} порц.`
+      : null;
 
   return (
     <div
       data-product-id={product.id}
       className="product-card-wrapper product-card-tibico cursor-pointer flex flex-row gap-4 items-start"
-      style={{ "--card-delay": `${Math.min(idx * 35, 400)}ms` } as React.CSSProperties}
+      style={
+        {
+          "--card-delay": `${Math.min(idx * 35, 400)}ms`,
+        } as React.CSSProperties
+      }
       onClick={onClick}
     >
       {/* Image — standalone rounded square, ~40% width */}
@@ -198,10 +212,14 @@ const DetailCard: React.FC<{
             </span>
           ))}
         </div>
-        <h3 className={`text-sm font-bold leading-snug line-clamp-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+        <h3
+          className={`text-sm font-bold leading-snug line-clamp-2 ${isDark ? "text-white" : "text-gray-900"}`}
+        >
           {product.name}
         </h3>
-        <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? "text-slate-500" : "text-gray-400"}`}>
+        <p
+          className={`text-xs leading-relaxed line-clamp-3 ${isDark ? "text-slate-500" : "text-gray-400"}`}
+        >
           {product.shortDescription}
         </p>
         <div className="flex flex-wrap gap-1">
@@ -210,7 +228,7 @@ const DetailCard: React.FC<{
               key={s}
               className={`px-2 py-0.5 text-[10px] rounded-lg font-medium ${
                 isDark
-                  ? "bg-white/5 text-slate-400 border border-white/8"
+                  ? "bg-white/[0.02] text-slate-400 border border-white/[0.031]"
                   : "bg-gray-100 text-gray-500 border border-gray-200"
               }`}
             >
@@ -218,7 +236,13 @@ const DetailCard: React.FC<{
             </span>
           ))}
         </div>
-        {qty && <span className={`text-[10px] ${isDark ? "text-slate-600" : "text-gray-400"}`}>{qty}</span>}
+        {qty && (
+          <span
+            className={`text-[10px] ${isDark ? "text-slate-600" : "text-gray-400"}`}
+          >
+            {qty}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -245,7 +269,12 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
             Коллекция
           </h2>
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2">
-            {products.length} {products.length === 1 ? "продукт" : products.length < 5 ? "продукта" : "продуктов"}
+            {products.length}{" "}
+            {products.length === 1
+              ? "продукт"
+              : products.length < 5
+                ? "продукта"
+                : "продуктов"}
           </span>
           <AnimatePresence>
             {selectedCategory && (
@@ -256,7 +285,9 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
                 transition={{ duration: 0.2 }}
                 onClick={onClearFilters}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors mt-2 ${
-                  isDark ? "bg-white/10 text-gray-300 hover:bg-white/20" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                  isDark
+                    ? "bg-white/10 text-gray-300 hover:bg-white/20"
+                    : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                 }`}
               >
                 <X className="w-3 h-3" /> Сбросить
@@ -272,7 +303,11 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
           }`}
         >
           {([2, 3, 4] as const).map((num) => {
-            const labels: Record<number, string> = { 2: "Детали", 3: "Каталог", 4: "Обзор" };
+            const labels: Record<number, string> = {
+              2: "Детали",
+              3: "Каталог",
+              4: "Обзор",
+            };
             return (
               <button
                 key={num}
@@ -289,7 +324,11 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
                 }`}
                 aria-label={labels[num]}
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {num === 2 && (
                     <>
                       <rect x="3" y="3" width="8" height="18" rx="1.5" />

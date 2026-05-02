@@ -56,27 +56,27 @@ const AuroraTextComponent = memo(
   }: AuroraTextProps) => {
     // 2026 PERFORMANCE TIER SYSTEM
     const performanceTier = usePerformanceTier();
-    
+
     // Мемоизируем класс анимации на основе производительности
     const animationClass = useMemo(() => {
       switch (performanceTier) {
-        case 'high':
-          return 'animate-aurora-high';
-        case 'medium':
-          return 'animate-aurora-medium';
-        case 'low':
+        case "high":
+          return "animate-aurora-high";
+        case "medium":
+          return "animate-aurora-medium";
+        case "low":
         default:
-          return 'animate-aurora-low'; // Статичный градиент для слабых устройств
+          return "animate-aurora-low"; // Статичный градиент для слабых устройств
       }
     }, [performanceTier]);
-    
+
     // Адаптивная скорость анимации
     const adaptiveSpeed = useMemo(() => {
-      if (performanceTier === 'low') return 0; // Отключаем анимацию
-      if (performanceTier === 'medium') return speed * 0.7; // Замедляем на 30%
+      if (performanceTier === "low") return 0; // Отключаем анимацию
+      if (performanceTier === "medium") return speed * 0.7; // Замедляем на 30%
       return speed; // Полная скорость для HIGH
     }, [performanceTier, speed]);
-    
+
     const gradientStyle = {
       backgroundImage: `linear-gradient(135deg, ${colors.join(", ")}, ${
         colors[0]
@@ -92,7 +92,7 @@ const AuroraTextComponent = memo(
         <span className="sr-only">{children}</span>
         <span
           className={`relative bg-[length:200%_auto] bg-clip-text text-transparent ${
-            performanceTier !== 'low' ? animationClass : 'animate-aurora-low'
+            performanceTier !== "low" ? animationClass : "animate-aurora-low"
           }`}
           style={gradientStyle}
           aria-hidden="true"

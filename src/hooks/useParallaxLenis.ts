@@ -54,7 +54,10 @@ export function useParallaxLenis(
       if (relTop > winH + 200 || relTop + containerH < -200) return;
 
       const totalTravel = winH + containerH;
-      const progress = Math.max(0, Math.min(1, (scroll - (containerTop - winH)) / totalTravel));
+      const progress = Math.max(
+        0,
+        Math.min(1, (scroll - (containerTop - winH)) / totalTravel),
+      );
       const offset = (progress - 0.5) * strength * direction;
 
       el.style.transform = `translate3d(0, ${offset}px, 0)`;

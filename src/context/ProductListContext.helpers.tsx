@@ -18,4 +18,6 @@ export interface ProductListContextType {
 }
 
 /** @description Контекст для управления списком выбранных продуктов (корзиной). */
-export const ProductListContext = createContext<ProductListContextType | undefined>(undefined);
+export const ProductListContext = createContext<
+  ProductListContextType | undefined
+>(undefined);

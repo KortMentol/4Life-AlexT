@@ -14,7 +14,14 @@ import { usePerformanceTier } from "@/hooks";
 import { lenis } from "@/lib/lenis";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import SciFiCloseButton from "./SciFiCloseButton";
 import { useShoppingCart } from "./ShoppingCartAnimation";
@@ -32,7 +39,10 @@ export interface ProductDetailModalHandle {
   getPanelImage: () => HTMLDivElement | null;
 }
 
-const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+const IS_TOUCH =
+  typeof window !== "undefined"
+    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
+    : false;
 
 // ─── Tier configs ─────────────────────────────────────────────────────────────
 
@@ -86,7 +96,11 @@ const MediaSlide: React.FC<{
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-14 h-14 rounded-full bg-black/50 border border-white/30 flex items-center justify-center backdrop-blur-sm">
-              <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-6 h-6 text-white ml-1"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
@@ -128,7 +142,8 @@ const ThumbnailStrip: React.FC<{
     >
       {items.map((item, i) => {
         const isActive = i === activeIndex;
-        const thumb = item.type === "video" ? (item.poster ?? item.src) : item.src;
+        const thumb =
+          item.type === "video" ? (item.poster ?? item.src) : item.src;
 
         return (
           <button
@@ -142,15 +157,29 @@ const ThumbnailStrip: React.FC<{
           >
             {item.type === "video" ? (
               <>
-                <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <img
+                  src={thumb}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
               </>
             ) : (
-              <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+              <img
+                src={thumb}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             )}
           </button>
         );
@@ -175,7 +204,11 @@ const ProductStrip: React.FC<{
     if (!strip) return;
     const active = strip.children[activeIndex] as HTMLElement | undefined;
     if (active) {
-      active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      active.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
     }
   }, [activeIndex]);
 
@@ -194,12 +227,19 @@ const ProductStrip: React.FC<{
             key={p.id}
             onClick={() => onSelect(i)}
             className={`relative flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden transition-all duration-200 focus:outline-none ${
-              isActive ? "opacity-100 scale-110 brightness-110" : "opacity-35 hover:opacity-65 scale-100"
+              isActive
+                ? "opacity-100 scale-110 brightness-110"
+                : "opacity-35 hover:opacity-65 scale-100"
             }`}
             style={{ contain: "layout paint" }}
             aria-label={p.name}
           >
-            <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-contain bg-white p-1" />
+            <img
+              src={p.image}
+              alt={p.name}
+              loading="lazy"
+              className="w-full h-full object-contain bg-white p-1"
+            />
           </button>
         );
       })}
@@ -276,7 +316,11 @@ const ContentPanel: React.FC<{
     scrollTimer.current = setTimeout(() => setIsScrolling(false), 1000);
   }, []);
 
-  const qty = product.capsules ? `${product.capsules} капсул` : product.servings ? `${product.servings} порций` : null;
+  const qty = product.capsules
+    ? `${product.capsules} капсул`
+    : product.servings
+      ? `${product.servings} порций`
+      : null;
 
   return (
     <div className="flex flex-col h-full">
@@ -300,7 +344,7 @@ const ContentPanel: React.FC<{
                 key={cat}
                 className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${
                   isMobile
-                    ? "bg-white/8 text-slate-300 border border-white/10"
+                    ? "bg-white/[0.031] text-slate-300 border border-white/10"
                     : "bg-cyan-500/10 text-cyan-300 border border-cyan-400/20"
                 }`}
               >
@@ -319,11 +363,15 @@ const ContentPanel: React.FC<{
           {/* Meta row — price + volume */}
           <div
             className={`flex items-center gap-5 py-3 px-4 rounded-xl ${
-              isMobile ? "bg-white/4 border border-white/8" : "bg-white/[0.03] border border-white/[0.07]"
+              isMobile
+                ? "bg-white/[0.016] border border-white/[0.031]"
+                : "bg-white/[0.03] border border-white/[0.07]"
             }`}
           >
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mb-0.5">Цена</span>
+              <span className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mb-0.5">
+                Цена
+              </span>
               <span
                 className={`font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent ${
                   isMobile ? "text-xl" : "text-2xl"
@@ -339,20 +387,26 @@ const ContentPanel: React.FC<{
                   <span className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mb-0.5">
                     Объём
                   </span>
-                  <span className="text-sm font-medium text-slate-300">{qty}</span>
+                  <span className="text-sm font-medium text-slate-300">
+                    {qty}
+                  </span>
                 </div>
               </>
             )}
           </div>
 
           {/* Description */}
-          <p className={`text-slate-300 leading-relaxed ${isMobile ? "text-sm" : "text-sm"}`}>
+          <p
+            className={`text-slate-300 leading-relaxed ${isMobile ? "text-sm" : "text-sm"}`}
+          >
             {product.mainDescription}
           </p>
 
           {/* Main support */}
           <div className="space-y-2">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Поддерживает</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              Поддерживает
+            </h3>
             <div className="flex flex-wrap gap-1.5">
               {product.mainSupport.map((s) => (
                 <span
@@ -367,14 +421,20 @@ const ContentPanel: React.FC<{
 
           {/* Key benefits */}
           <div className="space-y-2">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Преимущества</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              Преимущества
+            </h3>
             <ul className="space-y-1.5">
               {product.keyBenefits.map((b, i) => (
                 <li key={i} className="flex items-start gap-2.5">
                   <div className="mt-1 w-3.5 h-3.5 rounded-full bg-emerald-400/15 border border-emerald-400/30 flex items-center justify-center flex-shrink-0">
                     <Icons.Check className="w-2 h-2 text-emerald-400" />
                   </div>
-                  <span className={`text-slate-400 leading-relaxed ${isMobile ? "text-xs" : "text-xs"}`}>{b}</span>
+                  <span
+                    className={`text-slate-400 leading-relaxed ${isMobile ? "text-xs" : "text-xs"}`}
+                  >
+                    {b}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -382,27 +442,41 @@ const ContentPanel: React.FC<{
 
           {/* How to use */}
           <div className="space-y-1.5">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Применение</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">{product.howToUse}</p>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              Применение
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {product.howToUse}
+            </p>
           </div>
 
           {/* Scientific evidence */}
           <div
             className={`p-4 rounded-xl space-y-1.5 ${
-              isMobile ? "bg-blue-500/5 border border-blue-400/12" : "bg-blue-500/5 border border-blue-400/15"
+              isMobile
+                ? "bg-blue-500/5 border border-blue-400/12"
+                : "bg-blue-500/5 border border-blue-400/15"
             }`}
           >
             <div className="flex items-center gap-2">
               <Icons.FlaskConical className="w-3.5 h-3.5 text-blue-400/80 flex-shrink-0" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400/70">Научная база</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400/70">
+                Научная база
+              </span>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed">{product.scientificEvidence}</p>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              {product.scientificEvidence}
+            </p>
           </div>
 
           {/* Composition */}
           <div className="space-y-1.5 pb-4">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Состав</h3>
-            <p className="text-[11px] text-slate-600 leading-relaxed">{product.composition}</p>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+              Состав
+            </h3>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              {product.composition}
+            </p>
           </div>
         </div>
         {/* end inner content wrapper */}
@@ -410,7 +484,7 @@ const ContentPanel: React.FC<{
 
       {/* Footer CTA — desktop only (mobile has fixed footer) */}
       {!isMobile && (
-        <div className="flex-shrink-0 pt-4 border-t border-white/8 mt-2">
+        <div className="flex-shrink-0 pt-4 border-t border-white/[0.031] mt-2">
           <button
             onClick={onAddToCart}
             className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-base transition-all duration-200 active:scale-[0.98] shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/25"
@@ -418,7 +492,9 @@ const ContentPanel: React.FC<{
             <Icons.ShoppingCart className="w-5 h-5" />
             <span>Добавить в список</span>
           </button>
-          <p className="text-center text-xs text-slate-600 mt-2">Консультация по подбору — бесплатно</p>
+          <p className="text-center text-xs text-slate-600 mt-2">
+            Консультация по подбору — бесплатно
+          </p>
         </div>
       )}
     </div>
@@ -427,339 +503,400 @@ const ContentPanel: React.FC<{
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 
-const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailModalProps>(
-  ({ product, products, isOpen, onClose }, ref) => {
-    const { addToCart } = useShoppingCart();
-    const tier = usePerformanceTier();
-    const panelImageRef = useRef<HTMLDivElement>(null);
-    const closeButtonRef = useRef<HTMLButtonElement>(null);
+const ProductDetailModal = forwardRef<
+  ProductDetailModalHandle,
+  ProductDetailModalProps
+>(({ product, products, isOpen, onClose }, ref) => {
+  const { addToCart } = useShoppingCart();
+  const tier = usePerformanceTier();
+  const panelImageRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-    // Which product in the list
-    const [productIndex, setProductIndex] = useState(0);
-    // Which media item in gallery
-    const [mediaIndex, setMediaIndex] = useState(0);
-    // Swipe state
-    const dragStartX = useRef(0);
-    const isDragging = useRef(false);
+  // Which product in the list
+  const [productIndex, setProductIndex] = useState(0);
+  // Which media item in gallery
+  const [mediaIndex, setMediaIndex] = useState(0);
+  // Swipe state
+  const dragStartX = useRef(0);
+  const isDragging = useRef(false);
 
-    const isMobile = IS_TOUCH || (typeof window !== "undefined" && window.innerWidth < 768);
-    const anim = ANIM[tier];
+  const isMobile =
+    IS_TOUCH || (typeof window !== "undefined" && window.innerWidth < 768);
+  const anim = ANIM[tier];
 
-    const currentProduct = products[productIndex] ?? null;
-    const gallery = currentProduct ? buildGallery(currentProduct) : [];
+  const currentProduct = products[productIndex] ?? null;
+  const gallery = currentProduct ? buildGallery(currentProduct) : [];
 
-    useImperativeHandle(ref, () => ({ getPanelImage: () => panelImageRef.current }));
+  useImperativeHandle(ref, () => ({
+    getPanelImage: () => panelImageRef.current,
+  }));
 
-    // Sync product index when modal opens
-    useEffect(() => {
-      if (isOpen && product) {
-        const idx = products.findIndex((p) => p.id === product.id);
-        setProductIndex(idx >= 0 ? idx : 0);
-        setMediaIndex(0);
-      }
-    }, [isOpen, product, products]);
-
-    // Reset media index when product changes
-    useEffect(() => {
+  // Sync product index when modal opens
+  useEffect(() => {
+    if (isOpen && product) {
+      const idx = products.findIndex((p) => p.id === product.id);
+      setProductIndex(idx >= 0 ? idx : 0);
       setMediaIndex(0);
-    }, [productIndex]);
+    }
+  }, [isOpen, product, products]);
 
-    // Lenis + body scroll lock
-    useEffect(() => {
-      const root = document.getElementById("root");
-      if (isOpen) {
-        document.body.classList.add("menu-open");
-        document.documentElement.classList.add("menu-open");
-        if (root) root.inert = true;
-        lenis.stop();
-        setTimeout(() => closeButtonRef.current?.focus(), 100);
+  // Reset media index when product changes
+  useEffect(() => {
+    setMediaIndex(0);
+  }, [productIndex]);
+
+  // Lenis + body scroll lock
+  useEffect(() => {
+    const root = document.getElementById("root");
+    if (isOpen) {
+      document.body.classList.add("menu-open");
+      document.documentElement.classList.add("menu-open");
+      if (root) root.inert = true;
+      lenis.stop();
+      setTimeout(() => closeButtonRef.current?.focus(), 100);
+    }
+    return () => {
+      document.body.classList.remove("menu-open");
+      document.documentElement.classList.remove("menu-open");
+      if (root) root.inert = false;
+      lenis.start();
+    };
+  }, [isOpen]);
+
+  // Keyboard
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      if (e.key === "Escape") handleClose();
+      if (e.key === "ArrowRight") goNextProduct();
+      if (e.key === "ArrowLeft") goPrevProduct();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen, productIndex]);
+
+  const handleClose = useCallback(() => {
+    onClose();
+    setTimeout(() => {
+      setProductIndex(0);
+      setMediaIndex(0);
+    }, 300);
+  }, [onClose]);
+
+  const goNextProduct = useCallback(() => {
+    setProductIndex((p) => (p + 1) % products.length);
+  }, [products.length]);
+
+  const goPrevProduct = useCallback(() => {
+    setProductIndex((p) => (p - 1 + products.length) % products.length);
+  }, [products.length]);
+
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (currentProduct) {
+        const btn = (e.target as HTMLElement).closest("button");
+        if (btn) addToCart(currentProduct, btn);
       }
-      return () => {
-        document.body.classList.remove("menu-open");
-        document.documentElement.classList.remove("menu-open");
-        if (root) root.inert = false;
-        lenis.start();
-      };
-    }, [isOpen]);
+    },
+    [currentProduct, addToCart],
+  );
 
-    // Keyboard
-    useEffect(() => {
-      const onKey = (e: KeyboardEvent) => {
-        if (!isOpen) return;
-        if (e.key === "Escape") handleClose();
-        if (e.key === "ArrowRight") goNextProduct();
-        if (e.key === "ArrowLeft") goPrevProduct();
-      };
-      document.addEventListener("keydown", onKey);
-      return () => document.removeEventListener("keydown", onKey);
-    }, [isOpen, productIndex]);
+  // Swipe handlers for product navigation
+  const onDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    isDragging.current = true;
+    dragStartX.current =
+      "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
+  }, []);
 
-    const handleClose = useCallback(() => {
-      onClose();
-      setTimeout(() => {
-        setProductIndex(0);
-        setMediaIndex(0);
-      }, 300);
-    }, [onClose]);
+  const onDragEnd = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      const endX =
+        "changedTouches" in e ? (e.changedTouches[0]?.clientX ?? 0) : e.clientX;
+      const delta = endX - dragStartX.current;
+      const threshold = isMobile ? 50 : 80;
+      if (Math.abs(delta) > threshold) {
+        if (delta < 0) goNextProduct();
+        else goPrevProduct();
+      }
+    },
+    [isMobile, goNextProduct, goPrevProduct],
+  );
 
-    const goNextProduct = useCallback(() => {
-      setProductIndex((p) => (p + 1) % products.length);
-    }, [products.length]);
+  const backdropBlur = isMobile
+    ? 0
+    : tier === "high"
+      ? 16
+      : tier === "medium"
+        ? 8
+        : 0;
 
-    const goPrevProduct = useCallback(() => {
-      setProductIndex((p) => (p - 1 + products.length) % products.length);
-    }, [products.length]);
+  if (!isOpen) return null;
 
-    const handleAddToCart = useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (currentProduct) {
-          const btn = (e.target as HTMLElement).closest("button");
-          if (btn) addToCart(currentProduct, btn);
-        }
-      },
-      [currentProduct, addToCart],
-    );
-
-    // Swipe handlers for product navigation
-    const onDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-      isDragging.current = true;
-      dragStartX.current = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
-    }, []);
-
-    const onDragEnd = useCallback(
-      (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDragging.current) return;
-        isDragging.current = false;
-        const endX = "changedTouches" in e ? (e.changedTouches[0]?.clientX ?? 0) : e.clientX;
-        const delta = endX - dragStartX.current;
-        const threshold = isMobile ? 50 : 80;
-        if (Math.abs(delta) > threshold) {
-          if (delta < 0) goNextProduct();
-          else goPrevProduct();
-        }
-      },
-      [isMobile, goNextProduct, goPrevProduct],
-    );
-
-    const backdropBlur = isMobile ? 0 : tier === "high" ? 16 : tier === "medium" ? 8 : 0;
-
-    if (!isOpen) return null;
-
-    return createPortal(
-      <AnimatePresence mode="wait">
-        {isOpen && (
+  return createPortal(
+    <AnimatePresence mode="wait">
+      {isOpen && (
+        <motion.div
+          key="modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: anim.duration }}
+          className={`fixed inset-0 z-[9999] flex items-end md:items-center justify-center ${isMobile ? "" : "p-4"}`}
+          style={{
+            backgroundColor: "rgba(0,0,0,0.92)",
+            backdropFilter:
+              backdropBlur > 0 ? `blur(${backdropBlur}px)` : "none",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleClose();
+          }}
+          data-lenis-prevent
+        >
           <motion.div
-            key="modal-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: anim.duration }}
-            className={`fixed inset-0 z-[9999] flex items-end md:items-center justify-center ${isMobile ? "" : "p-4"}`}
+            key="modal-panel"
+            initial={{
+              opacity: 0,
+              y: isMobile ? 60 : 24,
+              scale: isMobile ? 1 : 0.97,
+            }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{
+              opacity: 0,
+              y: isMobile ? 60 : 24,
+              scale: isMobile ? 1 : 0.97,
+            }}
+            transition={{ duration: anim.duration, ease: anim.ease }}
+            className={`relative flex flex-col w-full bg-[#030712] overflow-hidden ${
+              isMobile
+                ? "h-[95dvh] rounded-t-3xl"
+                : "max-w-6xl h-[90vh] rounded-3xl"
+            }`}
             style={{
-              backgroundColor: "rgba(0,0,0,0.92)",
-              backdropFilter: backdropBlur > 0 ? `blur(${backdropBlur}px)` : "none",
+              boxShadow:
+                tier === "high"
+                  ? "0 0 120px rgba(6,182,212,0.18), 0 40px 120px -20px rgba(0,0,0,0.95)"
+                  : "0 30px 80px -20px rgba(0,0,0,0.9)",
             }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) handleClose();
-            }}
-            data-lenis-prevent
+            onMouseDown={onDragStart}
+            onMouseUp={onDragEnd}
+            onTouchStart={onDragStart}
+            onTouchEnd={onDragEnd}
           >
-            <motion.div
-              key="modal-panel"
-              initial={{ opacity: 0, y: isMobile ? 60 : 24, scale: isMobile ? 1 : 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: isMobile ? 60 : 24, scale: isMobile ? 1 : 0.97 }}
-              transition={{ duration: anim.duration, ease: anim.ease }}
-              className={`relative flex flex-col w-full bg-[#030712] overflow-hidden ${
-                isMobile ? "h-[95dvh] rounded-t-3xl" : "max-w-6xl h-[90vh] rounded-3xl"
-              }`}
-              style={{
-                boxShadow:
-                  tier === "high"
-                    ? "0 0 120px rgba(6,182,212,0.18), 0 40px 120px -20px rgba(0,0,0,0.95)"
-                    : "0 30px 80px -20px rgba(0,0,0,0.9)",
-              }}
-              onMouseDown={onDragStart}
-              onMouseUp={onDragEnd}
-              onTouchStart={onDragStart}
-              onTouchEnd={onDragEnd}
+            {/* Close button */}
+            <div
+              className={`absolute ${isMobile ? "top-4 right-4" : "top-5 right-5"} z-50`}
             >
-              {/* Close button */}
-              <div className={`absolute ${isMobile ? "top-4 right-4" : "top-5 right-5"} z-50`}>
-                <SciFiCloseButton ref={closeButtonRef} onClick={handleClose} />
-              </div>
+              <SciFiCloseButton ref={closeButtonRef} onClick={handleClose} />
+            </div>
 
-              {/* ── DESKTOP LAYOUT ── */}
-              {!isMobile && (
-                <div className="flex flex-1 min-h-0 p-6 gap-5">
-                  {/* Left: thumbnail strip + main media */}
-                  <div className="flex gap-3 w-[48%] flex-shrink-0">
-                    {/* Vertical thumbnails */}
-                    <ThumbnailStrip
-                      items={gallery}
-                      activeIndex={mediaIndex}
-                      onSelect={setMediaIndex}
-                      orientation="vertical"
-                      tier={tier}
-                    />
+            {/* ── DESKTOP LAYOUT ── */}
+            {!isMobile && (
+              <div className="flex flex-1 min-h-0 p-6 gap-5">
+                {/* Left: thumbnail strip + main media */}
+                <div className="flex gap-3 w-[48%] flex-shrink-0">
+                  {/* Vertical thumbnails */}
+                  <ThumbnailStrip
+                    items={gallery}
+                    activeIndex={mediaIndex}
+                    onSelect={setMediaIndex}
+                    orientation="vertical"
+                    tier={tier}
+                  />
 
-                    {/* Main media */}
-                    <div className="flex-1 rounded-2xl overflow-hidden bg-slate-900 relative">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={`${currentProduct?.id}-${mediaIndex}`}
-                          initial={tier !== "low" ? { opacity: 0, scale: 0.98 } : {}}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={tier !== "low" ? { opacity: 0, scale: 0.98 } : {}}
-                          transition={{ duration: anim.duration * 0.7, ease: anim.ease }}
-                          className="absolute inset-0"
-                          ref={mediaIndex === 0 ? panelImageRef : undefined}
-                        >
-                          <MediaSlide item={gallery[mediaIndex]!} isActive={true} tier={tier} />
-                        </motion.div>
-                      </AnimatePresence>
-
-                      {/* Media nav arrows */}
-                      {gallery.length > 1 && (
-                        <>
-                          <button
-                            onClick={() => setMediaIndex((i) => (i - 1 + gallery.length) % gallery.length)}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-10"
-                          >
-                            <Icons.ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setMediaIndex((i) => (i + 1) % gallery.length)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-10"
-                          >
-                            <Icons.ChevronRight className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="w-px bg-white/[0.08] flex-shrink-0" />
-
-                  {/* Right: content */}
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentProduct?.id}
-                        initial={tier !== "low" ? { opacity: 0, x: 16 } : {}}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={tier !== "low" ? { opacity: 0, x: -16 } : {}}
-                        transition={{ duration: anim.duration * 0.8, ease: anim.ease }}
-                        className="h-full"
-                      >
-                        {currentProduct && (
-                          <ContentPanel
-                            product={currentProduct}
-                            tier={tier}
-                            isMobile={false}
-                            onAddToCart={handleAddToCart}
-                          />
-                        )}
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                </div>
-              )}
-
-              {/* ── MOBILE LAYOUT ── */}
-              {isMobile && (
-                <div className="flex flex-col flex-1 min-h-0">
-                  {/* Media area */}
-                  <div className="relative h-[42%] flex-shrink-0 bg-slate-900">
+                  {/* Main media */}
+                  <div className="flex-1 rounded-2xl overflow-hidden bg-slate-900 relative">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={`${currentProduct?.id}-${mediaIndex}`}
-                        initial={tier !== "low" ? { opacity: 0 } : {}}
-                        animate={{ opacity: 1 }}
-                        exit={tier !== "low" ? { opacity: 0 } : {}}
-                        transition={{ duration: anim.duration * 0.6 }}
+                        initial={
+                          tier !== "low" ? { opacity: 0, scale: 0.98 } : {}
+                        }
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={tier !== "low" ? { opacity: 0, scale: 0.98 } : {}}
+                        transition={{
+                          duration: anim.duration * 0.7,
+                          ease: anim.ease,
+                        }}
                         className="absolute inset-0"
+                        ref={mediaIndex === 0 ? panelImageRef : undefined}
                       >
-                        <MediaSlide item={gallery[mediaIndex]!} isActive={true} tier={tier} />
+                        <MediaSlide
+                          item={gallery[mediaIndex]!}
+                          isActive={true}
+                          tier={tier}
+                        />
                       </motion.div>
                     </AnimatePresence>
 
-                    {/* Horizontal thumbnail strip over image */}
+                    {/* Media nav arrows */}
                     {gallery.length > 1 && (
-                      <div className="absolute bottom-2 left-0 right-0 flex justify-center">
-                        <div className="flex gap-1.5 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm">
-                          {gallery.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setMediaIndex(i)}
-                              className={`rounded-full transition-all duration-200 ${
-                                i === mediaIndex ? "w-4 h-1.5 bg-cyan-400" : "w-1.5 h-1.5 bg-white/40"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
+                      <>
+                        <button
+                          onClick={() =>
+                            setMediaIndex(
+                              (i) => (i - 1 + gallery.length) % gallery.length,
+                            )
+                          }
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-10"
+                        >
+                          <Icons.ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() =>
+                            setMediaIndex((i) => (i + 1) % gallery.length)
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/15 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-10"
+                        >
+                          <Icons.ChevronRight className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
+                </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-h-0 overflow-hidden px-4 pt-4 pb-20">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentProduct?.id}
-                        initial={tier !== "low" ? { opacity: 0, y: 12 } : {}}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={tier !== "low" ? { opacity: 0, y: -12 } : {}}
-                        transition={{ duration: anim.duration * 0.7, ease: anim.ease }}
-                        className="h-full"
-                      >
-                        {currentProduct && (
-                          <ContentPanel
-                            product={currentProduct}
-                            tier={tier}
-                            isMobile={true}
-                            onAddToCart={handleAddToCart}
-                          />
-                        )}
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
+                {/* Divider */}
+                <div className="w-px bg-white/[0.08] flex-shrink-0" />
 
-                  {/* Mobile fixed footer */}
-                  <div className="absolute bottom-0 left-0 right-0 z-20 bg-[#030712]/98 border-t border-white/8 px-4 py-3 flex items-center gap-3">
-                    <div className="flex flex-col flex-shrink-0">
-                      <span className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold">Цена</span>
-                      <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                        {currentProduct?.lp} LP
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleAddToCart}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm active:scale-[0.97] transition-transform shadow-lg shadow-cyan-500/20"
+                {/* Right: content */}
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentProduct?.id}
+                      initial={tier !== "low" ? { opacity: 0, x: 16 } : {}}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={tier !== "low" ? { opacity: 0, x: -16 } : {}}
+                      transition={{
+                        duration: anim.duration * 0.8,
+                        ease: anim.ease,
+                      }}
+                      className="h-full"
                     >
-                      <Icons.ShoppingCart className="w-4 h-4" />
-                      <span>Добавить в список</span>
-                    </button>
-                  </div>
+                      {currentProduct && (
+                        <ContentPanel
+                          product={currentProduct}
+                          tier={tier}
+                          isMobile={false}
+                          onAddToCart={handleAddToCart}
+                        />
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* ── PRODUCT STRIP (bottom, both layouts) ── */}
-              {products.length > 1 && (
-                <div className={`flex-shrink-0 border-t border-white/8 bg-[#030712] ${isMobile ? "pb-20" : ""}`}>
-                  <ProductStrip products={products} activeIndex={productIndex} onSelect={setProductIndex} tier={tier} />
+            {/* ── MOBILE LAYOUT ── */}
+            {isMobile && (
+              <div className="flex flex-col flex-1 min-h-0">
+                {/* Media area */}
+                <div className="relative h-[42%] flex-shrink-0 bg-slate-900">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`${currentProduct?.id}-${mediaIndex}`}
+                      initial={tier !== "low" ? { opacity: 0 } : {}}
+                      animate={{ opacity: 1 }}
+                      exit={tier !== "low" ? { opacity: 0 } : {}}
+                      transition={{ duration: anim.duration * 0.6 }}
+                      className="absolute inset-0"
+                    >
+                      <MediaSlide
+                        item={gallery[mediaIndex]!}
+                        isActive={true}
+                        tier={tier}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Horizontal thumbnail strip over image */}
+                  {gallery.length > 1 && (
+                    <div className="absolute bottom-2 left-0 right-0 flex justify-center">
+                      <div className="flex gap-1.5 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm">
+                        {gallery.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setMediaIndex(i)}
+                            className={`rounded-full transition-all duration-200 ${
+                              i === mediaIndex
+                                ? "w-4 h-1.5 bg-cyan-400"
+                                : "w-1.5 h-1.5 bg-white/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </motion.div>
+
+                {/* Content */}
+                <div className="flex-1 min-h-0 overflow-hidden px-4 pt-4 pb-20">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentProduct?.id}
+                      initial={tier !== "low" ? { opacity: 0, y: 12 } : {}}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={tier !== "low" ? { opacity: 0, y: -12 } : {}}
+                      transition={{
+                        duration: anim.duration * 0.7,
+                        ease: anim.ease,
+                      }}
+                      className="h-full"
+                    >
+                      {currentProduct && (
+                        <ContentPanel
+                          product={currentProduct}
+                          tier={tier}
+                          isMobile={true}
+                          onAddToCart={handleAddToCart}
+                        />
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Mobile fixed footer */}
+                <div className="absolute bottom-0 left-0 right-0 z-20 bg-[#030712]/98 border-t border-white/[0.031] px-4 py-3 flex items-center gap-3">
+                  <div className="flex flex-col flex-shrink-0">
+                    <span className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold">
+                      Цена
+                    </span>
+                    <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                      {currentProduct?.lp} LP
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm active:scale-[0.97] transition-transform shadow-lg shadow-cyan-500/20"
+                  >
+                    <Icons.ShoppingCart className="w-4 h-4" />
+                    <span>Добавить в список</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── PRODUCT STRIP (bottom, both layouts) ── */}
+            {products.length > 1 && (
+              <div
+                className={`flex-shrink-0 border-t border-white/[0.031] bg-[#030712] ${isMobile ? "pb-20" : ""}`}
+              >
+                <ProductStrip
+                  products={products}
+                  activeIndex={productIndex}
+                  onSelect={setProductIndex}
+                  tier={tier}
+                />
+              </div>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>,
-      document.body,
-    );
-  },
-);
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+});
 
 ProductDetailModal.displayName = "ProductDetailModal";
 export default ProductDetailModal;

@@ -15,6 +15,9 @@ export { default as ScrollText } from "./ScrollText";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";
 export { default as SectionDivider } from "./SectionDivider";
 export { default as SectionHeading } from "./SectionHeading";
-export { default as ShoppingCartAnimation, useShoppingCart } from "./ShoppingCartAnimation";
+export {
+  default as ShoppingCartAnimation,
+  useShoppingCart,
+} from "./ShoppingCartAnimation";
 export { default as StaticFeature } from "./StaticFeature";
 export { TubelightNavbar } from "./tubelight-navbar";

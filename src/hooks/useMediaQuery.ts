@@ -2,7 +2,7 @@
  * @module src/hooks/useMediaQuery.ts
  * @description Набор хуков для работы с CSS медиа-запросами в React-компонентах. Основной хук useMediaQuery позволяет отслеживать соответствие заданному медиа-запросу, а дополнительные хуки предоставляют готовые решения для распространенных сценариев: определение типа устройства, ориентации экрана, предпочтений пользователя по доступности. Все хуки реактивно обновляют компоненты при изменении условий.
  * @author Kort
- * @version 1.0.0
+ * @version 2.0.0 - Singleton listeners (one matchMedia per unique query)
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries - Документация по CSS медиа-запросам
  * @usage
  * 1. `src/components/layout/Header.tsx`: Для адаптации хедера под разные размеры экрана и отображения мобильного меню.
@@ -27,58 +27,71 @@
  *   </div>
  * );
  */
-import { useCallback, useEffect, useState } from "react";
-import { debounce } from "@/utils/performanceUtils";
+import { useEffect, useState } from "react";
+
+// ─── Singleton Map ────────────────────────────────────────────────────────────
+// Один matchMedia listener на каждый уникальный query-строку.
+// Все компоненты подписываются через Set callbacks — нет дублирующих listeners.
+interface QueryEntry {
+  mql: MediaQueryList;
+  callbacks: Set<(matches: boolean) => void>;
+  handler: (e: MediaQueryListEvent) => void;
+}
+
+const queryMap = new Map<string, QueryEntry>();
+
+function getOrCreateEntry(query: string): QueryEntry {
+  let entry = queryMap.get(query);
+  if (!entry) {
+    const mql = window.matchMedia(query);
+    const callbacks = new Set<(matches: boolean) => void>();
+    const handler = (e: MediaQueryListEvent) => {
+      callbacks.forEach((cb) => cb(e.matches));
+    };
+    mql.addEventListener("change", handler);
+    entry = { mql, callbacks, handler };
+    queryMap.set(query, entry);
+  }
+  return entry;
+}
+
+function subscribe(query: string, cb: (matches: boolean) => void): () => void {
+  const entry = getOrCreateEntry(query);
+  entry.callbacks.add(cb);
+  return () => {
+    entry.callbacks.delete(cb);
+    // Если подписчиков не осталось — убираем listener и запись из Map
+    if (entry.callbacks.size === 0) {
+      entry.mql.removeEventListener("change", entry.handler);
+      queryMap.delete(query);
+    }
+  };
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 /**
- * Основной хук для работы с медиа-запросами
+ * Основной хук для работы с медиа-запросами.
+ * Использует синглтон-паттерн: один matchMedia listener на уникальный query.
  * @param query CSS медиа-запрос (например, '(max-width: 768px)')
  * @returns Булево значение, указывающее соответствует ли текущее состояние медиа-запросу
  */
 export const useMediaQuery = (query: string): boolean => {
-  // Проверяем, доступно ли window (для SSR)
-  const getMatches = useCallback((): boolean => {
-    if (typeof window !== "undefined") {
-      return window.matchMedia(query).matches;
-    }
-    return false;
-  }, [query]);
-
-  const [matches, setMatches] = useState<boolean>(getMatches());
+  const [matches, setMatches] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(query).matches;
+  });
 
   useEffect(() => {
-    // Функция для обновления состояния
-    const handleChange = () => {
-      setMatches(getMatches());
-    };
+    if (typeof window === "undefined") return;
 
-    // Дебаунсим функцию для оптимизации производительности
-    const debouncedHandleChange = debounce(handleChange, 300);
+    // Синхронизируем начальное значение (на случай SSR-гидрации)
+    setMatches(window.matchMedia(query).matches);
 
-    // Создаем медиа-запрос
-    const matchMedia = window.matchMedia(query);
-
-    // Добавляем слушатель событий с учетом кроссбраузерности
-    if (matchMedia.addEventListener) {
-      matchMedia.addEventListener("change", debouncedHandleChange);
-    } else {
-      // Для старых браузеров
-      matchMedia.addListener(debouncedHandleChange);
-    }
-
-    // Вызываем функцию один раз для инициализации
-    handleChange();
-
-    // Удаляем слушатель событий при размонтировании
-    return () => {
-      if (matchMedia.removeEventListener) {
-        matchMedia.removeEventListener("change", debouncedHandleChange);
-      } else {
-        // Для старых браузеров
-        matchMedia.removeListener(debouncedHandleChange);
-      }
-    };
-  }, [getMatches, query]);
+    // Подписываемся через синглтон — один listener на весь query
+    const unsubscribe = subscribe(query, setMatches);
+    return unsubscribe;
+  }, [query]);
 
   return matches;
 };

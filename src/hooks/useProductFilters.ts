@@ -19,7 +19,7 @@ export interface FilterState {
 
 export const useProductFilters = (
   products: DetailedProduct[],
-  filters: FilterState
+  filters: FilterState,
 ) => {
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -33,14 +33,14 @@ export const useProductFilters = (
           product.shortDescription.toLowerCase().includes(searchTerm) ||
           product.mainDescription.toLowerCase().includes(searchTerm) ||
           product.categories.some((cat) =>
-            cat.toLowerCase().includes(searchTerm)
+            cat.toLowerCase().includes(searchTerm),
           ) ||
           product.mainSupport.some((support) =>
-            support.toLowerCase().includes(searchTerm)
+            support.toLowerCase().includes(searchTerm),
           ) ||
           product.keyBenefits.some((benefit) =>
-            benefit.toLowerCase().includes(searchTerm)
-          )
+            benefit.toLowerCase().includes(searchTerm),
+          ),
       );
     }
 
@@ -48,15 +48,16 @@ export const useProductFilters = (
     if (filters.categories.length > 0) {
       result = result.filter((product) =>
         filters.categories.some((category) =>
-          product.categories.includes(category)
-        )
+          product.categories.includes(category),
+        ),
       );
     }
 
     // Price range filter
     result = result.filter(
       (product) =>
-        product.lp >= filters.priceRange[0] && product.lp <= filters.priceRange[1]
+        product.lp >= filters.priceRange[0] &&
+        product.lp <= filters.priceRange[1],
     );
 
     // Sorting

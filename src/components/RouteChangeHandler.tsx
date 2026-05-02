@@ -58,7 +58,10 @@ const restoreScrollPosition = (y: number, retries = 5) => {
   attemptScroll(retries);
 };
 
-const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHandlerProps) => {
+const RouteChangeHandler = ({
+  isMenuActionRef,
+  wasMenuOpenRef,
+}: RouteChangeHandlerProps) => {
   const location = useLocation();
   const navigationType = useNavigationType();
   const navigate = useNavigate();
@@ -115,7 +118,8 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
       setIsPopping(true);
       lenis?.stop();
 
-      const targetPath = event.state?.path || window.location.pathname + window.location.search;
+      const targetPath =
+        event.state?.path || window.location.pathname + window.location.search;
       const targetScroll = getScrollPosition(targetPath) ?? 0;
 
       // 2. Двойной RAF гарантирует, что браузер отрендерит черную вуаль
@@ -188,7 +192,11 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
   useEffect(() => {
     const currentPath = location.pathname + location.search;
     if (window.history.state?.path !== currentPath) {
-      window.history.replaceState({ ...window.history.state, path: currentPath }, "", currentPath);
+      window.history.replaceState(
+        { ...window.history.state, path: currentPath },
+        "",
+        currentPath,
+      );
     }
   }, [location.pathname, location.search]);
 

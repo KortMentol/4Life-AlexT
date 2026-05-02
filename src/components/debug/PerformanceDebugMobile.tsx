@@ -98,13 +98,17 @@ const PerformanceDebugMobile: React.FC = () => {
       const preventBackgroundScroll = (e: Event) => {
         e.stopPropagation();
       };
-      debugBody.addEventListener('touchstart', preventBackgroundScroll, { passive: true });
-      debugBody.addEventListener('touchmove', preventBackgroundScroll, { passive: true });
-      
+      debugBody.addEventListener("touchstart", preventBackgroundScroll, {
+        passive: true,
+      });
+      debugBody.addEventListener("touchmove", preventBackgroundScroll, {
+        passive: true,
+      });
+
       return () => {
         if (animationId) cancelAnimationFrame(animationId);
-        debugBody.removeEventListener('touchstart', preventBackgroundScroll);
-        debugBody.removeEventListener('touchmove', preventBackgroundScroll);
+        debugBody.removeEventListener("touchstart", preventBackgroundScroll);
+        debugBody.removeEventListener("touchmove", preventBackgroundScroll);
       };
     }
 

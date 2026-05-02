@@ -243,14 +243,26 @@ function DarkVeil({
 
     return () => {
       window.removeEventListener(TRANSITION_START, onStart as EventListener);
-      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+      window.removeEventListener(
+        TRANSITION_COMPLETE,
+        onComplete as EventListener,
+      );
       // При уходе из зоны видимости, останавливаем анимацию для экономии ресурсов
       if (frameId.current) {
         cancelAnimationFrame(frameId.current);
         frameId.current = null;
       }
     };
-  }, [isInView, isWebGLReady, speed, hueShift, noiseIntensity, scanlineIntensity, scanlineFrequency, warpAmount]);
+  }, [
+    isInView,
+    isWebGLReady,
+    speed,
+    hueShift,
+    noiseIntensity,
+    scanlineIntensity,
+    scanlineFrequency,
+    warpAmount,
+  ]);
 
   return (
     <div ref={wrapperRef} className="w-full h-full relative">

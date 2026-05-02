@@ -10,7 +10,11 @@
  * import { lenis, scrollTo } from '@/lib/lenis';
  */
 import Lenis from "lenis";
-import { LenisOptions, LenisScrollToOptions, Lenis as LenisType } from "./lenis.types";
+import {
+  LenisOptions,
+  LenisScrollToOptions,
+  Lenis as LenisType,
+} from "./lenis.types";
 
 // Определяем мобильное устройство (аналогично useIsMobile хуку)
 const isMobile = () => {
@@ -43,12 +47,16 @@ lenis.velocity = 0;
 /**
  * @description Плавно прокручивает страницу к указанной цели.
  */
-export const scrollTo = (target: string | HTMLElement | number, options: LenisScrollToOptions = {}) => {
+export const scrollTo = (
+  target: string | HTMLElement | number,
+  options: LenisScrollToOptions = {},
+) => {
   lenis.scrollTo(target, {
     offset: 0,
     immediate: false,
     duration: 1.5,
-    easing: (t: number) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2),
+    easing: (t: number) =>
+      t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2,
     ...options,
   });
 };

@@ -3,57 +3,59 @@ import {
   calculatePerformanceScore,
   detectDeviceSpecs,
 } from "@/utils/devicePerformance/devicePerformance";
+import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
 import { useEffect, useState } from "react";
+
+// Выносим кэш на уровень модуля (вне React-компонентов)
+// Это гарантирует, что расчет произойдет ровно 1 раз для всего сайта
+let globalTier: PerformanceTier | null = null;
+let isCalculating = false;
 
 /**
  * @module src/hooks/usePerformanceTier.ts
- * @description Хук для определения уровня производительности устройства клиента. Он анализирует характеристики устройства (CPU, GPU, RAM) и на основе скоринговой системы присваивает один из трех уровней: `high`, `medium` или `low`. Это позволяет адаптировать функциональность приложения (например, качество графики) под возможности пользователя.
- * @author Kort
- * @version 1.0.0
- * @returns {PerformanceTier} Строка, представляющая уровень производительности: `"high"`, `"medium"` или `"low"`.
- * @see calculatePerformanceScore - Функция, лежащая в основе логики определения производительности.
- * @usage
- * 1. `src/components/effects/FluidEffect.tsx`: Используется для выбора подходящей конфигурации WebGL-эффекта в зависимости от мощности устройства.
- * @example
- * const tier = usePerformanceTier();
- *
- * useEffect(() => {
- *   if (tier === 'low') {
- *     // Отключить сложные анимации
- *   }
- * }, [tier]);
+ * @description Оптимизированный хук (Singleton) для определения производительности.
+ * В DEV режиме поддерживает override через effectsDebugStore (localStorage).
  */
 export const usePerformanceTier = (): PerformanceTier => {
-  const [tier, setTier] = useState<PerformanceTier>("medium");
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      setTier("medium");
-      return;
+  // DEV: проверяем override из effectsDebugStore
+  if (import.meta.env.DEV && typeof window !== "undefined") {
+    const override = getTierOverride();
+    if (override !== "auto") {
+      return override as PerformanceTier;
     }
+  }
 
+  // Синхронно вычисляем тир при ПЕРВОМ вызове хука любым компонентом.
+  // Это избавляет от первоначального "medium" и последующего массового re-render'а.
+  if (typeof window !== "undefined" && !globalTier && !isCalculating) {
+    isCalculating = true;
     try {
-      // Определяем характеристики устройства
       const specs = detectDeviceSpecs();
-
-      // Рассчитываем производительность по единой системе
       const { score, tier: detectedTier } = calculatePerformanceScore(specs);
+      globalTier = detectedTier;
 
-      setTier(detectedTier);
-
-      console.log("🚀 Performance tier detected:", {
-        tier: detectedTier,
-        score,
-        specs,
-      });
+      console.log(
+        `🚀 System Performance Initialized: [${globalTier.toUpperCase()}] (Score: ${score})`,
+      );
     } catch (error) {
       console.error("❌ Error detecting performance tier:", error);
-      setTier("medium"); // Fallback на средний уровень
+      globalTier = "medium";
     }
-  }, []);
+    isCalculating = false;
+  }
+
+  // Инициализируем стейт сразу правильным глобальным значением (или medium для SSR)
+  const [tier, setTier] = useState<PerformanceTier>(globalTier || "medium");
+
+  // useEffect нужен только на случай, если глобальный тир вычислился чуть позже
+  // (например, при асинхронных загрузках)
+  useEffect(() => {
+    if (globalTier && tier !== globalTier) {
+      setTier(globalTier);
+    }
+  }, [tier]);
 
   return tier;
 };
 
-// Реэкспорт типа для обратной совместимости
 export type { PerformanceTier };

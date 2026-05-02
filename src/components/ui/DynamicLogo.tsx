@@ -5,8 +5,6 @@ import { useTheme } from "@/hooks";
 import logoLight from "@/assets/images/brand/4life-logo-light.svg";
 import logoDark from "@/assets/images/brand/4life-logo.svg";
 
-
-
 interface DynamicLogoProps {
   alt?: string;
   className?: string;

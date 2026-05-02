@@ -1,1 +1,1 @@
-export { default } from './ScrollNumber';
+export { default } from "./ScrollNumber";

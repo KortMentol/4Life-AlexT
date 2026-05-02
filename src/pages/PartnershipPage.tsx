@@ -16,7 +16,12 @@ const pageVariants = {
 };
 
 const PartnershipPage: React.FC = () => (
-  <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
+  <motion.div
+    initial="initial"
+    animate="animate"
+    exit="exit"
+    variants={pageVariants}
+  >
     <SEO
       title="Партнерство 4Life — Александр Тощев"
       description="Узнайте о возможностях партнерства с 4Life. Стабильный доход, прозрачная модель и поддержка опытного лидера."

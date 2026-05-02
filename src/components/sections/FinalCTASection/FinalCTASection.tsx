@@ -32,7 +32,7 @@ const FinalCTASection: React.FC = () => {
       height="auto"
       contentClasses="flex flex-col items-center justify-center text-center py-20 md:py-28"
       imageBrightness="brightness-[.35] dark:brightness-[.25]"
-      edgeFade={{ top: 160 }}
+      edgeFade={{ top: 160, colorLight: "#ffffff", colorDark: "#030712" }}
     >
       <div ref={ref} className="container max-w-5xl mx-auto px-6">
         {/* Stats row */}
@@ -47,7 +47,11 @@ const FinalCTASection: React.FC = () => {
               key={stat.label}
               initial={{ opacity: 0, y: 16 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * staggerDelay, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                duration: 0.6,
+                delay: i * staggerDelay,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className="flex flex-col items-center gap-1"
             >
               <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
@@ -66,7 +70,10 @@ const FinalCTASection: React.FC = () => {
           animate={isInView ? { scaleX: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="h-px w-32 mx-auto mb-12 origin-center"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)" }}
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)",
+          }}
         />
 
         {/* Heading */}
@@ -89,8 +96,8 @@ const FinalCTASection: React.FC = () => {
           transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg md:text-xl text-white/70 mb-10 leading-relaxed max-w-2xl mx-auto font-light"
         >
-          Получите персональную консультацию. Я помогу подобрать продукты под ваши цели и объясню как они работают — без
-          давления и обязательств.
+          Получите персональную консультацию. Я помогу подобрать продукты под
+          ваши цели и объясню как они работают — без давления и обязательств.
         </motion.p>
 
         {/* CTA buttons */}

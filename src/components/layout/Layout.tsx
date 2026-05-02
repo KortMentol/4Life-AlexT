@@ -1,11 +1,10 @@
+import { ScrollToTopButton } from "@/components/ui";
 import { updateScroll } from "@/lib/lenis";
 import { AnimatePresence } from "framer-motion";
 import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import FluidEffect from "@/components/effects/FluidEffect";
-import { ScrollToTopButton } from "@/components/ui";
-import Footer from "./Footer";
 import CustomScrollbar from "../ui/CustomScrollbar";
+import Footer from "./Footer";
 const Layout: React.FC = () => {
   const location = useLocation();
 
@@ -25,7 +24,6 @@ const Layout: React.FC = () => {
   return (
     <>
       <CustomScrollbar />
-      <FluidEffect />
       <main id="main-content" className="flex-grow">
         <AnimatePresence mode="wait">
           <Outlet key={location.pathname} />

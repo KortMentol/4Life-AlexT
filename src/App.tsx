@@ -1,3 +1,4 @@
+import EffectsDebugPanel from "@/components/debug/EffectsDebugPanel";
 import PerformanceDebug from "@/components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "@/components/debug/PerformanceDebugMobile";
 import Header from "@/components/layout/Header";
@@ -13,7 +14,13 @@ import { lenis, updateScroll } from "@/lib/lenis";
 import { scrollLockState } from "@/lib/scrollLockState";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import React, { createContext, Suspense, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  Suspense,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { Link, Route, Routes } from "react-router-dom";
 
@@ -44,7 +51,9 @@ export const useNavigation = () => {
   return context;
 };
 
-const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isPopping, setIsPopping] = useState(false);
 
   return (
@@ -59,7 +68,14 @@ function App() {
   const isMobile = useIsMobile();
 
   // Theodore Menu management with history API integration
-  const { isMenuOpen, toggleMenu, closeMenu, navigateFromMenu, isMenuActionRef, wasMenuOpenRef } = useTheodoreMenu();
+  const {
+    isMenuOpen,
+    toggleMenu,
+    closeMenu,
+    navigateFromMenu,
+    isMenuActionRef,
+    wasMenuOpenRef,
+  } = useTheodoreMenu();
 
   // Aggressive native scroll lock (when menu is closed)
   useTouchScrollLock(!isMenuOpen);
@@ -129,7 +145,9 @@ function App() {
       handleTouchStart(e);
     };
 
-    document.addEventListener("touchstart", handleTouchStartReset, { passive: true });
+    document.addEventListener("touchstart", handleTouchStartReset, {
+      passive: true,
+    });
     document.addEventListener("touchmove", handleTouchMove, { passive: true });
     document.addEventListener("touchend", handleTouchEnd, { passive: true });
     document.addEventListener("touchcancel", handleTouchEnd, { passive: true });
@@ -181,10 +199,17 @@ function App() {
   return (
     <NavigationProvider>
       <ProductListProvider>
-        <RouteChangeHandler isMenuActionRef={isMenuActionRef} wasMenuOpenRef={wasMenuOpenRef} />
+        <RouteChangeHandler
+          isMenuActionRef={isMenuActionRef}
+          wasMenuOpenRef={wasMenuOpenRef}
+        />
         <Suspense fallback={null}>
           <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />
-          <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
+          <TheodoreMenu
+            isOpen={isMenuOpen}
+            onClose={closeMenu}
+            navigateFromMenu={navigateFromMenu}
+          />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
@@ -202,8 +227,12 @@ function App() {
                   {" "}
                   <div className="card-modern p-12 text-center max-w-lg">
                     {" "}
-                    <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>{" "}
-                    <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>{" "}
+                    <h1 className="text-8xl font-bold mb-4 gradient-heading">
+                      404
+                    </h1>{" "}
+                    <p className="text-xl mb-8">
+                      Страница не найдена. Возможно, вы ошиблись адресом.
+                    </p>{" "}
                     <Link
                       to="/"
                       className="btn-modern btn-primary-modern px-8 py-4 rounded-lg inline-flex items-center gap-2"
@@ -235,6 +264,9 @@ function App() {
           (isMobile
             ? createPortal(<PerformanceDebugMobile />, document.body)
             : createPortal(<PerformanceDebug />, document.body))}
+        {import.meta.env.DEV &&
+          !isMobile &&
+          createPortal(<EffectsDebugPanel />, document.body)}
       </ProductListProvider>
     </NavigationProvider>
   );

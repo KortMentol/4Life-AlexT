@@ -17,7 +17,10 @@ import { scrollTo } from "@/lib/lenis";
 import { LayoutGroup, motion } from "framer-motion";
 import { memo } from "react";
 
-const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+const IS_TOUCH =
+  typeof window !== "undefined"
+    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
+    : false;
 
 export interface PageNavSection {
   label: string;
@@ -39,7 +42,9 @@ const PageNav = memo(({ sections, activeIndex }: PageNavProps) => {
   const cream = isDark ? "rgba(240,237,232,0.55)" : "rgba(26,24,20,0.50)";
   const dim = isDark ? "rgba(240,237,232,0.18)" : "rgba(26,24,20,0.13)";
 
-  const handleClick = (ref: React.RefObject<HTMLElement | HTMLDivElement | null>) => {
+  const handleClick = (
+    ref: React.RefObject<HTMLElement | HTMLDivElement | null>,
+  ) => {
     if (ref.current) {
       scrollTo(ref.current, {
         offset: 0,
@@ -87,7 +92,10 @@ const PageNav = memo(({ sections, activeIndex }: PageNavProps) => {
               </div>
 
               {/* Индикатор — жидкая полоска через layoutId */}
-              <div className="relative flex items-center justify-center" style={{ width: 1, height: 28 }}>
+              <div
+                className="relative flex items-center justify-center"
+                style={{ width: 1, height: 28 }}
+              >
                 {/* Фоновая тонкая линия — всегда видна */}
                 <div
                   className="absolute rounded-full"

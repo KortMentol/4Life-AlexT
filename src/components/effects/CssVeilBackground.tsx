@@ -6,17 +6,12 @@
  * @version 1.0.0
  */
 import { useTheme } from "@/hooks/useTheme";
-import React from 'react';
+import React from "react";
 
 const CssVeilBackground: React.FC = () => {
   const { theme } = useTheme();
 
-  return (
-    <div 
-      className="css-veil-background"
-      data-theme={theme}
-    />
-  );
+  return <div className="css-veil-background" data-theme={theme} />;
 };
 
 export default React.memo(CssVeilBackground);

@@ -31,17 +31,20 @@ const HowToBuyPage: React.FC = () => {
     {
       icon: Icons.BadgePercent,
       title: "Скидка 25%",
-      description: "Покупайте напрямую у 4Life по привилегированной цене Приоритетного Клиента",
+      description:
+        "Покупайте напрямую у 4Life по привилегированной цене Приоритетного Клиента",
     },
     {
       icon: Icons.Gift,
       title: "Бонусы и акции",
-      description: "Участвуйте в ежемесячных акциях и получайте подарки от компании",
+      description:
+        "Участвуйте в ежемесячных акциях и получайте подарки от компании",
     },
     {
       icon: Icons.Truck,
       title: "Доставка по России",
-      description: "Быстрая и надёжная доставка в любой регион через офис в Москве",
+      description:
+        "Быстрая и надёжная доставка в любой регион через офис в Москве",
     },
   ];
 
@@ -49,7 +52,8 @@ const HowToBuyPage: React.FC = () => {
     {
       number: "01",
       title: "Зарегистрируйтесь как Приоритетный Клиент",
-      description: "Пройдите быструю регистрацию на официальном сайте 4Life. Мой ID уже указан автоматически — вы получите доступ к скидкам и программе лояльности.",
+      description:
+        "Пройдите быструю регистрацию на официальном сайте 4Life. Мой ID уже указан автоматически — вы получите доступ к скидкам и программе лояльности.",
       action: {
         text: "Зарегистрироваться",
         link: "https://russia.4life.com/12299550/signup/PC",
@@ -59,7 +63,8 @@ const HowToBuyPage: React.FC = () => {
     {
       number: "02",
       title: "Свяжитесь со мной для консультации",
-      description: "Напишите мне в удобный мессенджер. Я помогу подобрать продукты, расскажу о дозировках и отвечу на все вопросы.",
+      description:
+        "Напишите мне в удобный мессенджер. Я помогу подобрать продукты, расскажу о дозировках и отвечу на все вопросы.",
       action: {
         text: "Написать в WhatsApp",
         link: "https://wa.me/79152561177",
@@ -69,7 +74,8 @@ const HowToBuyPage: React.FC = () => {
     {
       number: "03",
       title: "Оформите заказ через офис",
-      description: "С вашим ID Приоритетного Клиента свяжитесь с офисом в Москве для оформления заказа. Вы получите скидку и сможете выбрать удобный способ получения.",
+      description:
+        "С вашим ID Приоритетного Клиента свяжитесь с офисом в Москве для оформления заказа. Вы получите скидку и сможете выбрать удобный способ получения.",
       action: {
         text: "Контакты офиса",
         link: "/contact",
@@ -81,24 +87,33 @@ const HowToBuyPage: React.FC = () => {
   const faqData = [
     {
       question: "Зачем регистрироваться как Приоритетный Клиент?",
-      answer: "Регистрация дает вам скидку 25% на все продукты, доступ к эксклюзивным акциям и программе лояльности. Это бесплатно и занимает 2 минуты.",
+      answer:
+        "Регистрация дает вам скидку 25% на все продукты, доступ к эксклюзивным акциям и программе лояльности. Это бесплатно и занимает 2 минуты.",
     },
     {
       question: "Как получить продукцию после заказа?",
-      answer: "После оформления заказа через офис вы можете выбрать доставку курьером или самовывоз из офиса в Москве. Доставка осуществляется по всей России.",
+      answer:
+        "После оформления заказа через офис вы можете выбрать доставку курьером или самовывоз из офиса в Москве. Доставка осуществляется по всей России.",
     },
     {
       question: "Могу ли я купить без регистрации?",
-      answer: "Да, но без регистрации вы не получите скидку 25% и доступ к программе лояльности. Регистрация занимает всего 2 минуты и дает значительные преимущества.",
+      answer:
+        "Да, но без регистрации вы не получите скидку 25% и доступ к программе лояльности. Регистрация занимает всего 2 минуты и дает значительные преимущества.",
     },
     {
       question: "Как долго действует статус Приоритетного Клиента?",
-      answer: "Статус действует бессрочно. Вы сохраняете все привилегии и скидки на протяжении всего времени сотрудничества с 4Life.",
+      answer:
+        "Статус действует бессрочно. Вы сохраняете все привилегии и скидки на протяжении всего времени сотрудничества с 4Life.",
     },
   ];
 
   return (
-    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
+    <motion.div
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+    >
       <SEO
         title="Как приобрести продукцию 4Life - Александр Тощев"
         description="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам 25%. Пошаговая инструкция."
@@ -109,10 +124,14 @@ const HowToBuyPage: React.FC = () => {
       {/* Hero Section */}
       <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-950 dark:to-gray-900 overflow-hidden">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute inset-0" style={{
-            backgroundImage: "radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.3) 1px, transparent 0)",
-            backgroundSize: "32px 32px",
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.3) 1px, transparent 0)",
+              backgroundSize: "32px 32px",
+            }}
+          />
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -129,7 +148,8 @@ const HowToBuyPage: React.FC = () => {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Получите лучшие условия и экспертную поддержку, следуя простым шагам
+              Получите лучшие условия и экспертную поддержку, следуя простым
+              шагам
             </p>
           </motion.div>
         </div>
@@ -165,7 +185,10 @@ const HowToBuyPage: React.FC = () => {
                 className="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800 border border-blue-100 dark:border-gray-700"
               >
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
-                  <benefit.icon className="w-8 h-8 text-blue-600 dark:text-cyan-400" strokeWidth={1.5} />
+                  <benefit.icon
+                    className="w-8 h-8 text-blue-600 dark:text-cyan-400"
+                    strokeWidth={1.5}
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                   {benefit.title}
@@ -211,7 +234,9 @@ const HowToBuyPage: React.FC = () => {
                   {/* Number */}
                   <div className="flex-shrink-0">
                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-white">{step.number}</span>
+                      <span className="text-3xl font-bold text-white">
+                        {step.number}
+                      </span>
                     </div>
                   </div>
 
@@ -232,7 +257,11 @@ const HowToBuyPage: React.FC = () => {
                       {...(step.action.external && {
                         onClick: (e: React.MouseEvent) => {
                           e.preventDefault();
-                          window.open(step.action.link, "_blank", "noopener,noreferrer");
+                          window.open(
+                            step.action.link,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
                         },
                       })}
                     >

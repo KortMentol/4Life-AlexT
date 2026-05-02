@@ -38,13 +38,29 @@ export const WaveTransition = forwardRef<TransitionHandle>((_, ref) => {
 
       if (direction === "in") {
         tl.set(path, { attr: { d: "M 0 100 V 100 Q 50 100 100 100 V 100 z" } })
-          .to(path, { duration: 0.8, ease: "power4.in", attr: { d: "M 0 100 V 50 Q 50 0 100 50 V 100 z" } })
-          .to(path, { duration: 0.3, ease: "power2", attr: { d: "M 0 100 V 0 Q 50 0 100 0 V 100 z" } });
+          .to(path, {
+            duration: 0.8,
+            ease: "power4.in",
+            attr: { d: "M 0 100 V 50 Q 50 0 100 50 V 100 z" },
+          })
+          .to(path, {
+            duration: 0.3,
+            ease: "power2",
+            attr: { d: "M 0 100 V 0 Q 50 0 100 0 V 100 z" },
+          });
       } else {
         // direction 'out'
         tl.set(path, { attr: { d: "M 0 0 V 100 Q 50 100 100 100 V 0 z" } })
-          .to(path, { duration: 0.3, ease: "power2.in", attr: { d: "M 0 0 V 50 Q 50 0 100 50 V 0 z" } })
-          .to(path, { duration: 0.8, ease: "power4", attr: { d: "M 0 0 V 0 Q 50 0 100 0 V 0 z" } });
+          .to(path, {
+            duration: 0.3,
+            ease: "power2.in",
+            attr: { d: "M 0 0 V 50 Q 50 0 100 50 V 0 z" },
+          })
+          .to(path, {
+            duration: 0.8,
+            ease: "power4",
+            attr: { d: "M 0 0 V 0 Q 50 0 100 0 V 0 z" },
+          });
       }
     });
   };
@@ -54,8 +70,18 @@ export const WaveTransition = forwardRef<TransitionHandle>((_, ref) => {
   }));
 
   return (
-    <div ref={overlayRef} className="theodore-menu-container" style={{ pointerEvents: "none" }}>
-      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <div
+      ref={overlayRef}
+      className="theodore-menu-container"
+      style={{ pointerEvents: "none" }}
+    >
+      <svg
+        className="overlay"
+        width="100%"
+        height="100%"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
         <path
           ref={pathRef}
           className="overlay__path"

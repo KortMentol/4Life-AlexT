@@ -2,9 +2,14 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useTheme } from "@/hooks/useTheme";
 import { scrollTo as lenisScrollTo } from "@/lib/lenis";
-import { motion, useAnimationControls, useMotionValueEvent, useScroll } from "framer-motion";
+import {
+  motion,
+  useAnimationControls,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
 import { ArrowUp } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 const ScrollToTopButton: React.FC = () => {
   const isMobile = useIsMobile();
@@ -14,20 +19,28 @@ const ScrollToTopButton: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   const controls = useAnimationControls();
+  // Флаг видимости — избегаем лишних вызовов controls.start на каждый тик скролла
+  const isVisibleRef = useRef(false);
 
   // Достаем scrollYProgress (это и есть аппаратный процент скролла 0.0 - 1.0)
+  // useScroll вызывается безусловно (Rules of Hooks)
   const { scrollY, scrollYProgress } = useScroll();
 
   // Apple-style: процентная логика, но без Layout Thrashing!
+  // enabled-флаг через ref: не вызываем controls.start если состояние уже правильное
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
     const isScrollingUp = latest < previous;
-
-    // Получаем текущий процент прокрутки страницы аппаратно
     const progress = scrollYProgress.get();
 
-    // progress > 0.2 эквивалентно твоим 20%
-    if (progress > 0.2 && isScrollingUp) {
+    const shouldShow = progress > 0.2 && isScrollingUp;
+
+    // Пропускаем вызов если состояние уже совпадает — экономим на RAF/анимации
+    if (shouldShow === isVisibleRef.current) return;
+
+    isVisibleRef.current = shouldShow;
+
+    if (shouldShow) {
       controls.start({ opacity: 1, y: 0, pointerEvents: "auto" });
     } else {
       controls.start({ opacity: 0, y: 10, pointerEvents: "none" });
@@ -47,11 +60,15 @@ const ScrollToTopButton: React.FC = () => {
         animate={controls}
         transition={{ duration: 0.2, ease: "easeOut" }}
         className={`fixed z-50 bottom-2 right-2 w-10 h-10 rounded-full flex items-center justify-center ${
-          isDark ? "bg-gray-900/95 border-2 border-cyan-400/60" : "bg-white/95 border-2 border-blue-500/60"
+          isDark
+            ? "bg-gray-900/95 border-2 border-cyan-400/60"
+            : "bg-white/95 border-2 border-blue-500/60"
         } active:scale-90`}
         style={{
           contain: "layout style paint",
-          boxShadow: isDark ? "0 4px 12px rgba(6, 182, 212, 0.2)" : "0 4px 12px rgba(59, 130, 246, 0.2)",
+          boxShadow: isDark
+            ? "0 4px 12px rgba(6, 182, 212, 0.2)"
+            : "0 4px 12px rgba(59, 130, 246, 0.2)",
         }}
         aria-label="Прокрутить вверх"
       >
@@ -88,7 +105,9 @@ const ScrollToTopButton: React.FC = () => {
           : "bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600"
       }`}
       style={{
-        boxShadow: isDark ? "0 8px 24px rgba(139, 92, 246, 0.3)" : "0 8px 24px rgba(59, 130, 246, 0.3)",
+        boxShadow: isDark
+          ? "0 8px 24px rgba(139, 92, 246, 0.3)"
+          : "0 8px 24px rgba(59, 130, 246, 0.3)",
       }}
       aria-label="Прокрутить вверх"
     >
@@ -118,7 +137,9 @@ const ScrollToTopButton: React.FC = () => {
         <div className="absolute inset-0 rounded-full border border-white/20" />
 
         {/* Частицы только для HIGH tier */}
-        {tier === "high" && <div className="absolute inset-0 overflow-hidden rounded-full" />}
+        {tier === "high" && (
+          <div className="absolute inset-0 overflow-hidden rounded-full" />
+        )}
       </div>
 
       {/* Иконка */}

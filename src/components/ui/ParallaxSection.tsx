@@ -1,12 +1,14 @@
 // === Файл: src/components/ui/ParallaxSection.tsx ===
 /**
- * Параллакс секция с двумя стратегиями рендеринга.
+ * Параллакс секция — паттерн Olivier Larose.
  *
- * ВАРИАНТ 2 — mask-image для бесшовных переходов:
- * Проп `edgeFade` добавляет CSS mask-image на секцию.
- * Верх/низ фото растворяются в прозрачность автоматически,
- * без привязки к цвету соседней секции. Работает в обеих темах.
- * Compositor-only, 0 JS, 0 FPS cost.
+ * Desktop: фон всегда fixed (как у Оливье) + motion.div с y через useTransform.
+ * Никакого динамического переключения position — ноль layout reflow.
+ *
+ * Touch: useParallaxLenis через RAF синглтон — compositor-only.
+ *
+ * edgeFade: аппаратные overlay-градиенты (pointer-events-none).
+ * mask-image удалён — он создавал stacking context и блокировал compositor layer для fixed фона.
  */
 
 import { useParallaxLenis } from "@/hooks/useParallaxLenis";
@@ -28,31 +30,18 @@ export interface ParallaxSectionProps {
   clipPath?: string;
   skipPreload?: boolean;
   lazyLoad?: boolean;
-  /**
-   * Растворяет края секции в прозрачность через CSS mask-image.
-   * top/bottom — высота зоны растворения в px (default 120).
-   * Не зависит от цвета соседних секций — работает везде.
-   */
-  edgeFade?: { top?: number; bottom?: number };
+  edgeFade?: {
+    top?: number;
+    bottom?: number;
+    colorLight?: string;
+    colorDark?: string;
+  };
 }
 
-const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
-
-/** Строит CSS mask-image для растворения краёв */
-function buildMask(top: number, bottom: number): string {
-  const t = top > 0 ? `${top}px` : "0px";
-  const b = bottom > 0 ? `${bottom}px` : "0px";
-  if (top > 0 && bottom > 0) {
-    return `linear-gradient(to bottom, transparent 0px, black ${t}, black calc(100% - ${b}), transparent 100%)`;
-  }
-  if (top > 0) {
-    return `linear-gradient(to bottom, transparent 0px, black ${t})`;
-  }
-  if (bottom > 0) {
-    return `linear-gradient(to top, transparent 0px, black ${b})`;
-  }
-  return "none";
-}
+const IS_TOUCH =
+  typeof window !== "undefined"
+    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
+    : false;
 
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
@@ -75,11 +64,12 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
-  const [isNearViewport, setIsNearViewport] = useState(true);
+  // Отдельный inView для willChange — с буфером 100px, не once
+  const inViewForGPU = useInView(containerRef, {
+    once: false,
+    margin: "100px",
+  });
   const tier = usePerformanceTier();
-
-  // mask-image строка — вычисляем один раз
-  const maskStyle = edgeFade ? buildMask(edgeFade.top ?? 0, edgeFade.bottom ?? 0) : undefined;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -96,32 +86,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (IS_TOUCH) return;
-    const container = containerRef.current;
-    if (!container) return;
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => setIsNearViewport(e.isIntersecting)),
-      { threshold: 0, rootMargin: "300px 0px 300px 0px" },
-    );
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
-  const finalStrength = IS_TOUCH
-    ? tier === "low"
-      ? 0
-      : tier === "medium"
-        ? 180
-        : 300
-    : tier === "low"
-      ? 0
-      : tier === "medium"
-        ? 200
-        : 400;
+  const touchStrength = tier === "low" ? 0 : 300;
 
   useParallaxLenis(parallaxBgRef, containerRef, {
-    strength: IS_TOUCH ? finalStrength : 0,
+    strength: IS_TOUCH ? touchStrength : 0,
     disabled: !IS_TOUCH || tier === "low",
   });
 
@@ -130,10 +98,20 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     offset: ["start end", "end start"],
   });
 
+  // Паттерн Оливье Ларозе: проценты от высоты фона, масштабируется под любой экран
+  // Оригинал: ["-10%", "10%"] на фоне 120vh → ~±130px на 1080p
+  // medium и high одинаково — эффект погружения идентичный
+  const desktopYFrom = tier === "low" ? "0%" : "-10%";
+  const desktopYTo = tier === "low" ? "0%" : "10%";
+
   const desktopY = useTransform(
     scrollYProgress,
     [0, 1],
-    IS_TOUCH || tier === "low" ? ["0vh", "0vh"] : [`-${finalStrength / 2}px`, `${finalStrength / 2}px`],
+    IS_TOUCH || tier === "low"
+      ? ["0%", "0%"]
+      : inViewForGPU
+        ? [desktopYFrom, desktopYTo]
+        : ["0%", "0%"],
   );
 
   const finalBackgroundImage = isMobile
@@ -166,25 +144,58 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
   }, [backgroundVideo, inView]);
 
-  // Общий стиль секции с mask-image
   const sectionStyle: React.CSSProperties = {
     clipPath,
     WebkitClipPath: clipPath,
-    ...(maskStyle
-      ? {
-          maskImage: maskStyle,
-          WebkitMaskImage: maskStyle,
-        }
-      : {}),
   };
 
+  const fadeColorDark = edgeFade?.colorDark ?? "#000000";
+
+  const renderEdgeFades = () => {
+    if (!edgeFade) return null;
+    return (
+      <>
+        {edgeFade.top && edgeFade.top > 0 && (
+          <div
+            className="absolute top-0 left-0 w-full pointer-events-none z-20"
+            style={{
+              height: `${edgeFade.top}px`,
+              background: `linear-gradient(to bottom, ${fadeColorDark}, transparent)`,
+            }}
+          />
+        )}
+        {edgeFade.bottom && edgeFade.bottom > 0 && (
+          <div
+            className="absolute bottom-0 left-0 w-full pointer-events-none z-20"
+            style={{
+              height: `${edgeFade.bottom}px`,
+              background: `linear-gradient(to top, ${fadeColorDark}, transparent)`,
+            }}
+          />
+        )}
+      </>
+    );
+  };
+
+  // ─── TOUCH ────────────────────────────────────────────────────────────────
   if (IS_TOUCH) {
     return (
-      <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
-        <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
+      <section
+        ref={containerRef}
+        className={`relative overflow-hidden ${height} ${blendMode}`}
+        style={sectionStyle}
+      >
+        {renderEdgeFades()}
+        <div className={`relative z-10 h-full ${contentClasses}`}>
+          {children}
+        </div>
         <div
-          className="absolute left-0 w-full -z-10"
-          style={{ top: `-${finalStrength / 2}px`, height: `calc(100% + ${finalStrength}px)`, overflow: "hidden" }}
+          className="absolute left-0 w-full -z-10 pointer-events-none"
+          style={{
+            top: `-${touchStrength / 2}px`,
+            height: `calc(100% + ${touchStrength}px)`,
+            overflow: "hidden",
+          }}
         >
           <div
             ref={parallaxBgRef}
@@ -207,7 +218,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
                 {inView && (
                   <>
                     <source src={backgroundVideo} type="video/webm" />
-                    <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
+                    <source
+                      src={backgroundVideo.replace(".webm", ".mp4")}
+                      type="video/mp4"
+                    />
                   </>
                 )}
               </video>
@@ -216,7 +230,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
                 <img
                   src={lazyLoad && !inView ? undefined : finalBackgroundImage}
                   alt={altText}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover pointer-events-none"
                   loading="lazy"
                 />
               )
@@ -227,25 +241,32 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     );
   }
 
+  // ─── DESKTOP — паттерн Оливье: fixed всегда, только y меняется ───────────
   return (
-    <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
+    <section
+      ref={containerRef}
+      className={`relative overflow-hidden ${height} ${blendMode}`}
+      style={sectionStyle}
+    >
+      {renderEdgeFades()}
       <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
+
       <div
-        className="-z-10"
+        className="-z-10 pointer-events-none"
         style={{
-          position: isNearViewport ? "fixed" : "absolute",
+          position: "fixed",
+          top: "-20vh",
           left: 0,
           width: "100%",
-          height: isNearViewport ? `calc(100vh + ${finalStrength}px)` : "100%",
-          top: isNearViewport ? `-${finalStrength / 2}px` : 0,
+          height: "140vh",
         }}
       >
         <motion.div
           ref={parallaxBgRef}
-          className={`relative w-full h-full ${imageBrightness}`}
+          className={`relative w-full h-full ${imageBrightness} pointer-events-none`}
           style={{
-            y: isNearViewport ? desktopY : 0,
-            willChange: isNearViewport && tier !== "low" ? "transform" : "auto",
+            y: desktopY,
+            willChange: tier !== "low" && inViewForGPU ? "transform" : "auto",
             backfaceVisibility: "hidden",
           }}
         >
@@ -253,7 +274,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
             <video
               ref={videoRef}
               key={inView ? "loaded" : "unloaded"}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover pointer-events-none"
               autoPlay
               loop
               muted
@@ -265,7 +286,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               {inView && (
                 <>
                   <source src={backgroundVideo} type="video/webm" />
-                  <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
+                  <source
+                    src={backgroundVideo.replace(".webm", ".mp4")}
+                    type="video/mp4"
+                  />
                 </>
               )}
             </video>
@@ -274,7 +298,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               <img
                 src={lazyLoad && !inView ? undefined : finalBackgroundImage}
                 alt={altText}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover pointer-events-none"
                 loading="lazy"
               />
             )

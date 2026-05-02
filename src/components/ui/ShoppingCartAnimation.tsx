@@ -30,8 +30,16 @@ const CartButton: React.FC<CartButtonProps> = ({ itemCount, onClick }) => {
         .timeline()
         .to(numberRef.current, { scale: 0, duration: 0.1 })
         .to(bgRef.current, { scale: 1.2, duration: 0.4, ease: "power3.out" })
-        .to(bgRef.current, { scale: 1, duration: 0.8, ease: "elastic.out(1, 0.5)" })
-        .to(numberRef.current, { scale: 1, duration: 0.8, ease: "elastic.out(1, 0.5)" }, "-=0.6");
+        .to(bgRef.current, {
+          scale: 1,
+          duration: 0.8,
+          ease: "elastic.out(1, 0.5)",
+        })
+        .to(
+          numberRef.current,
+          { scale: 1, duration: 0.8, ease: "elastic.out(1, 0.5)" },
+          "-=0.6",
+        );
     }
     prevItemCount.current = itemCount;
   }, [itemCount]);
@@ -79,15 +87,29 @@ interface ShoppingCartAnimationProps {
   onClose: () => void;
 }
 
-const ShoppingCartAnimation: React.FC<ShoppingCartAnimationProps> = ({ isOpen, onToggle, onClose }) => {
-  const { items, removeFromList, updateItemQuantity, clearList } = useProductList();
+const ShoppingCartAnimation: React.FC<ShoppingCartAnimationProps> = ({
+  isOpen,
+  onToggle,
+  onClose,
+}) => {
+  const { items, removeFromList, updateItemQuantity, clearList } =
+    useProductList();
   const cartRef = useRef<HTMLDivElement>(null);
 
   const cartVariants = {
-    closed: { x: "100%", transition: { type: "spring", stiffness: 400, damping: 40 } },
+    closed: {
+      x: "100%",
+      transition: { type: "spring", stiffness: 400, damping: 40 },
+    },
     open: {
       x: "0%",
-      transition: { type: "spring", stiffness: 300, damping: 30, staggerChildren: 0.07, delayChildren: 0.2 },
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        staggerChildren: 0.07,
+        delayChildren: 0.2,
+      },
     },
   };
 
@@ -103,7 +125,10 @@ const ShoppingCartAnimation: React.FC<ShoppingCartAnimationProps> = ({ isOpen, o
 
   return (
     <>
-      <CartButton itemCount={items.reduce((acc, item) => acc + item.quantity, 0)} onClick={onToggle} />
+      <CartButton
+        itemCount={items.reduce((acc, item) => acc + item.quantity, 0)}
+        onClick={onToggle}
+      />
 
       <AnimatePresence>
         {isOpen && (
@@ -139,7 +164,10 @@ const ShoppingCartAnimation: React.FC<ShoppingCartAnimationProps> = ({ isOpen, o
 
             <div className="flex-1 overflow-y-auto p-6">
               {items.length === 0 ? (
-                <motion.div variants={itemVariants} className="text-center py-12">
+                <motion.div
+                  variants={itemVariants}
+                  className="text-center py-12"
+                >
                   <div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
                     <Icons.ShoppingCart className="w-8 h-8 text-gray-500" />
                   </div>
@@ -152,24 +180,38 @@ const ShoppingCartAnimation: React.FC<ShoppingCartAnimationProps> = ({ isOpen, o
                       key={item.id}
                       variants={itemVariants}
                       layout
-                      className="flex gap-4 p-4 bg-white/5 rounded-lg border border-white/10"
+                      className="flex gap-4 p-4 bg-white/[0.02] rounded-lg border border-white/10"
                     >
-                      <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
                       <div className="flex-1">
-                        <h3 className="text-white font-medium text-sm line-clamp-2">{item.name}</h3>
+                        <h3 className="text-white font-medium text-sm line-clamp-2">
+                          {item.name}
+                        </h3>
                         {/* --- ИСПРАВЛЕНИЕ: Теперь `item.lp` доступно без приведения типов --- */}
-                        <p className="text-cyan-400 font-bold mt-1">{item.lp} LP</p>
+                        <p className="text-cyan-400 font-bold mt-1">
+                          {item.lp} LP
+                        </p>
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                              onClick={() =>
+                                updateItemQuantity(item.id, item.quantity - 1)
+                              }
                               className="w-6 h-6 bg-white/10 hover:bg-white/20 rounded text-white text-sm flex items-center justify-center"
                             >
                               -
                             </button>
-                            <span className="text-white text-sm w-8 text-center">{item.quantity}</span>
+                            <span className="text-white text-sm w-8 text-center">
+                              {item.quantity}
+                            </span>
                             <button
-                              onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                              onClick={() =>
+                                updateItemQuantity(item.id, item.quantity + 1)
+                              }
                               className="w-6 h-6 bg-white/10 hover:bg-white/20 rounded text-white text-sm flex items-center justify-center"
                             >
                               +
@@ -190,17 +232,27 @@ const ShoppingCartAnimation: React.FC<ShoppingCartAnimationProps> = ({ isOpen, o
             </div>
 
             {items.length > 0 && (
-              <motion.div variants={itemVariants} className="p-6 border-t border-white/10 bg-gray-900/50">
+              <motion.div
+                variants={itemVariants}
+                className="p-6 border-t border-white/10 bg-gray-900/50"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-white font-medium">Итого:</span>
-                  <span className="text-2xl font-bold text-cyan-400">{getTotalPrice()} LP</span>
+                  <span className="text-2xl font-bold text-cyan-400">
+                    {getTotalPrice()} LP
+                  </span>
                 </div>
                 <button className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-lg transition-colors">
                   Оформить заказ
                 </button>
                 <div className="flex justify-between mt-4">
-                  <p className="text-xs text-gray-400 text-center">Доставка и налоги рассчитываются при оформлении</p>
-                  <button onClick={clearList} className="text-xs text-red-400 hover:text-red-300 transition-colors">
+                  <p className="text-xs text-gray-400 text-center">
+                    Доставка и налоги рассчитываются при оформлении
+                  </p>
+                  <button
+                    onClick={clearList}
+                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                  >
                     Очистить корзину
                   </button>
                 </div>
@@ -225,7 +277,7 @@ export const useShoppingCart = () => {
       });
       window.dispatchEvent(event);
     },
-    [addToList]
+    [addToList],
   );
 
   return { addToCart };

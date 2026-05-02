@@ -52,10 +52,10 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
             initial={{ y: 150, opacity: 0, scale: 0.95 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 150, opacity: 0, scale: 0.95 }}
-            transition={{ 
-              duration: 0.4, 
+            transition={{
+              duration: 0.4,
               ease: [0.16, 1, 0.3, 1],
-              opacity: { duration: 0.3 }
+              opacity: { duration: 0.3 },
             }}
             className={`filter-capsule ${theme === "dark" ? "filter-capsule--dark" : "filter-capsule--light"}`}
             data-lenis-prevent="true"
@@ -80,14 +80,16 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
                       d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
                     />
                   </svg>
-                  <h3 className={`text-base font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                  <h3
+                    className={`text-base font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                  >
                     Фильтры
                   </h3>
                   <span
                     key={productCount}
                     className={`product-counter changed text-xs font-bold px-2.5 py-1 rounded-full ${
-                      theme === "dark" 
-                        ? "bg-cyan-500/20 text-cyan-400 border border-cyan-400/30" 
+                      theme === "dark"
+                        ? "bg-cyan-500/20 text-cyan-400 border border-cyan-400/30"
                         : "bg-blue-500/20 text-blue-600 border border-blue-400/30"
                     }`}
                   >
@@ -138,7 +140,9 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
                 {categories.map((cat) => (
                   <motion.button
                     key={cat}
-                    onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
+                    onClick={() =>
+                      onCategoryChange(selectedCategory === cat ? null : cat)
+                    }
                     whileHover={{ scale: 1.03, y: -2 }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}

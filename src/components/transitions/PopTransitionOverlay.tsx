@@ -13,7 +13,9 @@ interface PopTransitionOverlayProps {
  * Features: Adaptive performance tiers, ethereal gradients, buttery smooth 120fps
  * Color analysis: Futuristic health supplement site with cyan/blue accents
  */
-const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive }) => {
+const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({
+  isActive,
+}) => {
   const performanceTier = usePerformanceTier();
 
   // Производительность по тирам
@@ -39,9 +41,9 @@ const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive })
           `,
           backdropFilter: "blur(12px) saturate(1.2) brightness(0.95)",
           duration: 0.5,
-          ease: [0.25, 0.1, 0.25, 1] // Organic Immersive Garden easing
+          ease: [0.25, 0.1, 0.25, 1], // Organic Immersive Garden easing
         };
-      
+
       case "medium":
         return {
           // MEDIUM: Баланс - простой градиент + легкий blur
@@ -54,9 +56,9 @@ const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive })
           `,
           backdropFilter: "blur(6px) saturate(1.1)",
           duration: 0.4,
-          ease: [0.25, 0.46, 0.45, 0.94] // Smooth but faster
+          ease: [0.25, 0.46, 0.45, 0.94], // Smooth but faster
         };
-      
+
       case "low":
       default:
         return {
@@ -64,7 +66,7 @@ const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive })
           background: "rgba(15, 23, 42, 0.95)",
           backdropFilter: "none",
           duration: 0.3,
-          ease: [0.4, 0, 0.2, 1] // Fast and efficient
+          ease: [0.4, 0, 0.2, 1], // Fast and efficient
         };
     }
   };
@@ -85,7 +87,7 @@ const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive })
             // Оптимизация GPU слоев
             transform: "translateZ(0)",
             backfaceVisibility: "hidden",
-            isolation: "isolate"
+            isolation: "isolate",
           }}
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
@@ -93,8 +95,8 @@ const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive })
             opacity: 0,
             transition: {
               duration: config.duration,
-              ease: config.ease
-            }
+              ease: config.ease,
+            },
           }}
         />
       )}

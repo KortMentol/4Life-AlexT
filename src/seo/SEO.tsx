@@ -13,7 +13,9 @@ const toAbsoluteUrl = (path?: string): string => {
   // Если путь уже является полным URL, возвращаем его как есть.
   if (path.startsWith("http")) return path;
   // Убираем завершающий слэш у siteConfig.url, если он есть.
-  const baseUrl = siteConfig.url.endsWith("/") ? siteConfig.url.slice(0, -1) : siteConfig.url;
+  const baseUrl = siteConfig.url.endsWith("/")
+    ? siteConfig.url.slice(0, -1)
+    : siteConfig.url;
   // Убираем начальный слэш у path, если он есть.
   const cleanPath = path.startsWith("/") ? path.slice(1) : path;
   return `${baseUrl}/${cleanPath}`;
@@ -27,7 +29,9 @@ const toAbsoluteUrl = (path?: string): string => {
 const mergeTitle = (title?: string): string => {
   if (!title) return siteConfig.name;
   // Проверяем, содержит ли заголовок уже название сайта, чтобы избежать дублирования.
-  return title.includes(siteConfig.name) ? title : `${title} | ${siteConfig.name}`;
+  return title.includes(siteConfig.name)
+    ? title
+    : `${title} | ${siteConfig.name}`;
 };
 
 // --- JSON-LD Schema Builders ---
@@ -59,7 +63,9 @@ const buildWebSiteSearchJSONLD = () => ({
 const buildOrganizationJSONLD = () => ({
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: siteConfig.distributor?.name ? `4Life с ${siteConfig.distributor.name}` : siteConfig.name,
+  name: siteConfig.distributor?.name
+    ? `4Life с ${siteConfig.distributor.name}`
+    : siteConfig.name,
   url: siteConfig.url,
   logo: toAbsoluteUrl("/favicon.svg") || toAbsoluteUrl(siteConfig.ogImage),
   // Удалены ссылки на социальные сети, так как они не используются
@@ -117,7 +123,10 @@ export const SEO: React.FC<SEOProps> = ({
     <Helmet>
       <title>{finalTitle}</title>
       <meta name="description" content={description} />
-      <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
+      <meta
+        name="robots"
+        content={noIndex ? "noindex, nofollow" : "index, follow"}
+      />
       <link rel="canonical" href={url} />
 
       {/* Open Graph */}
@@ -135,7 +144,9 @@ export const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:image" content={absoluteImage} />
 
       {/* JSON-LD */}
-      {jsonLd.length > 0 && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
+      {jsonLd.length > 0 && (
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      )}
     </Helmet>
   );
 };

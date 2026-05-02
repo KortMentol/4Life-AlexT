@@ -19,24 +19,32 @@ interface ClipLineProps {
   className?: string;
 }
 
-const ClipLine = memo(({ children, delay = 0, tier, className }: ClipLineProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  // once: false — анимация повторяется при каждом входе в viewport
-  // margin — триггер чуть раньше появления, сброс когда ушёл за экран
-  const inView = useInView(ref, { once: false, margin: "-15% 0px -15% 0px" });
+const ClipLine = memo(
+  ({ children, delay = 0, tier, className }: ClipLineProps) => {
+    const ref = useRef<HTMLDivElement>(null);
+    // once: false — анимация повторяется при каждом входе в viewport
+    // margin — триггер чуть раньше появления, сброс когда ушёл за экран
+    const inView = useInView(ref, { once: false, margin: "-15% 0px -15% 0px" });
 
-  return (
-    <div ref={ref} className={`overflow-hidden ${className ?? ""}`}>
-      <motion.div
-        initial={tier !== "low" ? { y: "105%", opacity: 0 } : { opacity: 1 }}
-        animate={tier !== "low" ? (inView ? { y: "0%", opacity: 1 } : { y: "105%", opacity: 0 }) : { opacity: 1 }}
-        transition={{ duration: 0.85, delay, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-});
+    return (
+      <div ref={ref} className={`overflow-hidden ${className ?? ""}`}>
+        <motion.div
+          initial={tier !== "low" ? { y: "105%", opacity: 0 } : { opacity: 1 }}
+          animate={
+            tier !== "low"
+              ? inView
+                ? { y: "0%", opacity: 1 }
+                : { y: "105%", opacity: 0 }
+              : { opacity: 1 }
+          }
+          transition={{ duration: 0.85, delay, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {children}
+        </motion.div>
+      </div>
+    );
+  },
+);
 
 ClipLine.displayName = "ClipLine";
 

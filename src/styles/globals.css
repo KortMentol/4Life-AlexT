@@ -146,7 +146,6 @@ section {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   outline: 1px solid transparent;
-  filter: blur(0.1px);
 }
 
 .grid__item-inner {
@@ -160,7 +159,7 @@ section {
 .grid__item--type-1 {
   transform: translateZ(0);
   backface-visibility: hidden;
-  filter: blur(0.3px) contrast(1.05);
+  filter: contrast(1.05);
 }
 .grid__item--type-1 .grid__item-inner {
   transform: scale(1.01);
@@ -169,7 +168,7 @@ section {
 .grid__item--type-2 {
   transform: translateZ(0);
   backface-visibility: hidden;
-  filter: blur(0.2px) contrast(1.03);
+  filter: contrast(1.03);
   outline: 1px solid transparent;
 }
 .grid__item--type-2 .grid__item-inner {
@@ -180,7 +179,6 @@ section {
 .grid__item--type-3 {
   transform: translateZ(0);
   backface-visibility: hidden;
-  filter: blur(0.1px);
   outline: 1px solid transparent;
 }
 .grid__item--type-3 .grid__item-inner {
@@ -352,4 +350,12 @@ section {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ─── EffectsDebug: отключение filter:blur на Grid3D элементах ───────────────── */
+[data-filter="false"] .grid__item,
+[data-filter="false"] .grid__item--type-1,
+[data-filter="false"] .grid__item--type-2,
+[data-filter="false"] .grid__item--type-3 {
+  filter: none !important;
 }

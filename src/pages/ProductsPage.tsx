@@ -11,7 +11,13 @@ import { lenis } from "@/lib/lenis";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 
 // Секции
@@ -29,16 +35,20 @@ const ProductsPage: React.FC = () => {
 
   // --- STATE ---
   // Category synced with URL ?cat=... for browser back/forward support
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    () => searchParams.get("cat") ?? null,
+  );
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<DetailedProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<DetailedProduct | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFloatingFilter, setShowFloatingFilter] = useState(false);
   // Grid mode persisted in localStorage
   const [gridMode, setGridMode] = useState<2 | 3 | 4>(() => {
     try {
       const saved = localStorage.getItem("products-grid-mode");
-      if (saved === "2" || saved === "3" || saved === "4") return Number(saved) as 2 | 3 | 4;
+      if (saved === "2" || saved === "3" || saved === "4")
+        return Number(saved) as 2 | 3 | 4;
     } catch {}
     return 4;
   });
@@ -136,7 +146,11 @@ const ProductsPage: React.FC = () => {
 
         <div className="py-12 relative z-20">
           {/* ИДЕАЛЬНЫЙ ЯКОРЬ В НОРМАЛЬНОМ ПОТОКЕ */}
-          <div ref={gridAnchorRef} className="w-full h-0 pointer-events-none" aria-hidden="true" />
+          <div
+            ref={gridAnchorRef}
+            className="w-full h-0 pointer-events-none"
+            aria-hidden="true"
+          />
 
           {/* Заголовок с отступами */}
           <div className="max-w-[1600px] mx-auto px-4 md:px-8">
@@ -176,7 +190,11 @@ const ProductsPage: React.FC = () => {
             }`}
             aria-label="Фильтры"
           >
-            {isFiltersOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Filter className="w-6 h-6" />}
+            {isFiltersOpen ? (
+              <Icons.X className="w-6 h-6" />
+            ) : (
+              <Icons.Filter className="w-6 h-6" />
+            )}
           </motion.button>
         )}
       </AnimatePresence>

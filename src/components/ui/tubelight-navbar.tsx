@@ -1,10 +1,10 @@
-import { motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
 import { useTransition } from "@/context/TransitionProvider";
 import { useTheme } from "@/hooks/useTheme";
 import { mainNav } from "@/site-config/site";
 import { scrollToTop } from "@/utils/navigationUtils";
+import { motion, useInView } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 
 export const TubelightNavbar: React.FC = () => {
   const location = useLocation();
@@ -17,19 +17,36 @@ export const TubelightNavbar: React.FC = () => {
   const [clickedIndex, setClickedIndex] = useState<number | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // useInView с once:false — когда навбар не виден, RAF не работает
+  const inView = useInView(navRef, { once: false, margin: "100px" });
 
   // --- ИЗМЕНЕНИЕ 2: Сбрасываем "залипание" после завершения перехода на новую страницу ---
   useEffect(() => {
     setClickedIndex(null);
   }, [location.pathname]);
 
+  // Cleanup RAF при размонтировании
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
   return (
     <motion.nav
+      ref={navRef}
       role="navigation"
       className="hidden md:flex items-center justify-center h-full"
       style={{ marginLeft: "4rem" }}
       onMouseLeave={() => setHoveredIndex(null)}
       onMouseMove={(e) => {
+        // Когда навбар не виден — не тратим CPU на RAF
+        if (!inView) return;
+
         // Оптимизация: throttling для мобильных (хотя навбар скрыт на мобильных)
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         rafRef.current = requestAnimationFrame(() => {
@@ -44,12 +61,17 @@ export const TubelightNavbar: React.FC = () => {
             if (!el) return;
             const rect = el.getBoundingClientRect();
             const center = rect.left + rect.width / 2;
-            const edgeDistance = Math.max(0, e.clientX - (rect.right + OVERLAP), rect.left - OVERLAP - e.clientX);
+            const edgeDistance = Math.max(
+              0,
+              e.clientX - (rect.right + OVERLAP),
+              rect.left - OVERLAP - e.clientX,
+            );
             const centerDistance = Math.abs(center - e.clientX);
 
             if (
               edgeDistance < bestMatch.edgeDistance ||
-              (edgeDistance === bestMatch.edgeDistance && centerDistance < bestMatch.centerDistance)
+              (edgeDistance === bestMatch.edgeDistance &&
+                centerDistance < bestMatch.centerDistance)
             ) {
               bestMatch = { index: idx, edgeDistance, centerDistance };
             }
@@ -84,7 +106,9 @@ export const TubelightNavbar: React.FC = () => {
               onMouseEnter={() => setHoveredIndex(index)}
               className={({ isActive }) =>
                 `flex items-center px-3 py-1.5 rounded-xl text-[14px] font-medium relative whitespace-nowrap tracking-tight transition-colors duration-300 ${
-                  isActive ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-300"
+                  isActive
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300"
                 }`
               }
             >
@@ -114,25 +138,33 @@ export const TubelightNavbar: React.FC = () => {
                         <div
                           className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full"
                           style={{
-                            background: isDark ? "linear-gradient(90deg, #00ffff, #00aaff)" : "linear-gradient(90deg, #374151, #1f2937)",
+                            background: isDark
+                              ? "linear-gradient(90deg, #00ffff, #00aaff)"
+                              : "linear-gradient(90deg, #374151, #1f2937)",
                           }}
                         >
                           <div
                             className="absolute w-12 h-6 rounded-full blur-md -top-2 -left-2"
                             style={{
-                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.25)",
+                              background: isDark
+                                ? "rgba(0, 255, 255, 0.2)"
+                                : "rgba(55, 65, 81, 0.25)",
                             }}
                           />
                           <div
                             className="absolute w-8 h-6 rounded-full blur-md -top-1"
                             style={{
-                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.2)",
+                              background: isDark
+                                ? "rgba(0, 255, 255, 0.2)"
+                                : "rgba(55, 65, 81, 0.2)",
                             }}
                           />
                           <div
                             className="absolute w-4 h-4 rounded-full blur-sm top-0 left-2"
                             style={{
-                              background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.15)",
+                              background: isDark
+                                ? "rgba(0, 255, 255, 0.2)"
+                                : "rgba(55, 65, 81, 0.15)",
                             }}
                           />
                         </div>

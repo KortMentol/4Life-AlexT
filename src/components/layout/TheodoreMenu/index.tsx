@@ -31,8 +31,6 @@ declare global {
   }
 }
 
-
-
 interface TheodoreMenuProps {
   isOpen: boolean;
   onClose: () => void;
@@ -65,7 +63,11 @@ const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   </button>
 );
 
-const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFromMenu }) => {
+const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
+  isOpen,
+  onClose,
+  navigateFromMenu,
+}) => {
   const location = useLocation();
   const tier = usePerformanceTier();
   const menuWrapRef = useRef<HTMLDivElement>(null);
@@ -98,10 +100,10 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
     const menuWrap = menuWrapRef.current;
     const overlayPath = overlayPathRef.current;
     const menuItems = gsap.utils.toArray<HTMLElement>(".menu__item", menuWrap);
-    
+
     // Добавляем класс для отключения анимации плиток на low tier
-    if (tier === 'low') {
-      menuWrap.classList.add('low-performance');
+    if (tier === "low") {
+      menuWrap.classList.add("low-performance");
     }
 
     gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
@@ -110,21 +112,29 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
       paused: true,
       onStart: () => {
         // Добавляем класс для скрытия скроллбара
-        document.body.classList.add('menu-open');
-        document.documentElement.classList.add('menu-open');
+        document.body.classList.add("menu-open");
+        document.documentElement.classList.add("menu-open");
         lenis.stop();
-        window.dispatchEvent(new CustomEvent("custom-scrollbar-update", { detail: { action: "hide" } }));
+        window.dispatchEvent(
+          new CustomEvent("custom-scrollbar-update", {
+            detail: { action: "hide" },
+          }),
+        );
       },
       onReverseComplete: () => {
         gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
         // Убираем класс для возвращения скроллбара
-        document.body.classList.remove('menu-open');
-        document.documentElement.classList.remove('menu-open');
+        document.body.classList.remove("menu-open");
+        document.documentElement.classList.remove("menu-open");
         lenis.start();
         // Сообщаем глобально, что переход завершён (включая случай закрытия по стрелке)
         window.dispatchEvent(new CustomEvent("menu-transition-complete"));
         window.__menuTransitionInProgress = false;
-        window.dispatchEvent(new CustomEvent("custom-scrollbar-update", { detail: { action: "show" } }));
+        window.dispatchEvent(
+          new CustomEvent("custom-scrollbar-update", {
+            detail: { action: "show" },
+          }),
+        );
       },
     });
 
@@ -140,7 +150,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
         ease: "power4.in",
         attr: { d: "M 0 100 V 50 Q 50 0 100 50 V 100 z" },
       },
-      0
+      0,
     );
     tl.to(overlayPath, {
       duration: 0.3,
@@ -165,13 +175,13 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
       menuItems,
       { y: 150, opacity: 0 },
       { duration: 1.1, ease: "power4", y: 0, opacity: 1, stagger: 0.05 },
-      "-=1.1"
+      "-=1.1",
     );
 
     return () => {
       tl.kill();
-      if (tier === 'low' && menuWrap) {
-        menuWrap.classList.remove('low-performance');
+      if (tier === "low" && menuWrap) {
+        menuWrap.classList.remove("low-performance");
       }
     };
   }, [tier]);
@@ -194,7 +204,8 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
 
     // Безопасно остановим внешние твины и запустим обратное проигрывание
     gsap.killTweensOf(tl);
-    const labelTime = tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2; // запасной расчёт
+    const labelTime =
+      tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2; // запасной расчёт
     let lastTime = tl.time();
     const prevUpdate = tl.eventCallback("onUpdate") as gsap.Callback | null;
     const targetHref = pendingHrefRef.current;
@@ -206,7 +217,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
       const isSame = location.pathname === href;
       window.__menuTransitionInProgress = true;
       window.dispatchEvent(new CustomEvent("menu-transition-start"));
-      
+
       // 2. Навигация (Рендер новой страницы)
       navigateFromMenu(href, isSame);
 
@@ -240,8 +251,6 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
     };
   }, [isOpen, navigateFromMenu, location.pathname]);
 
-
-
   // --- Утилиты префетча перенесены на уровень модуля ---
 
   return (
@@ -255,28 +264,82 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
         </div>
         <div className="tiles">
           <div className="tiles__line">
-            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
-            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
+            <div
+              className="tiles__line-img tiles__line-img--large"
+              style={{ backgroundImage: `url(${img4})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img5})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img6})` }}
+            ></div>
+            <div
+              className="tiles__line-img tiles__line-img--large"
+              style={{ backgroundImage: `url(${img4})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img5})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img6})` }}
+            ></div>
           </div>
           <div className="tiles__line">
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
-            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
-            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img1})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img2})` }}
+            ></div>
+            <div
+              className="tiles__line-img tiles__line-img--large"
+              style={{ backgroundImage: `url(${img3})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img1})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img2})` }}
+            ></div>
+            <div
+              className="tiles__line-img tiles__line-img--large"
+              style={{ backgroundImage: `url(${img3})` }}
+            ></div>
           </div>
           <div className="tiles__line">
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
-            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
-            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
-            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img7})` }}
+            ></div>
+            <div
+              className="tiles__line-img tiles__line-img--large"
+              style={{ backgroundImage: `url(${img8})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img9})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img7})` }}
+            ></div>
+            <div
+              className="tiles__line-img tiles__line-img--large"
+              style={{ backgroundImage: `url(${img8})` }}
+            ></div>
+            <div
+              className="tiles__line-img"
+              style={{ backgroundImage: `url(${img9})` }}
+            ></div>
           </div>
         </div>
         <nav className="menu">
@@ -295,7 +358,13 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose, navigateFr
           <SciFiThemeToggle />
         </div>
       </div>
-      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <svg
+        className="overlay"
+        width="100%"
+        height="100%"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
         <path
           ref={overlayPathRef}
           className="overlay__path"

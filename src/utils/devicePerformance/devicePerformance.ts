@@ -28,7 +28,8 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
   if (cachedSpecs) return cachedSpecs;
 
   const ua = navigator.userAgent;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
   const navMem = (navigator as any).deviceMemory;
   const cpuCores = navigator.hardwareConcurrency || 4;
@@ -51,7 +52,8 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
     if (gl) {
-      webglVersion = gl instanceof WebGL2RenderingContext ? "WebGL 2.0" : "WebGL 1.0";
+      webglVersion =
+        gl instanceof WebGL2RenderingContext ? "WebGL 2.0" : "WebGL 1.0";
       const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
       if (debugInfo) {
         gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
@@ -61,7 +63,13 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
     /* silent */
   }
 
-  const cpuFrequency = isMobile ? (cpuCores >= 8 ? "2.8 GHz" : "2.0 GHz") : cpuCores >= 8 ? "3.5 GHz" : "2.8 GHz";
+  const cpuFrequency = isMobile
+    ? cpuCores >= 8
+      ? "2.8 GHz"
+      : "2.0 GHz"
+    : cpuCores >= 8
+      ? "3.5 GHz"
+      : "2.8 GHz";
 
   cachedSpecs = {
     ram,
@@ -78,12 +86,15 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
   return cachedSpecs;
 };
 
-export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; tier: PerformanceTier } => {
+export const calculatePerformanceScore = (
+  specs: DeviceSpecs,
+): { score: number; tier: PerformanceTier } => {
   if (cachedPerformance) return cachedPerformance;
 
   let score = 0;
   const ua = navigator.userAgent.toLowerCase();
-  const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+  const isMobile =
+    /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
 
   // 1. RAM (max 25 баллов)
   let ramValue = parseFloat(specs.ram) || 4;
@@ -235,7 +246,8 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   // Apple GPU — iOS не раскрывает номер чипа, определяем по UA + ядра + maxTextureSize
   else if (gpuString.includes("apple")) {
     const uaLower = navigator.userAgent.toLowerCase();
-    const isMacUA = uaLower.includes("macintosh") || uaLower.includes("mac os x");
+    const isMacUA =
+      uaLower.includes("macintosh") || uaLower.includes("mac os x");
     const cores = specs.cpuCores;
 
     if (isMacUA) {
@@ -313,7 +325,9 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
       !gpuString.includes("xe") &&
       specs.cpuCores <= 8) ||
     // Radeon без RX и без мощных APU серий
-    (gpuString.includes("radeon") && !gpuString.includes("rx") && !/\d{3}m/.test(gpuString));
+    (gpuString.includes("radeon") &&
+      !gpuString.includes("rx") &&
+      !/\d{3}m/.test(gpuString));
 
   if (isWeakIntegrated) {
     score *= 0.3;

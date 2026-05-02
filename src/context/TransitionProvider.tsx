@@ -1,7 +1,21 @@
-import React, { createContext, ReactNode, startTransition, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  startTransition,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PixelTransition, TransitionHandle as PixelTransitionHandle } from "@/components/transitions/PixelTransition";
-import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "@/components/transitions/WaveTransition";
+import {
+  PixelTransition,
+  TransitionHandle as PixelTransitionHandle,
+} from "@/components/transitions/PixelTransition";
+import {
+  WaveTransition,
+  TransitionHandle as WaveTransitionHandle,
+} from "@/components/transitions/WaveTransition";
 import { useFluid, useIsMobile } from "@/hooks";
 
 interface TransitionContextType {
@@ -18,7 +32,9 @@ export const useTransition = () => {
   return context;
 };
 
-export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const TransitionProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const pixelOverlayRef = useRef<PixelTransitionHandle>(null);

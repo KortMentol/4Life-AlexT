@@ -6,7 +6,10 @@ interface SciFiCloseButtonProps {
   onClick: () => void;
 }
 
-const SciFiCloseButton = React.forwardRef<HTMLButtonElement, SciFiCloseButtonProps>(({ onClick }, ref) => {
+const SciFiCloseButton = React.forwardRef<
+  HTMLButtonElement,
+  SciFiCloseButtonProps
+>(({ onClick }, ref) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -22,7 +25,9 @@ const SciFiCloseButton = React.forwardRef<HTMLButtonElement, SciFiCloseButtonPro
       whileTap={{ scale: 0.95 }}
       aria-label="Закрыть"
     >
-      <div className={`absolute inset-0 rounded-full blur-sm ${isDark ? "bg-cyan-400/10" : "bg-blue-400/10"}`} />
+      <div
+        className={`absolute inset-0 rounded-full blur-sm ${isDark ? "bg-cyan-400/10" : "bg-blue-400/10"}`}
+      />
       <div className="relative z-10">
         <svg
           width="18"

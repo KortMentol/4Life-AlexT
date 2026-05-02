@@ -53,14 +53,21 @@ const PartnershipSection = memo(() => {
   const economicsRef = useRef<HTMLElement>(null);
   const invitationRef = useRef<HTMLElement>(null);
 
-  const chapterRefs = [portalRef, scienceRef, modelRef, economicsRef, invitationRef];
+  const chapterRefs = [
+    portalRef,
+    scienceRef,
+    modelRef,
+    economicsRef,
+    invitationRef,
+  ];
 
   return (
     <div
       ref={sectionRef}
       style={{
         background: palette.bg,
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily:
+          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         WebkitFontSmoothing: "antialiased",
         MozOsxFontSmoothing: "grayscale",
         position: "relative",
@@ -74,18 +81,32 @@ const PartnershipSection = memo(() => {
           tier={tier}
           palette={palette}
           visible={sectionInView}
-          chapterRefs={chapterRefs as React.RefObject<HTMLElement | HTMLDivElement | null>[]}
+          chapterRefs={
+            chapterRefs as React.RefObject<
+              HTMLElement | HTMLDivElement | null
+            >[]
+          }
         />
       )}
 
       {/* Глава 0 — входной экран */}
-      <Portal ref={portalRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <Portal
+        ref={portalRef}
+        tier={tier}
+        palette={palette}
+        onChapter={handleChapter}
+      />
 
       {/* Бегущая строка */}
       <Ticker tier={tier} palette={palette} />
 
       {/* Глава 1 — наука */}
-      <Science ref={scienceRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <Science
+        ref={scienceRef}
+        tier={tier}
+        palette={palette}
+        onChapter={handleChapter}
+      />
 
       {/* Разделитель */}
       <div
@@ -98,13 +119,28 @@ const PartnershipSection = memo(() => {
       />
 
       {/* Глава 2 — модель */}
-      <Model ref={modelRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <Model
+        ref={modelRef}
+        tier={tier}
+        palette={palette}
+        onChapter={handleChapter}
+      />
 
       {/* Глава 3 — экономика */}
-      <Economics ref={economicsRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <Economics
+        ref={economicsRef}
+        tier={tier}
+        palette={palette}
+        onChapter={handleChapter}
+      />
 
       {/* Глава 4 — приглашение */}
-      <Invitation ref={invitationRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <Invitation
+        ref={invitationRef}
+        tier={tier}
+        palette={palette}
+        onChapter={handleChapter}
+      />
     </div>
   );
 });

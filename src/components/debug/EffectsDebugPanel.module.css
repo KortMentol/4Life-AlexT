@@ -1,0 +1,278 @@
+/* EffectsDebugPanel — стиль совпадает с PerformanceDebug */
+
+.container {
+  position: fixed;
+  z-index: 99998; /* Чуть ниже PerformanceDebug */
+  background-color: rgba(10, 10, 10, 0.88);
+  color: white;
+  border-radius: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  width: 260px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: move;
+  touch-action: none;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.headerLeft svg {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+  line-height: 1;
+}
+
+.iconBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+.body {
+  padding: 0.6rem 0.65rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.body::-webkit-scrollbar {
+  width: 4px;
+}
+.body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+/* ─── Tier Selector ──────────────────────────────────────────────────────── */
+.sectionLabel {
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.4rem;
+  padding: 0 0.1rem;
+}
+
+.tierRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+  margin-bottom: 0.65rem;
+}
+
+.tierBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.tierBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tierBtnActive {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  font-weight: 600;
+}
+
+.tierBtnAuto.tierBtnActive {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.tierBtnLow.tierBtnActive {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.tierBtnMedium.tierBtnActive {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+.tierBtnHigh.tierBtnActive {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0.5rem 0;
+}
+
+/* ─── Toggle Row ─────────────────────────────────────────────────────────── */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.35rem;
+  border-radius: 0.4rem;
+  transition: background 0.12s;
+  gap: 0.5rem;
+}
+
+.toggleRow:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.toggleLabel {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+.toggleLabelDisabled {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Toggle Switch ──────────────────────────────────────────────────────── */
+.toggle {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggleSlider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggleSlider::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 2px;
+  top: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+
+.toggle input:checked + .toggleSlider {
+  background: rgba(34, 197, 94, 0.5);
+}
+
+.toggle input:checked + .toggleSlider::before {
+  transform: translateX(12px);
+  background: rgb(134, 239, 172);
+}
+
+.toggle input:disabled + .toggleSlider {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ─── Sub-group indent ───────────────────────────────────────────────────── */
+.subGroup {
+  padding-left: 0.6rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  margin-left: 0.2rem;
+  margin-bottom: 0.1rem;
+}
+
+/* ─── Reset button ───────────────────────────────────────────────────────── */
+.resetBtn {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.4rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: all 0.15s;
+}
+
+.resetBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Compact mode (header only) ────────────────────────────────────────── */
+.containerCompact .body {
+  display: none;
+}
+
+.containerCompact .header {
+  border-bottom: none;
+}

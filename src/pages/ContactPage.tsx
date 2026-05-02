@@ -46,7 +46,12 @@ const ContactPage: React.FC = () => {
   ];
 
   return (
-    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
+    <motion.div
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+    >
       <SEO
         title="Свяжитесь с Александром Тощевым - 4Life | Контакты"
         description="Узнайте, как связаться с Александром Тощевым для консультации по продукции 4Life или возможностям партнерства. WhatsApp, Telegram, Телефон."
@@ -67,7 +72,8 @@ const ContactPage: React.FC = () => {
               Свяжитесь со мной
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Готовы начать свой путь к здоровью и благополучию? У меня есть ответы на ваши вопросы, и я готов помочь на каждом этапе
+              Готовы начать свой путь к здоровью и благополучию? У меня есть
+              ответы на ваши вопросы, и я готов помочь на каждом этапе
             </p>
           </motion.div>
 
@@ -78,7 +84,9 @@ const ContactPage: React.FC = () => {
                 key={index}
                 href={method.link}
                 target={method.link.startsWith("tel:") ? "_self" : "_blank"}
-                rel={method.link.startsWith("tel:") ? "" : "noopener noreferrer"}
+                rel={
+                  method.link.startsWith("tel:") ? "" : "noopener noreferrer"
+                }
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -88,15 +96,22 @@ const ContactPage: React.FC = () => {
               >
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-                    backgroundSize: "24px 24px",
-                  }} />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage:
+                        "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                      backgroundSize: "24px 24px",
+                    }}
+                  />
                 </div>
 
                 {/* Content */}
                 <div className="relative z-10">
-                  <method.icon className="w-12 h-12 mb-4 transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+                  <method.icon
+                    className="w-12 h-12 mb-4 transition-transform duration-300 group-hover:scale-110"
+                    strokeWidth={1.5}
+                  />
                   <h3 className="text-2xl font-bold mb-2">{method.name}</h3>
                   <p className="text-white/90 text-sm">{method.description}</p>
                 </div>
@@ -117,7 +132,8 @@ const ContactPage: React.FC = () => {
             <div className="inline-flex items-center gap-3 px-6 py-4 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
               <Icons.Clock className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
               <p className="text-gray-700 dark:text-gray-300">
-                Отвечаю в течение нескольких часов. Выберите удобный способ связи
+                Отвечаю в течение нескольких часов. Выберите удобный способ
+                связи
               </p>
             </div>
           </motion.div>
@@ -139,7 +155,8 @@ const ContactPage: React.FC = () => {
                     Консультация по продуктам
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                    Помогу подобрать оптимальные продукты 4Life для ваших целей и объясню, как они работают
+                    Помогу подобрать оптимальные продукты 4Life для ваших целей
+                    и объясню, как они работают
                   </p>
                 </div>
               </div>
@@ -160,7 +177,8 @@ const ContactPage: React.FC = () => {
                     Партнерство
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                    Расскажу о возможностях построения бизнеса с 4Life и помогу начать
+                    Расскажу о возможностях построения бизнеса с 4Life и помогу
+                    начать
                   </p>
                 </div>
               </div>

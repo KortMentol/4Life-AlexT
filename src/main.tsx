@@ -1,7 +1,12 @@
 // import React from "react"; - <React.StrictMode> отключен ниже
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 import App from "./App";
 import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
@@ -38,18 +43,18 @@ const initApp = () => {
             </ThemeProvider>
           </HelmetProvider>
         }
-      />
+      />,
     ),
     {
       future: {
         v7_relativeSplatPath: true,
       },
-    }
+    },
   );
 
   ReactDOM.createRoot(rootElement).render(
     //<React.StrictMode> - временно отключен
-    <RouterProvider router={router} />
+    <RouterProvider router={router} />,
     //</React.StrictMode> - временно отключен
   );
 
@@ -61,7 +66,7 @@ const initApp = () => {
     import("@/pages/AboutMePage"),
     import("@/pages/ContactPage"),
     import("@/pages/PartnershipPage"),
-    import("@/pages/HowToBuyPage")
+    import("@/pages/HowToBuyPage"),
   ]).then(() => {
     // Dispatch event only when all chunks are loaded in RAM
     window.dispatchEvent(new CustomEvent("app-mounted"));
