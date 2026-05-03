@@ -38,10 +38,7 @@ export interface ParallaxSectionProps {
   };
 }
 
-const IS_TOUCH =
-  typeof window !== "undefined"
-    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
-    : false;
+const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
@@ -64,11 +61,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
-  // Отдельный inView для willChange — с буфером 100px, не once
-  const inViewForGPU = useInView(containerRef, {
-    once: false,
-    margin: "100px",
-  });
   const tier = usePerformanceTier();
 
   useEffect(() => {
@@ -107,11 +99,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const desktopY = useTransform(
     scrollYProgress,
     [0, 1],
-    IS_TOUCH || tier === "low"
-      ? ["0%", "0%"]
-      : inViewForGPU
-        ? [desktopYFrom, desktopYTo]
-        : ["0%", "0%"],
+    IS_TOUCH || tier === "low" ? ["0%", "0%"] : [desktopYFrom, desktopYTo],
   );
 
   const finalBackgroundImage = isMobile
@@ -180,15 +168,9 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   // ─── TOUCH ────────────────────────────────────────────────────────────────
   if (IS_TOUCH) {
     return (
-      <section
-        ref={containerRef}
-        className={`relative overflow-hidden ${height} ${blendMode}`}
-        style={sectionStyle}
-      >
+      <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
         {renderEdgeFades()}
-        <div className={`relative z-10 h-full ${contentClasses}`}>
-          {children}
-        </div>
+        <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
         <div
           className="absolute left-0 w-full -z-10 pointer-events-none"
           style={{
@@ -218,10 +200,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
                 {inView && (
                   <>
                     <source src={backgroundVideo} type="video/webm" />
-                    <source
-                      src={backgroundVideo.replace(".webm", ".mp4")}
-                      type="video/mp4"
-                    />
+                    <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
                   </>
                 )}
               </video>
@@ -243,11 +222,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
 
   // ─── DESKTOP — паттерн Оливье: fixed всегда, только y меняется ───────────
   return (
-    <section
-      ref={containerRef}
-      className={`relative overflow-hidden ${height} ${blendMode}`}
-      style={sectionStyle}
-    >
+    <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
       {renderEdgeFades()}
       <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
 
@@ -266,7 +241,8 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
           className={`relative w-full h-full ${imageBrightness} pointer-events-none`}
           style={{
             y: desktopY,
-            willChange: tier !== "low" && inViewForGPU ? "transform" : "auto",
+            willChange: tier !== "low" ? "transform" : "auto",
+            transform: "translateZ(0)",
             backfaceVisibility: "hidden",
           }}
         >
@@ -286,10 +262,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               {inView && (
                 <>
                   <source src={backgroundVideo} type="video/webm" />
-                  <source
-                    src={backgroundVideo.replace(".webm", ".mp4")}
-                    type="video/mp4"
-                  />
+                  <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
                 </>
               )}
             </video>

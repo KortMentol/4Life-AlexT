@@ -10,20 +10,20 @@
  */
 import { useEffect } from "react";
 
-export const useTouchScrollLock = (isEnabled: boolean) => {
+export const useTouchScrollLock = (isLocked: boolean) => {
   useEffect(() => {
     const html = document.documentElement;
-
-    if (isEnabled) {
-      // CSS touch-action: none блокирует нативный скролл без JS-обработчика
-      // Это не трогает compositor thread — браузер сам обрабатывает тач
+    // Когда isLocked = true (например, меню открыто), жестко блокируем всё
+    if (isLocked) {
       html.style.touchAction = "none";
+      html.style.overflow = "hidden";
     } else {
       html.style.touchAction = "";
+      html.style.overflow = "";
     }
-
     return () => {
       html.style.touchAction = "";
+      html.style.overflow = "";
     };
-  }, [isEnabled]);
+  }, [isLocked]);
 };

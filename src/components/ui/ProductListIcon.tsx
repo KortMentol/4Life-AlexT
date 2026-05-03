@@ -58,13 +58,7 @@ const messengerButtonVariants = {
  * <ProductListIcon className="fixed bottom-8 right-8 z-50" />
  */
 const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
-  const {
-    items,
-    removeFromList,
-    updateItemQuantity,
-    getTotalItems,
-    clearList,
-  } = useProductList();
+  const { items, removeFromList, updateItemQuantity, getTotalItems, clearList } = useProductList();
 
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -84,11 +78,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     // Добавляем обработчик клика вне модального окна
     const handleClickOutside = (event: Event) => {
       // Если модальное окно открыто и клик был не по кнопке
-      if (
-        isOpen &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
+      if (isOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         // Проверяем, был ли клик по диалогу (не закрываем в этом случае)
         const dialogElement = document.querySelector('[role="dialog"]');
         if (dialogElement && !dialogElement.contains(event.target as Node)) {
@@ -101,7 +91,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     if (isOpen) {
       document.addEventListener("keydown", handleEscapeKey);
       document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside, { passive: true });
     }
 
     return () => {
@@ -112,10 +102,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
   }, [isOpen]);
   const [showMessengerOptions, setShowMessengerOptions] = useState(false);
   const [clientId, setClientId] = useState<string>(
-    () =>
-      (typeof window !== "undefined" &&
-        localStorage.getItem("clientId4life")) ||
-      "",
+    () => (typeof window !== "undefined" && localStorage.getItem("clientId4life")) || "",
   );
 
   useEffect(() => {
@@ -255,9 +242,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                   </Dialog.Title>
 
                   {items.length === 0 ? (
-                    <p className="text-gray-400 text-center py-10">
-                      Ваш список пуст. Добавьте продукты!
-                    </p>
+                    <p className="text-gray-400 text-center py-10">Ваш список пуст. Добавьте продукты!</p>
                   ) : (
                     <>
                       <ul className="divide-y divide-gray-700 max-h-96 overflow-y-auto pr-2">
@@ -269,31 +254,18 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                             exit={{ opacity: 0, x: -50 }}
                             className="py-4 flex items-center space-x-4"
                           >
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-16 h-16 object-contain rounded-md"
-                            />
+                            <img src={item.image} alt={item.name} className="w-16 h-16 object-contain rounded-md" />
                             <div className="flex-grow">
-                              <h4 className="text-lg font-semibold text-white">
-                                {item.name}
-                              </h4>
-                              <p className="text-gray-400 text-sm line-clamp-2">
-                                {item.shortDescription}
-                              </p>
+                              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
+                              <p className="text-gray-400 text-sm line-clamp-2">{item.shortDescription}</p>
                             </div>
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() =>
-                                  updateItemQuantity(item.id, item.quantity - 1)
-                                }
+                                onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
                                     e.preventDefault();
-                                    updateItemQuantity(
-                                      item.id,
-                                      item.quantity - 1,
-                                    );
+                                    updateItemQuantity(item.id, item.quantity - 1);
                                   }
                                 }}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
@@ -306,16 +278,11 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() =>
-                                  updateItemQuantity(item.id, item.quantity + 1)
-                                }
+                                onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
                                     e.preventDefault();
-                                    updateItemQuantity(
-                                      item.id,
-                                      item.quantity + 1,
-                                    );
+                                    updateItemQuantity(item.id, item.quantity + 1);
                                   }
                                 }}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
@@ -365,9 +332,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                           ) : clientId.trim() === "" ? (
                             <div className="flex flex-col space-y-4 w-full">
                               <label className="text-sm text-gray-300 flex flex-col items-start w-full">
-                                <span className="mb-1">
-                                  Введите ваш ID клиента 4Life (если есть):
-                                </span>
+                                <span className="mb-1">Введите ваш ID клиента 4Life (если есть):</span>
                                 <input
                                   type="text"
                                   value={clientId}
@@ -377,10 +342,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 />
                               </label>
                               <motion.button
-                                onClick={() =>
-                                  clientId.trim() &&
-                                  setShowMessengerOptions(true)
-                                }
+                                onClick={() => clientId.trim() && setShowMessengerOptions(true)}
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
                                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all duration-300 w-full"

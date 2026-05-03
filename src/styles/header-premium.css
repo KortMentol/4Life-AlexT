@@ -224,3 +224,18 @@
     border-color: rgba(var(--header-light-glow-rgb), 0.2) !important;
   }
 }
+
+/* SAFE MODE FOR FIREFOX (GECKO) */
+@-moz-document url-prefix() {
+  .header-premium {
+    backdrop-filter: none !important;
+    background-color: rgba(15, 23, 42, 0.98) !important;
+  }
+}
+
+/* FORCE SAFE MODE ON WEAK DEVICES OR SAFARI MOBILE */
+@media (max-width: 768px) {
+  .header-premium {
+    backdrop-filter: blur(8px) !important; /* Уменьшаем радиус для остальных */
+  }
+}
