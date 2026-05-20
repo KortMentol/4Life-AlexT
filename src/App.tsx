@@ -13,29 +13,18 @@ import { lenis, updateScroll } from "@/lib/lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import React, {
-  createContext,
-  Suspense,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
+    createContext,
+    Suspense,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
 } from "react";
 import { createPortal } from "react-dom";
 import { Link, Route, Routes } from "react-router-dom";
 
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
-
-// КРИТИЧНО: Добавь эту глобальную конфигурацию!
-if (typeof window !== "undefined") {
-  const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  if (isTouch) {
-    ScrollTrigger.config({
-      ignoreMobileResize: true, // Не пересчитывать позиции при появлении/скрытии URL-бара
-      autoRefreshEvents: "DOMContentLoaded,load,visibilitychange", // Убираем 'resize' из событий для мобильных
-    });
-  }
-}
 
 // Lazy-loaded pages
 import HomePage from "@/pages/HomePage";

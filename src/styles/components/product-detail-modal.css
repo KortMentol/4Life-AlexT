@@ -96,13 +96,6 @@
   transform: translateX(-50%) scale(0.9);
 }
 
-/* CSS Mask - убрано */
-
-.premium-scroll.has-scroll.scroll-started {
-  mask-image: none;
-  -webkit-mask-image: none;
-}
-
 /* Responsive - адаптация под мобильные */
 @media (max-width: 1024px) {
   .scroll-arrow-indicator {
