@@ -208,8 +208,16 @@ const BlockVideo: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
-      style={{ perspective: "1200px" }}
+      className="fixed z-40 flex items-center justify-center pointer-events-none"
+      style={{
+        perspective: "1200px",
+        // ПРОФИ ФИКС 2026: svh на тач = фиксированная высота без URL bar
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: isTouchDevice ? "100svh" : "100vh",
+      }}
     >
       <motion.div
         style={{

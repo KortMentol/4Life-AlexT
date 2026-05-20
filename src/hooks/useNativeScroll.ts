@@ -1,5 +1,4 @@
 import { rafLoop } from "@/lib/rafLoop";
-import { scrollLockState } from "@/lib/scrollLockState";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
 
@@ -8,71 +7,8 @@ const HEADER_HEIGHT = 80;
 const LERP_DESKTOP = 0.06;
 const SNAP_TRANSITION = "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)";
 
-// ─── Мобайл: spring-параметры (те же что были с Lenis) ────────────────────────
-// stiffness: жёсткость пружины — чем выше тем быстрее
-// damping: затухание — чем выше тем меньше колебаний
-// mass: инерция — чем выше тем "тяжелее" ощущение
-const SPRING_STIFFNESS = 400;
-const SPRING_DAMPING = 40;
-const SPRING_MASS = 0.8;
-
-// Порог скорости (px/ms) для инерционного снапа при touchend
-const VELOCITY_SNAP_THRESHOLD = 0.15;
-
 function getHeader(): HTMLElement | null {
   return document.querySelector(".header-premium");
-}
-
-/**
- * Простой spring-симулятор без зависимостей.
- * Работает через физику: position, velocity, force.
- * Вызывается каждый RAF-кадр.
- */
-class SpringValue {
-  position = 0; // текущее значение [-HEADER_HEIGHT .. 0]
-  velocity = 0; // текущая скорость
-  target = 0; // целевое значение
-
-  constructor(initial = 0) {
-    this.position = initial;
-    this.target = initial;
-  }
-
-  /** Один шаг симуляции. dt — время в секундах. */
-  step(dt: number): boolean {
-    // Ограничиваем dt чтобы не было взрывов при потере фокуса вкладки
-    const safeDt = Math.min(dt, 0.064);
-
-    const force =
-      -SPRING_STIFFNESS * (this.position - this.target) -
-      SPRING_DAMPING * this.velocity;
-
-    this.velocity += (force / SPRING_MASS) * safeDt;
-    this.position += this.velocity * safeDt;
-
-    // Считаем settled если близко к цели и скорость мала
-    const settled =
-      Math.abs(this.position - this.target) < 0.1 &&
-      Math.abs(this.velocity) < 0.1;
-
-    if (settled) {
-      this.position = this.target;
-      this.velocity = 0;
-    }
-
-    return !settled; // true = ещё анимируется
-  }
-
-  setTarget(t: number) {
-    this.target = Math.max(-HEADER_HEIGHT, Math.min(0, t));
-  }
-
-  /** Мгновенно установить позицию и цель (без анимации) */
-  snap(value: number) {
-    this.position = value;
-    this.target = value;
-    this.velocity = 0;
-  }
 }
 
 export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
@@ -82,9 +18,6 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const targetYRef = useRef(0);
   const displayYRef = useRef(0);
   const prevScrollRef = useRef(0);
-
-  // Сохраняем spring между re-mount (не пересоздаём при disabled)
-  const springRef = useRef<SpringValue | null>(null);
 
   const showHeader = () => {
     targetYRef.current = 0;
@@ -135,11 +68,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         setTimeout(tryShowHeader, 50);
       } else {
         if (import.meta.env.DEV) {
-          console.error(
-            "❌ Failed to initialize header after",
-            maxAttempts,
-            "attempts",
-          );
+          console.error("❌ Failed to initialize header after", maxAttempts, "attempts");
         }
       }
     };
@@ -165,145 +94,12 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
 
     prevScrollRef.current = window.scrollY;
 
-    // ─── МОБАЙЛ: spring от пальца ─────────────────────────────────────────────
+    // ─── МОБАЙЛ: Статичный хедер (Awwwards 2026 Mobile Perfomance) ───
     if (isMobile) {
       header.style.transition = "none";
-
-      // Используем существующий spring или создаём новый
-      if (!springRef.current) {
-        springRef.current = new SpringValue(0);
-      }
-      const spring = springRef.current;
-
-      // Устанавливаем текущую позицию хедера (может быть GSAP анимировал)
-      const currentY = parseFloat(
-        getComputedStyle(header).transform.split(",")[5] || "0",
-      );
-      if (!isNaN(currentY) && Math.abs(currentY) < HEADER_HEIGHT) {
-        spring.position = currentY;
-        spring.target = currentY;
-      }
-
-      header.style.transform = `translateY(${spring.position}px) translateZ(0)`;
-
-      // Состояние касания
-      let isTouching = false;
-      let touchStartY = 0;
-      let headerStartPos = 0;
-      let lastTouchY = 0;
-      let lastTouchTime = 0;
-      let touchVelocity = 0; // px/ms — для инерционного снапа
-
-      // RAF для spring-анимации (только когда нужно)
-      let rafId: number | null = null;
-      let lastFrameTime = 0;
-
-      const startRAF = () => {
-        if (rafId !== null) return;
-        lastFrameTime = performance.now();
-        const tick = (now: number) => {
-          const dt = (now - lastFrameTime) / 1000;
-          lastFrameTime = now;
-
-          const stillAnimating = spring.step(dt);
-          header.style.transform = `translateY(${spring.position}px) translateZ(0)`;
-
-          if (stillAnimating) {
-            rafId = requestAnimationFrame(tick);
-          } else {
-            rafId = null;
-          }
-        };
-        rafId = requestAnimationFrame(tick);
-      };
-
-      const stopRAF = () => {
-        if (rafId !== null) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
-      };
-
-      const onTouchStart = (e: TouchEvent) => {
-        if (!e.touches[0]) return;
-        isTouching = true;
-        touchStartY = e.touches[0].clientY;
-        lastTouchY = touchStartY;
-        lastTouchTime = performance.now();
-        touchVelocity = 0;
-
-        // Запоминаем текущую позицию spring — двигаем от неё
-        headerStartPos = spring.position;
-
-        // Останавливаем spring-анимацию — мгновенный отклик на касание
-        stopRAF();
-        spring.velocity = 0;
-        spring.target = spring.position;
-      };
-
-      const onTouchMove = (e: TouchEvent) => {
-        if (!isTouching || !e.touches[0]) return;
-        if (scrollLockState.isLocked) return;
-
-        const touchY = e.touches[0].clientY;
-        const now = performance.now();
-        const dt = now - lastTouchTime;
-
-        // Скорость пальца px/ms
-        if (dt > 0) {
-          touchVelocity = (lastTouchY - touchY) / dt;
-        }
-        lastTouchY = touchY;
-        lastTouchTime = now;
-
-        // Дельта пальца от начала касания → новая позиция хедера
-        const deltaY = touchStartY - touchY; // вверх = положительная
-        const newPos = Math.max(
-          -HEADER_HEIGHT,
-          Math.min(0, headerStartPos - deltaY),
-        );
-
-        // Прямое движение без spring во время касания — пиксель в пиксель
-        spring.position = newPos;
-        spring.target = newPos;
-        header.style.transform = `translateY(${newPos}px) translateZ(0)`;
-      };
-
-      const onTouchEnd = () => {
-        if (!isTouching) return;
-        isTouching = false;
-        if (scrollLockState.isLocked) return;
-
-        const currentPos = spring.position;
-
-        let snapTarget: number;
-
-        if (Math.abs(touchVelocity) > VELOCITY_SNAP_THRESHOLD) {
-          // Быстрый свайп — снапим в направлении скорости пальца
-          snapTarget = touchVelocity > 0 ? -HEADER_HEIGHT : 0;
-        } else {
-          // Медленное движение — снапим по половине
-          snapTarget = currentPos < -HEADER_HEIGHT / 2 ? -HEADER_HEIGHT : 0;
-        }
-
-        spring.setTarget(snapTarget);
-        // Передаём скорость пальца в spring для инерционного продолжения
-        spring.velocity = -touchVelocity * 60; // конвертируем px/ms → px/s
-        startRAF();
-      };
-
-      document.addEventListener("touchstart", onTouchStart, { passive: true });
-      document.addEventListener("touchmove", onTouchMove, { passive: true });
-      document.addEventListener("touchend", onTouchEnd, { passive: true });
-      document.addEventListener("touchcancel", onTouchEnd, { passive: true });
-
-      return () => {
-        stopRAF();
-        document.removeEventListener("touchstart", onTouchStart);
-        document.removeEventListener("touchmove", onTouchMove);
-        document.removeEventListener("touchend", onTouchEnd);
-        document.removeEventListener("touchcancel", onTouchEnd);
-      };
+      header.style.transform = `translateY(0px) translateZ(0)`;
+      // Отключаем физику на мобилках для 100% совместимости с нативным URL-баром
+      return () => {};
     }
 
     // ─── ДЕСКТОП: RAF lerp ────────────────────────────────────────────────────

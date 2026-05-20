@@ -1,12 +1,7 @@
 // import React from "react"; - <React.StrictMode> отключен ниже
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import App from "./App";
 import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
@@ -19,6 +14,15 @@ import "./styles/base/fixes.css";
 import "./styles/base/modern-design.css";
 import "./styles/globals.css";
 import "./styles/image-rendering.css";
+
+// --- AWWWARDS 2026: SCROLL RESTORATION FIX ---
+// Отключаем нативное восстановление скролла браузером,
+// так как мы используем кастомную логику с двойным RAF и GSAP в RouteChangeHandler.tsx.
+// Это предотвращает скачки страницы до появления вуали перехода.
+if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
+// ----------------------------------------------
 
 const initApp = () => {
   const rootElement = document.getElementById("root");

@@ -174,49 +174,41 @@
   }
 }
 
-/* Mobile optimizations + Smart Degradation Fallback */
+/* Mobile optimizations + AWWWARDS 2026 - PREMIUM 3D FALLBACK (60 FPS) */
 @media (max-width: 768px) {
   .header-premium {
     padding: 0.5rem 1.5rem;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
-  /*
-   * === AWWWARDS 2026 - SMART DEGRADATION FALLBACK ===
-   * Replaces expensive backdrop-filter with a lightweight "frosted glass"
-   * effect for low/medium tier mobile devices to guarantee 60 FPS scroll.
-   */
-
-  /* This selector targets the header ONLY on devices flagged as low or medium performance */
-  .header-premium[data-tier="low"],
-  .header-premium[data-tier="medium"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
 
-  /* Dark Theme Fallback: Simulates a premium matte surface */
-  .header-premium--dark[data-tier="low"],
-  .header-premium--dark[data-tier="medium"] {
-    /* 1. Use a near-opaque complex gradient instead of a solid color for depth */
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(25, 33, 52, 0.96) 100%) !important;
-    /* 2. Simulate glass edges and lighting with inner shadows */
+  /* Dark Theme Mobile: Restoring 3D Volume & Spotlights */
+  .header-premium--dark {
+    background: 
+      /* Spotlight in center */
+      radial-gradient(ellipse 120% 100% at 50% -10%, rgba(0, 212, 255, 0.15) 0%, transparent 60%),
+      /* Side highlights */ linear-gradient(90deg, transparent 0%, rgba(0, 212, 255, 0.05) 50%, transparent 100%),
+      /* Main body */ linear-gradient(135deg, #0a0f1c 0%, #1a1f2e 100%) !important;
+
     box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      /* Top highlight */ inset 0 -1px 1px rgba(0, 0, 0, 0.4),
-      /* Bottom inner shadow */ 0 10px 30px rgba(0, 0, 0, 0.3) /* Standard drop shadow */ !important;
-    border-color: rgba(var(--header-dark-glow-rgb), 0.3) !important;
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.4),
+      0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(0, 212, 255, 0.3) !important;
   }
 
-  /* Light Theme Fallback: Simulates premium frosted glass */
-  .header-premium--light[data-tier="low"],
-  .header-premium--light[data-tier="medium"] {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.96) 100%) !important;
+  /* Light Theme Mobile: Premium Frosted Surface */
+  .header-premium--light {
+    background: 
+      /* Spotlight */
+      radial-gradient(ellipse 120% 100% at 50% -10%, rgba(255, 255, 255, 0.6) 0%, transparent 60%),
+      /* Main body */ linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+
     box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      inset 0 1px 1px rgba(255, 255, 255, 0.8),
       inset 0 -1px 1px rgba(0, 0, 0, 0.05),
       0 10px 30px rgba(0, 0, 0, 0.1) !important;
-    border-color: rgba(var(--header-light-glow-rgb), 0.2) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
   }
 }
 
@@ -225,13 +217,6 @@
   .header-premium {
     backdrop-filter: none !important;
     background-color: rgba(15, 23, 42, 0.98) !important;
-  }
-}
-
-/* FORCE SAFE MODE ON WEAK DEVICES OR SAFARI MOBILE */
-@media (max-width: 768px) {
-  .header-premium {
-    backdrop-filter: blur(8px) !important; /* Уменьшаем радиус для остальных */
   }
 }
 

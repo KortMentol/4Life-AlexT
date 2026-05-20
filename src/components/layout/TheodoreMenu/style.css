@@ -73,10 +73,6 @@
   transition: transform 0.3s ease;
 }
 
-.menu-logo-container:hover {
-  transform: translateX(-50%) scale(1.1);
-}
-
 .menu-footer {
   justify-content: center;
   align-items: flex-end;
@@ -112,11 +108,6 @@
 }
 
 /* Убираем hover-цвет — только scale */
-.menu__item:hover {
-  transform: scale(1.05);
-}
-
-/* Текст — отдельный span чтобы линия не влияла на его размер */
 .menu__item-text {
   display: block;
   font-variant-numeric: tabular-nums; /* стабильная ширина при scramble */
@@ -213,16 +204,26 @@
   transform: translateY(-15px);
 }
 
-.unbutton.button-close:hover {
-  transform: scale(1.15);
-}
-
 .neon-arrow-path {
   transition: stroke 0.3s ease;
 }
 
-.unbutton.button-close:hover .neon-arrow-path {
-  stroke: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .menu-logo-container:hover {
+    transform: translateX(-50%) scale(1.1);
+  }
+
+  .menu__item:hover {
+    transform: scale(1.05);
+  }
+
+  .unbutton.button-close:hover {
+    transform: scale(1.15);
+  }
+
+  .unbutton.button-close:hover .neon-arrow-path {
+    stroke: #fff;
+  }
 }
 
 /* Awwwards-level деградация для LOW tier */
