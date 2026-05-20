@@ -20,3 +20,8 @@ declare module "@heroicons/react/24/solid" {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export const MinusIcon: any;
 }
+
+// Swiper CSS imports
+declare module "swiper/css";
+declare module "swiper/css/effect-cube";
+declare module "swiper/css/pagination";

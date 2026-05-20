@@ -6,34 +6,24 @@ import {
 import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
 import { useEffect, useState } from "react";
 
-// Выносим кэш на уровень модуля (вне React-компонентов)
-// Это гарантирует, что расчет произойдет ровно 1 раз для всего сайта
+// Кэш на уровне модуля — вычисляется ровно 1 раз для всего сайта
 let globalTier: PerformanceTier | null = null;
 let isCalculating = false;
 
 /**
  * @module src/hooks/usePerformanceTier.ts
- * @description Оптимизированный хук (Singleton) для определения производительности.
- * В DEV режиме поддерживает override через effectsDebugStore (localStorage).
+ * @description Singleton-хук для определения производительности устройства.
+ * Rules of Hooks соблюдены: useState и useEffect всегда вызываются безусловно.
+ * DEV override проверяется ПОСЛЕ хуков и возвращается в конце.
  */
 export const usePerformanceTier = (): PerformanceTier => {
-  // DEV: проверяем override из effectsDebugStore
-  if (import.meta.env.DEV && typeof window !== "undefined") {
-    const override = getTierOverride();
-    if (override !== "auto") {
-      return override as PerformanceTier;
-    }
-  }
-
-  // Синхронно вычисляем тир при ПЕРВОМ вызове хука любым компонентом.
-  // Это избавляет от первоначального "medium" и последующего массового re-render'а.
+  // Синхронно вычисляем тир при первом вызове
   if (typeof window !== "undefined" && !globalTier && !isCalculating) {
     isCalculating = true;
     try {
       const specs = detectDeviceSpecs();
       const { score, tier: detectedTier } = calculatePerformanceScore(specs);
       globalTier = detectedTier;
-
       console.log(
         `🚀 System Performance Initialized: [${globalTier.toUpperCase()}] (Score: ${score})`,
       );
@@ -44,16 +34,23 @@ export const usePerformanceTier = (): PerformanceTier => {
     isCalculating = false;
   }
 
-  // Инициализируем стейт сразу правильным глобальным значением (или medium для SSR)
+  // ─── ХУКИ ВСЕГДА ВЫЗЫВАЮТСЯ БЕЗУСЛОВНО (Rules of Hooks) ───
   const [tier, setTier] = useState<PerformanceTier>(globalTier || "medium");
 
-  // useEffect нужен только на случай, если глобальный тир вычислился чуть позже
-  // (например, при асинхронных загрузках)
   useEffect(() => {
     if (globalTier && tier !== globalTier) {
       setTier(globalTier);
     }
-  }, [tier]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // только при монтировании — globalTier не меняется после инициализации
+
+  // ─── DEV override: проверяем ПОСЛЕ хуков ───
+  if (import.meta.env.DEV && typeof window !== "undefined") {
+    const override = getTierOverride();
+    if (override !== "auto") {
+      return override as PerformanceTier;
+    }
+  }
 
   return tier;
 };

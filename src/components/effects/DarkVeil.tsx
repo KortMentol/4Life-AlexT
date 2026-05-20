@@ -150,8 +150,21 @@ function DarkVeil({
           program.uniforms.uResolution.value.set(w, h);
         };
 
-        glObjects.current = { renderer, program, mesh, start, resize };
-        window.addEventListener("resize", resize);
+        // Debounce resize — предотвращаем пересоздание framebuffer на каждый пиксель
+        let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+        const debouncedResize = () => {
+          if (resizeTimer) clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(resize, 150);
+        };
+
+        glObjects.current = {
+          renderer,
+          program,
+          mesh,
+          start,
+          resize: debouncedResize,
+        };
+        window.addEventListener("resize", debouncedResize);
         resize();
         // Устанавливаем флаг готовности, что вызовет плавное появление канваса
         setIsWebGLReady(true);

@@ -1,11 +1,17 @@
 import DynamicLogo from "@/components/ui/DynamicLogo";
 import SciFiThemeToggle from "@/components/ui/SciFiThemeToggle";
-import { lenis } from "@/lib/lenis";
-import { mainNav } from "@/site-config/site";
-import { gsap } from "gsap";
-import React, { useEffect, useLayoutEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { mainNav } from "@/site-config/site";
+import { scrollToTop } from "@/utils/navigationUtils";
+import { gsap } from "gsap";
+import React, {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./style.css";
 
 import img1 from "@/assets/images/MobileMenu/1.jpg";
@@ -18,24 +24,88 @@ import img7 from "@/assets/images/MobileMenu/7.jpg";
 import img8 from "@/assets/images/MobileMenu/8.jpg";
 import img9 from "@/assets/images/MobileMenu/9.jpg";
 
-// === Константы таймингов анимации волн (секунды) ===
-// Используются для метки "чёрного" кадра.
-const WAVE_OPEN_DOWN_1 = 0.8; // вниз до полуэкрана (открытие)
-const WAVE_OPEN_DOWN_2 = 0.3; // вниз до полного чёрного (открытие)
+const WAVE_OPEN_DOWN_1 = 0.8;
+const WAVE_OPEN_DOWN_2 = 0.3;
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-// Типизация глобального окна для флага перехода меню
 declare global {
   interface Window {
     __menuTransitionInProgress?: boolean;
-    __menuSentinelActive?: boolean;
   }
 }
 
 interface TheodoreMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  navigateFromMenu: (href: string, isSame: boolean) => void;
 }
+
+// ─── Scramble hook ────────────────────────────────────────────────────────────
+function useScramble(text: string) {
+  const [display, setDisplay] = useState(text);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const scramble = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    let frame = 0;
+    const totalFrames = text.length * 3;
+
+    timerRef.current = setInterval(() => {
+      frame++;
+      const progress = frame / totalFrames;
+      const revealed = Math.floor(progress * text.length);
+      setDisplay(
+        text
+          .split("")
+          .map((char, i) => {
+            if (char === " ") return " ";
+            if (i < revealed) return text[i];
+            return SCRAMBLE_CHARS[
+              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
+            ];
+          })
+          .join(""),
+      );
+      if (frame >= totalFrames) {
+        clearInterval(timerRef.current!);
+        timerRef.current = null;
+        setDisplay(text);
+      }
+    }, 30);
+  }, [text]);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    },
+    [],
+  );
+
+  return { display, scramble };
+}
+
+// ─── MenuItem ─────────────────────────────────────────────────────────────────
+const MenuItem: React.FC<{
+  title: string;
+  href: string;
+  isActive: boolean;
+  onClick: (e: React.MouseEvent, href: string) => void;
+}> = ({ title, href, isActive, onClick }) => {
+  const { display, scramble } = useScramble(title);
+
+  return (
+    <Link
+      to={href}
+      className={`menu__item${isActive ? " menu__item--active" : ""}`}
+      onClick={(e) => {
+        scramble();
+        onClick(e, href);
+      }}
+    >
+      <span className="menu__item-text">{display}</span>
+      <span className="menu__item-line" aria-hidden="true" />
+    </Link>
+  );
+};
 
 const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button onClick={onClick} className="unbutton button-close">
@@ -63,37 +133,45 @@ const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   </button>
 );
 
-const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
-  isOpen,
-  onClose,
-  navigateFromMenu,
-}) => {
+// ─── TheodoreMenu ─────────────────────────────────────────────────────────────
+const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const tier = usePerformanceTier();
   const menuWrapRef = useRef<HTMLDivElement>(null);
   const overlayPathRef = useRef<SVGPathElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  // Путь, на который пользователь кликнул. Если null — закрытие по стрелке.
   const pendingHrefRef = useRef<string | null>(null);
-  // Историей управляет App через централизованный sentinel
+
+  const [activeHref, setActiveHref] = useState(location.pathname);
+
+  useEffect(() => {
+    if (isOpen) setActiveHref(location.pathname);
+  }, [isOpen, location.pathname]);
 
   const handleMobileLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    // Сохраняем целевой путь для координации закрытия и навигации на «чёрном» кадре
-    pendingHrefRef.current = href;
-    onClose(); // запустит закрытие меню (ниже перехватим в useEffect)
+    const isSame = location.pathname === href;
+
+    // Закрываем меню обычным способом
+    onClose();
+
+    // Если кликнули на ту же страницу, на которой находимся
+    if (isSame) {
+      // Запускаем скролл с задержкой в 1000мс.
+      // Это время позволяет анимации закрытия меню почти завершиться
+      // перед началом плавного скролла вверх
+      setTimeout(() => {
+        scrollToTop({ duration: 1.2 });
+      }, 1000);
+    } else {
+      // Если переходим на другую страницу, просто запоминаем куда идти
+      setActiveHref(href);
+      pendingHrefRef.current = href;
+    }
   };
 
-  // POP перехват больше не нужен — обработка централизована в App
-  useEffect(() => {
-    // no-op
-  }, [isOpen, onClose]);
-
-  // Sentinel устанавливается/снимается в App — здесь ничего не делаем
-  useLayoutEffect(() => {
-    // no-op
-  }, [isOpen]);
-
+  // ─── GSAP Timeline (инициализация) ─────────────────────────────────────────
   useEffect(() => {
     if (!menuWrapRef.current || !overlayPathRef.current) return;
 
@@ -101,20 +179,15 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
     const overlayPath = overlayPathRef.current;
     const menuItems = gsap.utils.toArray<HTMLElement>(".menu__item", menuWrap);
 
-    // Добавляем класс для отключения анимации плиток на low tier
-    if (tier === "low") {
-      menuWrap.classList.add("low-performance");
-    }
+    if (tier === "low") menuWrap.classList.add("low-performance");
 
     gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
 
     timelineRef.current = gsap.timeline({
       paused: true,
       onStart: () => {
-        // Добавляем класс для скрытия скроллбара
         document.body.classList.add("menu-open");
         document.documentElement.classList.add("menu-open");
-        lenis.stop();
         window.dispatchEvent(
           new CustomEvent("custom-scrollbar-update", {
             detail: { action: "hide" },
@@ -123,13 +196,10 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
       },
       onReverseComplete: () => {
         gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
-        // Убираем класс для возвращения скроллбара
         document.body.classList.remove("menu-open");
         document.documentElement.classList.remove("menu-open");
-        lenis.start();
-        // Сообщаем глобально, что переход завершён (включая случай закрытия по стрелке)
-        window.dispatchEvent(new CustomEvent("menu-transition-complete"));
         window.__menuTransitionInProgress = false;
+        window.dispatchEvent(new CustomEvent("menu-transition-complete"));
         window.dispatchEvent(
           new CustomEvent("custom-scrollbar-update", {
             detail: { action: "show" },
@@ -157,7 +227,6 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
       ease: "power2",
       attr: { d: "M 0 100 V 0 Q 50 0 100 0 V 100 z" },
     });
-    // Момент полного чёрного экрана
     tl.addLabel("fullBlack");
     tl.set(menuWrap, { autoAlpha: 1, pointerEvents: "auto" });
     tl.set(overlayPath, { attr: { d: "M 0 0 V 100 Q 50 100 100 100 V 0 z" } })
@@ -180,78 +249,77 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
 
     return () => {
       tl.kill();
-      if (tier === "low" && menuWrap) {
+      if (tier === "low" && menuWrap)
         menuWrap.classList.remove("low-performance");
-      }
     };
   }, [tier]);
 
+  // ─── Управление анимацией по isOpen ────────────────────────────────────────
   useEffect(() => {
     const tl = timelineRef.current;
     if (!tl) return;
 
     if (isOpen) {
+      pendingHrefRef.current = null;
       tl.play();
       return;
     }
 
-    // Меню закрывается. Если пользователь кликнул пункт (есть pendingHref) —
-    // идём в reverse() и ставим паузу ровно на 'fullBlack', где делаем навигацию.
+    // Простое закрытие (стрелка, кнопка назад) — без навигации
     if (!pendingHrefRef.current) {
       tl.reverse();
       return;
     }
 
-    // Безопасно остановим внешние твины и запустим обратное проигрывание
+    // Закрытие с переходом на другую страницу — пауза на fullBlack, navigate
     gsap.killTweensOf(tl);
     const labelTime =
-      tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2; // запасной расчёт
+      tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2;
     let lastTime = tl.time();
     const prevUpdate = tl.eventCallback("onUpdate") as gsap.Callback | null;
     const targetHref = pendingHrefRef.current;
 
     const atBlack = () => {
-      // 1. Пауза на чёрном кадре
       tl.pause(labelTime);
-      const href = targetHref!;
-      const isSame = location.pathname === href;
       window.__menuTransitionInProgress = true;
       window.dispatchEvent(new CustomEvent("menu-transition-start"));
 
-      // 2. Навигация (Рендер новой страницы)
-      navigateFromMenu(href, isSame);
+      // Оборачиваем навигацию в startTransition, чтобы снизить приоритет рендера
+      // и не блокировать анимации
+      startTransition(() => {
+        navigate(targetHref!);
+      });
 
-      // 3. Прячем лаг рендера в темноте (пауза 150мс)
+      // Даем слабому железу время на сборку мусора и рендер тяжелой страницы
+      // Для мобилок (ширина < 768) даем 400мс, для ПК оставляем 150мс
+      const delay = window.innerWidth < 768 ? 400 : 150;
+
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setTimeout(() => {
             tl.eventCallback("onUpdate", prevUpdate || null);
             tl.resume();
             pendingHrefRef.current = null;
-          }, 150);
+          }, delay);
         });
       });
     };
 
     const onUpdate = () => {
       const t = tl.time();
-      if (lastTime > labelTime && t <= labelTime) {
-        atBlack();
-      }
+      if (lastTime > labelTime && t <= labelTime) atBlack();
       lastTime = t;
     };
+
     tl.eventCallback("onUpdate", onUpdate);
     tl.reverse();
 
     return () => {
-      // Очистка onUpdate, если эффект размонтируется или зависимость изменится
       if (tl.eventCallback("onUpdate") === onUpdate) {
         tl.eventCallback("onUpdate", prevUpdate || null);
       }
     };
-  }, [isOpen, navigateFromMenu, location.pathname]);
-
-  // --- Утилиты префетча перенесены на уровень модуля ---
+  }, [isOpen, navigate, location.pathname]);
 
   return (
     <div className="theodore-menu-container">
@@ -344,14 +412,13 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({
         </div>
         <nav className="menu">
           {mainNav.map((item) => (
-            <Link
+            <MenuItem
               key={item.href}
-              to={item.href}
-              className="menu__item"
-              onClick={(e) => handleMobileLinkClick(e, item.href)}
-            >
-              {item.title}
-            </Link>
+              title={item.title}
+              href={item.href}
+              isActive={activeHref === item.href}
+              onClick={handleMobileLinkClick}
+            />
           ))}
         </nav>
         <div className="menu-footer">

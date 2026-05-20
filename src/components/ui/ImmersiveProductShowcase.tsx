@@ -10,7 +10,14 @@
 import { useTransition } from "@/context";
 import { useIsMobile, usePerformanceTier, useTheme } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
-import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import React, { lazy, memo, Suspense, useCallback, useRef } from "react";
 
 const KineticProductCarousel = lazy(() => import("./KineticProductCarousel"));
@@ -27,7 +34,10 @@ interface ImmersiveProductShowcaseProps {
   products: ShowcaseProduct[];
 }
 
-const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+const IS_TOUCH =
+  typeof window !== "undefined"
+    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
+    : false;
 
 const MAGNETIC = { stiffness: 100, damping: 18, mass: 0.5, restDelta: 0.001 };
 const MAGNETIC_MEDIUM = {
@@ -66,8 +76,10 @@ const ShowcaseCard: React.FC<{
   const springY = useSpring(rawY, MAGNETIC);
   const springXMedium = useSpring(rawX, MAGNETIC_MEDIUM);
   const springYMedium = useSpring(rawY, MAGNETIC_MEDIUM);
-  const mx = tier === "high" ? springX : tier === "medium" ? springXMedium : rawX;
-  const my = tier === "high" ? springY : tier === "medium" ? springYMedium : rawY;
+  const mx =
+    tier === "high" ? springX : tier === "medium" ? springXMedium : rawX;
+  const my =
+    tier === "high" ? springY : tier === "medium" ? springYMedium : rawY;
 
   // 3D tilt для изображения — отдельные motion values
   // Прямое обновление DOM через style — 0 ре-рендеров React
@@ -106,7 +118,8 @@ const ShowcaseCard: React.FC<{
     rawY.set(0);
     // Плавный возврат tilt к нулю
     if (tiltEnabled && imgRef.current) {
-      imgRef.current.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+      imgRef.current.style.transform =
+        "perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0px)";
     }
   }, [rawX, rawY, tiltEnabled]);
 
@@ -150,7 +163,10 @@ const ShowcaseCard: React.FC<{
       style={{
         // Magnetic X + scroll-driven X combined
         x: magnetEnabled
-          ? useTransform([mx, cardScrollX] as any, ([mxVal, csVal]: number[]) => (mxVal ?? 0) + (csVal ?? 0))
+          ? useTransform(
+              [mx, cardScrollX] as any,
+              ([mxVal, csVal]: number[]) => (mxVal ?? 0) + (csVal ?? 0),
+            )
           : cardScrollX,
         y: magnetEnabled ? my : 0,
         opacity: cardOpacity,
@@ -164,7 +180,10 @@ const ShowcaseCard: React.FC<{
       onKeyDown={(e) => e.key === "Enter" && handleClick(e as any)}
       aria-label={`Перейти к продукту: ${product.title}`}
     >
-      <div className="relative rounded-2xl overflow-hidden" style={{ contain: "layout paint", ...cardStyle }}>
+      <div
+        className="relative rounded-2xl overflow-hidden"
+        style={{ contain: "layout paint", ...cardStyle }}
+      >
         {/* Apple inner top highlight */}
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none z-10"
@@ -228,7 +247,9 @@ const ShowcaseCard: React.FC<{
           >
             {product.title}
           </h3>
-          <p className={`text-sm leading-relaxed line-clamp-2 mb-4 ${isDark ? "text-slate-400/80" : "text-slate-500"}`}>
+          <p
+            className={`text-sm leading-relaxed line-clamp-2 mb-4 ${isDark ? "text-slate-400/80" : "text-slate-500"}`}
+          >
             {product.description}
           </p>
 
@@ -246,7 +267,11 @@ const ShowcaseCard: React.FC<{
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </div>
         </div>
@@ -257,7 +282,9 @@ const ShowcaseCard: React.FC<{
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({ products }) => {
+const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({
+  products,
+}) => {
   const tier = usePerformanceTier();
   const { theme } = useTheme();
   const efxFlags = useEffectsDebug();

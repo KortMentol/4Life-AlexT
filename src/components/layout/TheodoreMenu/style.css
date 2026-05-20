@@ -101,15 +101,52 @@
   text-align: center;
   position: relative;
   will-change: opacity, transform;
-  transition:
-    color 0.3s ease,
-    transform 0.3s ease;
+  /* Убираем color transition — цвет не меняется */
+  transition: transform 0.3s ease;
   padding: 0.5rem 0;
+  /* Нужен для позиционирования линии */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
+/* Убираем hover-цвет — только scale */
 .menu__item:hover {
-  color: var(--color-menu-item-hover);
   transform: scale(1.05);
+}
+
+/* Текст — отдельный span чтобы линия не влияла на его размер */
+.menu__item-text {
+  display: block;
+  font-variant-numeric: tabular-nums; /* стабильная ширина при scramble */
+}
+
+/* Линия-индикатор */
+.menu__item-line {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+  background: #fff;
+  border-radius: 1px;
+  /* Скрыта по умолчанию — scaleX(0) из центра */
+  transform: scaleX(0);
+  transform-origin: center;
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+  opacity: 0;
+  /* Тонкое свечение */
+  box-shadow:
+    0 0 6px rgba(255, 255, 255, 0.5),
+    0 0 16px rgba(255, 255, 255, 0.15);
+  will-change: transform, opacity;
+}
+
+/* Активный пункт — линия видна */
+.menu__item--active .menu__item-line {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 .tiles {

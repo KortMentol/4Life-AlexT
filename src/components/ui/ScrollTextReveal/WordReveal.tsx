@@ -24,10 +24,18 @@ const WordReveal: React.FC<WordRevealProps> = ({
   tier = "high",
 }) => {
   // Calculate timing for this specific word
-  const [startProgress, endProgress] = TextSplitter.calculateWordTiming(index, totalWords, staggerDelay);
+  const [startProgress, endProgress] = TextSplitter.calculateWordTiming(
+    index,
+    totalWords,
+    staggerDelay,
+  );
 
   // Create animation transforms for this word
-  const opacity = useTransform(scrollProgress, [startProgress, endProgress], DEFAULT_CONFIG.animation.opacityRange);
+  const opacity = useTransform(
+    scrollProgress,
+    [startProgress, endProgress],
+    DEFAULT_CONFIG.animation.opacityRange,
+  );
 
   // Skew only for HIGH tier
   const skewX = useTransform(
@@ -40,7 +48,9 @@ const WordReveal: React.FC<WordRevealProps> = ({
   const blur = useTransform(
     scrollProgress,
     [startProgress, endProgress],
-    tier === "high" || tier === "medium" ? DEFAULT_CONFIG.animation.blurRange : [0, 0],
+    tier === "high" || tier === "medium"
+      ? DEFAULT_CONFIG.animation.blurRange
+      : [0, 0],
   );
 
   // Create filter string from blur value
@@ -49,7 +59,8 @@ const WordReveal: React.FC<WordRevealProps> = ({
   // Premium font styling matching demo 3
   const getPremiumFontStyles = () => {
     return {
-      fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+      fontFamily:
+        '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
       fontWeight: 600, // Semi-bold for premium look
       fontVariationSettings: '"wght" 600, "slnt" 0',
       letterSpacing: "-0.02em", // Tight letter spacing

@@ -356,7 +356,7 @@ export const calculatePerformanceScore = (
 
   cachedPerformance = { score, tier };
 
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env.DEV) {
     console.log(
       `%c⚡ PERFORMANCE TIER: ${tier.toUpperCase()} | Score: ${score}`,
       "color: #00d9ff; font-weight: bold; font-size: 12px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px;",

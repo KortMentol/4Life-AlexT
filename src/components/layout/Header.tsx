@@ -40,42 +40,71 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const tier = usePerformanceTier();
 
   const headerRef = useRef<HTMLElement>(null);
+  const isMenuAnimatingRef = useRef(false);
 
-  const { showHeader } = useNativeScroll({ disabled: isMenuOpen });
+  const { showHeader } = useNativeScroll({
+    disabled: isMenuOpen || isMenuAnimatingRef.current,
+  });
 
-  // Принудительно показываем хедер при переходах и перезагрузке
+  // КРИТИЧНО: Принудительно показываем хедер при первом рендере
   useEffect(() => {
-    showHeader();
+    if (headerRef.current) {
+      headerRef.current.style.transform = "translateY(0px) translateZ(0)";
+      headerRef.current.style.opacity = "1";
+      headerRef.current.style.visibility = "visible";
+    }
+  }, []); // Пустой массив зависимостей - выполнится только один раз
+
+  // Показываем хедер при маунте (первая загрузка) и по событию force-header-show.
+  // force-header-show диспатчится из RouteChangeHandler после восстановления скролла —
+  // уже после того как пелена перехода закрыла экран.
+  // НЕ вызываем showHeader() при каждой смене location — это показывало хедер
+  // до закрытия пелены.
+  useEffect(() => {
+    showHeader(); // показываем сразу при маунте
     const handleForceShow = () => showHeader();
     window.addEventListener("force-header-show", handleForceShow);
     return () =>
       window.removeEventListener("force-header-show", handleForceShow);
   }, [showHeader]);
 
-  // Слушаем изменения маршрута — всегда показываем хедер
-  useEffect(() => {
-    showHeader();
-  }, [location.pathname, showHeader]);
+  // Хедер при открытии/закрытии меню
+  const menuTlRef = useRef<gsap.core.Timeline | null>(null);
 
-  // GSAP для скрытия хедера при открытии меню
-  // overwrite:true — не конфликтует с useNativeScroll style.transform
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
+
+    // Создаём timeline один раз если его нет
+    if (!menuTlRef.current) {
+      menuTlRef.current = gsap
+        .timeline({
+          paused: true,
+          onStart: () => {
+            isMenuAnimatingRef.current = true;
+          },
+          onComplete: () => {
+            isMenuAnimatingRef.current = false;
+          },
+          onReverseComplete: () => {
+            isMenuAnimatingRef.current = false;
+          },
+        })
+        .to(header, {
+          y: "-120%",
+          duration: 0.8,
+          ease: "power4.inOut",
+        });
+    }
+
+    const tl = menuTlRef.current;
+
     if (isMenuOpen) {
-      gsap.to(header, {
-        y: "-120%",
-        duration: 0.8,
-        ease: "power4.inOut",
-        overwrite: true,
-      });
+      // Играем вперёд из текущей позиции
+      tl.play();
     } else {
-      gsap.to(header, {
-        y: "0%",
-        duration: 0.6,
-        ease: "power4.out",
-        overwrite: true,
-      });
+      // Реверсируем из текущей позиции
+      tl.reverse();
     }
   }, [isMenuOpen]);
 

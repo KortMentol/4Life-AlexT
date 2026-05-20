@@ -9,17 +9,33 @@ import PopTransitionOverlay from "@/components/transitions/PopTransitionOverlay"
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useTheodoreMenu } from "@/hooks/useTheodoreMenu";
-import { useTouchScrollLock } from "@/hooks/useTouchScrollLock";
 import { lenis, updateScroll } from "@/lib/lenis";
-import { scrollLockState } from "@/lib/scrollLockState";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import React, { createContext, Suspense, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  Suspense,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { Link, Route, Routes } from "react-router-dom";
 
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
+
+// КРИТИЧНО: Добавь эту глобальную конфигурацию!
+if (typeof window !== "undefined") {
+  const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  if (isTouch) {
+    ScrollTrigger.config({
+      ignoreMobileResize: true, // Не пересчитывать позиции при появлении/скрытии URL-бара
+      autoRefreshEvents: "DOMContentLoaded,load,visibilitychange", // Убираем 'resize' из событий для мобильных
+    });
+  }
+}
 
 // Lazy-loaded pages
 import HomePage from "@/pages/HomePage";
@@ -45,7 +61,9 @@ export const useNavigation = () => {
   return context;
 };
 
-const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isPopping, setIsPopping] = useState(false);
 
   return (
@@ -59,133 +77,65 @@ const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 function App() {
   const isMobile = useIsMobile();
 
-  // Theodore Menu management with history API integration
-  const { isMenuOpen, toggleMenu, closeMenu, navigateFromMenu, isMenuActionRef, wasMenuOpenRef } = useTheodoreMenu();
+  const { isMenuOpen, toggleMenu, closeMenu, isMenuActionRef, wasMenuOpenRef } =
+    useTheodoreMenu();
 
-  // Блокируем скролл ТОЛЬКО когда меню ОТКРЫТО
-  useTouchScrollLock(isMenuOpen);
+  const scrollYBeforeMenuRef = useRef(0);
 
+  // Скролл-лок при открытом меню с fail-safe cleanup
   useEffect(() => {
-    if (isMenuOpen) lenis.stop();
-    else lenis.start();
+    const html = document.documentElement;
+    if (isMenuOpen) {
+      const scrollY = window.scrollY;
+      scrollYBeforeMenuRef.current = scrollY;
+      html.style.overflow = "hidden";
+      html.style.position = "fixed";
+      html.style.top = `-${scrollY}px`;
+      html.style.width = "100%";
+      lenis?.stop();
+    } else {
+      html.style.overflow = "";
+      html.style.position = "";
+      html.style.top = "";
+      html.style.width = "";
+      window.scrollTo(0, scrollYBeforeMenuRef.current);
+      lenis?.start();
+    }
 
-    // Определение горизонтального свайпа для блокировки Lenis
-    // Используем только touchstart + touchend — минимум обработчиков на main thread
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (isMenuOpen) return;
-      const touch = e.touches[0];
-      if (!touch) return;
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (isMenuOpen) return;
-
-      // Разблокируем Lenis при завершении любого тача
-      if (scrollLockState.isLocked) {
-        lenis.start();
-        scrollLockState.isLocked = false;
-      }
-
-      // Определяем был ли это горизонтальный свайп по changedTouches
-      const touch = e.changedTouches[0];
-      if (!touch) return;
-      const deltaX = Math.abs(touch.clientX - touchStartX);
-      const deltaY = Math.abs(touch.clientY - touchStartY);
-
-      // Если был горизонтальный свайп — Lenis уже разблокирован выше
-      // Если вертикальный — ничего не делаем, Lenis работает
-      if (deltaX > deltaY * 1.7 && deltaX > 5) {
-        // горизонтальный свайп завершён — Lenis уже запущен
-      }
-    };
-
-    // Блокировка Lenis при горизонтальном свайпе — через один passive touchmove
-    // Только первый move определяет направление, дальше флаг не меняется
-    let directionLocked = false;
-    let isTicking = false; // Добавлено
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isMenuOpen || directionLocked || isTicking) return;
-      isTicking = true;
-
-      requestAnimationFrame(() => {
-        const touch = e.touches[0];
-        if (touch) {
-          const deltaX = Math.abs(touch.clientX - touchStartX);
-          const deltaY = Math.abs(touch.clientY - touchStartY);
-
-          if (deltaX > 5 || deltaY > 5) {
-            directionLocked = true;
-            if (deltaX > deltaY * 1.7) {
-              // горизонтальный — стопаем Lenis
-              if (!scrollLockState.isLocked) {
-                lenis.stop();
-                scrollLockState.isLocked = true;
-              }
-            }
-          }
-        }
-        isTicking = false;
-      });
-    };
-
-    const handleTouchStartReset = (e: TouchEvent) => {
-      directionLocked = false;
-      handleTouchStart(e);
-    };
-
-    document.addEventListener("touchstart", handleTouchStartReset, {
-      passive: true,
-    });
-    document.addEventListener("touchmove", handleTouchMove, { passive: true });
-    document.addEventListener("touchend", handleTouchEnd, { passive: true });
-    document.addEventListener("touchcancel", handleTouchEnd, { passive: true });
-
+    // Fail-safe cleanup: ensure scroll is restored even if component unmounts
     return () => {
-      document.removeEventListener("touchstart", handleTouchStartReset);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchend", handleTouchEnd);
-      document.removeEventListener("touchcancel", handleTouchEnd);
+      if (isMenuOpen) {
+        html.style.overflow = "";
+        html.style.position = "";
+        html.style.top = "";
+        html.style.width = "";
+        lenis?.start();
+      }
     };
   }, [isMenuOpen]);
 
   useEffect(() => {
     window.addEventListener("load", updateScroll);
     window.addEventListener("resize", updateScroll);
-    updateScroll();
     return () => {
       window.removeEventListener("load", updateScroll);
       window.removeEventListener("resize", updateScroll);
     };
   }, []);
 
-  // --- ENGINE SYNCHRONIZATION (Lenis + GSAP) ---
-  // Unifies the animation pipelines to prevent layout jitter during smooth scrolling.
+  // --- ENGINE SYNCHRONIZATION (Lenis + GSAP, только десктоп) ---
   useEffect(() => {
-    if (typeof window === "undefined" || !lenis) return;
+    if (!lenis) return; // На мобильных lenis === null — пропускаем
 
-    // 1. Force ScrollTrigger to update strictly on Lenis scroll tick
-    lenis.on("scroll", ScrollTrigger.update);
+    const l = lenis;
+    l.on("scroll", ScrollTrigger.update);
 
-    // 2. Add Lenis RAF to GSAP's global ticker
-    // GSAP's time is in seconds, Lenis expects milliseconds
-    const ticker = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-
+    const ticker = (time: number) => l.raf(time * 1000);
     gsap.ticker.add(ticker);
-
-    // 3. Disable GSAP's internal lag smoothing because Lenis manages the timeline
     gsap.ticker.lagSmoothing(0);
 
-    // 4. Proper cleanup to prevent memory leaks on unmount
     return () => {
-      lenis.off("scroll", ScrollTrigger.update);
+      l.off("scroll", ScrollTrigger.update);
       gsap.ticker.remove(ticker);
     };
   }, []);
@@ -193,10 +143,13 @@ function App() {
   return (
     <NavigationProvider>
       <ProductListProvider>
-        <RouteChangeHandler isMenuActionRef={isMenuActionRef} wasMenuOpenRef={wasMenuOpenRef} />
+        <RouteChangeHandler
+          isMenuActionRef={isMenuActionRef}
+          wasMenuOpenRef={wasMenuOpenRef}
+        />
         <Suspense fallback={null}>
           <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />
-          <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} navigateFromMenu={navigateFromMenu} />
+          <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
@@ -211,17 +164,18 @@ function App() {
               path="*"
               element={
                 <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
-                  {" "}
                   <div className="card-modern p-12 text-center max-w-lg">
-                    {" "}
-                    <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>{" "}
-                    <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>{" "}
+                    <h1 className="text-8xl font-bold mb-4 gradient-heading">
+                      404
+                    </h1>
+                    <p className="text-xl mb-8">
+                      Страница не найдена. Возможно, вы ошиблись адресом.
+                    </p>
                     <Link
                       to="/"
                       className="btn-modern btn-primary-modern px-8 py-4 rounded-lg inline-flex items-center gap-2"
                     >
-                      {" "}
-                      <span>Вернуться на главную</span>{" "}
+                      <span>Вернуться на главную</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
@@ -233,11 +187,10 @@ function App() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        {" "}
-                        <path d="m15 18-6-6 6-6" />{" "}
-                      </svg>{" "}
-                    </Link>{" "}
-                  </div>{" "}
+                        <path d="m15 18-6-6 6-6" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               }
             />
@@ -247,7 +200,9 @@ function App() {
           (isMobile
             ? createPortal(<PerformanceDebugMobile />, document.body)
             : createPortal(<PerformanceDebug />, document.body))}
-        {import.meta.env.DEV && !isMobile && createPortal(<EffectsDebugPanel />, document.body)}
+        {import.meta.env.DEV &&
+          !isMobile &&
+          createPortal(<EffectsDebugPanel />, document.body)}
       </ProductListProvider>
     </NavigationProvider>
   );

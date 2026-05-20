@@ -65,20 +65,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     };
 
     // Добавляем слушатель изменений
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener("change", handleChange);
-    } else {
-      // Для старых браузеров
-      mediaQuery.addListener(handleChange);
-    }
+    mediaQuery.addEventListener("change", handleChange);
 
     return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener("change", handleChange);
-      } else {
-        // Для старых браузеров
-        mediaQuery.removeListener(handleChange);
-      }
+      mediaQuery.removeEventListener("change", handleChange);
     };
   }, []);
 

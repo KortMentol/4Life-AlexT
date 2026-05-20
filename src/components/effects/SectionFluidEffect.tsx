@@ -17,7 +17,13 @@ import { useFluid } from "@/hooks/useFluid";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useTheme } from "@/hooks/useTheme";
 import WebGLFluidEnhanced from "@/lib/webgl-fluid/index";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 const TRANSITION_START = "menu-transition-start";
@@ -43,7 +49,13 @@ const getFluidConfig = (
   densityDissipation: 1,
   velocityDissipation: isMobile ? 0.9 : 0.3,
   pressure: 0.01,
-  pressureIterations: pressureHigh ? (tier === "high" ? 50 : tier === "medium" ? 25 : 10) : 20,
+  pressureIterations: pressureHigh
+    ? tier === "high"
+      ? 50
+      : tier === "medium"
+        ? 25
+        : 10
+    : 20,
   curl: isMobile ? 25 : 35,
   splatRadius: isMobile ? 0.18 : 0.22,
   splatForce: isMobile ? 6000 : 7000,
@@ -51,7 +63,11 @@ const getFluidConfig = (
   sunrays: tier === "high" && sunrays,
 });
 
-const getCommonConfig = (theme: string, isMobile: boolean, isTouchDevice: boolean) => {
+const getCommonConfig = (
+  theme: string,
+  isMobile: boolean,
+  isTouchDevice: boolean,
+) => {
   const isLightTheme = theme === "light";
   return {
     transparent: true,
@@ -80,7 +96,9 @@ interface SectionFluidEffectProps {
   sectionRef: React.RefObject<HTMLElement>;
 }
 
-const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) => {
+const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
+  sectionRef,
+}) => {
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
   const { theme } = useTheme();
@@ -88,29 +106,29 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
 
   const containerRef = useRef<HTMLDivElement>(null);
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
-  const stopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRunningRef = useRef<boolean>(false);
   const isInViewportRef = useRef<boolean>(false);
   const scissorRafRef = useRef<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   const isTouchDevice = useMemo(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches,
     [],
   );
   const isMobile = useMemo(
     () =>
       typeof navigator !== "undefined" &&
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      ),
     [],
   );
 
-  // РАННИЙ ВОЗВРАТ: Если это тач-устройство или тир не High - не рендерим ничего.
-  // Никаких Canvas, никаких Observer'ов, 0 влияния на производительность.
-  if (isTouchDevice || tier !== "high") return null;
-
-  // DEV: проверяем флаг webglFluid
-  if (import.meta.env.DEV && !efxFlags.webglFluid) return null;
+  // РАННИЕ ВОЗВРАТЫ перенесены ВНИЗ — после всех хуков (Rules of Hooks).
+  // Здесь только вычисления, которые нужны хукам ниже.
 
   const startAnimation = useCallback(() => {
     if (simulationRef.current && !isRunningRef.current) {
@@ -144,6 +162,13 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     if (!section || !simulation) return;
 
     const updateScissor = () => {
+      // Не вызываем getBoundingClientRect если секция вне viewport —
+      // экономим forced layout каждый кадр
+      if (!isInViewportRef.current) {
+        scissorRafRef.current = requestAnimationFrame(updateScissor);
+        return;
+      }
+
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
 
@@ -216,7 +241,15 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
         console.error("[SectionFluidEffect] Cleanup Error:", error);
       }
     };
-  }, [setFluidInstance, theme, tier, isTouchDevice, isMobile, resetKey, efxFlags]);
+  }, [
+    setFluidInstance,
+    theme,
+    tier,
+    isTouchDevice,
+    isMobile,
+    resetKey,
+    efxFlags,
+  ]);
 
   // INTERSECTION OBSERVER — прогрев 200px
   useEffect(() => {
@@ -300,7 +333,11 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
         if (event.type === "touchmove") lastTouchEvent = event;
 
         const mouseEventType =
-          event.type === "touchstart" ? "mousedown" : event.type === "touchend" ? "mouseup" : "mousemove";
+          event.type === "touchstart"
+            ? "mousedown"
+            : event.type === "touchend"
+              ? "mouseup"
+              : "mousemove";
         canvas.dispatchEvent(
           new MouseEvent(mouseEventType, {
             clientX: touch.clientX,
@@ -339,14 +376,31 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       }
     }
 
-    const directEventTypes = ["mousedown", "mouseup", "touchstart", "touchmove", "touchend"];
-    directEventTypes.forEach((type) => section.addEventListener(type, handleEvent, { passive: true }));
-    section.addEventListener("mousemove", throttledMouseMoveHandler as EventListener, { passive: true });
+    const directEventTypes = [
+      "mousedown",
+      "mouseup",
+      "touchstart",
+      "touchmove",
+      "touchend",
+    ];
+    directEventTypes.forEach((type) =>
+      section.addEventListener(type, handleEvent, { passive: true }),
+    );
+    section.addEventListener(
+      "mousemove",
+      throttledMouseMoveHandler as EventListener,
+      { passive: true },
+    );
 
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      directEventTypes.forEach((type) => section.removeEventListener(type, handleEvent));
-      section.removeEventListener("mousemove", throttledMouseMoveHandler as EventListener);
+      directEventTypes.forEach((type) =>
+        section.removeEventListener(type, handleEvent),
+      );
+      section.removeEventListener(
+        "mousemove",
+        throttledMouseMoveHandler as EventListener,
+      );
     };
   }, [sectionRef, startAnimation, scheduleStopAnimation]);
 
@@ -365,9 +419,16 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     window.addEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
     return () => {
       window.removeEventListener(TRANSITION_START, onStart as EventListener);
-      window.removeEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+      window.removeEventListener(
+        TRANSITION_COMPLETE,
+        onComplete as EventListener,
+      );
     };
   }, [startAnimation]);
+
+  // ─── РАННИЕ ВОЗВРАТЫ — после всех хуков (Rules of Hooks соблюдены) ───
+  if (isTouchDevice || tier !== "high") return null;
+  if (import.meta.env.DEV && !efxFlags.webglFluid) return null;
 
   return createPortal(
     <div

@@ -259,7 +259,6 @@ const HomePage: React.FC = () => {
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
-          skipPreload={true}
           edgeFade={{
             top: 160,
             bottom: 150,

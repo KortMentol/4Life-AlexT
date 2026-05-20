@@ -1,42 +1,41 @@
 /**
  * @module src/styles/image-rendering.css
- * @description Глобальные CSS правила для устранения пикселизации изображений во всех браузерах
+ * @description Глобальные CSS правила для устранения пикселизации изображений.
  * @author Kort
- * @version 2.0.0 - Fixed (2026)
- * @usage Импортируется в main.tsx, применяется глобально ко всем изображениям
- * @logic Fallback chain: auto → smooth (современные браузеры используют smooth)
+ * @version 3.0.0 - Video exempt (2026)
+ * @note video теги намеренно исключены из image-rendering правил.
+ *       Видео должно полагаться на нативное аппаратное декодирование браузера.
+ *       Принудительный image-rendering на трансформируемых видео заставляет CPU
+ *       постоянно перерастеризовывать кадры во время скролла.
  */
 
-/* Глобальные правила для всех изображений */
+/* Изображения, canvas, svg — применяем smooth rendering */
 img,
-video,
 canvas,
 svg,
 [style*="background-image"] {
-  /* Fallback для старых браузеров */
   image-rendering: auto;
   -webkit-image-rendering: auto;
   -moz-image-rendering: auto;
   -ms-image-rendering: auto;
-  
-  /* Современный стандарт (перезаписывает auto) */
+
+  /* Современный стандарт */
   image-rendering: smooth;
   -webkit-image-rendering: smooth;
-  /* Firefox не поддерживает smooth, оставляем auto */
 }
 
-/* Tailwind bg-* классы (bg-cover, bg-contain, bg-center и т.д.) */
+/* Tailwind bg-* классы */
 [class*="bg-"] {
   image-rendering: auto;
   -webkit-image-rendering: auto;
   -moz-image-rendering: auto;
   -ms-image-rendering: auto;
-  
+
   image-rendering: smooth;
   -webkit-image-rendering: smooth;
 }
 
-/* Анимированные/трансформируемые изображения - максимальная плавность */
+/* Анимированные/трансформируемые изображения */
 .will-change-transform img,
 .will-change-transform [style*="background-image"],
 [style*="transform"] img,
@@ -44,4 +43,13 @@ svg,
   image-rendering: smooth;
   -webkit-image-rendering: smooth;
   -moz-image-rendering: auto;
+}
+
+/* VIDEO: намеренно НЕ переопределяем image-rendering.
+   Браузер использует аппаратное декодирование (GPU video decoder).
+   Любой image-rendering на video отключает этот путь и нагружает CPU.
+   Особенно критично на мобильных при scroll-driven трансформациях. */
+video {
+  image-rendering: auto;
+  -webkit-image-rendering: auto;
 }

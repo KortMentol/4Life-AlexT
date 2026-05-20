@@ -74,7 +74,7 @@ const ProductsPage: React.FC = () => {
   const handleCategoryChange = useCallback(
     (category: string | null) => {
       if (gridAnchorRef.current) {
-        lenis.scrollTo(gridAnchorRef.current, {
+        lenis?.scrollTo(gridAnchorRef.current, {
           offset: -100,
           duration: 1.2,
           easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -223,7 +223,7 @@ const ProductsPage: React.FC = () => {
             ) as HTMLElement | null;
             if (cardEl) {
               setTimeout(() => {
-                lenis.scrollTo(cardEl, { offset: -120, duration: 1.0 });
+                lenis?.scrollTo(cardEl, { offset: -120, duration: 1.0 });
               }, 350); // wait for modal exit animation
             }
           }

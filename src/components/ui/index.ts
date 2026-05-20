@@ -11,7 +11,6 @@ export { default as ProductListIcon } from "./ProductListIcon";
 export { default as SciFiCloseButton } from "./SciFiCloseButton";
 export { default as SciFiThemeToggle } from "./SciFiThemeToggle";
 export { default as ScrollNumber } from "./ScrollNumber";
-export { default as ScrollText } from "./ScrollText";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";
 export { default as SectionDivider } from "./SectionDivider";
 export { default as SectionHeading } from "./SectionHeading";

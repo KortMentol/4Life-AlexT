@@ -552,14 +552,14 @@ const ProductDetailModal = forwardRef<
       document.body.classList.add("menu-open");
       document.documentElement.classList.add("menu-open");
       if (root) root.inert = true;
-      lenis.stop();
+      lenis?.stop();
       setTimeout(() => closeButtonRef.current?.focus(), 100);
     }
     return () => {
       document.body.classList.remove("menu-open");
       document.documentElement.classList.remove("menu-open");
       if (root) root.inert = false;
-      lenis.start();
+      lenis?.start();
     };
   }, [isOpen]);
 

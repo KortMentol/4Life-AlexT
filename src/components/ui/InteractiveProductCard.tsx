@@ -74,6 +74,8 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
         x: magnetEnabled ? x : 0,
         y: magnetEnabled ? y : 0,
         isolation: "isolate",
+        // Убираем perspective на touch — уплощаем layer tree, экономим GPU
+        perspective: IS_TOUCH ? "none" : undefined,
       }}
       className="h-full"
     >

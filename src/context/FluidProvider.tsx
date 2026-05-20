@@ -23,8 +23,19 @@ export const FluidProvider: React.FC<FluidProviderProps> = ({ children }) => {
       setIsMobile(mobile);
     };
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+
+    // Debounce — не вызываем setState на каждый пиксель resize
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedCheck = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(checkMobile, 150);
+    };
+
+    window.addEventListener("resize", debouncedCheck);
+    return () => {
+      window.removeEventListener("resize", debouncedCheck);
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   const multipleSplats = (amount: number) => {

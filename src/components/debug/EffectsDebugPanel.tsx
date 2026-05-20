@@ -356,6 +356,17 @@ const EffectsDebugPanel: React.FC = () => {
             onChange={handleToggle}
           />
 
+          <div className={styles.divider} />
+
+          {/* ── Parallax Background ── */}
+          <div className={styles.sectionLabel}>Parallax Background</div>
+          <ToggleRow
+            label="Параллакс фон (вкл/выкл)"
+            flagKey="parallaxBackground"
+            flags={flags}
+            onChange={handleToggle}
+          />
+
           {/* ── Reset ── */}
           <button className={styles.resetBtn} onClick={handleReset}>
             ↺ Reset all &amp; reload

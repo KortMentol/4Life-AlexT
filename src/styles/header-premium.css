@@ -39,10 +39,11 @@
   border-radius: 9999px;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  will-change: transform;
   contain: layout style paint;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   isolation: isolate;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .header-premium--dark {
@@ -143,12 +144,6 @@
 }
 
 /* Performance optimizations */
-.header-premium {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
 
 /* ─── Smart Degradation по tier (desktop + mobile) ──────────────────────────── */
 /* low tier: убрать backdrop-filter полностью, непрозрачный фон */
@@ -238,4 +233,11 @@
   .header-premium {
     backdrop-filter: blur(8px) !important; /* Уменьшаем радиус для остальных */
   }
+}
+
+/* Скрытие хедера при открытом меню — через CSS класс, без GSAP.
+   Управляется из Header.tsx: classList.add/remove("header-hidden").
+   Transition уже определён выше: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) */
+.header-premium.header-hidden {
+  transform: translateY(-120%) translateZ(0);
 }

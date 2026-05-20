@@ -1,7 +1,7 @@
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useTheme } from "@/hooks/useTheme";
-import { scrollTo as lenisScrollTo } from "@/lib/lenis";
+import { scrollToTop } from "@/utils/navigationUtils";
 import {
   motion,
   useAnimationControls,
@@ -9,7 +9,8 @@ import {
   useScroll,
 } from "framer-motion";
 import { ArrowUp } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const ScrollToTopButton: React.FC = () => {
   const isMobile = useIsMobile();
@@ -17,18 +18,34 @@ const ScrollToTopButton: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [isHovered, setIsHovered] = useState(false);
+  const location = useLocation();
 
   const controls = useAnimationControls();
-  // Флаг видимости — избегаем лишних вызовов controls.start на каждый тик скролла
   const isVisibleRef = useRef(false);
+  // Lock during route transitions to prevent phantom show from scroll restoration jumps
+  const isRoutingLockRef = useRef(false);
 
-  // Достаем scrollYProgress (это и есть аппаратный процент скролла 0.0 - 1.0)
-  // useScroll вызывается безусловно (Rules of Hooks)
   const { scrollY, scrollYProgress } = useScroll();
 
-  // Apple-style: процентная логика, но без Layout Thrashing!
-  // enabled-флаг через ref: не вызываем controls.start если состояние уже правильное
+  // Hide button and lock on every route change for 800ms
+  useEffect(() => {
+    isRoutingLockRef.current = true;
+    isVisibleRef.current = false;
+    controls.start({ opacity: 0, y: 10, pointerEvents: "none" });
+
+    const timer = setTimeout(() => {
+      isRoutingLockRef.current = false;
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [location.pathname, controls]);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
+    // Ignore while menu is open (position:fixed makes scrollY = 0)
+    if (document.documentElement.style.position === "fixed") return;
+    // Ignore during route transitions (scroll restoration jumps)
+    if (isRoutingLockRef.current) return;
+
     const previous = scrollY.getPrevious() || 0;
     const isScrollingUp = latest < previous;
     const progress = scrollYProgress.get();
@@ -48,7 +65,7 @@ const ScrollToTopButton: React.FC = () => {
   });
 
   const handleClick = () => {
-    lenisScrollTo(0, { duration: isMobile ? 1.2 : 1.5 });
+    scrollToTop();
   };
 
   // МОБИЛЬНАЯ ВЕРСИЯ - минималистичная и сверхбыстрая

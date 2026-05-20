@@ -62,7 +62,7 @@ const CustomScrollbar: React.FC = () => {
   const [hasScroll, setHasScroll] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
@@ -210,7 +210,7 @@ const CustomScrollbar: React.FC = () => {
           maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
         const targetScroll = progress * scrollableHeightRef.current;
 
-        lenis.scrollTo(targetScroll, { immediate: true });
+        lenis?.scrollTo(targetScroll, { immediate: true });
 
         // Перезапускаем таймер скрытия (фикс для позиции 0)
         showScrollbar();
@@ -259,11 +259,11 @@ const CustomScrollbar: React.FC = () => {
     const resizeObserver = new ResizeObserver(updateDimensions);
     resizeObserver.observe(document.body);
 
-    lenis.on("scroll", handleScroll);
+    lenis?.on("scroll", handleScroll);
 
     return () => {
       resizeObserver.disconnect();
-      lenis.off("scroll", handleScroll);
+      lenis?.off("scroll", handleScroll);
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }

@@ -54,6 +54,10 @@ export interface EffectsDebugFlags {
   // ─── Cards scroll gather (ImmersiveProductShowcase) ───────────────────────
   /** true = карточки разлетаются/сходятся при скролле, false = статичны */
   cardScrollGather: boolean;
+
+  // ─── Parallax Background ──────────────────────────────────────────────────
+  /** true = параллакс фон включен, false = статичный фон */
+  parallaxBackground: boolean;
 }
 
 const STORAGE_KEY = "4life_effects_debug";
@@ -70,6 +74,7 @@ const DEFAULTS: EffectsDebugFlags = {
   blockVideoTranslateZHigh: true,
   molecularNetHighNodes: true,
   cardScrollGather: true,
+  parallaxBackground: true,
 };
 
 type Listener = (flags: EffectsDebugFlags) => void;

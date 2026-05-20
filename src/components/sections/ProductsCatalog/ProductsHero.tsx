@@ -8,7 +8,6 @@ const ProductsHero: React.FC = () => {
   const tier = usePerformanceTier();
   const spacerRef = useRef<HTMLDivElement>(null);
 
-  // Считываем прогресс скролла только в зоне первого экрана
   const { scrollYProgress } = useScroll({
     target: spacerRef,
     offset: ["start start", "end start"],
@@ -17,13 +16,27 @@ const ProductsHero: React.FC = () => {
   const isLowTier = tier === "low";
   const isHighTier = tier === "high";
 
-  // Zero-Render Физика:
-  // Scale (уход вглубь) отключен на слабых устройствах
-  const scale = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 1 : 0.85]);
-  // Opacity (уход в темноту) работает везде
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 0.3 : 0.1]);
-  // Blur через backdrop-filter overlay — в 10 раз быстрее для GPU
-  const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0, isHighTier ? 1 : 0]);
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [1, isLowTier ? 1 : 0.85],
+  );
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [1, isLowTier ? 0.3 : 0.1],
+  );
+  const overlayOpacity = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, isHighTier ? 1 : 0],
+  );
+
+  // willChange только пока элемент активно анимируется (opacity > 0.01)
+  // Когда hero полностью ушёл — снимаем GPU слой
+  const dynamicWillChange = useTransform(opacity, (val) =>
+    val > 0.02 ? "transform, opacity" : "auto",
+  );
 
   return (
     <>
@@ -35,10 +48,17 @@ const ProductsHero: React.FC = () => {
             scale,
             opacity,
             transform: "translateZ(0)",
-            willChange: "transform, opacity",
+            willChange: dynamicWillChange,
           }}
         >
-          <video autoPlay muted loop playsInline disablePictureInPicture className="w-full h-full object-cover">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            disablePictureInPicture
+            className="w-full h-full object-cover"
+          >
             <source src={productsHeroVideo} type="video/mp4" />
           </video>
           {/* Blur через backdrop-filter overlay — системный композитор, в 10 раз быстрее */}
@@ -59,7 +79,7 @@ const ProductsHero: React.FC = () => {
             opacity,
             scale,
             transform: "translateZ(0)",
-            willChange: "transform, opacity",
+            willChange: dynamicWillChange,
           }}
           className="text-center px-6 max-w-5xl mx-auto text-white"
         >
@@ -71,7 +91,16 @@ const ProductsHero: React.FC = () => {
           </p>
           <button
             style={{ pointerEvents: "auto" }}
-            onClick={() => lenis.scrollTo(window.innerHeight, { duration: 1.2 })}
+            onClick={() => {
+              if (lenis) {
+                lenis.scrollTo(window.innerHeight, { duration: 1.2 });
+              } else {
+                window.scrollTo({
+                  top: window.innerHeight,
+                  behavior: "smooth",
+                });
+              }
+            }}
             className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-lg font-semibold shadow-2xl active:scale-95 transition-transform"
           >
             Исследовать

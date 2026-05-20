@@ -17,8 +17,12 @@ class RAFLoop {
   private running = false;
 
   private tick = () => {
+    // Проверяем ПЕРЕД перезапуском — если подписчиков нет, останавливаемся
+    if (this.subscribers.size === 0) {
+      this.running = false;
+      return;
+    }
     this.rafId = requestAnimationFrame(this.tick);
-    if (this.subscribers.size === 0) return;
     const scrollY = window.scrollY;
     this.subscribers.forEach((fn) => fn(scrollY));
   };

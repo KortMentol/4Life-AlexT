@@ -16,7 +16,6 @@
       "ES2015.Symbol",
       "ES2015.Symbol.WellKnown"
     ],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

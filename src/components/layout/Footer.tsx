@@ -55,10 +55,10 @@ const Footer: React.FC = () => {
   return (
     <footer className="pt-16 pb-8 relative overflow-hidden">
       <div className="absolute inset-0 w-full h-full z-0">
-        {tier === "high" ? (
+        {tier === "high" && !isMobile ? (
           <DarkVeil
             speed={0.8}
-            hueShift={isMobile ? 340 : 360}
+            hueShift={360}
             noiseIntensity={0}
             scanlineFrequency={0}
             scanlineIntensity={0}

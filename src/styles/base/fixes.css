@@ -1,61 +1,40 @@
 /**
- * @module src/styles/fixes.css
- * @description Критические фиксы для браузеров и мобильных устройств.
+ * @module src/styles/base/fixes.css
+ * @description Минимальные кросс-браузерные фиксы. Не содержит правил, конфликтующих
+ * с нативным скроллом на мобильных (убраны touch-action, overscroll-behavior, position: static).
  * @author Kort
- * @version 2.0.0 (2026 Optimized)
- * @usage Импортируется в main.tsx, применяется глобально ко всему сайту
- * @fixes iOS Safari zoom, overflow-x, Lenis smooth scroll, scrollbar hiding
+ * @version 3.0.0 - Mobile-native scroll safe
  */
 
-/* iOS Safari - предотвращение масштабирования при фокусе */
+/* iOS Safari - предотвращение масштабирования при фокусе на инпутах */
 @supports (-webkit-touch-callout: none) {
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-size: 16px;
   }
 }
 
 /* Основные фиксы для стабильности */
-html, body {
+html,
+body {
   overflow-x: hidden;
   max-width: 100%;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
 }
 
-/* Safari - фикс для fixed элементов */
+/* Safari - фикс для fixed элементов (улучшает производительность) */
 .fixed {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
-/* Lenis smooth scroll оптимизация */
-html.lenis {
-  height: auto;
-}
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
-
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
-
-/* Предотвращение скачков скроллбара */
+/* Предотвращение скачков скроллбара на десктопе */
 html {
   scrollbar-gutter: stable;
   scrollbar-width: none; /* Firefox */
 }
 
-/* Скрытие системного скроллбара */
+/* Скрытие системного скроллбара в Chrome/Safari */
 body::-webkit-scrollbar {
   display: none;
 }
