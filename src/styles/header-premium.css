@@ -51,7 +51,7 @@
     /* Top spotlight creating depth */
     radial-gradient(ellipse 150% 60% at 50% -10%, rgba(var(--header-dark-glow-rgb), 0.2) 0%, transparent 70%),
     /* Side highlights for 3D effect */
-      linear-gradient(
+    linear-gradient(
         90deg,
         transparent 0%,
         rgba(var(--header-dark-glow-rgb), 0.05) 20%,
@@ -61,7 +61,7 @@
         transparent 100%
       ),
     /* Main capsule gradient with extreme depth */
-      linear-gradient(
+    linear-gradient(
         135deg,
         var(--header-dark-bg) 0%,
         var(--header-dark-surface) 15%,
@@ -85,41 +85,41 @@
 
 .header-premium--light {
   background:
-    /* Top glass highlight */
-    radial-gradient(ellipse 150% 60% at 50% -10%, rgba(255, 255, 255, 0.9) 0%, transparent 70%),
-    /* Side reflections */
-      linear-gradient(
+    /* 1. Мягкий синий прожектор в центре для создания объема на белом */
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(var(--header-light-glow-rgb), 0.12) 0%, transparent 60%),
+    /* 2. Жесткий белый блик (эффект полировки) */
+    radial-gradient(ellipse 150% 60% at 50% -10%, rgba(255, 255, 255, 0.95) 0%, transparent 70%),
+    /* 3. Боковые отражения */
+    linear-gradient(
         90deg,
         transparent 0%,
-        rgba(var(--header-light-glow-rgb), 0.08) 20%,
+        rgba(var(--header-light-glow-rgb), 0.1) 20%,
         transparent 40%,
         transparent 60%,
-        rgba(var(--header-light-glow-rgb), 0.08) 80%,
+        rgba(var(--header-light-glow-rgb), 0.1) 80%,
         transparent 100%
       ),
-    /* Premium glass gradient */
-      linear-gradient(
+    /* 4. Основной градиент капсулы */
+    linear-gradient(
         135deg,
-        var(--header-light-bg) 0%,
-        var(--header-light-surface) 15%,
-        var(--header-light-accent) 35%,
-        var(--header-light-highlight) 50%,
-        var(--header-light-accent) 65%,
-        var(--header-light-surface) 85%,
-        var(--header-light-bg) 100%
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(248, 250, 252, 0.9) 15%,
+        rgba(226, 232, 240, 0.7) 50%,
+        rgba(248, 250, 252, 0.9) 85%,
+        rgba(255, 255, 255, 0.95) 100%
       );
 
   box-shadow:
-    /* Outer glow */
-    0 0 40px rgba(var(--header-light-glow-rgb), 0.2),
-    0 0 80px rgba(var(--header-light-glow-rgb), 0.1),
-    /* Glass depth effect */ inset 0 2px 4px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
-    inset 2px 0 4px rgba(255, 255, 255, 0.4),
-    inset -2px 0 4px rgba(255, 255, 255, 0.4),
-    /* Drop shadow */ 0 20px 60px rgba(0, 0, 0, 0.15);
+    /* Внешнее синее свечение (аура) */
+    0 8px 32px rgba(var(--header-light-glow-rgb), 0.15),
+    /* Внутренний жесткий белый блик сверху (срез стекла) */ inset 0 1.5px 2px rgba(255, 255, 255, 1),
+    /* Внутренняя тень снизу (округлость) */ inset 0 -2px 6px rgba(0, 0, 0, 0.08),
+    /* Боковые внутренние блики */ inset 2px 0 4px rgba(255, 255, 255, 0.6),
+    inset -2px 0 4px rgba(255, 255, 255, 0.6),
+    /* Глубокая падающая тень для отрыва от фона */ 0 15px 40px rgba(0, 0, 0, 0.12);
 
-  border: 1px solid rgba(var(--header-light-glow-rgb), 0.3);
+  /* Более четкая синяя окантовка (opacity 0.45 вместо 0.3) */
+  border: 1px solid rgba(var(--header-light-glow-rgb), 0.45);
 }
 
 /* 3D Capsule Enhancement - верхний блик для глубины */
@@ -174,41 +174,13 @@
   }
 }
 
-/* Mobile optimizations + AWWWARDS 2026 - PREMIUM 3D FALLBACK (60 FPS) */
+/* Mobile optimizations - Keeping the premium glassmorphism from desktop */
 @media (max-width: 768px) {
   .header-premium {
     padding: 0.5rem 1.5rem;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Dark Theme Mobile: Restoring 3D Volume & Spotlights */
-  .header-premium--dark {
-    background: 
-      /* Spotlight in center */
-      radial-gradient(ellipse 120% 100% at 50% -10%, rgba(0, 212, 255, 0.15) 0%, transparent 60%),
-      /* Side highlights */ linear-gradient(90deg, transparent 0%, rgba(0, 212, 255, 0.05) 50%, transparent 100%),
-      /* Main body */ linear-gradient(135deg, #0a0f1c 0%, #1a1f2e 100%) !important;
-
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.15),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.4),
-      0 10px 30px rgba(0, 0, 0, 0.5) !important;
-    border: 1px solid rgba(0, 212, 255, 0.3) !important;
-  }
-
-  /* Light Theme Mobile: Premium Frosted Surface */
-  .header-premium--light {
-    background: 
-      /* Spotlight */
-      radial-gradient(ellipse 120% 100% at 50% -10%, rgba(255, 255, 255, 0.6) 0%, transparent 60%),
-      /* Main body */ linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
-
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.8),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
-      0 10px 30px rgba(0, 0, 0, 0.1) !important;
-    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    /* На мобилках оставляем блюр, но чуть меньше радиус для страховки FPS */
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
   }
 }
 

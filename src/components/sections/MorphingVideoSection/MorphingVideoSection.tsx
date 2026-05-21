@@ -119,8 +119,6 @@ const BlockVideo: React.FC<{
 }> = ({ blockRef, videoSrc, blockIndex }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
-  // isVisible: true когда блок в зоне видимости — только тогда включаем willChange
-  const [isVisible, setIsVisible] = useState(false);
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
   const { isTouchDevice } = useDeviceType();
@@ -154,15 +152,13 @@ const BlockVideo: React.FC<{
   );
 
   const tzHigh = import.meta.env.DEV ? efxFlags.blockVideoTranslateZHigh : true;
-  const tzVal = tier === "high" && tzHigh ? 400 : 200;
+  // AWWWARDS 2026: Strictly disable translateZ on touch devices to prevent video scaling FPS drops
+  const tzVal = isTouchDevice ? 0 : tier === "high" && tzHigh ? 400 : 200;
   const translateZ = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     [-tzVal, 0, 0, 0, 0, -tzVal],
   );
-
-  // Как только opacity становится 0, выкидываем слой из композитинга
-  const visibility = useTransform(opacity, (val) => (val > 0.01 ? "visible" : "hidden"));
 
   // Обработка переходов меню
   useEffect(() => {
@@ -174,34 +170,37 @@ const BlockVideo: React.FC<{
     return () => window.removeEventListener("menu-transition-complete", handleComplete);
   }, [isTransitioning]);
 
-  // Intersection Observer: управляет willChange и автоплеем видео
-  // willChange включается только когда блок близко к экрану — экономим GPU память
+  // Effect for video playback (AWWWARDS 2026 DEBOUNCE FIX)
   useEffect(() => {
     const video = videoRef.current;
     const block = blockRef.current;
     if (!video || !block) return;
 
-    // На мобилках уменьшаем rootMargin — видео включается только когда реально близко
     const margin = isTouchDevice ? "100px" : "400px";
+    let playTimeout: ReturnType<typeof setTimeout>;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
           if (entry.isIntersecting) {
-            video.play().catch(() => {});
+            // Задержка 150мс. Если юзер бешено свайпает мимо — декодер даже не проснется.
+            playTimeout = setTimeout(() => {
+              video.play().catch(() => {});
+            }, 150);
           } else {
+            clearTimeout(playTimeout);
             video.pause();
           }
         });
       },
-      // 100px буфер на мобилках, 400px на десктопе
       { threshold: 0, rootMargin: `${margin} 0px ${margin} 0px` },
     );
 
     observer.observe(block);
+
     return () => {
       observer.disconnect();
+      clearTimeout(playTimeout);
       video.pause();
     };
   }, [blockRef, isTouchDevice]);
@@ -224,9 +223,8 @@ const BlockVideo: React.FC<{
           y,
           opacity,
           translateZ,
-          visibility,
-          // willChange только когда блок виден — не держим 3 GPU слоя постоянно
-          willChange: isVisible ? "transform, opacity" : "auto",
+          // AWWWARDS 2026: Force stable GPU layer, remove dynamic will-change layout thrashing
+          backfaceVisibility: "hidden",
         }}
         className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
         transition={{

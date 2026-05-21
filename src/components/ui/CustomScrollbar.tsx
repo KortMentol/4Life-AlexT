@@ -103,10 +103,7 @@ const CustomScrollbar: React.FC = () => {
     const minHeight = isMobile ? 32 : 40;
     const maxHeight = trackHeight * 0.9;
 
-    const newThumbHeight = Math.max(
-      minHeight,
-      Math.min(maxHeight, trackHeight * ratio),
-    );
+    const newThumbHeight = Math.max(minHeight, Math.min(maxHeight, trackHeight * ratio));
 
     setThumbHeight(newThumbHeight);
     maxThumbYRef.current = trackHeight - newThumbHeight;
@@ -195,10 +192,7 @@ const CustomScrollbar: React.FC = () => {
 
       const handleMouseMove = (e: MouseEvent) => {
         const deltaY = e.clientY - dragStartYRef.current;
-        const newThumbY = Math.max(
-          0,
-          Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY),
-        );
+        const newThumbY = Math.max(0, Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY));
 
         if (thumbRef.current) {
           thumbRef.current.style.transform = `translateX(-50%) translateY(${newThumbY}px)`;
@@ -206,8 +200,7 @@ const CustomScrollbar: React.FC = () => {
         thumbYRef.current = newThumbY;
 
         // Вычисляем и применяем скролл
-        const progress =
-          maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
+        const progress = maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
         const targetScroll = progress * scrollableHeightRef.current;
 
         lenis?.scrollTo(targetScroll, { immediate: true });
@@ -252,7 +245,7 @@ const CustomScrollbar: React.FC = () => {
 
   // Основные эффекты
   useEffect(() => {
-    if (!lenis) return;
+    if (isMobile || !lenis) return; // Prevent heavy observer logic on mobile
 
     updateDimensions();
 
@@ -294,13 +287,15 @@ const CustomScrollbar: React.FC = () => {
       setIsMenuOpen(customEvent.detail.action === "hide");
     };
     window.addEventListener("custom-scrollbar-update", handleMenuUpdate);
-    return () =>
-      window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
+    return () => window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
   }, []);
 
   const trackWidth = isMobile ? 2 : 3;
   const thumbWidth = isMobile ? 4 : 6;
   const containerWidth = isMobile ? 8 : 12;
+
+  // AWWWARDS 2026: Do not render custom scrollbar DOM on mobile
+  if (isMobile) return null;
 
   return (
     <>
@@ -328,8 +323,7 @@ const CustomScrollbar: React.FC = () => {
           // Smoothly hide if menu is open, or if there's no scroll, or if inactive
           opacity: isVisible && hasScroll && !isMenuOpen ? 1 : 0,
           transition: "opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
-          pointerEvents:
-            isVisible && hasScroll && !isMenuOpen ? "auto" : "none",
+          pointerEvents: isVisible && hasScroll && !isMenuOpen ? "auto" : "none",
         }}
       >
         {/* Дорожка - Как у Immersive Garden */}
@@ -357,8 +351,7 @@ const CustomScrollbar: React.FC = () => {
             top: TRACK_PADDING,
             transform: `translateX(-50%) translateY(0px)`,
             backgroundColor: isHovering || isDragging ? "#FFFFFF" : "#F5F5F5",
-            boxShadow:
-              "0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)",
+            boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)",
             transition: "background-color 0.2s ease",
             willChange: "transform",
           }}
