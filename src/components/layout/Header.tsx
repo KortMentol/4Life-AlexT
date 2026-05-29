@@ -108,6 +108,26 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }, [isMenuOpen]);
 
+  // Слушатель для плавного скрытия хедера при открытии модалки товаров
+  useEffect(() => {
+    const handleModalState = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const isModalOpen = customEvent.detail.isOpen;
+
+      if (menuTlRef.current) {
+        if (isModalOpen) {
+          menuTlRef.current.play(); // Плавно уезжает вверх
+        } else if (!isMenuOpen) {
+          menuTlRef.current.reverse(); // Плавно возвращается, если меню не открыто
+        }
+      }
+    };
+
+    window.addEventListener("modal-state-change", handleModalState);
+    return () =>
+      window.removeEventListener("modal-state-change", handleModalState);
+  }, [isMenuOpen]);
+
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
   };

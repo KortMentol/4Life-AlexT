@@ -117,7 +117,7 @@ const BlockVideo: React.FC<{
   videoSrc: string;
   blockIndex: number;
 }> = ({ blockRef, videoSrc, blockIndex }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isIntersecting, setIsIntersecting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
@@ -170,28 +170,15 @@ const BlockVideo: React.FC<{
     return () => window.removeEventListener("menu-transition-complete", handleComplete);
   }, [isTransitioning]);
 
-  // Effect for video playback (AWWWARDS 2026 DEBOUNCE FIX)
+  // Effect for video visibility (Lazy Mounting — предотвращает аллокацию 3 декодеров одновременно)
   useEffect(() => {
-    const video = videoRef.current;
     const block = blockRef.current;
-    if (!video || !block) return;
+    if (!block) return;
 
     const margin = isTouchDevice ? "100px" : "400px";
-    let playTimeout: ReturnType<typeof setTimeout>;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Задержка 150мс. Если юзер бешено свайпает мимо — декодер даже не проснется.
-            playTimeout = setTimeout(() => {
-              video.play().catch(() => {});
-            }, 150);
-          } else {
-            clearTimeout(playTimeout);
-            video.pause();
-          }
-        });
+      ([entry]) => {
+        setIsIntersecting(entry?.isIntersecting ?? false);
       },
       { threshold: 0, rootMargin: `${margin} 0px ${margin} 0px` },
     );
@@ -200,8 +187,6 @@ const BlockVideo: React.FC<{
 
     return () => {
       observer.disconnect();
-      clearTimeout(playTimeout);
-      video.pause();
     };
   }, [blockRef, isTouchDevice]);
 
@@ -246,23 +231,24 @@ const BlockVideo: React.FC<{
             }}
           />
 
-          {/* Видео */}
-          <video
-            ref={videoRef}
-            className="h-full w-full object-cover"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload={tier === "high" ? "auto" : "metadata"}
-            style={
-              {
-                imageRendering: tier === "low" ? "auto" : "optimizeQuality",
-              } as React.CSSProperties
-            }
-          >
-            {!isTransitioning && <source src={videoSrc} type="video/mp4" />}
-          </video>
+          {/* Видео - рендерится только когда карточка в зоне видимости */}
+          {isIntersecting && (
+            <video
+              className="h-full w-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload={tier === "high" ? "auto" : "metadata"}
+              style={
+                {
+                  imageRendering: tier === "low" ? "auto" : "optimizeQuality",
+                } as React.CSSProperties
+              }
+            >
+              {!isTransitioning && <source src={videoSrc} type="video/mp4" />}
+            </video>
+          )}
 
           {/* Современные overlay эффекты */}
           {tier === "high" && (

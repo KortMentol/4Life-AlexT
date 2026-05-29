@@ -132,13 +132,9 @@ const Button: React.FC<ButtonProps> = ({
 
   const content = (
     <>
-      {icon && iconPosition === "left" && (
-        <span className="flex-shrink-0">{icon}</span>
-      )}
+      {icon && iconPosition === "left" && <span className="flex-shrink-0">{icon}</span>}
       <span>{children}</span>
-      {icon && iconPosition === "right" && (
-        <span className="flex-shrink-0">{icon}</span>
-      )}
+      {icon && iconPosition === "right" && <span className="flex-shrink-0">{icon}</span>}
       {rippleEls}
     </>
   );
@@ -191,4 +187,4 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-export default React.memo(Button);
+export default Button;

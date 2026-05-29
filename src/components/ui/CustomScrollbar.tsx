@@ -5,7 +5,7 @@
  * Оптимизирован для всех performance tier (LOW/MEDIUM/HIGH).
  *
  * @author Kort
- * @version 7.0.0 - Awwwards Pro 2025
+ * @version 9.0.0 - Awwwards Pro 2025 (Fitts' Law + Apple UX)
  *
  * @usage
  * 1. src/components/layout/Layout.tsx - Глобальный скроллбар для всего сайта
@@ -27,15 +27,26 @@
  * }
  *
  * @performance
- * - GPU acceleration через `will-change: transform`
- * - Только `translateY()` для анимаций (не width/height/left)
+ * - GPU acceleration через `will-change: transform, width`
+ * - Только `translateY()` для анимаций (не left/top)
  * - Прямое обновление DOM без лишних re-render
  * - ~0.1ms на кадр, работает на всех tier
  *
  * @crossbrowser
- * - Chrome/Firefox/Safari/Edge: pixel-perfect центрирование через calc()
- * - Нет sub-pixel артефактов благодаря математическому позиционированию
+ * - Chrome/Firefox/Safari/Edge: pixel-perfect через чётные размеры (6px → 10px)
+ * - Нет sub-pixel артефактов благодаря right: 0 позиционированию
  * - box-shadow вместо border для идентичного рендеринга
+ *
+ * @design
+ * - Apple/Awwwards 2025 стиль: только thumb, без track (минимализм)
+ * - Overlay scrollbar (не занимает место в layout)
+ * - Fade in/out с Apple-timing (1500ms)
+ * - Hover expansion: 6px → 10px (плавная анимация)
+ *
+ * @ux
+ * - Fitts' Law: thumb прижат к правому краю экрана (infinite width target)
+ * - Расширенная hit-area: 24px невидимая зона для раннего hover
+ * - Hover expansion: thumb расширяется для удобного хвата
  */
 import { useIsMobile } from "@/hooks";
 import { lenis } from "@/lib/lenis";
@@ -64,14 +75,13 @@ const CustomScrollbar: React.FC = () => {
 
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const dragStartYRef = useRef(0);
   const dragStartThumbYRef = useRef(0);
   const maxThumbYRef = useRef(0);
   const scrollableHeightRef = useRef(0);
   const thumbYRef = useRef(0);
-  const isInitialMountRef = useRef(true);
+  const isInitialLoadRef = useRef(true); // ФИКС: Флаг первой загрузки
 
   const TRACK_PADDING = isMobile ? 1 : 0; // 8px safe zone for mobile
 
@@ -149,18 +159,24 @@ const CustomScrollbar: React.FC = () => {
     (e: LenisScrollEvent) => {
       if (isDragging || isMenuOpen) return;
 
-      // Игнорируем первый scroll event от Lenis при монтировании (Apple UX)
-      if (isInitialMountRef.current) {
-        isInitialMountRef.current = false;
-        return;
-      }
-
       const newThumbY = e.progress * maxThumbYRef.current;
 
       if (thumbRef.current) {
-        thumbRef.current.style.transform = `translateX(-50%) translateY(${newThumbY}px)`;
+        // ФИКС: Используем только translateY, без translateX (thumb прижат к right: 0)
+        thumbRef.current.style.transform = `translateY(${newThumbY}px)`;
       }
       thumbYRef.current = newThumbY;
+
+      // ФИКС: Не показываем скроллбар пока прелоадер активен
+      if (document.getElementById("preloader")) {
+        return;
+      }
+
+      // ФИКС: Не показываем скроллбар при первой загрузке (сразу после прелоадера)
+      if (isInitialLoadRef.current) {
+        isInitialLoadRef.current = false;
+        return;
+      }
 
       showScrollbar();
       hideScrollbar();
@@ -195,7 +211,8 @@ const CustomScrollbar: React.FC = () => {
         const newThumbY = Math.max(0, Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY));
 
         if (thumbRef.current) {
-          thumbRef.current.style.transform = `translateX(-50%) translateY(${newThumbY}px)`;
+          // ФИКС: Используем только translateY, без translateX (thumb прижат к right: 0)
+          thumbRef.current.style.transform = `translateY(${newThumbY}px)`;
         }
         thumbYRef.current = newThumbY;
 
@@ -229,6 +246,13 @@ const CustomScrollbar: React.FC = () => {
    */
   const handleMouseEnter = useCallback(() => {
     if (isMobile) return;
+
+    // ФИКС: Не показываем скроллбар пока прелоадер активен
+    if (document.getElementById("preloader")) return;
+
+    // ФИКС: Не показываем скроллбар при первой загрузке (сразу после прелоадера)
+    if (isInitialLoadRef.current) return;
+
     setIsHovering(true);
     showScrollbar();
   }, [isMobile, showScrollbar]);
@@ -240,8 +264,15 @@ const CustomScrollbar: React.FC = () => {
   const handleMouseLeave = useCallback(() => {
     if (isMobile) return;
     setIsHovering(false);
-    hideScrollbar();
-  }, [isMobile, hideScrollbar]);
+
+    // ФИКС: Отменяем предыдущий таймер и запускаем новый
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+    }, 1500);
+  }, [isMobile]);
 
   // Основные эффекты
   useEffect(() => {
@@ -267,7 +298,6 @@ const CustomScrollbar: React.FC = () => {
   useEffect(() => {
     // Apple-style: мгновенно скрываем скроллбар при переходе
     setIsVisible(false);
-    isInitialMountRef.current = true; // Сброс флага при переходе
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
@@ -290,21 +320,88 @@ const CustomScrollbar: React.FC = () => {
     return () => window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
   }, []);
 
-  const trackWidth = isMobile ? 2 : 3;
-  const thumbWidth = isMobile ? 4 : 6;
-  const containerWidth = isMobile ? 8 : 12;
+  // ФИКС МЕРЦАНИЯ: Мгновенно скрываем скроллбар при начале POP-перехода
+  useEffect(() => {
+    const checkPopTransition = () => {
+      if (window.__popTransitionInProgress) {
+        setIsVisible(false);
+        if (hideTimeoutRef.current) {
+          clearTimeout(hideTimeoutRef.current);
+          hideTimeoutRef.current = null;
+        }
+      }
+    };
+
+    // Проверяем каждые 16ms (60fps) во время POP-перехода
+    const intervalId = setInterval(checkPopTransition, 16);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // ФИКС HOVER: Автоматически скрываем скроллбар через 1.5 сек после ухода курсора
+  useEffect(() => {
+    if (!isHovering && isVisible && !isDragging) {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+      hideTimeoutRef.current = setTimeout(() => {
+        setIsVisible(false);
+      }, 1500);
+    }
+  }, [isHovering, isVisible, isDragging]);
+
+  // ФИКС ПРЕЛОАДЕРА: Проверяем позицию курсора после исчезновения прелоадера
+  useEffect(() => {
+    const checkPreloaderRemoval = () => {
+      const preloader = document.getElementById("preloader");
+      if (!preloader && isInitialLoadRef.current) {
+        // Прелоадер исчез, сбрасываем флаг
+        isInitialLoadRef.current = false;
+
+        // Проверяем, находится ли курсор в области скроллбара (правые 24px)
+        const checkCursorPosition = (e: MouseEvent) => {
+          const isInScrollbarArea = e.clientX >= window.innerWidth - 24;
+          if (isInScrollbarArea) {
+            setIsHovering(true);
+            showScrollbar();
+          }
+          document.removeEventListener("mousemove", checkCursorPosition);
+        };
+
+        document.addEventListener("mousemove", checkCursorPosition, { once: true });
+
+        // Если курсор не двигается, проверяем через 100ms
+        setTimeout(() => {
+          document.removeEventListener("mousemove", checkCursorPosition);
+        }, 100);
+      }
+    };
+
+    const intervalId = setInterval(checkPreloaderRemoval, 100);
+
+    return () => clearInterval(intervalId);
+  }, [showScrollbar]);
+
+  // ФИКС: Используем чётные размеры для pixel-perfect центрирования в Firefox/Chrome
+  // Нечётные размеры создают sub-pixel артефакты (3px → translateX(-1.5px) → разное округление)
+
+  // Fitts' Law: скроллбар должен доходить до края экрана (infinite width target)
+  const thumbWidthDefault = 6; // Узкий в состоянии покоя
+  const thumbWidthHover = 10; // Расширяется при hover для удобного хвата
+  const containerWidth = 16; // Достаточно для hover-зоны thumb
+  const hitAreaWidth = 24; // Невидимая зона для раннего срабатывания hover
 
   // AWWWARDS 2026: Do not render custom scrollbar DOM on mobile
   if (isMobile) return null;
 
   return (
     <>
-      {/* Невидимая зона hover только для ПК */}
+      {/* Невидимая зона hover для Fitts' Law — доходит до самого края экрана */}
       {!isMobile && (
         <div
           className="fixed top-0 right-0 h-full z-[9998]"
           style={{
-            width: 24,
+            width: hitAreaWidth,
             pointerEvents: "auto",
           }}
           onMouseEnter={handleMouseEnter}
@@ -312,48 +409,42 @@ const CustomScrollbar: React.FC = () => {
         />
       )}
 
-      {/* Основной скроллбар */}
+      {/* Основной контейнер — доходит до края экрана (right: 0) */}
       <div
         ref={containerRef}
-        className="fixed right-0 z-[9999]"
+        className="fixed top-0 right-0 z-[9999]"
         style={{
           width: containerWidth,
-          top: 0,
-          bottom: 0,
+          height: "100%",
           // Smoothly hide if menu is open, or if there's no scroll, or if inactive
           opacity: isVisible && hasScroll && !isMenuOpen ? 1 : 0,
           transition: "opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
           pointerEvents: isVisible && hasScroll && !isMenuOpen ? "auto" : "none",
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
-        {/* Дорожка - Как у Immersive Garden */}
-        <div
-          ref={trackRef}
-          className="absolute rounded-full"
-          style={{
-            width: trackWidth,
-            top: TRACK_PADDING,
-            bottom: TRACK_PADDING,
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
-          }}
-        />
-
-        {/* Ползунок - Профессиональный стиль */}
+        {/* Ползунок - Awwwards 2025: расширяется при hover КОНТЕЙНЕРА, доходит до края */}
         <div
           ref={thumbRef}
           className="absolute rounded-full cursor-grab active:cursor-grabbing"
           style={{
-            width: thumbWidth,
+            // Динамическая ширина: узкий → широкий при hover контейнера
+            width: isHovering || isDragging ? thumbWidthHover : thumbWidthDefault,
             height: thumbHeight,
-            left: "50%",
+            // Позиционирование: прижат к правому краю контейнера
+            right: 0,
             top: TRACK_PADDING,
-            transform: `translateX(-50%) translateY(0px)`,
-            backgroundColor: isHovering || isDragging ? "#FFFFFF" : "#F5F5F5",
-            boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)",
-            transition: "background-color 0.2s ease",
-            willChange: "transform",
+            transform: `translateY(0px)`,
+            backgroundColor: isHovering || isDragging ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)",
+            // Профессиональная тень: работает на светлых И тёмных фонах
+            boxShadow:
+              "0 0 0 1px rgba(255, 255, 255, 0.4), " + // Светлая обводка (видна на тёмном)
+              "0 0 0 2px rgba(0, 0, 0, 0.5), " + // Тёмная обводка (видна на светлом)
+              "0 3px 12px rgba(0, 0, 0, 0.35)", // Глубокая тень для объёма
+            // Плавная анимация расширения + цвета
+            transition: "width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), background-color 0.2s ease, box-shadow 0.2s ease",
+            willChange: "transform, width",
           }}
           onMouseDown={handleMouseDown}
         />

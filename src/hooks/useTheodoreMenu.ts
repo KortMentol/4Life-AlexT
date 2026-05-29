@@ -36,21 +36,25 @@ export const useTheodoreMenu = () => {
       navigate(-1);
     } else {
       const currentState = window.history.state || {};
-      window.history.pushState(
-        { ...currentState, menuOpen: true },
-        "",
-        currentPath,
-      );
+      window.history.pushState({ ...currentState, menuOpen: true }, "", currentPath);
       setIsMenuOpen(true);
     }
   }, [isMenuOpen, navigate, location.pathname, location.search]);
 
-  const closeMenu = useCallback(() => {
-    if (isMenuOpen) {
-      isMenuActionRef.current = true;
-      navigate(-1);
-    }
-  }, [isMenuOpen, navigate]);
+  const closeMenu = useCallback(
+    (isNavigatingAway = false) => {
+      if (isMenuOpen) {
+        isMenuActionRef.current = true;
+        if (isNavigatingAway) {
+          // Мы уходим на другой роут. Просто закрываем UI, без шага назад в истории.
+          setIsMenuOpen(false);
+        } else {
+          navigate(-1);
+        }
+      }
+    },
+    [isMenuOpen, navigate],
+  );
 
   return {
     isMenuOpen,

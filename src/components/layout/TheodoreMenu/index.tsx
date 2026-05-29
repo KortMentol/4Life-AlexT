@@ -4,13 +4,7 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { mainNav } from "@/site-config/site";
 import { scrollToTop } from "@/utils/navigationUtils";
 import { gsap } from "gsap";
-import React, {
-  startTransition,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./style.css";
 
@@ -36,7 +30,7 @@ declare global {
 
 interface TheodoreMenuProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (isNavigatingAway?: boolean) => void;
 }
 
 // ─── Scramble hook ────────────────────────────────────────────────────────────
@@ -59,9 +53,7 @@ function useScramble(text: string) {
           .map((char, i) => {
             if (char === " ") return " ";
             if (i < revealed) return text[i];
-            return SCRAMBLE_CHARS[
-              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
-            ];
+            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
           })
           .join(""),
       );
@@ -153,11 +145,9 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
     e.preventDefault();
     const isSame = location.pathname === href;
 
-    // Закрываем меню обычным способом
-    onClose();
-
-    // Если кликнули на ту же страницу, на которой находимся
     if (isSame) {
+      // Закрываем меню обычным способом
+      onClose();
       // Запускаем скролл с задержкой в 1000мс.
       // Это время позволяет анимации закрытия меню почти завершиться
       // перед началом плавного скролла вверх
@@ -165,9 +155,11 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
         scrollToTop({ duration: 1.2 });
       }, 1000);
     } else {
-      // Если переходим на другую страницу, просто запоминаем куда идти
+      // Если переходим на другую страницу, запоминаем куда идти
       setActiveHref(href);
       pendingHrefRef.current = href;
+      // Закрываем с флагом перехода
+      onClose(true);
     }
   };
 
@@ -249,8 +241,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
 
     return () => {
       tl.kill();
-      if (tier === "low" && menuWrap)
-        menuWrap.classList.remove("low-performance");
+      if (tier === "low" && menuWrap) menuWrap.classList.remove("low-performance");
     };
   }, [tier]);
 
@@ -273,8 +264,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
 
     // Закрытие с переходом на другую страницу — пауза на fullBlack, navigate
     gsap.killTweensOf(tl);
-    const labelTime =
-      tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2;
+    const labelTime = tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2;
     let lastTime = tl.time();
     const prevUpdate = tl.eventCallback("onUpdate") as gsap.Callback | null;
     const targetHref = pendingHrefRef.current;
@@ -285,9 +275,10 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
       window.dispatchEvent(new CustomEvent("menu-transition-start"));
 
       // Оборачиваем навигацию в startTransition, чтобы снизить приоритет рендера
-      // и не блокировать анимации
+      // и не блокировать анимации. Используем replace: true, чтобы затереть
+      // фантомную запись с открытым меню
       startTransition(() => {
-        navigate(targetHref!);
+        navigate(targetHref!, { replace: true });
       });
 
       // Даем слабому железу время на сборку мусора и рендер тяжелой страницы
@@ -332,82 +323,28 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
         </div>
         <div className="tiles">
           <div className="tiles__line">
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img4})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img5})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img6})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img4})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img5})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img6})` }}
-            ></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
           </div>
           <div className="tiles__line">
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img1})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img2})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img3})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img1})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img2})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img3})` }}
-            ></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
           </div>
           <div className="tiles__line">
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img7})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img8})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img9})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img7})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img8})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img9})` }}
-            ></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
           </div>
         </div>
         <nav className="menu">
@@ -425,13 +362,7 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
           <SciFiThemeToggle />
         </div>
       </div>
-      <svg
-        className="overlay"
-        width="100%"
-        height="100%"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
+      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path
           ref={overlayPathRef}
           className="overlay__path"

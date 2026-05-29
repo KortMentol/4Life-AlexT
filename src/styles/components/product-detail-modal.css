@@ -8,7 +8,34 @@
  * @usage ProductDetailModal.tsx - кастомный скроллбар и индикатор прокрутки
  */
 
-/* CSS Variables - цвета и анимации */
+/* ─── Modal Gallery Swiper pagination ───────────────────────────────────────── */
+.modal-gallery-swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-gallery-swiper .swiper-pagination {
+  bottom: 10px;
+  pointer-events: auto;
+}
+
+.modal-gallery-bullet {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0 3px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.modal-gallery-bullet--active {
+  width: 18px;
+  background: #22d3ee; /* cyan-400 */
+}
+
+/* ─── CSS Variables - цвета и анимации ──────────────────────────────────────── */
 :root {
   --modal-accent: rgba(6, 182, 212, 0.8); /* Основной cyan цвет */
   --modal-accent-light: rgba(6, 182, 212, 0.5); /* Светлый cyan */

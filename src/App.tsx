@@ -12,14 +12,7 @@ import { useTheodoreMenu } from "@/hooks/useTheodoreMenu";
 import { lenis, updateScroll } from "@/lib/lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import React, {
-    createContext,
-    Suspense,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import React, { createContext, Suspense, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, Route, Routes } from "react-router-dom";
 
@@ -50,9 +43,7 @@ export const useNavigation = () => {
   return context;
 };
 
-const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isPopping, setIsPopping] = useState(false);
 
   return (
@@ -66,42 +57,41 @@ const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({
 function App() {
   const isMobile = useIsMobile();
 
-  const { isMenuOpen, toggleMenu, closeMenu, isMenuActionRef, wasMenuOpenRef } =
-    useTheodoreMenu();
+  const { isMenuOpen, toggleMenu, closeMenu, isMenuActionRef, wasMenuOpenRef } = useTheodoreMenu();
 
   const scrollYBeforeMenuRef = useRef(0);
+  const pathBeforeMenuRef = useRef(window.location.pathname);
 
   // Скролл-лок при открытом меню с fail-safe cleanup
   useEffect(() => {
-    const html = document.documentElement;
+    const body = document.body;
+
     if (isMenuOpen) {
       const scrollY = window.scrollY;
       scrollYBeforeMenuRef.current = scrollY;
-      html.style.overflow = "hidden";
-      html.style.position = "fixed";
-      html.style.top = `-${scrollY}px`;
-      html.style.width = "100%";
-      lenis?.stop();
+      pathBeforeMenuRef.current = window.location.pathname;
+
+      // Блокировка без уничтожения скролл-контейнера
+      body.style.overflow = "hidden";
+      body.style.touchAction = "none";
+      if (!isMobile) lenis?.stop();
     } else {
-      html.style.overflow = "";
-      html.style.position = "";
-      html.style.top = "";
-      html.style.width = "";
-      window.scrollTo(0, scrollYBeforeMenuRef.current);
-      lenis?.start();
+      body.style.overflow = "";
+      body.style.touchAction = "";
+
+      // Восстанавливаем скролл, ТОЛЬКО если мы закрыли меню на ТОЙ ЖЕ странице
+      if (window.location.pathname === pathBeforeMenuRef.current) {
+        window.scrollTo(0, scrollYBeforeMenuRef.current);
+      }
+      if (!isMobile) lenis?.start();
     }
 
-    // Fail-safe cleanup: ensure scroll is restored even if component unmounts
     return () => {
-      if (isMenuOpen) {
-        html.style.overflow = "";
-        html.style.position = "";
-        html.style.top = "";
-        html.style.width = "";
-        lenis?.start();
-      }
+      body.style.overflow = "";
+      body.style.touchAction = "";
+      if (!isMobile) lenis?.start();
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isMobile]);
 
   useEffect(() => {
     window.addEventListener("load", updateScroll);
@@ -132,10 +122,7 @@ function App() {
   return (
     <NavigationProvider>
       <ProductListProvider>
-        <RouteChangeHandler
-          isMenuActionRef={isMenuActionRef}
-          wasMenuOpenRef={wasMenuOpenRef}
-        />
+        <RouteChangeHandler isMenuActionRef={isMenuActionRef} wasMenuOpenRef={wasMenuOpenRef} />
         <Suspense fallback={null}>
           <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />
           <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} />
@@ -154,12 +141,8 @@ function App() {
               element={
                 <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
                   <div className="card-modern p-12 text-center max-w-lg">
-                    <h1 className="text-8xl font-bold mb-4 gradient-heading">
-                      404
-                    </h1>
-                    <p className="text-xl mb-8">
-                      Страница не найдена. Возможно, вы ошиблись адресом.
-                    </p>
+                    <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>
+                    <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>
                     <Link
                       to="/"
                       className="btn-modern btn-primary-modern px-8 py-4 rounded-lg inline-flex items-center gap-2"
@@ -189,9 +172,7 @@ function App() {
           (isMobile
             ? createPortal(<PerformanceDebugMobile />, document.body)
             : createPortal(<PerformanceDebug />, document.body))}
-        {import.meta.env.DEV &&
-          !isMobile &&
-          createPortal(<EffectsDebugPanel />, document.body)}
+        {import.meta.env.DEV && !isMobile && createPortal(<EffectsDebugPanel />, document.body)}
       </ProductListProvider>
     </NavigationProvider>
   );

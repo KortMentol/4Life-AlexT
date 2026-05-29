@@ -4,20 +4,14 @@
  * @author KortMentol
  */
 
-import { ProductDetailModal } from "@/components/ui";
+import ProductDetailModal from "@/components/ui/ProductDetailModal";
 import { DetailedProduct, productsData } from "@/data/productsData";
 import { useTheme } from "@/hooks";
 import { lenis } from "@/lib/lenis";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 // Секции
@@ -35,20 +29,25 @@ const ProductsPage: React.FC = () => {
 
   // --- STATE ---
   // Category synced with URL ?cat=... for browser back/forward support
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    () => searchParams.get("cat") ?? null,
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] =
-    useState<DetailedProduct | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFloatingFilter, setShowFloatingFilter] = useState(false);
+
+  // Получаем productId из URL параметров для управления модалкой
+  const selectedProductId = searchParams.get("productId");
+
+  // Ищем активный продукт по ID из URL
+  const selectedProduct = useMemo(() => {
+    if (!selectedProductId) return null;
+    return productsData.find((p) => p.id === selectedProductId) ?? null;
+  }, [selectedProductId]);
+
+  const isModalOpen = !!selectedProduct;
   // Grid mode persisted in localStorage
   const [gridMode, setGridMode] = useState<2 | 3 | 4>(() => {
     try {
       const saved = localStorage.getItem("products-grid-mode");
-      if (saved === "2" || saved === "3" || saved === "4")
-        return Number(saved) as 2 | 3 | 4;
+      if (saved === "2" || saved === "3" || saved === "4") return Number(saved) as 2 | 3 | 4;
     } catch {}
     return 4;
   });
@@ -106,6 +105,24 @@ const ProductsPage: React.FC = () => {
     } catch {}
   }, []);
 
+  const handleProductClick = useCallback(
+    (p: DetailedProduct) => {
+      lastClickedCardRef.current = p.id;
+      setSearchParams(
+        (prev) => {
+          prev.set("productId", p.id);
+          return prev;
+        },
+        { replace: false }, // push в историю, чтобы работала кнопка "Назад"
+      );
+    },
+    [setSearchParams],
+  );
+
+  const handleCloseFilters = useCallback(() => {
+    setIsFiltersOpen(false);
+  }, []);
+
   useEffect(() => {
     const catalogElement = catalogRef.current;
     if (!catalogElement) return;
@@ -146,11 +163,7 @@ const ProductsPage: React.FC = () => {
 
         <div className="py-12 relative z-20">
           {/* ИДЕАЛЬНЫЙ ЯКОРЬ В НОРМАЛЬНОМ ПОТОКЕ */}
-          <div
-            ref={gridAnchorRef}
-            className="w-full h-0 pointer-events-none"
-            aria-hidden="true"
-          />
+          <div ref={gridAnchorRef} className="w-full h-0 pointer-events-none" aria-hidden="true" />
 
           {/* Заголовок с отступами */}
           <div className="max-w-[1600px] mx-auto px-4 md:px-8">
@@ -160,11 +173,7 @@ const ProductsPage: React.FC = () => {
               setGridMode={handleSetGridMode}
               selectedCategory={selectedCategory}
               onClearFilters={clearFilters}
-              onProductClick={(p) => {
-                lastClickedCardRef.current = p.id;
-                setSelectedProduct(p);
-                setIsModalOpen(true);
-              }}
+              onProductClick={handleProductClick}
             />
           </div>
         </div>
@@ -190,11 +199,7 @@ const ProductsPage: React.FC = () => {
             }`}
             aria-label="Фильтры"
           >
-            {isFiltersOpen ? (
-              <Icons.X className="w-6 h-6" />
-            ) : (
-              <Icons.Filter className="w-6 h-6" />
-            )}
+            {isFiltersOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Filter className="w-6 h-6" />}
           </motion.button>
         )}
       </AnimatePresence>
@@ -202,7 +207,7 @@ const ProductsPage: React.FC = () => {
       {/* 5. КАПСУЛА ФИЛЬТРОВ */}
       <ProductsFilters
         isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
+        onClose={handleCloseFilters}
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
@@ -215,8 +220,15 @@ const ProductsPage: React.FC = () => {
         products={filteredProducts}
         isOpen={isModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
-          // Scroll back to the card that was clicked
+          setSearchParams(
+            (prev) => {
+              prev.delete("productId");
+              return prev;
+            },
+            { replace: true }, // replace, чтобы не засорять историю закрытиями
+          );
+
+          // Возврат скролла к последней открытой карточке
           if (lastClickedCardRef.current) {
             const cardEl = document.querySelector(
               `[data-product-id="${lastClickedCardRef.current}"]`,
@@ -224,7 +236,7 @@ const ProductsPage: React.FC = () => {
             if (cardEl) {
               setTimeout(() => {
                 lenis?.scrollTo(cardEl, { offset: -120, duration: 1.0 });
-              }, 350); // wait for modal exit animation
+              }, 350);
             }
           }
         }}
