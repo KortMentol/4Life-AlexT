@@ -1,3 +1,8 @@
+export {
+  useEffectsDebug,
+  useEffectsDebugFlag,
+  useFeatureFlag,
+} from "./useEffectsDebug";
 export { useFluid } from "./useFluid";
 export { useIsMobile } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";

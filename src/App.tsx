@@ -1,3 +1,4 @@
+import EffectsDebugMobile from "@/components/debug/EffectsDebugMobile";
 import EffectsDebugPanel from "@/components/debug/EffectsDebugPanel";
 import PerformanceDebug from "@/components/debug/PerformanceDebug";
 import PerformanceDebugMobile from "@/components/debug/PerformanceDebugMobile";
@@ -96,6 +97,7 @@ function App() {
   useEffect(() => {
     window.addEventListener("load", updateScroll);
     window.addEventListener("resize", updateScroll);
+
     return () => {
       window.removeEventListener("load", updateScroll);
       window.removeEventListener("resize", updateScroll);
@@ -169,9 +171,14 @@ function App() {
           </Routes>
         </Suspense>
         {import.meta.env.DEV &&
-          (isMobile
-            ? createPortal(<PerformanceDebugMobile />, document.body)
-            : createPortal(<PerformanceDebug />, document.body))}
+          (isMobile ? (
+            <>
+              {createPortal(<PerformanceDebugMobile />, document.body)}
+              {createPortal(<EffectsDebugMobile />, document.body)}
+            </>
+          ) : (
+            createPortal(<PerformanceDebug />, document.body)
+          ))}
         {import.meta.env.DEV && !isMobile && createPortal(<EffectsDebugPanel />, document.body)}
       </ProductListProvider>
     </NavigationProvider>

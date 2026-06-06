@@ -1,6 +1,6 @@
 /**
  * @module src/styles/pages/products-page.css
- * @version 7.0.0 — Three distinct grid concepts, Awwwards 2026
+ * @version 8.0.0 — Ethereal Depth (Awwwards 2026)
  *
  * PERFORMANCE RULES:
  * - will-change: NEVER at rest, only on :hover
@@ -35,17 +35,67 @@
   cursor: pointer;
 }
 
-/* Image swap trigger on tibico card hover */
+/* ─── Premium Image Container & Ethereal Depth (Awwwards 2026) ─────────────── */
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+  contain: paint;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  flex-shrink: 0;
+  /* Hardware acceleration boundary */
+  transform: translateZ(0);
+}
+
+/* Subtle dimming layer to create depth on hover */
+.product-image-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-image-premium {
+  transition:
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(0, 0, 0) scale(1);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Forces GPU rasterization for sharp text/images */
+  transform-style: preserve-3d;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .product-card-tibico:hover .product-image-primary {
-    will-change: transform, opacity;
-    transform: translate3d(0, -100%, 0);
-    opacity: 0;
+  /* MICRO-DELAY (60ms): Prevents the animation from triggering if the user is just scrolling past.
+     Only intentional hovers will trigger the beautiful scale effect. */
+
+  .product-card-tibico:hover .product-image-container::before {
+    opacity: 0.05;
+    transition-delay: 60ms;
   }
-  .product-card-tibico:hover .product-image-secondary {
-    will-change: transform, opacity;
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
+
+  .dark .product-card-tibico:hover .product-image-container::before {
+    background: #ffffff;
+    opacity: 0.03;
+    transition-delay: 60ms;
+  }
+
+  .product-card-tibico:hover .product-image-premium {
+    /* Moves up slightly and scales, creating a 3D pop-out effect */
+    transform: translate3d(0, -4px, 0) scale(1.06);
+    /* Soft shadow directly on the product inside the container */
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15));
+    transition-delay: 60ms;
+    will-change: transform, filter;
+  }
+
+  .dark .product-card-tibico:hover .product-image-premium {
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
   }
 }
 
@@ -82,47 +132,6 @@
 
 @media (hover: hover) and (pointer: fine) {
   .product-card-inner:hover::after {
-    opacity: 1;
-  }
-}
-
-/* ─── Image container — square, image dominant ───────────────────────────────── */
-.product-image-container {
-  position: relative;
-  overflow: hidden;
-  contain: paint;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  flex-shrink: 0;
-}
-
-/* ─── Image swap — bottom to top (Tibico style) ──────────────────────────────── */
-.product-image-primary,
-.product-image-secondary {
-  transition:
-    transform 1.05s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.product-image-secondary {
-  position: absolute;
-  inset: 0;
-  transform: translate3d(0, 100%, 0);
-  opacity: 0;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .product-card-inner:hover .product-image-primary {
-    will-change: transform, opacity;
-    transform: translate3d(0, -100%, 0);
-    opacity: 0;
-  }
-  .product-card-inner:hover .product-image-secondary {
-    will-change: transform, opacity;
-    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
@@ -170,19 +179,6 @@
   flex-shrink: 0;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .product-card-horizontal:hover .product-image-primary {
-    will-change: transform, opacity;
-    transform: translate3d(0, -100%, 0);
-    opacity: 0;
-  }
-  .product-card-horizontal:hover .product-image-secondary {
-    will-change: transform, opacity;
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-  }
-}
-
 /* ─── prefers-reduced-motion ─────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .product-card-wrapper {
@@ -193,8 +189,9 @@
   .product-card-horizontal {
     transition: none;
   }
-  .product-image-primary,
-  .product-image-secondary {
-    transition: none;
+  .product-image-premium,
+  .product-image-container::before {
+    transition: none !important;
+    transform: none !important;
   }
 }

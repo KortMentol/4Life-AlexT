@@ -13,15 +13,7 @@ import ClipLine from "../ui/ClipLine";
 
 // ─── MolecularNet — ambient декор, остаётся ──────────────────────────────────
 const MolecularNet = memo(
-  ({
-    tier,
-    palette,
-    highNodes = true,
-  }: {
-    tier: PerformanceTier;
-    palette: Palette;
-    highNodes?: boolean;
-  }) => {
+  ({ tier, palette, highNodes = true }: { tier: PerformanceTier; palette: Palette; highNodes?: boolean }) => {
     if (tier === "low") return null;
     const count = tier === "high" && highNodes ? 12 : 7;
 
@@ -36,8 +28,7 @@ const MolecularNet = memo(
           dx: (Math.random() - 0.5) * 12,
           dy: (Math.random() - 0.5) * 12,
         })),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [],
+      [count],
     );
 
     const edges = useMemo(() => {
@@ -133,150 +124,142 @@ const PILLARS = [
 ] as const;
 
 const Science = memo(
-  forwardRef<HTMLElement, ScienceProps>(
-    ({ tier, palette, onChapter }, forwardedRef) => {
-      const ref = useRef<HTMLElement>(null);
-      const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
-      const inView = useInView(activeRef, { margin: "-35%" });
-      const efxFlags = useEffectsDebug();
+  forwardRef<HTMLElement, ScienceProps>(({ tier, palette, onChapter }, forwardedRef) => {
+    const ref = useRef<HTMLElement>(null);
+    const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
+    const inView = useInView(activeRef, { margin: "-35%" });
+    const efxFlags = useEffectsDebug();
 
-      useEffect(() => {
-        if (inView) onChapter(1);
-      }, [inView, onChapter]);
+    useEffect(() => {
+      if (inView) onChapter(1);
+    }, [inView, onChapter]);
 
-      return (
-        <section
-          ref={activeRef}
-          className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40 overflow-hidden"
-          style={{ background: palette.bg }}
-        >
-          <MolecularNet
-            tier={tier}
-            palette={palette}
-            highNodes={
-              import.meta.env.DEV ? efxFlags.molecularNetHighNodes : true
-            }
-          />
+    return (
+      <section
+        ref={activeRef}
+        className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40 overflow-hidden"
+        style={{ background: palette.bg }}
+      >
+        <MolecularNet
+          tier={tier}
+          palette={palette}
+          highNodes={import.meta.env.DEV ? efxFlags.molecularNetHighNodes : true}
+        />
 
-          <div className="relative z-10 max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-15%" }}
-              transition={{ duration: 0.7 }}
-              className="flex items-center gap-3 mb-16"
-            >
-              <span
-                className="text-[9px] uppercase tracking-[0.5em]"
-                style={{ color: palette.gold }}
-              >
-                01 — Основа
-              </span>{" "}
-            </motion.div>
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-15%" }}
+            transition={{ duration: 0.7 }}
+            className="flex items-center gap-3 mb-16"
+          >
+            <span className="text-[9px] uppercase tracking-[0.5em]" style={{ color: palette.gold }}>
+              01 — Основа
+            </span>{" "}
+          </motion.div>
 
-            <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-start">
-              {/* Left */}
-              <div>
-                <ClipLine tier={tier} delay={0} className="mb-6">
-                  <p
-                    className="font-extralight leading-tight"
-                    style={{
-                      fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
-                      color: palette.cream,
-                      letterSpacing: "-0.025em",
-                      lineHeight: 1.1,
-                      paddingBottom: "0.1em",
-                    }}
-                  >
-                    Знание
-                  </p>
-                </ClipLine>
-                <ClipLine tier={tier} delay={0.1} className="mb-6">
-                  <p
-                    className="font-extralight leading-tight"
-                    style={{
-                      fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
-                      color: palette.cream,
-                      letterSpacing: "-0.025em",
-                      lineHeight: 1.1,
-                      paddingBottom: "0.1em",
-                    }}
-                  >
-                    становится
-                  </p>
-                </ClipLine>
-                <ClipLine tier={tier} delay={0.2}>
-                  <p
-                    className="font-extralight leading-tight"
-                    style={{
-                      fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
-                      color: palette.gold,
-                      letterSpacing: "-0.025em",
-                      lineHeight: 1.1,
-                      paddingBottom: "0.1em",
-                    }}
-                  >
-                    доходом.
-                  </p>
-                </ClipLine>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-15%" }}
-                  transition={{ duration: 0.8, delay: 0.45 }}
-                  className="mt-10 font-light leading-relaxed max-w-xs"
+          <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-start">
+            {/* Left */}
+            <div>
+              <ClipLine tier={tier} delay={0} className="mb-6">
+                <p
+                  className="font-extralight leading-tight"
                   style={{
-                    fontSize: "clamp(0.88rem, 1.2vw, 1rem)",
-                    color: palette.overlay40,
+                    fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
+                    color: palette.cream,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.1,
+                    paddingBottom: "0.1em",
                   }}
                 >
-                  Партнёрство 4Life — это рекомендации продуктов, в которые вы
-                  верите сами. Личный опыт убеждает естественно, а доверие людей
-                  превращается в доход.
-                </motion.p>
-              </div>
+                  Знание
+                </p>
+              </ClipLine>
+              <ClipLine tier={tier} delay={0.1} className="mb-6">
+                <p
+                  className="font-extralight leading-tight"
+                  style={{
+                    fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
+                    color: palette.cream,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.1,
+                    paddingBottom: "0.1em",
+                  }}
+                >
+                  становится
+                </p>
+              </ClipLine>
+              <ClipLine tier={tier} delay={0.2}>
+                <p
+                  className="font-extralight leading-tight"
+                  style={{
+                    fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
+                    color: palette.gold,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.1,
+                    paddingBottom: "0.1em",
+                  }}
+                >
+                  доходом.
+                </p>
+              </ClipLine>
 
-              {/* Right: три тезиса */}
-              <div className="flex flex-col gap-0 pt-4">
-                {PILLARS.map((item, i) => (
-                  <motion.div
-                    key={item.title}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-10%" }}
-                    transition={{ duration: 0.7, delay: i * 0.12 }}
-                    className="flex flex-col gap-2 py-8"
-                    style={{ borderTop: `1px solid ${palette.overlay10}` }}
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-15%" }}
+                transition={{ duration: 0.8, delay: 0.45 }}
+                className="mt-10 font-light leading-relaxed max-w-xs"
+                style={{
+                  fontSize: "clamp(0.88rem, 1.2vw, 1rem)",
+                  color: palette.overlay40,
+                }}
+              >
+                Партнёрство 4Life — это рекомендации продуктов, в которые вы верите сами. Личный опыт убеждает
+                естественно, а доверие людей превращается в доход.
+              </motion.p>
+            </div>
+
+            {/* Right: три тезиса */}
+            <div className="flex flex-col gap-0 pt-4">
+              {PILLARS.map((item, i) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-10%" }}
+                  transition={{ duration: 0.7, delay: i * 0.12 }}
+                  className="flex flex-col gap-2 py-8"
+                  style={{ borderTop: `1px solid ${palette.overlay10}` }}
+                >
+                  <span
+                    className="font-light"
+                    style={{
+                      fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
+                      color: palette.cream,
+                      lineHeight: 1.4,
+                    }}
                   >
-                    <span
-                      className="font-light"
-                      style={{
-                        fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
-                        color: palette.cream,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {item.title}
-                    </span>
-                    <span
-                      className="font-light leading-relaxed"
-                      style={{
-                        fontSize: "clamp(0.82rem, 1vw, 0.92rem)",
-                        color: palette.overlay40,
-                      }}
-                    >
-                      {item.body}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
+                    {item.title}
+                  </span>
+                  <span
+                    className="font-light leading-relaxed"
+                    style={{
+                      fontSize: "clamp(0.82rem, 1vw, 0.92rem)",
+                      color: palette.overlay40,
+                    }}
+                  >
+                    {item.body}
+                  </span>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </section>
-      );
-    },
-  ),
+        </div>
+      </section>
+    );
+  }),
 );
 
 Science.displayName = "Science";

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui";
 import { useTransition } from "@/context";
 import {
+  useFeatureFlag,
   useIsMobile,
   useNativeScroll,
   usePerformanceTier,
@@ -38,6 +39,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const { transitionTo } = useTransition();
   const isMobile = useIsMobile();
   const tier = usePerformanceTier();
+  const isGlassEnabled = useFeatureFlag("headerGlass", tier !== "low");
 
   const headerRef = useRef<HTMLElement>(null);
   const isMenuAnimatingRef = useRef(false);
@@ -154,7 +156,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   return (
     <header
-      data-tier={tier}
+      data-tier={isGlassEnabled ? tier : "low"}
       ref={headerRef}
       role="banner"
       style={

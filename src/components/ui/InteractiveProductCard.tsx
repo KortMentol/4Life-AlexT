@@ -25,7 +25,10 @@ interface InteractiveProductCardProps {
   isHoverEffectDisabled?: boolean;
 }
 
-const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
+const IS_TOUCH =
+  typeof window !== "undefined"
+    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
+    : false;
 
 const MAGNETIC_SPRING = {
   stiffness: 120,
@@ -83,9 +86,13 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
       >
         <div
           className={`relative h-full rounded-2xl overflow-hidden transition-all duration-500 ${
-            opaque ? "bg-white dark:bg-gray-900" : "bg-white/90 dark:bg-gray-900/80"
+            opaque
+              ? "bg-white dark:bg-gray-900"
+              : "bg-white/90 dark:bg-gray-900/80"
           } border border-white/40 dark:border-white/[0.031] ${
-            !IS_TOUCH ? "hover:border-cyan-400/30 dark:hover:border-cyan-400/20" : ""
+            !IS_TOUCH
+              ? "hover:border-cyan-400/30 dark:hover:border-cyan-400/20"
+              : ""
           }`}
           style={{
             contain: "layout paint",
@@ -136,7 +143,8 @@ const InteractiveProductCard: React.FC<InteractiveProductCardProps> = ({
             <div
               className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
               style={{
-                background: "radial-gradient(circle at 50% 0%, rgba(6,182,212,0.06) 0%, transparent 60%)",
+                background:
+                  "radial-gradient(circle at 50% 0%, rgba(6,182,212,0.06) 0%, transparent 60%)",
               }}
             />
           )}

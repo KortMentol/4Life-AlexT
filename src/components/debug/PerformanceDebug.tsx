@@ -1,10 +1,6 @@
+import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
+import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
 import {
-  DeviceSpecs,
-  calculatePerformanceScore,
-  detectDeviceSpecs,
-} from "@/utils/devicePerformance/devicePerformance";
-import {
-  Bug,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -22,32 +18,27 @@ import {
 import React, { useEffect, useState } from "react";
 import styles from "./PerformanceDebug.module.css";
 
-// Используем DeviceSpecs из единой системы
-
 /**
  * @module components/debug/PerformanceDebug
  * @description
- * `PerformanceDebug` — это плавающая UI-панель для разработчиков, предназначенная для мониторинга производительности приложения в реальном времени.
- * Она отображает ключевые метрики, такие как FPS, время кадра, и статический "балл производительности", рассчитанный на основе характеристик устройства.
- * Компонент является десктопной версией отладочной панели.
+ * `PerformanceDebug` — Floating developer panel for real-time performance monitoring.
+ * Zero-overhead implementation using direct DOM updates via refs instead of React state.
+ * Displays key metrics like FPS, frame time, and static performance score.
+ * Desktop version of the debug panel.
  *
  * @author Kort
- * @version 1.0.0
+ * @version 4.0.0 - Perfect Design Edition
  *
  * @usage
- * Компонент используется в корневом файле приложения для обеспечения постоянного доступа к метрикам в режиме разработки:
- * 1. **`src/App.tsx` (строка 211):** Рендерится условно, когда `isMobile` имеет значение `false`, предоставляя оверлей с данными о производительности на десктопных устройствах.
+ * Rendered conditionally in root app file for desktop devices in development mode.
  *
  * @example
- * // Вставляется в App.tsx без пропсов
  * <PerformanceDebug />
  */
 const PerformanceDebug: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const [isCompact, setIsCompact] = useState(true); // По умолчанию компактный режим
+  const [isCompact, setIsCompact] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
-  const [fps, setFps] = useState(0);
-  const [frameTime, setFrameTime] = useState(0);
   const [staticScore, setStaticScore] = useState(0);
   const [tier, setTier] = useState<"low" | "medium" | "high">("medium");
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpecs>({
@@ -62,6 +53,12 @@ const PerformanceDebug: React.FC = () => {
     connectionType: "Unknown",
   });
 
+  // Zero-overhead refs for direct DOM updates
+  const fpsTextRef = React.useRef<HTMLSpanElement>(null);
+  const ftTextRef = React.useRef<HTMLSpanElement>(null);
+  const compactFpsTextRef = React.useRef<HTMLSpanElement>(null);
+  const compactFtTextRef = React.useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
     let animationId: number;
     let lastTime = performance.now();
@@ -72,13 +69,16 @@ const PerformanceDebug: React.FC = () => {
       const specs = detectDeviceSpecs();
       setDeviceSpecs(specs);
 
-      const { score, tier: detectedTier } = calculatePerformanceScore(specs);
+      const { score, tier: hardwareTier } = calculatePerformanceScore(specs);
       setStaticScore(score);
-      setTier(detectedTier);
+
+      const override = getTierOverride();
+      const finalTier = override !== "auto" ? override : hardwareTier;
+      setTier(finalTier as "low" | "medium" | "high");
 
       console.log("📱 PerformanceDebug initialized:", {
         score,
-        tier: detectedTier,
+        tier: finalTier,
         specs,
       });
     } catch (error) {
@@ -92,10 +92,16 @@ const PerformanceDebug: React.FC = () => {
       if (frameTimeHistory.length > 10) frameTimeHistory.shift();
 
       if (currentTime - lastTime >= 500) {
-        const avgFrameTime =
-          frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
-        setFps(Math.round(1000 / avgFrameTime));
-        setFrameTime(Math.round(avgFrameTime * 100) / 100);
+        const avgFrameTime = frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
+        const calculatedFps = Math.round(1000 / avgFrameTime);
+        const calculatedFt = Math.round(avgFrameTime * 100) / 100;
+
+        // Direct DOM updates — zero React overhead
+        if (fpsTextRef.current) fpsTextRef.current.textContent = String(calculatedFps);
+        if (compactFpsTextRef.current) compactFpsTextRef.current.textContent = String(calculatedFps);
+        if (ftTextRef.current) ftTextRef.current.textContent = `${calculatedFt}ms`;
+        if (compactFtTextRef.current) compactFtTextRef.current.textContent = `${calculatedFt}ms`;
+
         lastTime = currentTime;
       }
 
@@ -110,18 +116,6 @@ const PerformanceDebug: React.FC = () => {
     };
   }, []);
 
-  const toggleCompactMode = (
-    e?: React.MouseEvent | React.TouchEvent | React.KeyboardEvent,
-  ) => {
-    if (wasDragging.current) {
-      e?.preventDefault();
-      e?.stopPropagation();
-      return;
-    }
-
-    setIsCompact((prev) => !prev);
-  };
-
   const dragRef = React.useRef<HTMLDivElement>(null);
   const startPos = React.useRef({ x: 0, y: 0 });
   const isDragging = React.useRef(false);
@@ -129,9 +123,7 @@ const PerformanceDebug: React.FC = () => {
   const wasDragging = React.useRef(false);
   const hasDragged = React.useRef(false);
 
-  const handleMouseDown = (
-    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-  ) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const element = dragRef.current;
     if (!element) return;
 
@@ -237,25 +229,22 @@ const PerformanceDebug: React.FC = () => {
     const element = dragRef.current;
     if (element) {
       element.style.position = "fixed";
-      element.style.top = "4rem";
-      element.style.right = "1rem";
+      element.style.top = "16px";
+      element.style.right = "16px";
     }
   }, []);
 
-  const getValueColor = (value: number) => {
-    return value >= 50
-      ? styles.valueGood
-      : value >= 30
-        ? styles.valueWarning
-        : styles.valueBad;
+  const toggleCompactMode = (e: React.MouseEvent) => {
+    if (wasDragging.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    setIsCompact((prev) => !prev);
   };
 
   const getScoreColor = (score: number) => {
-    return score >= 80
-      ? styles.valueGood
-      : score >= 55
-        ? styles.valueWarning
-        : styles.valueBad;
+    return score >= 80 ? styles.valueGood : score >= 55 ? styles.valueWarning : styles.valueBad;
   };
 
   if (!isVisible) return null;
@@ -263,197 +252,269 @@ const PerformanceDebug: React.FC = () => {
     <div
       ref={dragRef}
       className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`}
-      role="button"
-      tabIndex={0}
-      onClick={toggleCompactMode}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          toggleCompactMode(e);
-        }
-      }}
       aria-expanded={!isCompact}
     >
+      {/* Header */}
       <div
         className={styles.debugHeader}
-        role="button"
-        tabIndex={0}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleCompactMode(e);
-          }
-        }}
+        onClick={toggleCompactMode}
       >
-        <div className={styles.dragHandle} data-drag-handle>
-          <Move size={16} className={styles.dragIcon} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            fontSize: "0.7rem",
+            fontWeight: 600,
+            color: "rgba(255, 255, 255, 0.9)",
+          }}
+        >
+          <Move size={13} style={{ color: "rgba(255, 255, 255, 0.5)", cursor: "move" }} />
+          <Gauge size={13} style={{ color: "rgba(255, 255, 255, 0.5)" }} />
+          <span>{isCompact ? "Perf" : "Perf Debug"}</span>
         </div>
-        {isCompact ? (
-          <div className={styles.headerMetricsCompact}>
-            <div className={styles.metricItem} title={`FPS: ${fps}`}>
-              <span>FPS:</span>{" "}
-              <span className={getValueColor(fps)}>{fps}</span>
-            </div>
-            <div
-              className={styles.metricItem}
-              title={`Frame Time: ${frameTime}ms`}
-            >
-              <span>Frame:</span> <span>{frameTime}ms</span>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.headerTitle}>
-            <Bug size={16} />
-            <span>Performance Debug</span>
+
+        {isCompact && (
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              fontSize: "0.65rem",
+              marginLeft: "auto",
+              marginRight: "0.5rem",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ display: "flex", gap: "0.2rem", alignItems: "baseline" }}>
+              <span style={{ color: "rgba(255, 255, 255, 0.6)" }}>FPS:</span>
+              <span
+                ref={compactFpsTextRef}
+                className={styles.valueGood}
+                style={{
+                  fontVariantNumeric: "tabular-nums",
+                  minWidth: "24px",
+                  textAlign: "right",
+                  display: "inline-block",
+                }}
+              >
+                --
+              </span>
+            </span>
+            <span style={{ display: "flex", gap: "0.2rem", alignItems: "baseline" }}>
+              <span style={{ color: "rgba(255, 255, 255, 0.6)" }}>FT:</span>
+              <span
+                ref={compactFtTextRef}
+                style={{
+                  fontVariantNumeric: "tabular-nums",
+                  minWidth: "36px",
+                  textAlign: "right",
+                  display: "inline-block",
+                }}
+              >
+                --ms
+              </span>
+            </span>
           </div>
         )}
-        <div className={styles.headerActions}>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.2rem",
+            marginLeft: isCompact ? "0" : "auto",
+          }}
+        >
           {!isCompact && (
             <button
-              onClick={() => setShowInfo(true)}
-              title="Подробнее о метриках"
+              className={styles.iconBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowInfo((p) => !p);
+              }}
+              title="Show info"
             >
-              <Info size={18} />
+              <Info size={14} />
             </button>
           )}
           <button
+            className={styles.iconBtn}
             onClick={(e) => {
               e.stopPropagation();
               setIsCompact((p) => !p);
             }}
+            title={isCompact ? "Expand" : "Collapse"}
           >
-            {isCompact ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            {isCompact ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
           </button>
-          <button onClick={() => setIsVisible(false)} title="Закрыть дебаггер">
-            <X size={18} />
+          <button
+            className={styles.iconBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsVisible(false);
+            }}
+            title="Close debugger"
+          >
+            <X size={14} />
           </button>
         </div>
       </div>
 
+      {/* Body */}
       {!isCompact && (
         <div className={styles.debugBody}>
-          <div className={styles.metricsGrid}>
-            <div
-              className={styles.metricItem}
-              title={`Frames Per Second: ${fps}`}
-            >
-              <div className={styles.metricIcon}>
-                <Gauge size={14} />
-              </div>
-              <span className={styles.metricLabel}>FPS:</span>
-              <span className={`${styles.metricValue} ${getValueColor(fps)}`}>
-                {fps}
-              </span>
-            </div>
-            <div
-              className={styles.metricItem}
-              title={`Frame Time: ${frameTime}ms`}
-            >
-              <div className={styles.metricIcon}>
-                <Clock size={14} />
-              </div>
-              <span className={styles.metricLabel}>Frame:</span>
-              <span className={styles.metricValue}>{frameTime}ms</span>
-            </div>
-            <div
-              className={styles.metricItem}
-              title={`Static Performance Score: ${staticScore} (${tier.toUpperCase()})`}
-            >
-              <div className={styles.metricIcon}>
-                <Star size={14} />
-              </div>
-              <span className={styles.metricLabel}>Score:</span>
-              <span
-                className={`${styles.metricValue} ${getScoreColor(staticScore)}`}
-              >
-                {staticScore} ({tier.toUpperCase()})
-              </span>
-            </div>
-          </div>
-          <div className={styles.sectionDivider} />
-          <div className={styles.deviceInfoSection}>
-            <div className={styles.infoRow} title={`RAM: ${deviceSpecs.ram}`}>
-              <div className={styles.infoIcon}>
-                <HardDrive size={14} />
-              </div>
-              <strong>RAM:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.ram}</span>
-            </div>
-            <div
-              className={styles.infoRow}
-              title={`CPU: ${deviceSpecs.cpuCores} cores`}
-            >
-              <div className={styles.infoIcon}>
-                <Cpu size={14} />
-              </div>
-              <strong>CPU:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.cpuCores} cores
-              </span>
-            </div>
-            <div className={styles.infoRow} title={`GPU: ${deviceSpecs.gpu}`}>
-              <div className={styles.infoIcon}>
-                <PieChart size={14} />
-              </div>
-              <strong>GPU:</strong>
-              <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
-            </div>
-            <div
-              className={styles.infoRow}
-              title={`WebGL: ${deviceSpecs.webglVersion}`}
-            >
-              <div className={styles.infoIcon}>
-                <Zap size={14} />
-              </div>
-              <strong>WebGL:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.webglVersion}
-              </span>
-            </div>
-            <div
-              className={styles.infoRow}
-              title={`Touch: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}
-            >
-              <div className={styles.infoIcon}>
-                <Smartphone size={14} />
-              </div>
-              <strong>Touch:</strong>
-              <span className={styles.infoValue}>
-                {deviceSpecs.touchSupport ? "Yes" : "No"}
-              </span>
-            </div>
-          </div>
-
+          {/* Info Popover */}
           {showInfo && (
-            <div className={styles.infoModal}>
-              <div className={styles.infoContent}>
-                <h4>Performance Metrics Explained</h4>
-                <p>
-                  <strong>
-                    <Gauge size={14} /> FPS:
-                  </strong>{" "}
-                  Frames per second. Higher is better.
-                </p>
-                <p>
-                  <strong>
-                    <Clock size={14} /> Frame:
-                  </strong>{" "}
-                  Time to render a frame. Lower is better.
-                </p>
-
-                <p>
-                  <strong>
-                    <Star size={14} /> Score:
-                  </strong>{" "}
-                  Overall performance score based on device specs.
-                </p>
-                <button onClick={() => setShowInfo(false)}>Close</button>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "absolute",
+                top: "40px",
+                right: "10px",
+                left: "10px",
+                background: "#0b0f19",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "8px",
+                padding: "12px",
+                zIndex: 100,
+                boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "8px",
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: "#4ade80",
+                    margin: 0,
+                  }}
+                >
+                  Metrics Explained
+                </h4>
+                <button
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#ef4444",
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowInfo(false);
+                  }}
+                >
+                  ✕
+                </button>
               </div>
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  color: "rgba(255,255,255,0.7)",
+                  margin: "4px 0",
+                }}
+              >
+                <strong>FPS:</strong> Frames Per Second. Higher is smoother.
+              </p>
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  color: "rgba(255,255,255,0.7)",
+                  margin: "4px 0",
+                }}
+              >
+                <strong>FT:</strong> Frame Time (ms). Lower is faster.
+              </p>
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  color: "rgba(255,255,255,0.7)",
+                  margin: "4px 0",
+                }}
+              >
+                <strong>Score:</strong> Static hardware performance rating.
+              </p>
             </div>
           )}
+
+          {/* Metrics Grid: 3 columns */}
+          <div className={styles.metricsGrid}>
+            <div className={styles.metricItem} title="Frames Per Second">
+              <div className={styles.metricIcon}>
+                <Gauge size={16} />
+              </div>
+              <span className={styles.metricLabel}>FPS</span>
+              <span ref={fpsTextRef} className={`${styles.metricValue} ${styles.valueGood}`}>
+                --
+              </span>
+            </div>
+            <div className={styles.metricItem} title="Frame Time">
+              <div className={styles.metricIcon}>
+                <Clock size={16} />
+              </div>
+              <span className={styles.metricLabel}>Frame</span>
+              <span ref={ftTextRef} className={styles.metricValue}>
+                --ms
+              </span>
+            </div>
+            <div className={styles.metricItem} title={`Performance Score: ${staticScore} (${tier.toUpperCase()})`}>
+              <div className={styles.metricIcon}>
+                <Star size={16} />
+              </div>
+              <span className={styles.metricLabel}>Score</span>
+              <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>{staticScore}</span>
+            </div>
+          </div>
+
+          <div className={styles.sectionDivider} />
+
+          {/* Device Info Grid: 2 columns, vertical cards */}
+          <div className={styles.deviceInfoSection}>
+            <div className={styles.infoRow} title={`RAM: ${deviceSpecs.ram}`}>
+              <strong>
+                <HardDrive size={12} className={styles.infoIcon} />
+                RAM
+              </strong>
+              <span className={styles.infoValue}>{deviceSpecs.ram}</span>
+            </div>
+            <div className={styles.infoRow} title={`CPU: ${deviceSpecs.cpuCores} cores`}>
+              <strong>
+                <Cpu size={12} className={styles.infoIcon} />
+                CPU
+              </strong>
+              <span className={styles.infoValue}>{deviceSpecs.cpuCores} cores</span>
+            </div>
+            <div className={styles.infoRow} title={`GPU: ${deviceSpecs.gpu}`}>
+              <strong>
+                <PieChart size={12} className={styles.infoIcon} />
+                GPU
+              </strong>
+              <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
+            </div>
+            <div className={styles.infoRow} title={`WebGL: ${deviceSpecs.webglVersion}`}>
+              <strong>
+                <Zap size={12} className={styles.infoIcon} />
+                WebGL
+              </strong>
+              <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
+            </div>
+            <div className={styles.infoRow} title={`Touch: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}>
+              <strong>
+                <Smartphone size={12} className={styles.infoIcon} />
+                Touch
+              </strong>
+              <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -9,7 +9,7 @@
  * <ScrollNumber number="01" className="text-[8rem] font-thin" />
  */
 
-import { useTheme } from "@/hooks";
+import { useFeatureFlag, usePerformanceTier, useTheme } from "@/hooks";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { useRef } from "react";
 
@@ -18,11 +18,10 @@ interface ScrollNumberProps {
   className?: string;
 }
 
-const ScrollNumber: React.FC<ScrollNumberProps> = ({
-  number,
-  className = "",
-}) => {
+const ScrollNumber: React.FC<ScrollNumberProps> = ({ number, className = "" }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tier = usePerformanceTier();
+  const isAnimEnabled = useFeatureFlag("scrollNumberAnimation", tier !== "low");
   const { theme } = useTheme();
 
   // useInView с once:false — когда вне viewport, не тратим CPU на clipPath анимацию
@@ -34,23 +33,17 @@ const ScrollNumber: React.FC<ScrollNumberProps> = ({
     offset: ["start 1", "end 0.6"],
   });
 
-  const clipPath = useTransform(
-    scrollYProgress,
-    [0, 1],
-    ["inset(100% 0 0 0)", "inset(0% 0 0 0)"],
-  );
+  const clipPath = useTransform(scrollYProgress, [0, 1], ["inset(100% 0 0 0)", "inset(0% 0 0 0)"]);
 
   const opacity = useTransform(scrollYProgress, [0, 0.3, 1], [0, 1, 0.9]);
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       {/* Базовый текст */}
-      <div className="text-blue-500/10 dark:text-cyan-400/10 select-none">
-        {number}
-      </div>
+      <div className="text-blue-500/10 dark:text-cyan-400/10 select-none">{number}</div>
 
-      {/* Анимированный текст — только когда в viewport, иначе статичный */}
-      {inView ? (
+      {/* Анимированный текст — только если enabled AND в viewport */}
+      {isAnimEnabled && inView ? (
         <motion.div
           className="absolute inset-0 select-none will-change-transform"
           style={{

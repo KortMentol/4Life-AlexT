@@ -68,7 +68,11 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         setTimeout(tryShowHeader, 50);
       } else {
         if (import.meta.env.DEV) {
-          console.error("❌ Failed to initialize header after", maxAttempts, "attempts");
+          console.error(
+            "❌ Failed to initialize header after",
+            maxAttempts,
+            "attempts",
+          );
         }
       }
     };

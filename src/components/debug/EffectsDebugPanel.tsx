@@ -1,21 +1,87 @@
 /**
  * @module src/components/debug/EffectsDebugPanel
- * @description GUI-панель для тестирования HIGH-тир эффектов.
- * Позволяет переключать тир (low/medium/high/auto) и отдельные эффекты.
- * Только DEV режим. Позиционируется под PerformanceDebug.
+ * @description GUI panel for testing HIGH-tier effects.
+ * Allows toggling tier (low/medium/high/auto) and individual effects.
+ * DEV mode only. Positioned below PerformanceDebug.
  *
  * @author Kort
- * @version 1.0.0
+ * @version 3.0.0
  */
 
-import {
-  EffectsDebugFlags,
-  PerformanceTierOverride,
-  effectsDebugStore,
-} from "@/utils/effectsDebug/effectsDebugStore";
-import { ChevronDown, ChevronUp, Move, Sliders, X } from "lucide-react";
+import { useMediaQuery } from "@/hooks";
+import { EffectsDebugFlags, PerformanceTierOverride, effectsDebugStore } from "@/utils/effectsDebug/effectsDebugStore";
+import { ChevronDown, ChevronUp, Info, Move, Sliders, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./EffectsDebugPanel.module.css";
+
+// ─── Effect Help Data ─────────────────────────────────────────────────────────
+
+const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
+  webglFluid: {
+    desc: "Real-time GPU-accelerated Navier-Stokes fluid dynamics simulation reacting to mouse velocity.",
+    loc: "HomePage Background",
+  },
+  webglFluidPressureHigh: {
+    desc: "Scales Poisson pressure solver iterations to 50 for ultra-precise, high-fidelity smoke and liquid borders.",
+    loc: "HomePage Background",
+  },
+  webglFluidSunrays: {
+    desc: "Generates volumetric light scattering (crepuscular rays) dynamically projecting through the fluid canvas.",
+    loc: "HomePage Background",
+  },
+  webglFluidShading: {
+    desc: "Applies specular highlights and normal map bump-shading to give the fluid a 3D volumetric glass look.",
+    loc: "HomePage Background",
+  },
+  grid3d: {
+    desc: "Hardware-accelerated 3D CSS parallax grid rotating and translating elements along the Z-axis on scroll.",
+    loc: "HomePage Section 2",
+  },
+  grid3dFilterBlur: {
+    desc: "Applies a lightweight, dynamic CSS backdrop-filter blur to create a premium depth-of-field lens effect.",
+    loc: "HomePage Grid Background",
+  },
+  scrollTextWordByWord: {
+    desc: "High-performance GSAP ScrollTrigger typography parser animating word opacity and skew per scroll frame.",
+    loc: "HomePage Text Sections",
+  },
+  scrollNumberAnimation: {
+    desc: "Scroll-driven color fill of digits 01, 02, 03.",
+    loc: "HomePage Section 2",
+  },
+  blockVideoTranslateZHigh: {
+    desc: "Boosts 3D perspective scroll magnitude on why-us video blocks to ±400px for intense spatial immersion.",
+    loc: "HomePage Video Blocks",
+  },
+  molecularNetHighNodes: {
+    desc: "Scales dynamic SVG vertices to 12 nodes with bounding-box connection lines and custom orbital drift physics.",
+    loc: "Partnership Section 1",
+  },
+  cardScrollGather: {
+    desc: "Scroll-driven spatial physics: pushes popular product cards laterally, converging them into position on viewport focus.",
+    loc: "HomePage Products Grid",
+  },
+  parallaxBackground: {
+    desc: "Enables fixed compositing viewport layer parallax on background textures for mainpage sections 1, 3, and 5.",
+    loc: "HomePage Background",
+  },
+  headerGlass: {
+    desc: "Activates 12px hardware-accelerated backdrop blur and border-glow on the fixed header capsule.",
+    loc: "Global Header",
+  },
+  premiumTransitions: {
+    desc: "Enables pixelated block transitions on desktop and organic wave morph transitions on touch screens.",
+    loc: "Global Page Routing",
+  },
+  auroraText: {
+    desc: "Triggers GPU-accelerated translation and multi-stop colorful gradient rotation on Hero typography.",
+    loc: "HomePage Hero Titles",
+  },
+  textShineAnimation: {
+    desc: "Shimmer text shine animation.",
+    loc: "Global Header Names",
+  },
+};
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
 
@@ -25,16 +91,18 @@ const ToggleRow: React.FC<{
   flags: EffectsDebugFlags;
   disabled?: boolean;
   onChange: (key: keyof EffectsDebugFlags, value: boolean) => void;
-}> = ({ label, flagKey, flags, disabled = false, onChange }) => {
+  onHover: (key: keyof EffectsDebugFlags | null, mouseY?: number) => void;
+}> = ({ label, flagKey, flags, disabled = false, onChange, onHover }) => {
   const value = flags[flagKey] as boolean;
   const id = `efx-${flagKey}`;
 
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    onHover(flagKey, e.clientY);
+  };
+
   return (
-    <div className={styles.toggleRow}>
-      <label
-        htmlFor={id}
-        className={`${styles.toggleLabel} ${disabled ? styles.toggleLabelDisabled : ""}`}
-      >
+    <div className={styles.toggleRow} onMouseEnter={handleMouseEnter} onMouseLeave={() => onHover(null)}>
+      <label htmlFor={id} className={`${styles.toggleLabel} ${disabled ? styles.toggleLabelDisabled : ""}`}>
         {label}
       </label>
       <label className={styles.toggle}>
@@ -55,19 +123,21 @@ const ToggleRow: React.FC<{
 // ─── Main Panel ───────────────────────────────────────────────────────────────
 
 const EffectsDebugPanel: React.FC = () => {
-  const [flags, setFlags] = useState<EffectsDebugFlags>(() =>
-    effectsDebugStore.getFlags(),
-  );
-  const [isCompact, setIsCompact] = useState(false);
+  const [flags, setFlags] = useState<EffectsDebugFlags>(() => effectsDebugStore.getFlags());
+  const [isCompact, setIsCompact] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const [hoveredDescription, setHoveredDescription] = useState<string | null>(null);
+  const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<"left" | "right">("left");
+  const [tooltipTop, setTooltipTop] = useState<number>(60);
 
-  // Подписываемся на изменения store
+  // Subscribe to store changes
   useEffect(() => {
     const unsub = effectsDebugStore.subscribe(setFlags);
     return unsub;
   }, []);
 
-  // ─── Drag logic (копия из PerformanceDebug) ───────────────────────────────
+  // ─── Drag logic ─────────────────────────────────────────────────────────────
   const dragRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0 });
   const isDragging = useRef(false);
@@ -75,34 +145,51 @@ const EffectsDebugPanel: React.FC = () => {
   const wasDragging = useRef(false);
   const hasDragged = useRef(false);
 
-  // Начальная позиция — под PerformanceDebug (примерно top: 4rem + высота панели + gap)
+  // Initial position — below PerformanceDebug
   useEffect(() => {
     const el = dragRef.current;
     if (!el) return;
     el.style.position = "fixed";
-    el.style.top = "4rem";
-    el.style.right = "calc(1rem + 320px + 0.5rem)"; // левее PerformanceDebug
+    el.style.top = "70px";
+    el.style.right = "16px";
     el.style.left = "auto";
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isDragging.current) return;
-    hasDragged.current = true;
-    const el = dragRef.current;
-    if (!el) return;
-    const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
-    const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
-    if (!clientX && !clientY) return;
-    const deltaX = clientX - startPos.current.x;
-    const deltaY = clientY - startPos.current.y;
-    const newX = elementPos.current.x + deltaX;
-    const newY = elementPos.current.y + deltaY;
-    el.style.left = `${newX}px`;
-    el.style.top = `${newY}px`;
-    el.style.right = "auto";
-    startPos.current = { x: clientX, y: clientY };
-    elementPos.current = { x: newX, y: newY };
-  }, []);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging.current) return;
+      hasDragged.current = true;
+      const el = dragRef.current;
+      if (!el) return;
+      const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
+      const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
+      if (!clientX && !clientY) return;
+      const deltaX = clientX - startPos.current.x;
+      const deltaY = clientY - startPos.current.y;
+      const newX = elementPos.current.x + deltaX;
+      const newY = elementPos.current.y + deltaY;
+      el.style.left = `${newX}px`;
+      el.style.top = `${newY}px`;
+      el.style.right = "auto";
+      startPos.current = { x: clientX, y: clientY };
+      elementPos.current = { x: newX, y: newY };
+
+      // Update tooltip position while dragging if tooltip is visible
+      if (hoveredDescription) {
+        const rect = el.getBoundingClientRect();
+        const tooltipWidth = 240 + 12;
+        const spaceLeft = rect.left;
+        const spaceRight = window.innerWidth - rect.right;
+
+        if (spaceLeft >= tooltipWidth) {
+          setTooltipPosition("left");
+        } else if (spaceRight >= tooltipWidth) {
+          setTooltipPosition("right");
+        }
+      }
+    },
+    [hoveredDescription],
+  );
 
   const handleMouseUp = useCallback(
     (e: MouseEvent | TouchEvent) => {
@@ -167,16 +254,12 @@ const EffectsDebugPanel: React.FC = () => {
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
-  const handleToggle = useCallback(
-    (key: keyof EffectsDebugFlags, value: boolean) => {
-      effectsDebugStore.setFlag(key, value);
-    },
-    [],
-  );
+  const handleToggle = useCallback((key: keyof EffectsDebugFlags, value: boolean) => {
+    effectsDebugStore.setFlag(key, value);
+  }, []);
 
   const handleTier = useCallback((tier: PerformanceTierOverride) => {
-    effectsDebugStore.setFlag("tierOverride", tier);
-    // Перезагружаем страницу — тир читается синхронно при инициализации
+    effectsDebugStore.applyTierPreset(tier);
     window.location.reload();
   }, []);
 
@@ -191,7 +274,48 @@ const EffectsDebugPanel: React.FC = () => {
     setIsCompact((p) => !p);
   }, []);
 
+  const handleHover = useCallback((key: keyof EffectsDebugFlags | null, mouseY?: number) => {
+    if (key && EFFECT_HELP[key]) {
+      setHoveredDescription(EFFECT_HELP[key]!.desc);
+      setHoveredLocation(EFFECT_HELP[key]!.loc);
+
+      // Smart positioning: check available space
+      const el = dragRef.current;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const tooltipWidth = 252; // 240 + 12 margin
+        const spaceLeft = rect.left;
+        const spaceRight = window.innerWidth - rect.right;
+
+        // Prefer left, but switch to right if not enough space
+        if (spaceLeft >= tooltipWidth) {
+          setTooltipPosition("left");
+        } else if (spaceRight >= tooltipWidth) {
+          setTooltipPosition("right");
+        } else {
+          // Not enough space on either side, prefer right as fallback
+          setTooltipPosition("right");
+        }
+
+        // Calculate tooltip position relative to hovered element
+        if (mouseY !== undefined) {
+          const relativeY = mouseY - rect.top;
+          // Center tooltip vertically relative to the hovered row
+          const tooltipHeight = 120; // Approximate height
+          const centeredY = Math.max(40, relativeY - tooltipHeight / 2);
+          setTooltipTop(centeredY);
+        }
+      }
+    } else {
+      setHoveredDescription(null);
+      setHoveredLocation(null);
+    }
+  }, []);
+
   if (!isVisible) return null;
+
+  const isTabletScreen = useMediaQuery("(max-width: 1023px)"); // Natively disables Grid3D
+  const isMobileScreen = useMediaQuery("(max-width: 767px)"); // Natively disables Card Scatter/Gather
 
   const tierBtns: {
     label: string;
@@ -205,15 +329,63 @@ const EffectsDebugPanel: React.FC = () => {
   ];
 
   return (
-    <div
-      ref={dragRef}
-      className={`${styles.container} ${isCompact ? styles.containerCompact : ""}`}
-    >
+    <div ref={dragRef} className={`${styles.container} ${isCompact ? styles.containerCompact : ""}`}>
+      {/* Floating Help Card - Aligned, compact and highly professional */}
+      {hoveredDescription && (
+        <div
+          className={styles.floatingHelper}
+          style={{
+            ...(tooltipPosition === "left"
+              ? { right: "100%", marginRight: "12px" }
+              : { left: "100%", marginLeft: "12px" }),
+            top: `${tooltipTop}px`,
+            // Silky smooth vertical glide cubic-bezier
+            transition: "left 0.2s ease, right 0.2s ease, top 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          {/* Header Row: Info Icon + Cyan Location metadata */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginBottom: "8px",
+            }}
+          >
+            <Info size={13} style={{ color: "#00ffff", flexShrink: 0 }} />
+            <span
+              style={{
+                fontSize: "0.62rem",
+                color: "#00ffff",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {hoveredLocation}
+            </span>
+          </div>
+
+          {/* Description Row */}
+          <div
+            style={{
+              fontSize: "0.68rem",
+              color: "rgba(255, 255, 255, 0.7)",
+              lineHeight: "1.4",
+            }}
+          >
+            {hoveredDescription}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div
         className={styles.header}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
+        onClick={toggleCompact}
       >
         <div className={styles.headerLeft}>
           <Move size={13} />
@@ -223,8 +395,11 @@ const EffectsDebugPanel: React.FC = () => {
         <div className={styles.headerActions}>
           <button
             className={styles.iconBtn}
-            onClick={toggleCompact}
-            title={isCompact ? "Развернуть" : "Свернуть"}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCompact((p) => !p);
+            }}
+            title={isCompact ? "Expand" : "Collapse"}
           >
             {isCompact ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
@@ -234,7 +409,7 @@ const EffectsDebugPanel: React.FC = () => {
               e.stopPropagation();
               setIsVisible(false);
             }}
-            title="Закрыть"
+            title="Close"
           >
             <X size={15} />
           </button>
@@ -243,7 +418,12 @@ const EffectsDebugPanel: React.FC = () => {
 
       {/* Body */}
       {!isCompact && (
-        <div className={styles.body} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={styles.body}
+          onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {/* ── Tier Preset ── */}
           <div className={styles.sectionLabel}>Tier Preset</div>
           <div className={styles.tierRow}>
@@ -263,10 +443,11 @@ const EffectsDebugPanel: React.FC = () => {
           {/* ── WebGL Fluid ── */}
           <div className={styles.sectionLabel}>WebGL Fluid</div>
           <ToggleRow
-            label="Fluid эффект (вкл/выкл)"
+            label="Fluid effect (on/off)"
             flagKey="webglFluid"
             flags={flags}
             onChange={handleToggle}
+            onHover={handleHover}
           />
           <div className={styles.subGroup}>
             <ToggleRow
@@ -275,52 +456,74 @@ const EffectsDebugPanel: React.FC = () => {
               flags={flags}
               disabled={!flags.webglFluid}
               onChange={handleToggle}
+              onHover={handleHover}
             />
             <ToggleRow
-              label="sunrays шейдер"
+              label="sunrays shader"
               flagKey="webglFluidSunrays"
               flags={flags}
               disabled={!flags.webglFluid}
               onChange={handleToggle}
+              onHover={handleHover}
             />
             <ToggleRow
-              label="shading шейдер"
+              label="shading shader"
               flagKey="webglFluidShading"
               flags={flags}
               disabled={!flags.webglFluid}
               onChange={handleToggle}
+              onHover={handleHover}
             />
           </div>
 
           <div className={styles.divider} />
 
-          {/* ── Grid3D ── */}
-          <div className={styles.sectionLabel}>Grid 3D (MorphingVideo)</div>
-          <ToggleRow
-            label="Grid3D (вкл/выкл)"
-            flagKey="grid3d"
-            flags={flags}
-            onChange={handleToggle}
-          />
-          <div className={styles.subGroup}>
-            <ToggleRow
-              label="filter:blur на элементах"
-              flagKey="grid3dFilterBlur"
-              flags={flags}
-              disabled={!flags.grid3d}
-              onChange={handleToggle}
-            />
-          </div>
+          {/* ── Grid3D ── only show if width >= 1024px */}
+          {!isTabletScreen && (
+            <>
+              <div className={styles.sectionLabel}>Grid 3D (MorphingVideo)</div>
+              <ToggleRow
+                label="Grid3D (on/off)"
+                flagKey="grid3d"
+                flags={flags}
+                onChange={handleToggle}
+                onHover={handleHover}
+              />
+              <div className={styles.subGroup}>
+                <ToggleRow
+                  label="filter:blur on elements"
+                  flagKey="grid3dFilterBlur"
+                  flags={flags}
+                  disabled={!flags.grid3d}
+                  onChange={handleToggle}
+                  onHover={handleHover}
+                />
+              </div>
 
-          <div className={styles.divider} />
+              <div className={styles.divider} />
+            </>
+          )}
 
           {/* ── ScrollText ── */}
           <div className={styles.sectionLabel}>ScrollText</div>
           <ToggleRow
-            label="Пословная анимация (vs opacity)"
+            label="Word-by-word animation (vs opacity)"
             flagKey="scrollTextWordByWord"
             flags={flags}
             onChange={handleToggle}
+            onHover={handleHover}
+          />
+
+          <div className={styles.divider} />
+
+          {/* ── Scroll Number ── Independent parameter (NOT nested under ScrollText) */}
+          <div className={styles.sectionLabel}>Scroll Number</div>
+          <ToggleRow
+            label="Scroll number filling"
+            flagKey="scrollNumberAnimation"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
           />
 
           <div className={styles.divider} />
@@ -332,6 +535,7 @@ const EffectsDebugPanel: React.FC = () => {
             flagKey="blockVideoTranslateZHigh"
             flags={flags}
             onChange={handleToggle}
+            onHover={handleHover}
           />
 
           <div className={styles.divider} />
@@ -343,29 +547,73 @@ const EffectsDebugPanel: React.FC = () => {
             flagKey="molecularNetHighNodes"
             flags={flags}
             onChange={handleToggle}
+            onHover={handleHover}
           />
 
           <div className={styles.divider} />
 
-          {/* ── Cards Scroll Gather ── */}
-          <div className={styles.sectionLabel}>Cards (Products Section)</div>
-          <ToggleRow
-            label="Разлёт/схождение при скролле"
-            flagKey="cardScrollGather"
-            flags={flags}
-            onChange={handleToggle}
-          />
+          {/* ── Cards ── only show if width >= 768px */}
+          {!isMobileScreen && (
+            <>
+              <div className={styles.sectionLabel}>Cards (Products Section)</div>
+              <ToggleRow
+                label="Card scatter/gather on scroll"
+                flagKey="cardScrollGather"
+                flags={flags}
+                onChange={handleToggle}
+                onHover={handleHover}
+              />
 
-          <div className={styles.divider} />
+              <div className={styles.divider} />
+            </>
+          )}
 
           {/* ── Parallax Background ── */}
-          <div className={styles.sectionLabel}>Parallax Background</div>
+          <div className={styles.sectionLabel}>Parallax Background (sections 1,3,5)</div>
           <ToggleRow
-            label="Параллакс фон (вкл/выкл)"
+            label="Parallax background (on/off)"
             flagKey="parallaxBackground"
             flags={flags}
             onChange={handleToggle}
+            onHover={handleHover}
           />
+
+          <div className={styles.divider} />
+
+          {/* ── Global UI & Animations ── */}
+          <div className={styles.sectionLabel}>Global UI & Animations</div>
+          <ToggleRow
+            label="Header glassmorphism"
+            flagKey="headerGlass"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+          <ToggleRow
+            label="Premium page transitions"
+            flagKey="premiumTransitions"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+          <ToggleRow
+            label="Aurora text animation"
+            flagKey="auroraText"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+
+          {/* ── Text Shimmer ── Independent parameter (NOT nested, only show if width >= 768px) */}
+          {!isMobileScreen && (
+            <ToggleRow
+              label="Text shimmer animation"
+              flagKey="textShineAnimation"
+              flags={flags}
+              onChange={handleToggle}
+              onHover={handleHover}
+            />
+          )}
 
           {/* ── Reset ── */}
           <button className={styles.resetBtn} onClick={handleReset}>

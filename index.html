@@ -220,6 +220,24 @@
 
     <script>
       (function () {
+        // [WebGPU 2026] Фоновое определение точной видеокарты во время работы прелоадера
+        (function () {
+          if (navigator.gpu && typeof sessionStorage !== "undefined") {
+            navigator.gpu
+              .requestAdapter()
+              .then(function (adapter) {
+                if (adapter) {
+                  // Использование нативного синхронного свойства adapter.info (стандарт 2026)
+                  const info = adapter.info;
+                  if (info && info.device) {
+                    sessionStorage.setItem("4life_gpu", info.device);
+                  }
+                }
+              })
+              .catch(function () {});
+          }
+        })();
+
         // Логотип для светлой темы
         const logoImg = document.querySelector(".preloader-logo");
         if (logoImg && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
@@ -283,7 +301,7 @@
             duration: 0.6,
             ease: "power2.out",
           },
-          "-=0.7"
+          "-=0.7",
         );
 
         masterTl.to(
@@ -293,7 +311,7 @@
             duration: 0.5,
             ease: "power2.out",
           },
-          "-=0.4"
+          "-=0.4",
         );
 
         masterTl.to(
@@ -303,7 +321,7 @@
             duration: 0.7,
             ease: "back.out(1.1)",
           },
-          "-=0.5"
+          "-=0.5",
         );
 
         masterTl.to(
@@ -314,7 +332,7 @@
             duration: 0.6,
             ease: "power3.out",
           },
-          "-=0.3"
+          "-=0.3",
         );
 
         // 🌊 Одновременный старт прогресса с текстом
@@ -326,7 +344,7 @@
             ease: "power1.inOut",
             onUpdate: updateProgress,
           },
-          "-=0.6"
+          "-=0.6",
         );
 
         // 💫 Плавные проценты
@@ -342,7 +360,7 @@
               }
             },
           },
-          "-=2.2"
+          "-=2.2",
         );
 
         // 🌟 Живое дыхание свечения
@@ -356,7 +374,7 @@
             yoyo: true,
             repeat: -1,
           },
-          1.0
+          1.0,
         );
 
         // 💎 Тонкая пульсация лого
@@ -369,7 +387,7 @@
             yoyo: true,
             repeat: -1,
           },
-          1.2
+          1.2,
         );
 
         function updateProgress() {
@@ -407,7 +425,7 @@
               duration: 0.5,
               ease: "power2.inOut",
             },
-            "+=0.2"
+            "+=0.2",
           );
 
           /* ▼▼▼ НАЧАЛО КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №2 ▼▼▼ */
@@ -421,7 +439,7 @@
                 duration: 0.6,
                 ease: "power2.inOut",
               },
-              "-=0.5"
+              "-=0.5",
             ); // Начинаем анимацию появления немного раньше для бесшовного перехода
           }
           /* ▲▲▲ КОНЕЦ КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №2 ▲▲▲ */
@@ -434,7 +452,7 @@
               duration: 0.4,
               ease: "power2.inOut",
             },
-            "-=0.3"
+            "-=0.3",
           );
 
           // Растворение в эфире
@@ -448,7 +466,7 @@
               duration: 0.8,
               ease: "expo.inOut",
             },
-            "-=0.2"
+            "-=0.2",
           );
 
           // Финальное затемнение
@@ -460,7 +478,7 @@
               ease: "power2.inOut",
               onComplete: () => preloader.remove(),
             },
-            "-=0.4"
+            "-=0.4",
           );
         }
 

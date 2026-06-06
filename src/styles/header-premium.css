@@ -138,19 +138,20 @@
 .header-premium--dark[data-tier="low"] {
   background: linear-gradient(
     135deg,
-    var(--header-dark-bg) 0%,
-    var(--header-dark-surface) 15%,
-    var(--header-dark-accent) 35%,
-    var(--header-dark-highlight) 50%,
-    var(--header-dark-accent) 65%,
-    var(--header-dark-surface) 85%,
-    var(--header-dark-bg) 100%
+    #090f1d 0%,
+    #151c2c 15%,
+    #1e2535 35%,
+    #262d3c 50%,
+    #1e2535 65%,
+    #151c2c 85%,
+    #090f1d 100%
   ) !important;
   box-shadow:
+    /* Top highlight */
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.1),
-    inset 0 -4px 8px rgba(0, 0, 0, 0.85),
-    0 15px 30px rgba(0, 0, 0, 0.6);
-  border-color: rgba(var(--header-dark-glow-rgb), 0.4);
+    /* Deep bottom shadow */ inset 0 -4px 8px rgba(0, 0, 0, 0.85),
+    /* Normal drop shadow */ 0 15px 30px rgba(0, 0, 0, 0.6);
+  border-color: rgba(0, 212, 255, 0.4);
 }
 
 .header-premium--light[data-tier="low"] {

@@ -11,8 +11,8 @@
  * mask-image удалён — он создавал stacking context и блокировал compositor layer для fixed фона.
  */
 
+import { useFeatureFlag, usePerformanceTier } from "@/hooks";
 import { useParallaxLenis } from "@/hooks/useParallaxLenis";
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 
@@ -65,6 +65,10 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
   const tier = usePerformanceTier();
+  const isParallaxEnabled = useFeatureFlag(
+    "parallaxBackground",
+    IS_TOUCH ? tier !== "low" : true,
+  );
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -85,7 +89,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
 
   useParallaxLenis(parallaxBgRef, containerRef, {
     strength: IS_TOUCH ? touchStrength : 0,
-    disabled: !IS_TOUCH || tier === "low",
+    disabled: !IS_TOUCH || !isParallaxEnabled,
   });
 
   const { scrollYProgress } = useScroll({
@@ -102,7 +106,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const desktopY = useTransform(
     scrollYProgress,
     [0, 1],
-    IS_TOUCH || tier === "low" ? ["0%", "0%"] : [desktopYFrom, desktopYTo],
+    !isParallaxEnabled ? ["0%", "0%"] : [desktopYFrom, desktopYTo],
   );
 
   const finalBackgroundImage = isMobile

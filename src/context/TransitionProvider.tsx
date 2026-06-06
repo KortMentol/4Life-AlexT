@@ -1,22 +1,15 @@
-import React, {
-  createContext,
-  ReactNode,
-  startTransition,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { PixelTransition, TransitionHandle as PixelTransitionHandle } from "@/components/transitions/PixelTransition";
+import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "@/components/transitions/WaveTransition";
+import { useFeatureFlag, useFluid, useIsMobile, usePerformanceTier } from "@/hooks";
+import React, { createContext, ReactNode, startTransition, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  PixelTransition,
-  TransitionHandle as PixelTransitionHandle,
-} from "@/components/transitions/PixelTransition";
-import {
-  WaveTransition,
-  TransitionHandle as WaveTransitionHandle,
-} from "@/components/transitions/WaveTransition";
-import { useFluid, useIsMobile } from "@/hooks";
+
+declare global {
+  interface Window {
+    __isRoutingLock?: boolean;
+    __menuTransitionInProgress?: boolean;
+  }
+}
 
 interface TransitionContextType {
   transitionTo: (path: string) => void;
@@ -32,9 +25,7 @@ export const useTransition = () => {
   return context;
 };
 
-export const TransitionProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const pixelOverlayRef = useRef<PixelTransitionHandle>(null);
@@ -42,10 +33,22 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { resetFluid } = useFluid();
   const isMobile = useIsMobile();
+  const tier = usePerformanceTier();
+  const isTransitionsEnabled = useFeatureFlag("premiumTransitions", tier !== "low");
 
   const transitionTo = (path: string) => {
     if (isTransitioning || location.pathname === path) return;
+
+    // If transitions are disabled, navigate immediately
+    if (!isTransitionsEnabled) {
+      startTransition(() => {
+        navigate(path);
+      });
+      return;
+    }
+
     setIsTransitioning(true);
+    window.__isRoutingLock = true; // <-- LOCK SCROLL SAVING
 
     // Broadcast transition start — heavy components pause their init to free the Main Thread.
     window.__menuTransitionInProgress = true;
@@ -65,6 +68,7 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({
         resetFluid();
         overlay.play("out").then(() => {
           setIsTransitioning(false);
+          window.__isRoutingLock = false; // <-- UNLOCK SCROLL SAVING
 
           // Wave is done — GPU/CPU is free. Safe to init heavy GSAP/WebGL.
           window.__menuTransitionInProgress = false;

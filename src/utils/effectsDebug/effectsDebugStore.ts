@@ -19,45 +19,24 @@
 export type PerformanceTierOverride = "auto" | "low" | "medium" | "high";
 
 export interface EffectsDebugFlags {
-  // ─── Tier override ────────────────────────────────────────────────────────
-  /** "auto" = определяется автоматически, иначе принудительный тир */
   tierOverride: PerformanceTierOverride;
-
-  // ─── WebGL Fluid (SectionFluidEffect) ────────────────────────────────────
-  /** Включить/выключить весь WebGL Fluid эффект */
   webglFluid: boolean;
-  /** pressureIterations: 50 (high) vs 20 (reduced) */
   webglFluidPressureHigh: boolean;
-  /** sunrays шейдер-проход */
   webglFluidSunrays: boolean;
-  /** shading шейдер-проход */
   webglFluidShading: boolean;
-
-  // ─── Grid3D (MorphingVideoSection) ───────────────────────────────────────
-  /** Включить/выключить Grid3D в блоках 01/02/03 */
   grid3d: boolean;
-  /** filter:blur на .grid__item элементах */
   grid3dFilterBlur: boolean;
-
-  // ─── ScrollText ───────────────────────────────────────────────────────────
-  /** true = пословная анимация (high), false = один opacity (medium-режим) */
   scrollTextWordByWord: boolean;
-
-  // ─── BlockVideo translateZ ────────────────────────────────────────────────
-  /** true = ±400 (high), false = ±200 (medium) */
+  scrollNumberAnimation: boolean; // Scroll-driven color fill of digits 01, 02, 03
   blockVideoTranslateZHigh: boolean;
-
-  // ─── MolecularNet ─────────────────────────────────────────────────────────
-  /** true = 12 nodes (high), false = 7 nodes (medium) */
   molecularNetHighNodes: boolean;
-
-  // ─── Cards scroll gather (ImmersiveProductShowcase) ───────────────────────
-  /** true = карточки разлетаются/сходятся при скролле, false = статичны */
   cardScrollGather: boolean;
-
-  // ─── Parallax Background ──────────────────────────────────────────────────
-  /** true = параллакс фон включен, false = статичный фон */
   parallaxBackground: boolean;
+  // ─── Global UI Components ───
+  headerGlass: boolean;
+  premiumTransitions: boolean;
+  auroraText: boolean;
+  textShineAnimation: boolean; // Shimmer text shine animation
 }
 
 const STORAGE_KEY = "4life_effects_debug";
@@ -71,10 +50,15 @@ const DEFAULTS: EffectsDebugFlags = {
   grid3d: true,
   grid3dFilterBlur: true,
   scrollTextWordByWord: true,
+  scrollNumberAnimation: true,
   blockVideoTranslateZHigh: true,
   molecularNetHighNodes: true,
   cardScrollGather: true,
   parallaxBackground: true,
+  headerGlass: true,
+  premiumTransitions: true,
+  auroraText: true,
+  textShineAnimation: true,
 };
 
 type Listener = (flags: EffectsDebugFlags) => void;
@@ -117,10 +101,7 @@ class EffectsDebugStore {
     return this.flags[key];
   }
 
-  setFlag<K extends keyof EffectsDebugFlags>(
-    key: K,
-    value: EffectsDebugFlags[K],
-  ): void {
+  setFlag<K extends keyof EffectsDebugFlags>(key: K, value: EffectsDebugFlags[K]): void {
     this.flags = { ...this.flags, [key]: value };
     this.save();
     this.notify();
@@ -128,6 +109,49 @@ class EffectsDebugStore {
 
   reset(): void {
     this.flags = { ...DEFAULTS };
+    this.save();
+    this.notify();
+  }
+
+  applyTierPreset(tier: PerformanceTierOverride): void {
+    this.flags.tierOverride = tier;
+
+    if (tier === "low") {
+      // Отключаем всё тяжелое
+      this.flags.webglFluid = false;
+      this.flags.grid3d = false;
+      this.flags.scrollTextWordByWord = false;
+      this.flags.scrollNumberAnimation = false;
+      this.flags.blockVideoTranslateZHigh = false;
+      this.flags.molecularNetHighNodes = false;
+      this.flags.cardScrollGather = false;
+      this.flags.parallaxBackground = false;
+      this.flags.headerGlass = false;
+      this.flags.premiumTransitions = false;
+      this.flags.auroraText = false;
+      this.flags.textShineAnimation = false;
+    } else if (tier === "medium") {
+      // Отключаем только High-tier фичи
+      this.flags.webglFluid = true;
+      this.flags.webglFluidPressureHigh = false;
+      this.flags.webglFluidSunrays = false;
+      this.flags.grid3d = true;
+      this.flags.grid3dFilterBlur = false;
+      this.flags.blockVideoTranslateZHigh = false;
+      this.flags.molecularNetHighNodes = false;
+      this.flags.scrollTextWordByWord = true;
+      this.flags.cardScrollGather = true;
+      this.flags.parallaxBackground = true;
+      this.flags.headerGlass = true;
+      this.flags.premiumTransitions = true;
+      this.flags.auroraText = true;
+    } else {
+      // High или Auto - включаем всё по дефолту
+      const newFlags = { ...DEFAULTS };
+      newFlags.tierOverride = tier;
+      this.flags = newFlags;
+    }
+
     this.save();
     this.notify();
   }

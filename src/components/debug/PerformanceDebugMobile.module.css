@@ -5,12 +5,10 @@
   left: 0;
   right: 0;
   z-index: 99999;
-  background-color: rgba(10, 10, 10, 0.9);
+  background-color: #0f172a;
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(0);
   -webkit-tap-highlight-color: transparent;
@@ -38,7 +36,7 @@
 
 .headerMetrics {
   display: flex;
-  gap: 0.625rem; /* 10px */
+  gap: 0.75rem; /* 12px - увеличен с 10px для лучшего spacing */
   align-items: center;
   font-size: 0.6875rem; /* 11px */
   white-space: nowrap;
@@ -49,6 +47,14 @@
 
 .headerMetrics::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px between icon and text */
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .metricItemCompact {

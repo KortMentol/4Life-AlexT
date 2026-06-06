@@ -36,7 +36,11 @@ export const useTheodoreMenu = () => {
       navigate(-1);
     } else {
       const currentState = window.history.state || {};
-      window.history.pushState({ ...currentState, menuOpen: true }, "", currentPath);
+      window.history.pushState(
+        { ...currentState, menuOpen: true },
+        "",
+        currentPath,
+      );
       setIsMenuOpen(true);
     }
   }, [isMenuOpen, navigate, location.pathname, location.search]);

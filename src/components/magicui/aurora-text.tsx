@@ -1,7 +1,7 @@
 "use client";
 
+import { useFeatureFlag, usePerformanceTier } from "@/hooks";
 import React, { memo, useMemo } from "react";
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 
 interface AuroraTextProps {
   children: React.ReactNode;
@@ -56,9 +56,14 @@ const AuroraTextComponent = memo(
   }: AuroraTextProps) => {
     // 2026 PERFORMANCE TIER SYSTEM
     const performanceTier = usePerformanceTier();
+    const isAuroraEnabled = useFeatureFlag(
+      "auroraText",
+      performanceTier !== "low",
+    );
 
     // Мемоизируем класс анимации на основе производительности
     const animationClass = useMemo(() => {
+      if (!isAuroraEnabled) return "animate-aurora-low";
       switch (performanceTier) {
         case "high":
           return "animate-aurora-high";
@@ -68,19 +73,17 @@ const AuroraTextComponent = memo(
         default:
           return "animate-aurora-low"; // Статичный градиент для слабых устройств
       }
-    }, [performanceTier]);
+    }, [performanceTier, isAuroraEnabled]);
 
     // Адаптивная скорость анимации
     const adaptiveSpeed = useMemo(() => {
-      if (performanceTier === "low") return 0; // Отключаем анимацию
+      if (!isAuroraEnabled || performanceTier === "low") return 0; // Отключаем анимацию
       if (performanceTier === "medium") return speed * 0.7; // Замедляем на 30%
       return speed; // Полная скорость для HIGH
-    }, [performanceTier, speed]);
+    }, [performanceTier, speed, isAuroraEnabled]);
 
     const gradientStyle = {
-      backgroundImage: `linear-gradient(135deg, ${colors.join(", ")}, ${
-        colors[0]
-      })`,
+      backgroundImage: `linear-gradient(135deg, ${colors.join(", ")}, ${colors[0]})`,
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
       // Адаптивная длительность анимации
@@ -92,7 +95,9 @@ const AuroraTextComponent = memo(
         <span className="sr-only">{children}</span>
         <span
           className={`relative bg-[length:200%_auto] bg-clip-text text-transparent ${
-            performanceTier !== "low" ? animationClass : "animate-aurora-low"
+            isAuroraEnabled && performanceTier !== "low"
+              ? animationClass
+              : "animate-aurora-low"
           }`}
           style={gradientStyle}
           aria-hidden="true"

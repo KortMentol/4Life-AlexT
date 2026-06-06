@@ -1,12 +1,14 @@
 import productsHeroVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
 import { usePerformanceTier } from "@/hooks";
 import { lenis } from "@/lib/lenis";
-import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useRef } from "react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 
 const ProductsHero: React.FC = () => {
   const tier = usePerformanceTier();
   const spacerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isHeroVisible = useInView(spacerRef, { margin: "0px" });
 
   const { scrollYProgress } = useScroll({
     target: spacerRef,
@@ -16,27 +18,23 @@ const ProductsHero: React.FC = () => {
   const isLowTier = tier === "low";
   const isHighTier = tier === "high";
 
-  const scale = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [1, isLowTier ? 1 : 0.85],
-  );
-  const opacity = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [1, isLowTier ? 0.3 : 0.1],
-  );
-  const overlayOpacity = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [0, isHighTier ? 1 : 0],
-  );
+  const scale = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 1 : 0.85]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 0.3 : 0.1]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0, isHighTier ? 1 : 0]);
 
   // willChange только пока элемент активно анимируется (opacity > 0.01)
   // Когда hero полностью ушёл — снимаем GPU слой
-  const dynamicWillChange = useTransform(opacity, (val) =>
-    val > 0.02 ? "transform, opacity" : "auto",
-  );
+  const dynamicWillChange = useTransform(opacity, (val) => (val > 0.02 ? "transform, opacity" : "auto"));
+
+  // Auto-pause video when out of viewport
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (isHeroVisible) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+    }
+  }, [isHeroVisible]);
 
   return (
     <>
@@ -52,6 +50,7 @@ const ProductsHero: React.FC = () => {
           }}
         >
           <video
+            ref={videoRef}
             autoPlay
             muted
             loop

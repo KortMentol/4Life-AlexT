@@ -75,15 +75,7 @@ const TibicoCard: React.FC<{
         alt={product.name}
         loading="lazy"
         decoding="async"
-        className="product-image-primary w-full h-full object-contain p-4"
-      />
-      <img
-        src={product.image}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        aria-hidden="true"
-        className="product-image-secondary w-full h-full object-contain p-4"
+        className="product-image-premium w-full h-full object-contain p-4 relative z-10"
       />
       {/* LP badge */}
       <div
@@ -164,15 +156,7 @@ const DetailCard: React.FC<{
           alt={product.name}
           loading="lazy"
           decoding="async"
-          className="product-image-primary w-full h-full object-contain p-4"
-        />
-        <img
-          src={product.image}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-          className="product-image-secondary w-full h-full object-contain p-4"
+          className="product-image-premium w-full h-full object-contain p-4 relative z-10"
         />
         {/* LP badge */}
         <div

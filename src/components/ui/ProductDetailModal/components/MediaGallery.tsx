@@ -107,7 +107,8 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
           }}
         >
           {gallery.map((item, i) => {
-            const thumb = item.type === "video" ? (item.poster ?? item.src) : item.src;
+            const thumb =
+              item.type === "video" ? (item.poster ?? item.src) : item.src;
             const active = i === activeIndex;
             return (
               <button
@@ -120,7 +121,9 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                   borderRadius: 10,
                   overflow: "hidden",
                   flexShrink: 0,
-                  border: active ? `2px solid ${isDark ? "#22d3ee" : "#3b82f6"}` : "2px solid transparent",
+                  border: active
+                    ? `2px solid ${isDark ? "#22d3ee" : "#3b82f6"}`
+                    : "2px solid transparent",
                   opacity: active ? 1 : 0.5,
                   transform: active ? "scale(1.05)" : "scale(1)",
                   transition: "all 0.2s ease",
@@ -129,7 +132,12 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                   padding: 0,
                 }}
               >
-                <img src={thumb} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
+                <img
+                  src={thumb}
+                  alt=""
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  loading="lazy"
+                />
                 {item.type === "video" && (
                   <div
                     style={{
@@ -141,7 +149,12 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                       background: "rgba(0,0,0,0.3)",
                     }}
                   >
-                    <svg width="14" height="14" fill="white" viewBox="0 0 24 24">
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="white"
+                      viewBox="0 0 24 24"
+                    >
                       <path d="M8 5v14l11-7z" />
                     </svg>
                   </div>

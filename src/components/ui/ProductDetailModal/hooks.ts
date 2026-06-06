@@ -22,7 +22,10 @@ export function useModalDragSync(isOpen: boolean, isMobile: boolean) {
         return;
       }
       const progress = Math.min(1, latest / (window.innerHeight * 0.5));
-      document.body.style.setProperty("--header-y", `${-130 + progress * 130}%`);
+      document.body.style.setProperty(
+        "--header-y",
+        `${-130 + progress * 130}%`,
+      );
       document.body.style.setProperty("--header-opacity", `${progress}`);
     });
 

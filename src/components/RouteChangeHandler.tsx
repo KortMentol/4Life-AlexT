@@ -7,47 +7,75 @@ import { useLocation, useNavigate, useNavigationType } from "react-router-dom";
 declare global {
   interface Window {
     __popTransitionInProgress?: boolean;
+    __isRoutingLock?: boolean;
   }
 }
 
 const STORAGE_KEY = "scroll_positions_v_final";
 
-interface RouteChangeHandlerProps {
-  isMenuActionRef: RefObject<boolean>;
-  wasMenuOpenRef: RefObject<boolean>;
+// --- AWWWARDS 2026: IN-MEMORY SCROLL CACHE ---
+// Eliminates synchronous disk I/O during 144Hz scroll loops.
+let memoryScrollCache: Record<string, number> | null = null;
+let diskFlushTimeout: NodeJS.Timeout | null = null;
+
+const initScrollCache = () => {
+  if (memoryScrollCache) return;
+  try {
+    memoryScrollCache = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch {
+    memoryScrollCache = {};
+  }
+};
+
+const flushToDisk = () => {
+  if (!memoryScrollCache) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryScrollCache));
+  } catch {}
+};
+
+// Force flush on page unload
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", flushToDisk);
 }
 
 const saveScrollPosition = (path: string, position: number) => {
+  initScrollCache();
   const rounded = Math.round(position);
 
-  // Основное хранилище
-  try {
-    const positions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    positions[path] = rounded;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
-  } catch {}
+  // 1. O(1) Memory write (Lightning fast for RAF loop)
+  if (memoryScrollCache) {
+    memoryScrollCache[path] = rounded;
+  }
 
-  // Резерв в history.state для приватного режима iOS
+  // 2. History state backup (Fast enough)
   try {
     const state = window.history.state || {};
     window.history.replaceState({ ...state, _scroll: rounded }, "");
   } catch {}
+
+  // 3. Debounced Disk Write (Only touches disk 250ms AFTER scroll stops)
+  if (diskFlushTimeout) clearTimeout(diskFlushTimeout);
+  diskFlushTimeout = setTimeout(flushToDisk, 250);
 };
 
 const getScrollPosition = (path: string): number | null => {
-  // Приоритет: localStorage
-  try {
-    const positions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    if (positions[path] != null) return positions[path];
-  } catch {}
-
-  // Резерв: history.state
+  initScrollCache();
+  // Read from lightning-fast memory first
+  if (memoryScrollCache && memoryScrollCache[path] != null) {
+    return memoryScrollCache[path];
+  }
+  // Fallback to history
   try {
     if (window.history.state?._scroll != null) return window.history.state._scroll;
   } catch {}
-
   return null;
 };
+
+interface RouteChangeHandlerProps {
+  isMenuActionRef: RefObject<boolean>;
+  wasMenuOpenRef: RefObject<boolean>;
+}
 
 /**
  * AWWWARDS 2026: Умное восстановление скролла (Smart Observer + Scrollbar Sync).
@@ -130,7 +158,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
-      if (ticking || isHandlingPop.current || isFirstLoad.current) return;
+      if (ticking || isHandlingPop.current || isFirstLoad.current || window.__isRoutingLock) return; // <-- ADD window.__isRoutingLock CHECK
 
       ticking = true;
       requestAnimationFrame(() => {
@@ -187,6 +215,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
       isHandlingPop.current = true;
       window.__popTransitionInProgress = true; // КРИТИЧНО: Устанавливаем глобальный флаг
+      window.__isRoutingLock = true; // <-- LOCK SCROLL SAVING
 
       // Показываем вуаль немедленно
       setIsPopping(true);
@@ -200,6 +229,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
         lenis?.start();
         isHandlingPop.current = false;
         window.__popTransitionInProgress = false; // КРИТИЧНО: Сбрасываем флаг при timeout
+        window.__isRoutingLock = false; // <-- RELEASE LOCK
         if (window.ScrollTrigger) {
           window.ScrollTrigger.refresh();
         }
@@ -231,6 +261,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
                 lenis?.start();
                 isHandlingPop.current = false;
                 window.__popTransitionInProgress = false; // КРИТИЧНО: Сбрасываем глобальный флаг
+                window.__isRoutingLock = false; // <-- RELEASE LOCK
 
                 // Шаг 5: Финальный refresh после всего
                 if (window.ScrollTrigger) {
@@ -257,6 +288,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
         lenis?.start();
         isHandlingPop.current = false;
         window.__popTransitionInProgress = false; // КРИТИЧНО: Сбрасываем флаг при cleanup
+        window.__isRoutingLock = false; // <-- RELEASE LOCK
         // Уведомляем о завершении при cleanup
         window.dispatchEvent(new CustomEvent("pop-transition-complete"));
       }

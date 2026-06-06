@@ -113,7 +113,10 @@ const CustomScrollbar: React.FC = () => {
     const minHeight = isMobile ? 32 : 40;
     const maxHeight = trackHeight * 0.9;
 
-    const newThumbHeight = Math.max(minHeight, Math.min(maxHeight, trackHeight * ratio));
+    const newThumbHeight = Math.max(
+      minHeight,
+      Math.min(maxHeight, trackHeight * ratio),
+    );
 
     setThumbHeight(newThumbHeight);
     maxThumbYRef.current = trackHeight - newThumbHeight;
@@ -208,7 +211,10 @@ const CustomScrollbar: React.FC = () => {
 
       const handleMouseMove = (e: MouseEvent) => {
         const deltaY = e.clientY - dragStartYRef.current;
-        const newThumbY = Math.max(0, Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY));
+        const newThumbY = Math.max(
+          0,
+          Math.min(maxThumbYRef.current, dragStartThumbYRef.current + deltaY),
+        );
 
         if (thumbRef.current) {
           // ФИКС: Используем только translateY, без translateX (thumb прижат к right: 0)
@@ -217,7 +223,8 @@ const CustomScrollbar: React.FC = () => {
         thumbYRef.current = newThumbY;
 
         // Вычисляем и применяем скролл
-        const progress = maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
+        const progress =
+          maxThumbYRef.current > 0 ? newThumbY / maxThumbYRef.current : 0;
         const targetScroll = progress * scrollableHeightRef.current;
 
         lenis?.scrollTo(targetScroll, { immediate: true });
@@ -317,7 +324,8 @@ const CustomScrollbar: React.FC = () => {
       setIsMenuOpen(customEvent.detail.action === "hide");
     };
     window.addEventListener("custom-scrollbar-update", handleMenuUpdate);
-    return () => window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
+    return () =>
+      window.removeEventListener("custom-scrollbar-update", handleMenuUpdate);
   }, []);
 
   // ФИКС МЕРЦАНИЯ: Мгновенно скрываем скроллбар при начале POP-перехода
@@ -368,7 +376,9 @@ const CustomScrollbar: React.FC = () => {
           document.removeEventListener("mousemove", checkCursorPosition);
         };
 
-        document.addEventListener("mousemove", checkCursorPosition, { once: true });
+        document.addEventListener("mousemove", checkCursorPosition, {
+          once: true,
+        });
 
         // Если курсор не двигается, проверяем через 100ms
         setTimeout(() => {
@@ -419,7 +429,8 @@ const CustomScrollbar: React.FC = () => {
           // Smoothly hide if menu is open, or if there's no scroll, or if inactive
           opacity: isVisible && hasScroll && !isMenuOpen ? 1 : 0,
           transition: "opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
-          pointerEvents: isVisible && hasScroll && !isMenuOpen ? "auto" : "none",
+          pointerEvents:
+            isVisible && hasScroll && !isMenuOpen ? "auto" : "none",
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -430,20 +441,23 @@ const CustomScrollbar: React.FC = () => {
           className="absolute rounded-full cursor-grab active:cursor-grabbing"
           style={{
             // Динамическая ширина: узкий → широкий при hover контейнера
-            width: isHovering || isDragging ? thumbWidthHover : thumbWidthDefault,
+            width:
+              isHovering || isDragging ? thumbWidthHover : thumbWidthDefault,
             height: thumbHeight,
             // Позиционирование: прижат к правому краю контейнера
             right: 0,
             top: TRACK_PADDING,
             transform: `translateY(0px)`,
-            backgroundColor: isHovering || isDragging ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)",
+            backgroundColor:
+              isHovering || isDragging ? "#FFFFFF" : "rgba(255, 255, 255, 0.9)",
             // Профессиональная тень: работает на светлых И тёмных фонах
             boxShadow:
               "0 0 0 1px rgba(255, 255, 255, 0.4), " + // Светлая обводка (видна на тёмном)
               "0 0 0 2px rgba(0, 0, 0, 0.5), " + // Тёмная обводка (видна на светлом)
               "0 3px 12px rgba(0, 0, 0, 0.35)", // Глубокая тень для объёма
             // Плавная анимация расширения + цвета
-            transition: "width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), background-color 0.2s ease, box-shadow 0.2s ease",
+            transition:
+              "width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), background-color 0.2s ease, box-shadow 0.2s ease",
             willChange: "transform, width",
           }}
           onMouseDown={handleMouseDown}

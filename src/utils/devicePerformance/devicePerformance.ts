@@ -28,8 +28,7 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
   if (cachedSpecs) return cachedSpecs;
 
   const ua = navigator.userAgent;
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
   const navMem = (navigator as any).deviceMemory;
   const cpuCores = navigator.hardwareConcurrency || 4;
@@ -45,31 +44,32 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
     }
   }
 
-  let gpu = "Unknown";
+  // Считываем точные данные WebGPU, сохраненные прелоадером в фоне
+  let gpu = typeof window !== "undefined" ? sessionStorage.getItem("4life_gpu") : null;
   let webglVersion = "Not Supported";
 
-  try {
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-    if (gl) {
-      webglVersion =
-        gl instanceof WebGL2RenderingContext ? "WebGL 2.0" : "WebGL 1.0";
-      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-      if (debugInfo) {
-        gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+  if (!gpu) {
+    // Резервный фоллбэк на классический WebGL-парсер
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+      if (gl) {
+        webglVersion = gl instanceof WebGL2RenderingContext ? "WebGL 2.0" : "WebGL 1.0";
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        if (debugInfo) {
+          gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        }
       }
+    } catch (e) {
+      /* silent */
     }
-  } catch (e) {
-    /* silent */
+  } else {
+    webglVersion = "WebGL 2.0 (WebGPU fallback)";
   }
 
-  const cpuFrequency = isMobile
-    ? cpuCores >= 8
-      ? "2.8 GHz"
-      : "2.0 GHz"
-    : cpuCores >= 8
-      ? "3.5 GHz"
-      : "2.8 GHz";
+  if (!gpu) gpu = "Unknown";
+
+  const cpuFrequency = isMobile ? (cpuCores >= 8 ? "2.8 GHz" : "2.0 GHz") : cpuCores >= 8 ? "3.5 GHz" : "2.8 GHz";
 
   cachedSpecs = {
     ram,
@@ -86,15 +86,12 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
   return cachedSpecs;
 };
 
-export const calculatePerformanceScore = (
-  specs: DeviceSpecs,
-): { score: number; tier: PerformanceTier } => {
+export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; tier: PerformanceTier } => {
   if (cachedPerformance) return cachedPerformance;
 
   let score = 0;
   const ua = navigator.userAgent.toLowerCase();
-  const isMobile =
-    /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+  const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
 
   // 1. RAM (max 25 баллов)
   let ramValue = parseFloat(specs.ram) || 4;
@@ -141,9 +138,12 @@ export const calculatePerformanceScore = (
   const gpuString = specs.gpu.toLowerCase();
   let gpuScore = 0;
 
-  // WebGL версия
-  if (specs.webglVersion.startsWith("WebGL 2")) gpuScore += 10;
-  else if (specs.webglVersion.startsWith("WebGL 1")) gpuScore += 5;
+  // WebGL/WebGPU API бонус
+  if (specs.webglVersion.startsWith("WebGL 2") || specs.webglVersion === "WebGPU") {
+    gpuScore += 10; // WebGL 2.0 или WebGPU (современные API)
+  } else if (specs.webglVersion.startsWith("WebGL 1")) {
+    gpuScore += 5; // WebGL 1.0 (устаревший API)
+  }
 
   // --- DESKTOP GPU ---
 
@@ -243,39 +243,28 @@ export const calculatePerformanceScore = (
     else gpuScore += 5;
   }
 
-  // Apple GPU — iOS не раскрывает номер чипа, определяем по UA + ядра + maxTextureSize
+  // Apple GPU — точный парсинг из WebGPU строк
   else if (gpuString.includes("apple")) {
-    const uaLower = navigator.userAgent.toLowerCase();
-    const isMacUA =
-      uaLower.includes("macintosh") || uaLower.includes("mac os x");
-    const cores = specs.cpuCores;
-
-    if (isMacUA) {
-      // Apple Silicon Mac: M3/M4 = 10-12c, M2 = 8-10c, M1 = 8c
-      if (cores >= 10)
-        gpuScore += 40; // M3/M4+ (2023-2025+)
-      else if (cores >= 8)
-        gpuScore += 37; // M1/M2
-      else gpuScore += 30;
+    if (gpuString.includes("m4") || gpuString.includes("ultra")) {
+      gpuScore += 45;
+    } else if (gpuString.includes("m3") || gpuString.includes("max")) {
+      gpuScore += 41;
+    } else if (gpuString.includes("m2") || gpuString.includes("pro")) {
+      gpuScore += 38;
+    } else if (gpuString.includes("m1")) {
+      gpuScore += 35;
     } else {
-      // iPhone/iPad: все современные Apple = WebGL2 + maxTexSize 16384
-      let maxTexSize = 0;
-      try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-        if (gl) maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
-      } catch (_) {
-        /* silent */
-      }
-
-      const hasWebGL2 = specs.webglVersion.startsWith("WebGL 2");
-      if (hasWebGL2 && maxTexSize >= 16384 && cores >= 6)
-        gpuScore += 33; // A14+ (iPhone 12+)
-      else if (hasWebGL2 && cores >= 6)
-        gpuScore += 28; // A12/A13
-      else if (hasWebGL2) gpuScore += 22;
-      else gpuScore += 18; // A11 и старше
+      // Старый фоллбэк по ядрам для Safari/WebGL, если WebGPU отключен
+      const cores = specs.cpuCores;
+      if (cores >= 10) gpuScore += 40;
+      else if (cores >= 8) gpuScore += 35;
+      else gpuScore += 25;
     }
+  }
+
+  // Snapdragon X Elite / Plus (2024-2026 ARM Windows)
+  else if (gpuString.includes("snapdragon") || gpuString.includes("x elite") || gpuString.includes("x plus")) {
+    gpuScore += 38;
   }
 
   // Intel — Arc future-proof (Battlemage+), фикс Intel Core Ultra Graphics
@@ -325,9 +314,7 @@ export const calculatePerformanceScore = (
       !gpuString.includes("xe") &&
       specs.cpuCores <= 8) ||
     // Radeon без RX и без мощных APU серий
-    (gpuString.includes("radeon") &&
-      !gpuString.includes("rx") &&
-      !/\d{3}m/.test(gpuString));
+    (gpuString.includes("radeon") && !gpuString.includes("rx") && !/\d{3}m/.test(gpuString));
 
   if (isWeakIntegrated) {
     score *= 0.3;

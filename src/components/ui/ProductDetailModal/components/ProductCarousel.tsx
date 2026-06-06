@@ -18,7 +18,12 @@ interface ProductCarouselProps {
   isDark: boolean;
 }
 
-export const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, activeIndex, onSelect, isDark }) => {
+export const ProductCarousel: React.FC<ProductCarouselProps> = ({
+  products,
+  activeIndex,
+  onSelect,
+  isDark,
+}) => {
   const swiperRef = useRef<SwiperType | null>(null);
 
   // Синхронизируем позицию Swiper с activeIndex извне
@@ -43,7 +48,9 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, acti
   if (products.length <= 1) return null;
 
   return (
-    <div className={`flex-shrink-0 border-t ${isDark ? "border-white/[0.08]" : "border-slate-200"}`}>
+    <div
+      className={`flex-shrink-0 border-t ${isDark ? "border-white/[0.08]" : "border-slate-200"}`}
+    >
       <Swiper
         modules={[FreeMode]}
         onSwiper={(s) => {
@@ -61,7 +68,11 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, acti
         {products.map((p, i) => {
           const isActive = i === activeIndex;
           return (
-            <SwiperSlide key={p.id} style={{ width: "auto" }} className="flex-shrink-0">
+            <SwiperSlide
+              key={p.id}
+              style={{ width: "auto" }}
+              className="flex-shrink-0"
+            >
               <button
                 onClick={() => onSelect(p.id)}
                 aria-label={p.name}
@@ -80,7 +91,12 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, acti
                     }`}
                   />
                 )}
-                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-contain p-2" />
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  loading="lazy"
+                  className="w-full h-full object-contain p-2"
+                />
               </button>
             </SwiperSlide>
           );

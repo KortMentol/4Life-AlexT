@@ -1,11 +1,6 @@
+import { useFeatureFlag, useIsMobile, usePerformanceTier, useTheme } from "@/hooks";
+import { motion, useAnimationFrame, useMotionValue, useTransform } from "framer-motion";
 import React, { useRef } from "react";
-import {
-  motion,
-  useMotionValue,
-  useAnimationFrame,
-  useTransform,
-} from "framer-motion";
-import { useTheme, useIsMobile } from "@/hooks";
 
 interface ShineTextProps {
   text: string;
@@ -40,31 +35,20 @@ interface ShineTextProps {
  * @example
  * <TextShineEffect text="Важный заголовок" speed={3} delay={2.5} />
  */
-const TextShineEffect: React.FC<ShineTextProps> = ({
-  text,
-  className = "",
-  speed = 3,
-  delay = 2.5,
-}) => {
+const TextShineEffect: React.FC<ShineTextProps> = ({ text, className = "", speed = 3, delay = 2.5 }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const isMobile = useIsMobile();
+  const tier = usePerformanceTier();
+  const isShineEnabled = useFeatureFlag("textShineAnimation", tier !== "low");
 
-  // Мобильные: простой текст без анимации (60 FPS + экономия батареи)
-  if (isMobile) {
+  // Мобильные или disabled: простой текст без анимации (60 FPS + экономия батареи)
+  if (isMobile || !isShineEnabled) {
     return <span className={className}>{text}</span>;
   }
 
   // Десктоп: shine-эффект через Framer Motion RAF
-  return (
-    <DesktopShineText
-      text={text}
-      className={className}
-      speed={speed}
-      delay={delay}
-      isDark={isDark}
-    />
-  );
+  return <DesktopShineText text={text} className={className} speed={speed} delay={delay} isDark={isDark} />;
 };
 
 // Отдельный компонент для десктопа (чтобы hooks не вызывались на мобильных)
@@ -106,10 +90,7 @@ const DesktopShineText: React.FC<{
   });
 
   // Transform: p=0 → 150% (справа), p=100 → -50% (слева)
-  const backgroundPosition = useTransform(
-    progress,
-    (p) => `${150 - p * 2}% center`,
-  );
+  const backgroundPosition = useTransform(progress, (p) => `${150 - p * 2}% center`);
 
   // Цвета как раньше:
   // Базовый текст наследуется от родителя (currentColor)
@@ -128,10 +109,7 @@ const DesktopShineText: React.FC<{
   };
 
   return (
-    <motion.span
-      className={`inline-block ${className}`}
-      style={{ ...gradientStyle, backgroundPosition }}
-    >
+    <motion.span className={`inline-block ${className}`} style={{ ...gradientStyle, backgroundPosition }}>
       {text}
     </motion.span>
   );
