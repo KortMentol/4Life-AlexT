@@ -1,5 +1,5 @@
-import React from "react";
 import { motion } from "framer-motion";
+import React from "react";
 
 export interface SectionHeadingProps {
   title: string;
@@ -167,6 +167,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
   return (
     <motion.div
       className={`${alignClasses[align]} ${className}`}
+      style={{ paddingBottom: "var(--space-sm)" }}
       {...containerAnimation}
     >
       {subtitle && (
@@ -187,7 +188,11 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {withLine && (
         <div
-          className={`relative h-1 mt-4 mb-6 ${align === "center" ? "mx-auto" : ""} w-24`}
+          className={`relative h-1 ${align === "center" ? "mx-auto" : ""} w-24`}
+          style={{
+            marginTop: "var(--space-xs)",
+            marginBottom: "var(--space-md)",
+          }}
         >
           <motion.div
             className={`absolute h-full ${lineColors[lineColor as keyof typeof lineColors] || lineColors.blue}`}

@@ -129,11 +129,7 @@ export class TextSplitter {
    * @param staggerDelay - Delay between word animations
    * @returns Start and end progress values for the word
    */
-  static calculateWordTiming(
-    index: number,
-    totalWords: number,
-    staggerDelay: number,
-  ): [number, number] {
+  static calculateWordTiming(index: number, totalWords: number, staggerDelay: number): [number, number] {
     if (totalWords <= 1) {
       return [0, 1];
     }
@@ -167,9 +163,7 @@ export class TextSplitter {
     // Handle extremely long text (performance consideration)
     if (text.length > 10000) {
       if (import.meta.env.DEV) {
-        console.warn(
-          "[ScrollTextReveal] Text exceeds recommended length (10000 chars)",
-        );
+        console.warn("[ScrollTextReveal] Text exceeds recommended length (10000 chars)");
       }
       return text.substring(0, 10000) + "...";
     }
@@ -190,10 +184,7 @@ export class TextSplitter {
     const normalizedLineEndings = normalizedSpaces.replace(/\r\n|\r/g, "\n");
 
     // Handle excessive line breaks - limit to double line breaks
-    const normalizedLineBreaks = normalizedLineEndings.replace(
-      /\n{3,}/g,
-      "\n\n",
-    );
+    const normalizedLineBreaks = normalizedLineEndings.replace(/\n{3,}/g, "\n\n");
 
     return normalizedLineBreaks;
   }

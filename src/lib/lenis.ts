@@ -6,14 +6,9 @@
  * @version 4.0.0 - Mobile-native / Desktop-Lenis split
  */
 import Lenis from "lenis";
-import {
-  LenisOptions,
-  LenisScrollToOptions,
-  Lenis as LenisType,
-} from "./lenis.types";
+import { LenisOptions, LenisScrollToOptions, Lenis as LenisType } from "./lenis.types";
 
-const isMobile = () =>
-  typeof window !== "undefined" && window.innerWidth <= 767;
+const isMobile = () => typeof window !== "undefined" && window.innerWidth <= 767;
 
 let lenisInstance: LenisType | null = null;
 
@@ -26,6 +21,11 @@ if (!isMobile() && typeof window !== "undefined") {
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
   } as LenisOptions) as unknown as LenisType;
+
+  // Stop Lenis immediately if the preloader is currently rendering
+  if (document.getElementById("preloader")) {
+    lenisInstance.stop();
+  }
 }
 
 // На мобильных lenis === null — компоненты должны это учитывать
@@ -37,8 +37,7 @@ export const lenis = lenisInstance;
  * @description easeInOutQuint — та же кривая что на десктопе через Lenis.
  * Медленный старт → разгон → нежное торможение.
  */
-const easeInOutQuint = (t: number): number =>
-  t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+const easeInOutQuint = (t: number): number => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2);
 
 /** Активный RAF-скролл на мобайле — храним id чтобы отменять предыдущий */
 let rafScrollId: number | null = null;
@@ -104,10 +103,7 @@ const rafScrollTo = (targetY: number, duration: number): void => {
  * Десктоп — через Lenis (easeInOutQuint).
  * Мобайл — через RAF с тем же easeInOutQuint для премиального ощущения.
  */
-export const scrollTo = (
-  target: string | HTMLElement | number,
-  options: LenisScrollToOptions = {},
-) => {
+export const scrollTo = (target: string | HTMLElement | number, options: LenisScrollToOptions = {}) => {
   if (lenis) {
     // Десктоп: используем Lenis
     lenis.scrollTo(target, { duration: 1.5, ...options });
@@ -120,15 +116,8 @@ export const scrollTo = (
         if (typeof target === "number") {
           targetY = target + (options.offset || 0);
         } else {
-          const el =
-            typeof target === "string"
-              ? (document.querySelector(target) as HTMLElement | null)
-              : target;
-          if (el)
-            targetY =
-              el.getBoundingClientRect().top +
-              window.scrollY +
-              (options.offset || 0);
+          const el = typeof target === "string" ? (document.querySelector(target) as HTMLElement | null) : target;
+          if (el) targetY = el.getBoundingClientRect().top + window.scrollY + (options.offset || 0);
         }
         window.scrollTo(0, targetY);
         return;
@@ -138,15 +127,8 @@ export const scrollTo = (
       if (typeof target === "number") {
         targetY = target + (options.offset || 0);
       } else {
-        const el =
-          typeof target === "string"
-            ? (document.querySelector(target) as HTMLElement | null)
-            : target;
-        if (el)
-          targetY =
-            el.getBoundingClientRect().top +
-            window.scrollY +
-            (options.offset || 0);
+        const el = typeof target === "string" ? (document.querySelector(target) as HTMLElement | null) : target;
+        if (el) targetY = el.getBoundingClientRect().top + window.scrollY + (options.offset || 0);
       }
 
       if (targetY !== undefined) {
@@ -167,10 +149,6 @@ export const updateScroll = () => lenis?.resize();
 
 export const getScrollState = () => ({
   isScrolling: lenis ? (lenis as any).isScrolling : false,
-  scroll: lenis
-    ? (lenis as any).scroll
-    : typeof window !== "undefined"
-      ? window.scrollY
-      : 0,
+  scroll: lenis ? (lenis as any).scroll : typeof window !== "undefined" ? window.scrollY : 0,
   velocity: lenis ? (lenis as any).velocity : 0,
 });

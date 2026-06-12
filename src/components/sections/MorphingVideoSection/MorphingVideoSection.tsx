@@ -10,14 +10,14 @@
  * <MorphingVideoSection />
  */
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Media imports
 import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
 
 // Components
-import { Button } from "@/components/ui";
+import { Button, ScrollHeadingReveal } from "@/components/ui";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
@@ -38,8 +38,7 @@ declare global {
 // AWWWARDS ПРОФЕССИОНАЛЬНАЯ СИСТЕМА УСТРОЙСТВ
 const useDeviceType = () => {
   return useMemo(() => {
-    const isTouchDevice =
-      "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     return {
       isTouchDevice,
       isDesktop: !isTouchDevice,
@@ -51,35 +50,35 @@ const useDeviceType = () => {
 const BLOCK_CONFIG = {
   // ВЫСОТЫ БЛОКОВ (vh = % от высоты экрана)
   heights: {
-    touch: 180, // Все тач устройства (телефоны + планшеты)
+    touch: 200, // Оптимальный баланс плавности и скорости для тач-устройств
     desktop: 200, // Только десктоп с мышкой
   },
 
-  // ТАЙМИНГИ ДЛЯ ТАЧА (0.0 - 1.0) - НАСТРАИВАЙ ЗДЕСЬ! IMMERSIVE GARDEN STYLE
+  // AWWWARDS 2026: Perfect Symmetrical 40%-10%-40% Timings
   touchTimings: {
     block1: {
-      fadeInStart: 0.05, // Позже на 10% - после текста
-      fadeInEnd: 0.55, // ТЯГУЧЕЕ появление (37% времени!)
-      stickStart: 0.55, // Начало прилипания в центре
-      stickEnd: 0.8, // Конец прилипания (20% времени)
-      fadeOutStart: 0.8, // Начало исчезновения вверх
-      fadeOutEnd: 0.999, // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
+      fadeInStart: 0.2,
+      fadeInEnd: 0.45, // 40% duration (Ultra-smooth entrance)
+      stickStart: 0.45,
+      stickEnd: 0.55, // 10% duration (Sticky center focus)
+      fadeOutStart: 0.55,
+      fadeOutEnd: 0.9, // 40% duration (Identical, symmetrical ultra-smooth exit)
     },
     block2: {
-      fadeInStart: 0.05, // Позже на 10% //0.2
-      fadeInEnd: 0.57, // ТЯГУЧЕЕ появление (37% времени!)
-      stickStart: 0.57,
-      stickEnd: 0.8, // Конец прилипания (18% времени)
-      fadeOutStart: 0.8,
-      fadeOutEnd: 0.999, // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
+      fadeInStart: 0.2,
+      fadeInEnd: 0.45,
+      stickStart: 0.45,
+      stickEnd: 0.55,
+      fadeOutStart: 0.55,
+      fadeOutEnd: 0.9,
     },
     block3: {
-      fadeInStart: 0.05, // Позже на 10%
-      fadeInEnd: 0.59, // ТЯГУЧЕЕ появление (37% времени!)
-      stickStart: 0.59,
-      stickEnd: 0.8, // Конец прилипания (16% времени)
-      fadeOutStart: 0.8,
-      fadeOutEnd: 0.999, // УЛЬТРА-ТЯГУЧЕЕ исчезновение (24.9% времени!)
+      fadeInStart: 0.2,
+      fadeInEnd: 0.45,
+      stickStart: 0.45,
+      stickEnd: 0.55,
+      fadeOutStart: 0.55,
+      fadeOutEnd: 0.9,
     },
   },
 
@@ -119,73 +118,57 @@ const BlockVideo: React.FC<{
   blockIndex: number;
 }> = ({ blockRef, videoSrc, blockIndex }) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(
-    !!window.__menuTransitionInProgress,
-  );
+  const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
   const { isTouchDevice } = useDeviceType();
 
   // Тайминги всегда вычисляем до любых условных return (Rules of Hooks)
   const timings = useMemo(() => {
-    const blockKey =
-      `block${blockIndex + 1}` as keyof typeof BLOCK_CONFIG.touchTimings;
-    return isTouchDevice
-      ? BLOCK_CONFIG.touchTimings[blockKey]
-      : BLOCK_CONFIG.desktopTimings[blockKey];
+    const blockKey = `block${blockIndex + 1}` as keyof typeof BLOCK_CONFIG.touchTimings;
+    return isTouchDevice ? BLOCK_CONFIG.touchTimings[blockKey] : BLOCK_CONFIG.desktopTimings[blockKey];
   }, [blockIndex, isTouchDevice]);
 
   // Scroll progress для этого блока
+  // AWWWARDS 2026: Smart offset - video animation starts AFTER sticky content scrolls away
   const { scrollYProgress } = useScroll({
     target: blockRef,
-    offset: ["start 90%", "end 10%"],
+    offset: isTouchDevice
+      ? ["start 50%", "end 10%"] // Touch: Start when sticky content (01/text) already scrolled past
+      : ["start 90%", "end 10%"], // Desktop: Original timing
   });
 
   // Все useTransform вызываем безусловно — Rules of Hooks
   const fallbackTimings = BLOCK_CONFIG.touchTimings.block1;
   const t = timings ?? fallbackTimings;
 
-  const y = useTransform(
+  const rawY = useTransform(
     scrollYProgress,
-    [
-      t.fadeInStart,
-      t.fadeInEnd,
-      t.stickStart,
-      t.stickEnd,
-      t.fadeOutStart,
-      t.fadeOutEnd,
-    ],
+    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     ["100vh", "0vh", "0vh", "0vh", "0vh", "-100vh"],
   );
 
-  const opacity = useTransform(
+  const rawOpacity = useTransform(
     scrollYProgress,
-    [
-      t.fadeInStart,
-      t.fadeInEnd,
-      t.stickStart,
-      t.stickEnd,
-      t.fadeOutStart,
-      t.fadeOutEnd,
-    ],
+    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     [0, 1, 1, 1, 1, 0],
   );
 
   const tzHigh = import.meta.env.DEV ? efxFlags.blockVideoTranslateZHigh : true;
-  // AWWWARDS 2026: Strictly disable translateZ on touch devices to prevent video scaling FPS drops
   const tzVal = isTouchDevice ? 0 : tier === "high" && tzHigh ? 400 : 200;
-  const translateZ = useTransform(
+
+  const rawTranslateZ = useTransform(
     scrollYProgress,
-    [
-      t.fadeInStart,
-      t.fadeInEnd,
-      t.stickStart,
-      t.stickEnd,
-      t.fadeOutStart,
-      t.fadeOutEnd,
-    ],
+    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     [-tzVal, 0, 0, 0, 0, -tzVal],
   );
+
+  // AWWWARDS 2026: Mathematical dampers for URL-bar layout shift protection on Mobile
+  const springConfig = { stiffness: 300, damping: 30, mass: 0.8 };
+
+  const y = isTouchDevice ? useSpring(rawY, springConfig) : rawY;
+  const translateZ = isTouchDevice ? useSpring(rawTranslateZ, springConfig) : rawTranslateZ;
+  const opacity = rawOpacity; // Opacity does not cause geometry jumps
 
   // Обработка переходов меню
   useEffect(() => {
@@ -194,8 +177,7 @@ const BlockVideo: React.FC<{
     window.addEventListener("menu-transition-complete", handleComplete, {
       once: true,
     });
-    return () =>
-      window.removeEventListener("menu-transition-complete", handleComplete);
+    return () => window.removeEventListener("menu-transition-complete", handleComplete);
   }, [isTransitioning]);
 
   // Effect for video visibility (Lazy Mounting — предотвращает аллокацию 3 декодеров одновременно)
@@ -287,8 +269,7 @@ const BlockVideo: React.FC<{
               <div
                 className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
-                  background:
-                    "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)",
+                  background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)",
                 }}
               />
             </>
@@ -314,13 +295,7 @@ const Grid3D: React.FC<{
       return el.style.transform !== "";
     };
 
-    if (
-      !window.gsap ||
-      !window.ScrollTrigger ||
-      window.innerWidth < 1024 ||
-      !supports3D()
-    )
-      return;
+    if (!window.gsap || !window.ScrollTrigger || window.innerWidth < 1024 || !supports3D()) return;
 
     const grid = gridRef.current;
     if (!grid) return;
@@ -396,12 +371,7 @@ const Grid3D: React.FC<{
               },
               0,
             )
-            .fromTo(
-              gridWrap,
-              { rotationZ: -5 },
-              { rotationX: -20, rotationZ: 10, scale: 1.2 },
-              0,
-            );
+            .fromTo(gridWrap, { rotationZ: -5 }, { rotationX: -20, rotationZ: 10, scale: 1.2 }, 0);
           break;
         case 3:
           grid.style.setProperty("--grid-width", "105%");
@@ -448,11 +418,7 @@ const Grid3D: React.FC<{
 
   const imageCount = useMemo(() => (window.innerWidth >= 1024 ? 20 : 8), []);
   const images = useMemo(
-    () =>
-      Array.from(
-        { length: imageCount },
-        (_, i) => `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`,
-      ),
+    () => Array.from({ length: imageCount }, (_, i) => `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`),
     [imageCount],
   );
 
@@ -463,15 +429,9 @@ const Grid3D: React.FC<{
       style={{ perspective: "var(--perspective)" }}
       data-filter={String(filterBlur)}
     >
-      <div
-        className="grid-wrap grid h-full w-full p-8"
-        style={{ transformStyle: "preserve-3d" }}
-      >
+      <div className="grid-wrap grid h-full w-full p-8" style={{ transformStyle: "preserve-3d" }}>
         {images.map((src, i) => (
-          <div
-            key={i}
-            className="grid__item aspect-[1.5] overflow-hidden rounded-xl"
-          >
+          <div key={i} className="grid__item aspect-[1.5] overflow-hidden rounded-xl">
             <div
               className="h-full w-full bg-cover bg-center rounded-xl"
               style={
@@ -520,9 +480,7 @@ const MorphingVideoSection: React.FC = () => {
   const bgY = useTransform(
     scrollYProgress,
     [0, 1],
-    isTouchDevice || tier === "low"
-      ? ["0%", "0%"]
-      : [`-${parallaxStrength / 2}%`, `${parallaxStrength / 2}%`],
+    isTouchDevice || tier === "low" ? ["0%", "0%"] : [`-${parallaxStrength / 2}%`, `${parallaxStrength / 2}%`],
   );
 
   useEffect(() => {
@@ -538,10 +496,7 @@ const MorphingVideoSection: React.FC = () => {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative overflow-hidden bg-transparent"
-    >
+    <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
       {/* WebGL Fluid — только high tier, ограничен границами секции */}
       {/* Рендерится через портал в body — вне overflow:hidden */}
       <SectionFluidEffect sectionRef={sectionRef} />
@@ -588,7 +543,7 @@ const MorphingVideoSection: React.FC = () => {
       </div>
 
       {/* Заголовок секции */}
-      <div className="relative z-30 px-4 pt-24 pb-12 text-center">
+      <div className="relative z-30 px-4 pt-24 md:pt-32 pb-12 text-center">
         <div className="mx-auto max-w-4xl">
           <h2
             className="mb-4 text-sm font-medium uppercase tracking-[0.2em]"
@@ -605,27 +560,15 @@ const MorphingVideoSection: React.FC = () => {
           >
             Наука • Качество • Доверие
           </h2>
-          <h3
-            className="mb-8 text-4xl font-semibold md:text-6xl"
-            style={{
-              background:
-                "linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #1e293b 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              filter: "drop-shadow(0 0 2px rgba(59, 130, 246, 0.4))",
-              position: "relative",
-              lineHeight: "1.2",
-              paddingBottom: "0.1em",
-            }}
-          >
+          <ScrollHeadingReveal tag="h1" className="mb-6 text-center">
             Почему 4Life?
-          </h3>
-          <ScrollTextReveal className="mx-auto max-w-4xl text-xl md:text-2xl leading-relaxed">
-            Более двух десятилетий компания 4Life посвятила углублённому
-            изучению иммунной системы, создавая продукты, которые являются
-            результатом фундаментальных исследований и передовых технологий.
-          </ScrollTextReveal>
+          </ScrollHeadingReveal>
+          <div className="typography-lead text-center max-w-4xl mx-auto opacity-80">
+            <ScrollTextReveal>
+              Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая продукты,
+              которые являются результатом фундаментальных исследований и передовых технологий.
+            </ScrollTextReveal>
+          </div>
         </div>
       </div>
 
@@ -642,42 +585,25 @@ const MorphingVideoSection: React.FC = () => {
                   />
                 </div>
                 <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
-                  <h4
-                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-                      position: "relative",
-                    }}
-                  >
+                  <ScrollHeadingReveal tag="h2" className="text-left" direction="left" simpleMobile>
                     Исследования и Инновации
-                  </h4>
-                  <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl">
-                    В основе каждого продукта — запатентованные технологии.
-                    Ключевая из них — Трансфер Факторы, уникальные молекулы,
-                    которые "обучают" иммунную систему, оптимизируя её
-                    естественные защитные функции для точного и своевременного
-                    реагирования. 4Life не просто следует науке — компания её
+                  </ScrollHeadingReveal>
+                  <ScrollTextReveal>
+                    В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
+                    уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
+                    функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
                     создаёт.
                   </ScrollTextReveal>
                 </div>
               </div>
             </div>
           </div>
-          <div
-            className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}
-          >
+          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
             {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
               <Grid3D
                 type={1}
                 triggerRef={block1Ref}
-                filterBlur={
-                  import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true
-                }
+                filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
               />
             )}
           </div>
@@ -689,25 +615,13 @@ const MorphingVideoSection: React.FC = () => {
             <div className="container mx-auto px-4 md:px-8 max-w-6xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-9 order-1 space-y-6 text-right">
-                  <h4
-                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-                      position: "relative",
-                    }}
-                  >
+                  <ScrollHeadingReveal tag="h2" className="text-right" direction="right" simpleMobile>
                     Бескомпромиссный Контроль Качества
-                  </h4>
+                  </ScrollHeadingReveal>
                   <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl ml-auto">
-                    Каждый этап производства проходит строгий контроль качества.
-                    Современные технологии и сертифицированные процессы по
-                    стандарту cGMP гарантируют высочайшие стандарты чистоты,
-                    безопасности и эффективности продукции.
+                    Каждый этап производства проходит строгий контроль качества. Современные технологии и
+                    сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности
+                    и эффективности продукции.
                   </ScrollTextReveal>
                 </div>
                 <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
@@ -719,16 +633,12 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <div
-            className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}
-          >
+          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
             {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
               <Grid3D
                 type={2}
                 triggerRef={block2Ref}
-                filterBlur={
-                  import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true
-                }
+                filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
               />
             )}
           </div>
@@ -744,43 +654,25 @@ const MorphingVideoSection: React.FC = () => {
                   className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none"
                 />
                 <div className="space-y-6">
-                  <h4
-                    className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight max-w-4xl mx-auto"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      filter: "drop-shadow(0 0 1px rgba(59, 130, 246, 0.3))",
-                      position: "relative",
-                    }}
-                  >
+                  <ScrollHeadingReveal tag="h2" className="text-center" simpleMobile>
                     Подтверждённая Эффективность
-                  </h4>
+                  </ScrollHeadingReveal>
                   <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
-                    Представьте утро, когда вы просыпаетесь с ощущением, что
-                    готовы свернуть горы. Энергия бьёт ключом, мысли ясные,
-                    настроение на высоте. Это не случайность — это результат
-                    того, что ваша иммунная система работает как швейцарские
-                    часы. Миллионы людей уже почувствовали эту разницу. Теперь
-                    ваша очередь открыть для себя, каково это — жить в полную
-                    силу.
+                    Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом,
+                    мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная
+                    система работает как швейцарские часы. Миллионы людей уже почувствовали эту разницу. Теперь ваша
+                    очередь открыть для себя, каково это — жить в полную силу.
                   </ScrollTextReveal>
                 </div>
               </div>
             </div>
           </div>
-          <div
-            className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}
-          >
+          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
             {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
               <Grid3D
                 type={3}
                 triggerRef={block3Ref}
-                filterBlur={
-                  import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true
-                }
+                filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
               />
             )}
           </div>
@@ -805,21 +697,9 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </div>
       {/* Все три видео компонента */}
-      <BlockVideo
-        blockRef={block1Ref}
-        videoSrc={productionVideo}
-        blockIndex={0}
-      />
-      <BlockVideo
-        blockRef={block2Ref}
-        videoSrc={productionVideo}
-        blockIndex={1}
-      />
-      <BlockVideo
-        blockRef={block3Ref}
-        videoSrc={productionVideo}
-        blockIndex={2}
-      />
+      <BlockVideo blockRef={block1Ref} videoSrc={productionVideo} blockIndex={0} />
+      <BlockVideo blockRef={block2Ref} videoSrc={productionVideo} blockIndex={1} />
+      <BlockVideo blockRef={block3Ref} videoSrc={productionVideo} blockIndex={2} />
     </section>
   );
 };

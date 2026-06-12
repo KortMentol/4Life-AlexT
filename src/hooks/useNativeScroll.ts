@@ -68,11 +68,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         setTimeout(tryShowHeader, 50);
       } else {
         if (import.meta.env.DEV) {
-          console.error(
-            "❌ Failed to initialize header after",
-            maxAttempts,
-            "attempts",
-          );
+          console.error("❌ Failed to initialize header after", maxAttempts, "attempts");
         }
       }
     };
@@ -109,12 +105,31 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     // ─── ДЕСКТОП: RAF lerp ────────────────────────────────────────────────────
     // КРИТИЧНО: Флаг для игнорирования первого кадра и нефизических скачков
     let isFirstTick = true;
+    let isPreloaderPresent = true;
 
     const unsub = rafLoop.subscribe((scroll) => {
       // 1. При первом кадре просто запоминаем позицию, чтобы не было ложного скачка от 0 к текущему скроллу
       if (isFirstTick) {
         prevScrollRef.current = scroll;
         isFirstTick = false;
+        return;
+      }
+
+      // Check preloader presence in DOM only while it exists
+      if (isPreloaderPresent) {
+        isPreloaderPresent = document.getElementById("preloader") !== null;
+      }
+
+      // BYPASS CHECKS:
+      // If a route transition, POP navigation, active scroll restoration, or the preloader is present,
+      // silently synchronize scroll coordinates without applying translation transforms to the header.
+      if (
+        window.__isRoutingLock ||
+        window.__popTransitionInProgress ||
+        window.__isScrollRestorationActive ||
+        isPreloaderPresent
+      ) {
+        prevScrollRef.current = scroll;
         return;
       }
 

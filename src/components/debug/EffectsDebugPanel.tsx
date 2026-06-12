@@ -312,10 +312,11 @@ const EffectsDebugPanel: React.FC = () => {
     }
   }, []);
 
-  if (!isVisible) return null;
-
+  // ⚠️ ВАЖНО: useMediaQuery хуки должны быть ДО раннего возврата (правила React Hooks)
   const isTabletScreen = useMediaQuery("(max-width: 1023px)"); // Natively disables Grid3D
   const isMobileScreen = useMediaQuery("(max-width: 767px)"); // Natively disables Card Scatter/Gather
+
+  if (!isVisible) return null;
 
   const tierBtns: {
     label: string;
@@ -357,9 +358,7 @@ const EffectsDebugPanel: React.FC = () => {
               style={{
                 fontSize: "0.62rem",
                 color: "#00ffff",
-                fontWeight: 600,
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
                 whiteSpace: "nowrap",
               }}
             >
@@ -372,7 +371,6 @@ const EffectsDebugPanel: React.FC = () => {
             style={{
               fontSize: "0.68rem",
               color: "rgba(255, 255, 255, 0.7)",
-              lineHeight: "1.4",
             }}
           >
             {hoveredDescription}

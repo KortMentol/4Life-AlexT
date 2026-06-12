@@ -24,18 +24,10 @@ const WordReveal: React.FC<WordRevealProps> = ({
   tier = "high",
 }) => {
   // Calculate timing for this specific word
-  const [startProgress, endProgress] = TextSplitter.calculateWordTiming(
-    index,
-    totalWords,
-    staggerDelay,
-  );
+  const [startProgress, endProgress] = TextSplitter.calculateWordTiming(index, totalWords, staggerDelay);
 
   // Create animation transforms for this word
-  const opacity = useTransform(
-    scrollProgress,
-    [startProgress, endProgress],
-    DEFAULT_CONFIG.animation.opacityRange,
-  );
+  const opacity = useTransform(scrollProgress, [startProgress, endProgress], DEFAULT_CONFIG.animation.opacityRange);
 
   // Skew only for HIGH tier
   const skewX = useTransform(
@@ -48,41 +40,23 @@ const WordReveal: React.FC<WordRevealProps> = ({
   const blur = useTransform(
     scrollProgress,
     [startProgress, endProgress],
-    tier === "high" || tier === "medium"
-      ? DEFAULT_CONFIG.animation.blurRange
-      : [0, 0],
+    tier === "high" || tier === "medium" ? DEFAULT_CONFIG.animation.blurRange : [0, 0],
   );
 
   // Create filter string from blur value
   const filter = useTransform(blur, (value) => `blur(${value}px)`);
-
-  // Premium font styling matching demo 3
-  const getPremiumFontStyles = () => {
-    return {
-      fontFamily:
-        '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-      fontWeight: 600, // Semi-bold for premium look
-      fontVariationSettings: '"wght" 600, "slnt" 0',
-      letterSpacing: "-0.02em", // Tight letter spacing
-      lineHeight: 1.3,
-      textRendering: "optimizeLegibility" as const,
-      WebkitFontSmoothing: "antialiased" as const,
-      MozOsxFontSmoothing: "grayscale" as const,
-    };
-  };
 
   // Theme-based styling with consistent colors
   const getThemeStyles = () => {
     return {
       // Match block text colors from MorphingVideoSection
       color: theme === "dark" ? "#67e8f9" : "#475569", // cyan-300 for dark, slate-600 for light
-      ...getPremiumFontStyles(),
     };
   };
 
   return (
     <motion.span
-      className="relative inline-block mr-3 mt-3"
+      className="typography-lead relative inline-block mr-3 mt-3"
       style={{
         opacity,
         skewX,

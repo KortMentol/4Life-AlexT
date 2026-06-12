@@ -84,6 +84,7 @@ interface RouteChangeHandlerProps {
  */
 const restoreScrollPosition = (y: number, maxWaitMs = 3500) => {
   lenis?.stop();
+  window.__isScrollRestorationActive = true; // Block header scroll adjustments during restoration
 
   let observer: ResizeObserver | null = null;
   let timeoutId: NodeJS.Timeout;
@@ -113,10 +114,17 @@ const restoreScrollPosition = (y: number, maxWaitMs = 3500) => {
         requestAnimationFrame(() => {
           if (!lenis) return;
           lenis.scrollTo(y + 0.1, { immediate: true, force: true } as any);
+
+          // Allow the micro-scroll adjustment to be processed in the current frame,
+          // then release the block in the next frame.
+          requestAnimationFrame(() => {
+            window.__isScrollRestorationActive = false;
+          });
         });
       });
     } else {
       window.scrollTo(0, y);
+      window.__isScrollRestorationActive = false;
     }
   };
 
@@ -142,7 +150,10 @@ const restoreScrollPosition = (y: number, maxWaitMs = 3500) => {
   observer.observe(document.body);
 
   // 3. Предохранитель на случай обрыва связи
-  timeoutId = setTimeout(finalizeScroll, maxWaitMs);
+  timeoutId = setTimeout(() => {
+    finalizeScroll();
+    window.__isScrollRestorationActive = false;
+  }, maxWaitMs);
 };
 
 const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHandlerProps) => {

@@ -101,12 +101,12 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const baseClasses =
-    "btn-modern relative overflow-hidden inline-flex items-center justify-center gap-2 font-medium transition-all rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2";
+    "btn-modern relative overflow-hidden inline-flex items-center justify-center gap-2 font-medium transition-all rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2";
   const variantClasses = {
     primary: "btn-primary-modern",
     secondary: "btn-secondary-modern",
     outline: "border-2 border-current hover:bg-white/10",
-    ghost: "hover:bg-white/10",
+    ghost: "border border-white/20 hover:bg-white/10 hover:border-white/40",
   };
   const sizeClasses = {
     sm: "px-4 py-2 text-sm",
@@ -132,13 +132,9 @@ const Button: React.FC<ButtonProps> = ({
 
   const content = (
     <>
-      {icon && iconPosition === "left" && (
-        <span className="flex-shrink-0">{icon}</span>
-      )}
+      {icon && iconPosition === "left" && <span className="flex-shrink-0">{icon}</span>}
       <span>{children}</span>
-      {icon && iconPosition === "right" && (
-        <span className="flex-shrink-0">{icon}</span>
-      )}
+      {icon && iconPosition === "right" && <span className="flex-shrink-0">{icon}</span>}
       {rippleEls}
     </>
   );

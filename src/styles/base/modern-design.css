@@ -9,6 +9,14 @@
 
 /* CSS Переменные - только используемые */
 :root {
+  /* 2026 Fluid Spacing Scale (Viewport: 320px -> 1440px) */
+  --space-xs: clamp(0.5rem, 0.428rem + 0.357vw, 0.75rem); /* 8px -> 12px */
+  --space-sm: clamp(0.75rem, 0.607rem + 0.714vw, 1.25rem); /* 12px -> 20px */
+  --space-md: clamp(1.25rem, 1.035rem + 1.071vw, 2rem); /* 20px -> 32px */
+  --space-lg: clamp(2rem, 1.428rem + 2.857vw, 4rem); /* 32px -> 64px */
+  --space-xl: clamp(4rem, 2.857rem + 5.714vw, 8rem); /* 64px -> 128px */
+  --space-2xl: clamp(6rem, 4.285rem + 8.571vw, 12rem); /* 96px -> 192px */
+
   /* Цвета */
   --primary-blue: #0066ff;
 

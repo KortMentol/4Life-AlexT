@@ -1,16 +1,15 @@
 // import React from "react"; - <React.StrictMode> отключен ниже
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import App from "./App";
 import { FluidProvider } from "./context/FluidProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
 import { TransitionProvider } from "./context/TransitionProvider";
+
+// Import variable fonts
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/syne";
 
 // Стили
 import "./styles/base/animations.css";

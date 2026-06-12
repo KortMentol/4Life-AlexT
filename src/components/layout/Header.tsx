@@ -6,19 +6,9 @@ import { useLocation } from "react-router-dom";
 
 import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
-import {
-  HamburgerButton,
-  ProductListIcon,
-  TubelightNavbar,
-} from "@/components/ui";
+import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 import { useTransition } from "@/context";
-import {
-  useFeatureFlag,
-  useIsMobile,
-  useNativeScroll,
-  usePerformanceTier,
-  useTheme,
-} from "@/hooks";
+import { useFeatureFlag, useIsMobile, useNativeScroll, usePerformanceTier, useTheme } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
 import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
@@ -66,8 +56,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     showHeader(); // показываем сразу при маунте
     const handleForceShow = () => showHeader();
     window.addEventListener("force-header-show", handleForceShow);
-    return () =>
-      window.removeEventListener("force-header-show", handleForceShow);
+    return () => window.removeEventListener("force-header-show", handleForceShow);
   }, [showHeader]);
 
   // Хедер при открытии/закрытии меню
@@ -126,8 +115,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     };
 
     window.addEventListener("modal-state-change", handleModalState);
-    return () =>
-      window.removeEventListener("modal-state-change", handleModalState);
+    return () => window.removeEventListener("modal-state-change", handleModalState);
   }, [isMenuOpen]);
 
   const toggleTheme = () => {
@@ -159,19 +147,14 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       data-tier={isGlassEnabled ? tier : "low"}
       ref={headerRef}
       role="banner"
-      style={
-        { ...cssVars, contain: "layout style paint" } as React.CSSProperties
-      }
+      style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
     >
       <div className="header-content">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
             <div className="md:hidden relative z-[100] no-highlight flex items-center">
-              <HamburgerButton
-                isOpen={isMenuOpen}
-                toggle={() => setIsMenuOpen((prev) => !prev)}
-              />
+              <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen((prev) => !prev)} />
             </div>
             <button
               onClick={handleLogoClick}
@@ -185,18 +168,12 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 animate="animate"
                 whileHover={undefined}
               >
-                <img
-                  src={isDark ? logoLight : logoDark}
-                  alt="4Life Logo"
-                  className="h-8 w-auto relative z-10"
-                />
+                <img src={isDark ? logoLight : logoDark} alt="4Life Logo" className="h-8 w-auto relative z-10" />
               </motion.div>
               <motion.div
                 style={{
                   color: isDark ? "white" : "#1e293b",
-                  textShadow: isDark
-                    ? "0 1px 2px rgba(0,0,0,0.3)"
-                    : "0 1px 1px rgba(0,0,0,0.1)",
+                  textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                 }}
                 className="flex flex-col items-center"
               >
@@ -205,13 +182,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   className="font-semibold text-sm leading-tight whitespace-nowrap"
                 />
                 <div
-                  className={"text-xs font-medium mt-0.5"}
+                  className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1"
                   style={{
-                    color: isDark ? "#e6b800" : "#b38600",
-                    textShadow: isDark
-                      ? "0 1px 2px rgba(0,0,0,0.5)"
-                      : "0 1px 1px rgba(0,0,0,0.25)",
-                    fontWeight: 500,
+                    color: isDark ? "#e6b800" : "#8a6600",
+                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "none",
+                    fontWeight: 600,
                   }}
                 >
                   Builder Elite
@@ -231,9 +206,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   className="text-center flex flex-col items-center"
                   style={{
                     color: isDark ? "white" : "#1e293b",
-                    textShadow: isDark
-                      ? "0 1px 2px rgba(0,0,0,0.3)"
-                      : "0 1px 1px rgba(0,0,0,0.1)",
+                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
                   }}
                 >
                   <TextShineEffect
@@ -241,13 +214,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                     className="font-semibold text-sm leading-tight whitespace-nowrap"
                   />
                   <div
-                    className="text-xs font-medium mt-0.5"
+                    className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1"
                     style={{
-                      color: "#e6b800",
-                      textShadow: isDark
-                        ? "0 1px 2px rgba(0,0,0,0.5)"
-                        : "0 1px 2px rgba(0,0,0,0.3)",
-                      fontWeight: "500",
+                      color: isDark ? "#e6b800" : "#8a6600",
+                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "none",
+                      fontWeight: 600,
                     }}
                   >
                     Builder Elite

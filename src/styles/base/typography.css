@@ -1,0 +1,105 @@
+/**
+ * @module src/styles/base/typography.css
+ * @description Unified Typography System — Swiss-watch precision for all text
+ * @author Kort
+ * @version 3.0.0 - Variable Fonts 2026
+ * @requires @fontsource-variable/syne (headings)
+ * @requires @fontsource-variable/manrope (body)
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DISPLAY: Huge, tight, futuristic (Used for Hero and Giant Numbers)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-display {
+  font-family: "Syne Variable", sans-serif;
+  font-weight: 800;
+  color: white;
+  /* Significantly reduced maximum size. Syne is very wide. */
+  font-size: clamp(2.5rem, 6vw + 1rem, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   H1: Main Section Titles
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-h1 {
+  font-family: "Syne Variable", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   H2: Sub-section Titles
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-h2 {
+  font-family: "Syne Variable", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   H3: Card Titles
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-h3 {
+  font-family: "Syne Variable", sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEAD: Large description under headings
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-lead {
+  font-family: "Manrope Variable", sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.125rem, 1.5vw, 1.35rem);
+  line-height: 1.6;
+  text-wrap: pretty; /* Natively prevents orphans and isolated short words at line ends */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BODY: Standard reading text
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-body {
+  font-family: "Manrope Variable", sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.9rem, 1vw + 0.1rem, 1.1rem);
+  line-height: 1.6;
+  text-wrap: pretty; /* Natively prevents orphans and isolated short words at line ends */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LABEL: Tags, microcopy, badges (Awwwards staple)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-label {
+  font-family: "Manrope Variable", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DISPLAY: Responsive height adjustment for short mobile displays
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-height: 700px) {
+  .typography-display {
+    font-size: clamp(2rem, 5vw + 1rem, 3.8rem) !important;
+  }
+}

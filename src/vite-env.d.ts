@@ -1,7 +1,12 @@
 /// <reference types="vite/client" />
+/// <reference types="node" />
 /// <reference path="./types/headlessui-react.d.ts" />
 /// <reference path="./types/external-modules.d.ts" />
 /// <reference path="./types/emotion.d.ts" />
+
+// Font declarations
+declare module "@fontsource-variable/manrope";
+declare module "@fontsource-variable/syne";
 
 interface ImportMetaEnv {
   /** @description Основной URL-адрес сайта. */
@@ -26,6 +31,9 @@ interface ImportMetaEnv {
 
 interface Window {
   __menuTransitionInProgress?: boolean;
+  __isRoutingLock?: boolean;
+  __popTransitionInProgress?: boolean;
+  __isScrollRestorationActive?: boolean;
 }
 
 interface ImportMeta {

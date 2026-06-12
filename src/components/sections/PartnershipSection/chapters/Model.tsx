@@ -33,11 +33,7 @@ const ModelStep = memo(
     const inView = useInView(ref, { once: true, margin: "-15%" });
 
     const accentColor =
-      step.accentKey === "blue"
-        ? palette.blue
-        : step.accentKey === "gold"
-          ? palette.gold
-          : palette.cream;
+      step.accentKey === "blue" ? palette.blue : step.accentKey === "gold" ? palette.gold : palette.cream;
 
     return (
       <motion.div
@@ -55,11 +51,10 @@ const ModelStep = memo(
         <div className="grid md:grid-cols-[120px_1fr_1fr] gap-8 md:gap-12 items-start">
           {/* Number */}
           <span
-            className="font-extralight"
+            className="typography-h1"
             style={{
               fontSize: "clamp(3rem, 5vw, 4.5rem)",
               color: palette.overlay10,
-              letterSpacing: "-0.03em",
             }}
           >
             {step.n}
@@ -67,11 +62,10 @@ const ModelStep = memo(
 
           {/* Title */}
           <h3
-            className="font-light leading-tight"
+            className="typography-h2"
             style={{
               fontSize: "clamp(1.6rem, 3vw, 2.5rem)",
               color: accentColor,
-              letterSpacing: "-0.02em",
             }}
           >
             {step.title}
@@ -110,67 +104,55 @@ const ModelStep = memo(
 ModelStep.displayName = "ModelStep";
 
 const Model = memo(
-  forwardRef<HTMLElement, ModelProps>(
-    ({ tier, palette, onChapter }, forwardedRef) => {
-      const ref = useRef<HTMLElement>(null);
-      const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
-      const inView = useInView(activeRef, { margin: "-35%" });
+  forwardRef<HTMLElement, ModelProps>(({ tier, palette, onChapter }, forwardedRef) => {
+    const ref = useRef<HTMLElement>(null);
+    const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
+    const inView = useInView(activeRef, { margin: "-35%" });
 
-      useEffect(() => {
-        if (inView) onChapter(2);
-      }, [inView, onChapter]);
+    useEffect(() => {
+      if (inView) onChapter(2);
+    }, [inView, onChapter]);
 
-      return (
-        <section
-          ref={activeRef}
-          className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40"
-          style={{ background: palette.bg }}
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-start justify-between mb-20 flex-wrap gap-6">
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7 }}
+    return (
+      <section
+        ref={activeRef}
+        className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40"
+        style={{ background: palette.bg }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-start justify-between mb-20 flex-wrap gap-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+            >
+              <span className="text-[9px] uppercase tracking-[0.5em]" style={{ color: palette.gold }}>
+                02 — Модель
+              </span>
+            </motion.div>
+
+            <ClipLine tier={tier} className="max-w-lg">
+              <p
+                className="typography-h2 font-extralight text-right"
+                style={{
+                  fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
+                  color: palette.cream,
+                }}
               >
-                <span
-                  className="text-[9px] uppercase tracking-[0.5em]"
-                  style={{ color: palette.gold }}
-                >
-                  02 — Модель
-                </span>
-              </motion.div>
-
-              <ClipLine tier={tier} className="max-w-lg">
-                <p
-                  className="font-extralight text-right"
-                  style={{
-                    fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
-                    color: palette.cream,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  Как это устроено —<br />
-                  три простых факта.
-                </p>
-              </ClipLine>
-            </div>
-
-            {MODEL_STEPS.map((step, i) => (
-              <ModelStep
-                key={step.n}
-                step={step}
-                index={i}
-                tier={tier}
-                palette={palette}
-              />
-            ))}
+                Как это устроено —<br />
+                три простых факта.
+              </p>
+            </ClipLine>
           </div>
-        </section>
-      );
-    },
-  ),
+
+          {MODEL_STEPS.map((step, i) => (
+            <ModelStep key={step.n} step={step} index={i} tier={tier} palette={palette} />
+          ))}
+        </div>
+      </section>
+    );
+  }),
 );
 
 Model.displayName = "Model";

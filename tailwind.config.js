@@ -20,10 +20,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        serif: ["Cormorant Garamond", "serif"],
-        heading: ["Cormorant Garamond", "serif"],
-        display: ["Inter", "sans-serif"],
+        sans: ['"Manrope Variable"', "sans-serif"],
+        heading: ['"Syne Variable"', "sans-serif"],
       },
       boxShadow: {
         "3xl": "0 35px 60px -15px rgba(0, 0, 0, 0.4)",
@@ -113,6 +111,7 @@ export default {
     },
   },
   plugins: [
+    /** @param {{ addUtilities: Function }} param0 */
     function ({ addUtilities }) {
       const newUtilities = {
         ".pt-safe": {

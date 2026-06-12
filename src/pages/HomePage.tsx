@@ -1,9 +1,5 @@
 import { AuroraText } from "@/components/magicui/aurora-text";
-import {
-  FinalCTASection,
-  MorphingVideoSection,
-  PartnershipSection,
-} from "@/components/sections";
+import { FinalCTASection, MorphingVideoSection, PartnershipSection } from "@/components/sections";
 import { Button, ParallaxSection } from "@/components/ui";
 import { usePerformanceTier } from "@/hooks";
 import { SEO } from "@/seo/SEO";
@@ -22,15 +18,10 @@ import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
 import heroVideoWebm from "@/assets/videos/backgrounds/HomePage/Hero-section/Why 4Life Transfer Factor®_.webm";
 
 // --- LAZY LOADED COMPONENTS ---
-const ImmersiveProductShowcase = lazy(
-  () => import("@/components/ui/ImmersiveProductShowcase"),
-);
+const ImmersiveProductShowcase = lazy(() => import("@/components/ui/ImmersiveProductShowcase"));
 
 // Определяем тач один раз
-const IS_TOUCH =
-  typeof window !== "undefined"
-    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
-    : false;
+const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
 // Варианты анимации для страницы
 const pageVariants = {
@@ -72,16 +63,8 @@ const HomePage: React.FC = () => {
 
   const shouldAnimate = !IS_TOUCH && tier !== "low";
   // Если Hero не виден — передаём статичные значения чтобы Framer Motion не тикал
-  const heroContentY = useTransform(
-    heroScroll,
-    [0, 1],
-    shouldAnimate && heroInView ? ["0%", "18%"] : ["0%", "0%"],
-  );
-  const heroContentOpacity = useTransform(
-    heroScroll,
-    [0, 0.65],
-    shouldAnimate && heroInView ? [1, 0] : [1, 1],
-  );
+  const heroContentY = useTransform(heroScroll, [0, 1], shouldAnimate && heroInView ? ["0%", "18%"] : ["0%", "0%"]);
+  const heroContentOpacity = useTransform(heroScroll, [0, 0.65], shouldAnimate && heroInView ? [1, 0] : [1, 1]);
 
   const popularProducts = [
     {
@@ -111,12 +94,7 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-    >
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <SEO
         title="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес"
         description="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
@@ -137,78 +115,63 @@ const HomePage: React.FC = () => {
           height="h-screen"
           contentClasses="flex flex-col items-center justify-center text-center py-8 pt-24"
           skipPreload={true}
-          edgeFade={{
-            bottom: 140,
-            colorLight: "#ffffff",
-            colorDark: "#000000",
-          }}
         >
+          {/* Smart gradient: dark at top/bottom only, center is crystal clear */}
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/80 via-transparent to-black/80 z-0" />
+
           {/* Scroll-driven wrapper: весь контент уплывает вверх при скролле */}
           <motion.div
             ref={heroRef}
-            className="max-w-4xl px-4 md:px-6 flex flex-col justify-between"
-            style={{ y: heroContentY, opacity: heroContentOpacity }}
+            className="relative z-10 w-full max-w-5xl mx-auto px-4 md:px-6 flex flex-col justify-center items-center h-full"
+            style={{
+              y: heroContentY,
+              opacity: heroContentOpacity,
+              paddingTop: "clamp(40px, 8vh, 120px)",
+              paddingBottom: "clamp(20px, 4vh, 60px)",
+            }}
           >
             {/* Badge — появляется первым */}
             <motion.div
-              className="mb-2 md:mb-4"
+              style={{ marginBottom: "var(--space-md)" }}
               variants={heroItemVariants}
               initial="hidden"
               animate="visible"
               custom={0}
             >
-              <span className="px-3 py-1 md:px-4 md:py-1 bg-blue-600/30 text-blue-100 rounded-full text-xs md:text-sm font-medium border border-blue-400/30">
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-[10px] md:text-xs font-bold tracking-[0.2em] text-white uppercase shadow-xl">
                 Обучение вашего иммунитета
               </span>
             </motion.div>
 
             {/* H1 — появляется вторым */}
             <motion.h1
-              className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 mt-4 md:mt-0"
+              className="typography-display text-center w-full"
+              style={{ marginBottom: "var(--space-md)" }}
               variants={heroItemVariants}
               initial="hidden"
               animate="visible"
               custom={1}
             >
-              <span className="block mb-1 md:mb-2">
-                Раскройте потенциал своего здоровья
-              </span>
-              <span className="block mb-1 md:mb-2">
-                <AuroraText
-                  colors={["#007BFF", "#60A5FA", "#FFFFFF", "#38BDF8"]}
-                  speed={1.5}
-                >
-                  с научным подходом 4Life
-                </AuroraText>
-              </span>
+              Раскройте потенциал своего здоровья{" "}
+              <AuroraText colors={["#00ffff", "#3b82f6", "#ffffff", "#8b5cf6"]} speed={1.5}>
+                с научным подходом 4Life
+              </AuroraText>
             </motion.h1>
 
-            {/* Subtitle — третьим */}
-            <motion.p
-              className="text-lg md:text-2xl text-white/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto"
+            {/* Кнопки — третьими */}
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto"
+              style={{ marginTop: "var(--space-sm)" }}
               variants={heroItemVariants}
               initial="hidden"
               animate="visible"
               custom={2}
             >
-              Продукты 4Life Transfer Factor — это не просто добавка. Это
-              интеллект для вашей иммунной системы, который помогает ей работать
-              эффективнее.
-            </motion.p>
-
-            {/* Кнопки — четвёртыми */}
-            <motion.div
-              className="flex flex-col sm:flex-row gap-3 md:gap-5 justify-center items-center"
-              variants={heroItemVariants}
-              initial="hidden"
-              animate="visible"
-              custom={3}
-            >
               <Button
                 to="/products"
                 variant="primary"
                 size="lg"
-                className="group from-blue-600 to-blue-500 shadow-lg min-w-[245px] sm:min-w-0"
+                className="group w-full sm:w-auto rounded-full font-sans text-sm tracking-wide bg-blue-600 hover:bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
                 icon={
                   <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:translate-x-1" />
                 }
@@ -218,29 +181,15 @@ const HomePage: React.FC = () => {
 
               <Button
                 to="/how-to-buy"
-                variant="secondary"
+                variant="ghost"
                 size="lg"
-                className="group bg-white/10 border-white/30 min-w-[245px] sm:min-w-0"
+                className="group w-full sm:w-auto rounded-full font-sans text-sm tracking-wide text-white border border-white/25 hover:bg-white/10"
                 icon={
-                  <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-all duration-300 group-hover:rotate-12" />
+                  <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:rotate-12" />
                 }
               >
                 Как приобрести
               </Button>
-            </motion.div>
-
-            {/* Trust line — последней */}
-            <motion.div
-              className="mt-10 md:mt-12 flex items-start justify-center text-white/70"
-              variants={heroItemVariants}
-              initial="hidden"
-              animate="visible"
-              custom={4}
-            >
-              <Icons.Microscope className="w-4 h-4 md:w-5 md:h-5 text-blue-300 mt-0.5 mr-0.5 md:mr-1" />
-              <span className="text-xs md:text-sm">
-                Научно доказанная эффективность с 1998 года
-              </span>
             </motion.div>
           </motion.div>
         </ParallaxSection>
@@ -281,8 +230,7 @@ const HomePage: React.FC = () => {
                   <span className="block text-white/90">для иммунитета</span>
                 </h2>
                 <p className="text-lg text-white/70 leading-relaxed max-w-xl mx-auto font-light">
-                  Целевые формулы 4Life Transfer Factor — от сердечно-сосудистой
-                  до когнитивной функции.
+                  Целевые формулы 4Life Transfer Factor — от сердечно-сосудистой до когнитивной функции.
                 </p>
               </div>
             </div>

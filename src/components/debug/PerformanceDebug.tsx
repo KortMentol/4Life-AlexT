@@ -267,7 +267,6 @@ const PerformanceDebug: React.FC = () => {
             alignItems: "center",
             gap: "0.4rem",
             fontSize: "0.7rem",
-            fontWeight: 600,
             color: "rgba(255, 255, 255, 0.9)",
           }}
         >
@@ -393,7 +392,6 @@ const PerformanceDebug: React.FC = () => {
                 <h4
                   style={{
                     fontSize: "0.75rem",
-                    fontWeight: 600,
                     color: "#4ade80",
                     margin: 0,
                   }}

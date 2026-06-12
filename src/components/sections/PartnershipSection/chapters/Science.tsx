@@ -164,12 +164,10 @@ const Science = memo(
             <div>
               <ClipLine tier={tier} delay={0} className="mb-6">
                 <p
-                  className="font-extralight leading-tight"
+                  className="typography-h1 font-extralight leading-tight"
                   style={{
                     fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
                     color: palette.cream,
-                    letterSpacing: "-0.025em",
-                    lineHeight: 1.1,
                     paddingBottom: "0.1em",
                   }}
                 >
@@ -178,12 +176,10 @@ const Science = memo(
               </ClipLine>
               <ClipLine tier={tier} delay={0.1} className="mb-6">
                 <p
-                  className="font-extralight leading-tight"
+                  className="typography-h1 font-extralight leading-tight"
                   style={{
                     fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
                     color: palette.cream,
-                    letterSpacing: "-0.025em",
-                    lineHeight: 1.1,
                     paddingBottom: "0.1em",
                   }}
                 >
@@ -192,12 +188,10 @@ const Science = memo(
               </ClipLine>
               <ClipLine tier={tier} delay={0.2}>
                 <p
-                  className="font-extralight leading-tight"
+                  className="typography-h1 font-extralight leading-tight"
                   style={{
                     fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
                     color: palette.gold,
-                    letterSpacing: "-0.025em",
-                    lineHeight: 1.1,
                     paddingBottom: "0.1em",
                   }}
                 >
@@ -234,11 +228,10 @@ const Science = memo(
                   style={{ borderTop: `1px solid ${palette.overlay10}` }}
                 >
                   <span
-                    className="font-light"
+                    className="typography-body font-semibold"
                     style={{
                       fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
                       color: palette.cream,
-                      lineHeight: 1.4,
                     }}
                   >
                     {item.title}

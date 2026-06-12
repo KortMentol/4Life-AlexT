@@ -17,11 +17,7 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useInView } from "framer-motion";
 import React, { useEffect, useMemo, useRef } from "react";
 import { ScrollTextRevealProps } from "./ScrollTextReveal.types";
-import {
-  DEFAULT_CONFIG,
-  PERFORMANCE_CONFIGS,
-  TextSplitter,
-} from "./ScrollTextReveal.utils";
+import { DEFAULT_CONFIG, PERFORMANCE_CONFIGS, TextSplitter } from "./ScrollTextReveal.utils";
 
 // Global GSAP types
 declare global {
@@ -53,9 +49,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
 
   // КРИТИЧНО: На тач-устройствах СТРОГО отключаем blur и skew, даже если телефон мощный
   const isTouchDevice =
-    typeof window !== "undefined"
-      ? "ontouchstart" in window || navigator.maxTouchPoints > 0
-      : false;
+    typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
   // На мобилках СТРОГО medium tier — никаких blur/skew эффектов!
   const effectiveTier = isTouchDevice ? "medium" : tier;
@@ -64,12 +58,9 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
   const performanceConfig = PERFORMANCE_CONFIGS[effectiveTier];
 
   // DEV: Check effects debug flags
-  const wordByWordEnabled = import.meta.env.DEV
-    ? efxFlags.scrollTextWordByWord
-    : true;
+  const wordByWordEnabled = import.meta.env.DEV ? efxFlags.scrollTextWordByWord : true;
 
-  const resolvedTier =
-    effectiveTier === "high" && !wordByWordEnabled ? "medium" : effectiveTier;
+  const resolvedTier = effectiveTier === "high" && !wordByWordEnabled ? "medium" : effectiveTier;
 
   // Validate and sanitize input text
   const validatedText = useMemo(() => {
@@ -83,39 +74,17 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
     margin: DEFAULT_CONFIG.performance.inViewMargin,
   });
 
-  // Premium font styling — ЖИРНЫЙ КНИЖНЫЙ ШРИФТ как в Codrops демо
-  const getPremiumFontStyles = () => {
-    return {
-      fontFamily:
-        '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-      fontWeight: 700, // BOLD — жирный как в демо
-      fontVariationSettings: '"wght" 700, "slnt" 0',
-      letterSpacing: "0em", // Нормальное расстояние — НЕ сжимаем буквы
-      lineHeight: 1.5, // Увеличенная высота строки для читаемости
-      textRendering: "optimizeLegibility" as const,
-      WebkitFontSmoothing: "antialiased" as const,
-      MozOsxFontSmoothing: "grayscale" as const,
-    };
-  };
-
   // Theme-based styling with consistent colors
   const getThemeStyles = () => {
     return {
       // Премиальные цвета — яркие и контрастные
       color: theme === "dark" ? "#67e8f9" : "#1e293b", // cyan-300 dark / slate-800 light (темнее для контраста)
-      ...getPremiumFontStyles(),
     };
   };
 
   // GSAP Animation Effect (like original demo 4)
   useEffect(() => {
-    if (
-      !window.gsap ||
-      !window.ScrollTrigger ||
-      !containerRef.current ||
-      !inView
-    )
-      return;
+    if (!window.gsap || !window.ScrollTrigger || !containerRef.current || !inView) return;
 
     const container = containerRef.current;
 
@@ -173,15 +142,13 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
         }
 
         // Get words for animation
-        const words =
-          splitInstanceRef.current?.words ||
-          container.querySelectorAll('[class*="word-"]');
+        const words = splitInstanceRef.current?.words || container.querySelectorAll('[class*="word-"]');
 
         if (words && words.length > 0) {
-          // Apply theme styles to words
-          const themeStyles = getThemeStyles();
+          // Apply theme color to words
+          const themeColor = theme === "dark" ? "#67e8f9" : "#1e293b";
           words.forEach((word: HTMLElement) => {
-            Object.assign(word.style, themeStyles);
+            word.style.color = themeColor;
           });
 
           // GSAP Animation (exactly like demo 4)
@@ -215,11 +182,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
           }
 
           // Create the animation
-          scrollTriggerRef.current = window.gsap.fromTo(
-            words,
-            animationProps,
-            toProps,
-          );
+          scrollTriggerRef.current = window.gsap.fromTo(words, animationProps, toProps);
         }
       } catch (error) {
         if (import.meta.env.DEV) {
@@ -239,15 +202,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
         splitInstanceRef.current = null;
       }
     };
-  }, [
-    inView,
-    resolvedTier,
-    validatedText,
-    theme,
-    staggerDelay,
-    easingFunction,
-    performanceConfig,
-  ]);
+  }, [inView, resolvedTier, validatedText, theme, staggerDelay, easingFunction, performanceConfig]);
 
   // Error boundary wrapper
   const renderWithErrorBoundary = (content: React.ReactNode) => {
@@ -259,7 +214,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
       }
       // Fallback to static text
       return (
-        <p className={`relative ${className}`} style={getThemeStyles()}>
+        <p className={`typography-body relative ${className}`} style={getThemeStyles()}>
           {validatedText}
         </p>
       );
@@ -268,11 +223,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
 
   // Render the container
   return renderWithErrorBoundary(
-    <p
-      ref={containerRef}
-      className={`relative ${className}`}
-      style={getThemeStyles()}
-    >
+    <p ref={containerRef} className={`typography-body relative ${className}`} style={getThemeStyles()}>
       {validatedText}
     </p>,
   );

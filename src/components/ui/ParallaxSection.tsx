@@ -38,10 +38,7 @@ export interface ParallaxSectionProps {
   };
 }
 
-const IS_TOUCH =
-  typeof window !== "undefined"
-    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
-    : false;
+const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
 const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   backgroundImage,
@@ -52,7 +49,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   children,
   height = "h-screen",
   contentClasses = "flex items-center justify-center",
-  imageBrightness = "brightness-[.6] dark:brightness-[.4]",
+  imageBrightness = "",
   blendMode = "",
   clipPath = "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)",
   skipPreload = false,
@@ -65,10 +62,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
   const tier = usePerformanceTier();
-  const isParallaxEnabled = useFeatureFlag(
-    "parallaxBackground",
-    IS_TOUCH ? tier !== "low" : true,
-  );
+  const isParallaxEnabled = useFeatureFlag("parallaxBackground", IS_TOUCH ? tier !== "low" : true);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -175,15 +169,9 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   // ─── TOUCH ────────────────────────────────────────────────────────────────
   if (IS_TOUCH) {
     return (
-      <section
-        ref={containerRef}
-        className={`relative overflow-hidden ${height} ${blendMode}`}
-        style={sectionStyle}
-      >
+      <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
         {renderEdgeFades()}
-        <div className={`relative z-10 h-full ${contentClasses}`}>
-          {children}
-        </div>
+        <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
         <div
           className="absolute left-0 w-full -z-10 pointer-events-none"
           style={{
@@ -213,10 +201,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
                 {inView && (
                   <>
                     <source src={backgroundVideo} type="video/webm" />
-                    <source
-                      src={backgroundVideo.replace(".webm", ".mp4")}
-                      type="video/mp4"
-                    />
+                    <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
                   </>
                 )}
               </video>
@@ -238,11 +223,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
 
   // ─── DESKTOP — паттерн Оливье: fixed всегда, только y меняется ───────────
   return (
-    <section
-      ref={containerRef}
-      className={`relative overflow-hidden ${height} ${blendMode}`}
-      style={sectionStyle}
-    >
+    <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
       {renderEdgeFades()}
       <div className={`relative z-10 h-full ${contentClasses}`}>{children}</div>
 
@@ -282,10 +263,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
               {inView && (
                 <>
                   <source src={backgroundVideo} type="video/webm" />
-                  <source
-                    src={backgroundVideo.replace(".webm", ".mp4")}
-                    type="video/mp4"
-                  />
+                  <source src={backgroundVideo.replace(".webm", ".mp4")} type="video/mp4" />
                 </>
               )}
             </video>
