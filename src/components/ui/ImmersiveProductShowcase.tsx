@@ -94,6 +94,10 @@ const ShowcaseCard: React.FC<{
   // Opacity: карточки появляются по мере схождения
   const cardOpacity = useTransform(gatherProgress, [0, 0.4], [0.3, 1]);
 
+  // Magnetic X + scroll-driven X — вызываем useTransform безусловно (Rules of Hooks)
+  const combinedX = useTransform([mx, cardScrollX], ([mxVal, csVal]: number[]) => (mxVal ?? 0) + (csVal ?? 0));
+  const cardX = magnetEnabled ? combinedX : cardScrollX;
+
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!magnetEnabled || !ref.current) return;
@@ -162,12 +166,7 @@ const ShowcaseCard: React.FC<{
       }}
       style={{
         // Magnetic X + scroll-driven X combined
-        x: magnetEnabled
-          ? useTransform(
-              [mx, cardScrollX] as any,
-              ([mxVal, csVal]: number[]) => (mxVal ?? 0) + (csVal ?? 0),
-            )
-          : cardScrollX,
+        x: cardX,
         y: magnetEnabled ? my : 0,
         opacity: cardOpacity,
         isolation: "isolate",

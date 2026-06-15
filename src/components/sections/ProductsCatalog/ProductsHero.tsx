@@ -1,8 +1,10 @@
-import productsHeroVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
 import { usePerformanceTier } from "@/hooks";
 import { lenis } from "@/lib/lenis";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { useEffect, useRef } from "react";
+
+// Видео обслуживается как статический ассет из public/ — не пакуется в JS-бандл
+const productsHeroVideo = "/videos/bg-video-products-page.mp4";
 
 const ProductsHero: React.FC = () => {
   const tier = usePerformanceTier();
@@ -55,6 +57,7 @@ const ProductsHero: React.FC = () => {
             muted
             loop
             playsInline
+            preload="metadata"
             disablePictureInPicture
             className="w-full h-full object-cover"
           >

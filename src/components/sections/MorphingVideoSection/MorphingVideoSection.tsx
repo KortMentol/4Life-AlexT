@@ -13,8 +13,8 @@
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-// Media imports
-import productionVideo from "@/assets/videos/backgrounds/ProductsPage/Hero-section/bg-video-ProductsPage.mp4";
+// Media — видео обслуживается как статический ассет из public/ (не пакуется в JS-бандл)
+const productionVideo = "/videos/bg-video-products-page.mp4";
 
 // Components
 import { Button, ScrollHeadingReveal } from "@/components/ui";
@@ -166,8 +166,12 @@ const BlockVideo: React.FC<{
   // AWWWARDS 2026: Mathematical dampers for URL-bar layout shift protection on Mobile
   const springConfig = { stiffness: 300, damping: 30, mass: 0.8 };
 
-  const y = isTouchDevice ? useSpring(rawY, springConfig) : rawY;
-  const translateZ = isTouchDevice ? useSpring(rawTranslateZ, springConfig) : rawTranslateZ;
+  // Springs вызываем безусловно — Rules of Hooks; выбор применяем ниже
+  const springY = useSpring(rawY, springConfig);
+  const springTranslateZ = useSpring(rawTranslateZ, springConfig);
+
+  const y = isTouchDevice ? springY : rawY;
+  const translateZ = isTouchDevice ? springTranslateZ : rawTranslateZ;
   const opacity = rawOpacity; // Opacity does not cause geometry jumps
 
   // Обработка переходов меню

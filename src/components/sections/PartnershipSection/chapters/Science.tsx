@@ -14,7 +14,6 @@ import ClipLine from "../ui/ClipLine";
 // ─── MolecularNet — ambient декор, остаётся ──────────────────────────────────
 const MolecularNet = memo(
   ({ tier, palette, highNodes = true }: { tier: PerformanceTier; palette: Palette; highNodes?: boolean }) => {
-    if (tier === "low") return null;
     const count = tier === "high" && highNodes ? 12 : 7;
 
     const nodes = useMemo(
@@ -44,6 +43,8 @@ const MolecularNet = memo(
       }
       return pairs;
     }, [nodes]);
+
+    if (tier === "low") return null;
 
     return (
       <svg

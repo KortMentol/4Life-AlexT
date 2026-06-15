@@ -15,7 +15,9 @@ import tfTrifactorImg from "@/assets/images/products/MobileVersions/Mobile_tf-tr
 
 import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.webp";
 import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
-import heroVideoWebm from "@/assets/videos/backgrounds/HomePage/Hero-section/Why 4Life Transfer Factor®_.webm";
+
+// Тяжёлое видео обслуживается как статический ассет из public/ — не пакуется в JS-бандл
+const heroVideoWebm = "/videos/why-4life-transfer-factor.webm";
 
 // --- LAZY LOADED COMPONENTS ---
 const ImmersiveProductShowcase = lazy(() => import("@/components/ui/ImmersiveProductShowcase"));
