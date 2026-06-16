@@ -170,8 +170,9 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
           };
 
           // Add blur only for HIGH tier (НЕ на мобилках!)
+          // 6px вместо 8px — визуально тот же туман, GPU на 25% легче
           if (resolvedTier === "high" && performanceConfig.enableBlurEffect) {
-            animationProps.filter = "blur(8px)";
+            animationProps.filter = "blur(6px)";
             toProps.filter = "blur(0px)";
           }
 

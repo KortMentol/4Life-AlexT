@@ -120,7 +120,6 @@ const BlockVideo: React.FC<{
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
   const tier = usePerformanceTier();
-  const efxFlags = useEffectsDebug();
   const { isTouchDevice } = useDeviceType();
 
   // Тайминги всегда вычисляем до любых условных return (Rules of Hooks)
@@ -154,14 +153,8 @@ const BlockVideo: React.FC<{
     [0, 1, 1, 1, 1, 0],
   );
 
-  const tzHigh = import.meta.env.DEV ? efxFlags.blockVideoTranslateZHigh : true;
-  const tzVal = isTouchDevice ? 0 : tier === "high" && tzHigh ? 400 : 200;
-
-  const rawTranslateZ = useTransform(
-    scrollYProgress,
-    [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
-    [-tzVal, 0, 0, 0, 0, -tzVal],
-  );
+  // translateZ убран: создаёт лишние compositing layers, визуально незаметен на 1200px perspective
+  const rawTranslateZ = useTransform(scrollYProgress, [0, 1], [0, 0]);
 
   // AWWWARDS 2026: Mathematical dampers for URL-bar layout shift protection on Mobile
   const springConfig = { stiffness: 300, damping: 30, mass: 0.8 };
@@ -222,20 +215,21 @@ const BlockVideo: React.FC<{
           y,
           opacity,
           translateZ,
-          // AWWWARDS 2026: Force stable GPU layer, remove dynamic will-change layout thrashing
-          backfaceVisibility: "hidden",
+          // Chromium compositor fix: при translateZ + opacity Chromium рендерит артефакт-полоску
+          // filter: drop-shadow создаёт отдельный слой, который съедает этот артефакт
+          filter: "drop-shadow(0 0 0 transparent)",
+          // backfaceVisibility НЕ ставим — он триггерит Chromium баг с translateZ
         }}
         className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
         transition={{
           type: "tween",
-          duration: isTouchDevice ? 1.5 : 1.2,
-          ease: [0.25, 0.1, 0.25, 1.0],
+          duration: isTouchDevice ? 1.5 : 1.5, // Увеличено для более нежного прилипания
+          ease: [0.16, 1, 0.3, 1], // Awwwards 2026 signature curve — мягкое ускорение, нежное торможение
         }}
       >
         {/* ДОБАВЛЕН gpu-mask-radius ДЛЯ ИДЕАЛЬНЫХ УГЛОВ ПРИ СКРОЛЛЕ */}
         <div className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-          {/* Контейнер рамки вынесен ОТДЕЛЬНО от видео, чтобы не мерцать */}
-          <div className="absolute inset-0 rounded-2xl border border-blue-500/0 z-10 pointer-events-none" />
+          {/* Убираем border — он создаёт артефакт полоски при GPU compositing с translateZ */}
           {/* Фоновое изображение */}
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
@@ -356,7 +350,7 @@ const Grid3D: React.FC<{
             })
             .set(gridWrap, { rotationX: 20, force3D: true })
             .set(gridItems, {
-              z: () => window.gsap.utils.random(-3000, -1000),
+              z: () => window.gsap.utils.random(-3000, -1000), // Полная глубина
               opacity: 0.3,
               force3D: true,
             })
@@ -386,7 +380,7 @@ const Grid3D: React.FC<{
             .timeline({ scrollTrigger: scrollTriggerConfig })
             .set(gridItems, {
               transformOrigin: "50% 0%",
-              z: () => window.gsap.utils.random(-5000, -2000),
+              z: () => window.gsap.utils.random(-5000, -2000), // Полная глубина
               rotationX: () => window.gsap.utils.random(-65, -25),
               opacity: 0,
               force3D: true,
@@ -398,7 +392,7 @@ const Grid3D: React.FC<{
               opacity: 0.8,
               ease: "none",
             })
-            .to(gridWrap, { z: 6500, ease: "none" }, 0);
+            .to(gridWrap, { z: 6500, ease: "none" }, 0); // Полный z-range
           break;
       }
     };

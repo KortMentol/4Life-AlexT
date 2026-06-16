@@ -234,8 +234,8 @@ export const PERFORMANCE_CONFIGS = {
   high: {
     tier: "high" as const,
     enableWordSplitting: true,
-    enableBlurEffect: true,
-    enableSkewEffect: true, // Full effect with skew
+    enableBlurEffect: true, // blur возвращён — только центральные 5-7 слов (логика в ScrollTextReveal.tsx)
+    enableSkewEffect: true, // Full effect with skew — compositor-only
     enableGPUAcceleration: true,
   },
 } as const;

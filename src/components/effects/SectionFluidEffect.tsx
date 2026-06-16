@@ -17,6 +17,7 @@ import { useFluid } from "@/hooks/useFluid";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useTheme } from "@/hooks/useTheme";
 import WebGLFluidEnhanced from "@/lib/webgl-fluid/index";
+import { rafLoop } from "@/lib/rafLoop";
 import React, {
   useCallback,
   useEffect,
@@ -37,31 +38,32 @@ const runIdle = (cb: () => void) => {
   }
 };
 
-const getFluidConfig = (
-  tier: string,
-  isMobile: boolean,
-  pressureHigh: boolean,
-  sunrays: boolean,
-  shading: boolean,
-) => ({
-  dyeResolution: isMobile ? 512 : 1024,
-  simResolution: isMobile ? 150 : 256,
-  densityDissipation: 1,
-  velocityDissipation: isMobile ? 0.9 : 0.3,
-  pressure: 0.01,
-  pressureIterations: pressureHigh
-    ? tier === "high"
-      ? 50
-      : tier === "medium"
+  const getFluidConfig = (
+    tier: string,
+    isMobile: boolean,
+    pressureHigh: boolean,
+    sunraysEnabled: boolean,
+    shading: boolean,
+  ) => ({
+    dyeResolution: isMobile ? 512 : 1024,
+    simResolution: isMobile ? 150 : 200,
+    densityDissipation: 1,
+    velocityDissipation: isMobile ? 0.9 : 0.3,
+    pressure: 0.01,
+    pressureIterations: pressureHigh
+      ? tier === "high"
         ? 25
-        : 10
-    : 20,
-  curl: isMobile ? 25 : 35,
-  splatRadius: isMobile ? 0.18 : 0.22,
-  splatForce: isMobile ? 6000 : 7000,
-  shading: tier === "high" && shading,
-  sunrays: tier === "high" && sunrays,
-});
+        : tier === "medium"
+          ? 15
+          : 10
+      : 15,
+    curl: isMobile ? 25 : 30,
+    splatRadius: isMobile ? 0.18 : 0.22,
+    splatForce: isMobile ? 6000 : 7000,
+    shading: tier === "high" && shading,
+    // PROD: sunrays OFF (экономит ~1ms GPU). DEV: управляется через effectsDebug панель.
+    sunrays: import.meta.env.DEV ? (tier === "high" && sunraysEnabled) : false,
+  });
 
 const getCommonConfig = (
   theme: string,
@@ -109,7 +111,6 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
   const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRunningRef = useRef<boolean>(false);
   const isInViewportRef = useRef<boolean>(false);
-  const scissorRafRef = useRef<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   const isTouchDevice = useMemo(
@@ -152,9 +153,9 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
   }, []);
 
   /**
-   * Обновляет WebGL scissor rect в RAF loop.
-   * Scissor test — аппаратно ускоренная обрезка рендера.
-   * Физика симулируется на весь viewport, рендер только внутри секции.
+   * ОПТИМИЗАЦИЯ: Scissor rect обновляется через rafLoop singleton
+   * вместо отдельного requestAnimationFrame.
+   * Экономит 1 concurrent RAF callback → меньше main thread contention.
    */
   useEffect(() => {
     const section = sectionRef.current;
@@ -162,22 +163,14 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
     if (!section || !simulation) return;
 
     const updateScissor = () => {
-      // Не вызываем getBoundingClientRect если секция вне viewport —
-      // экономим forced layout каждый кадр
-      if (!isInViewportRef.current) {
-        scissorRafRef.current = requestAnimationFrame(updateScissor);
-        return;
-      }
+      if (!isInViewportRef.current) return;
 
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
 
-      // Проверяем, видна ли секция
       if (rect.bottom <= 0 || rect.top >= vh) {
-        // Секция вне viewport — отключаем scissor (ничего не рендерим)
         simulation.clearScissor();
       } else {
-        // Вычисляем пересечение секции с viewport
         const top = Math.max(0, rect.top);
         const bottom = Math.min(vh, rect.bottom);
         const left = Math.max(0, rect.left);
@@ -185,23 +178,17 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
 
         const width = right - left;
         const height = bottom - top;
-
-        // WebGL координаты: y от НИЖНЕГО края
         const y = vh - bottom;
 
-        // Устанавливаем scissor rect
         simulation.setScissor(left, y, width, height);
       }
-
-      scissorRafRef.current = requestAnimationFrame(updateScissor);
     };
 
-    scissorRafRef.current = requestAnimationFrame(updateScissor);
+    // Подписываемся на глобальный RAF вместо создания собственного
+    const unsub = rafLoop.subscribe(updateScissor);
 
     return () => {
-      if (scissorRafRef.current) {
-        cancelAnimationFrame(scissorRafRef.current);
-      }
+      unsub();
       simulation.clearScissor();
     };
   }, [sectionRef]);
