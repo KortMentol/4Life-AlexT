@@ -149,7 +149,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
         simulationRef.current.stop();
         isRunningRef.current = false;
       }
-    }, 5000);
+    }, 7000);
   }, []);
 
   /**
@@ -218,7 +218,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
       try {
         if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
         if (simulationRef.current) {
-          simulationRef.current.stop();
+          simulationRef.current.destroy();
           simulationRef.current = null;
         }
         if (container) container.innerHTML = "";
@@ -414,7 +414,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
   }, [startAnimation]);
 
   // ─── РАННИЕ ВОЗВРАТЫ — после всех хуков (Rules of Hooks соблюдены) ───
-  if (isTouchDevice || tier !== "high") return null;
+  if (isTouchDevice || tier === "low") return null;
   if (import.meta.env.DEV && !efxFlags.webglFluid) return null;
 
   return createPortal(

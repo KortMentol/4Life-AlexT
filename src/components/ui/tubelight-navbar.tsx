@@ -13,26 +13,33 @@ export const TubelightNavbar: React.FC = () => {
   const { transitionTo } = useTransition();
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  // --- ИЗМЕНЕНИЕ 1: Новое состояние для "залипания" подсветки при клике ---
   const [clickedIndex, setClickedIndex] = useState<number | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rafRef = useRef<number | null>(null);
   const navRef = useRef<HTMLElement>(null);
-
-  // useInView с once:false — когда навбар не виден, RAF не работает
   const inView = useInView(navRef, { once: false, margin: "100px" });
 
-  // --- ИЗМЕНЕНИЕ 2: Сбрасываем "залипание" после завершения перехода на новую страницу ---
+  // КЭШ КООРДИНАТ: спасает Main Thread от Layout Thrashing
+  const rectsCache = useRef<{ left: number; right: number; width: number }[]>([]);
+
   useEffect(() => {
     setClickedIndex(null);
   }, [location.pathname]);
 
-  // Cleanup RAF при размонтировании
+  // Считаем геометрию кнопок 1 раз при загрузке и ресайзе, а не на каждый пиксель мыши
   useEffect(() => {
+    const updateRects = () => {
+      rectsCache.current = itemRefs.current.map((el) => {
+        if (!el) return { left: 0, right: 0, width: 0 };
+        const rect = el.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, width: rect.width };
+      });
+    };
+
+    const timer = setTimeout(updateRects, 300);
+    window.addEventListener("resize", updateRects);
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateRects);
     };
   }, []);
 
@@ -44,129 +51,51 @@ export const TubelightNavbar: React.FC = () => {
       style={{ marginLeft: "4rem" }}
       onMouseLeave={() => setHoveredIndex(null)}
       onMouseMove={(e) => {
-        // Когда навбар не виден — не тратим CPU на RAF
-        if (!inView) return;
+        if (!inView || rectsCache.current.length === 0) return;
 
-        // Оптимизация: throttling для мобильных (хотя навбар скрыт на мобильных)
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        rafRef.current = requestAnimationFrame(() => {
-          const OVERLAP = 14;
-          let bestMatch = {
-            index: -1,
-            edgeDistance: Infinity,
-            centerDistance: Infinity,
-          };
+        const OVERLAP = 14;
+        let bestMatch = { index: -1, edgeDistance: Infinity, centerDistance: Infinity };
 
-          itemRefs.current.forEach((el, idx) => {
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
-            const center = rect.left + rect.width / 2;
-            const edgeDistance = Math.max(
-              0,
-              e.clientX - (rect.right + OVERLAP),
-              rect.left - OVERLAP - e.clientX,
-            );
-            const centerDistance = Math.abs(center - e.clientX);
+        rectsCache.current.forEach((rect, idx) => {
+          if (rect.width === 0) return;
+          const center = rect.left + rect.width / 2;
+          const edgeDistance = Math.max(0, e.clientX - (rect.right + OVERLAP), rect.left - OVERLAP - e.clientX);
+          const centerDistance = Math.abs(center - e.clientX);
 
-            if (
-              edgeDistance < bestMatch.edgeDistance ||
-              (edgeDistance === bestMatch.edgeDistance &&
-                centerDistance < bestMatch.centerDistance)
-            ) {
-              bestMatch = { index: idx, edgeDistance, centerDistance };
-            }
-          });
-
-          if (bestMatch.index !== -1 && bestMatch.index !== hoveredIndex) {
-            setHoveredIndex(bestMatch.index);
+          if (edgeDistance < bestMatch.edgeDistance || (edgeDistance === bestMatch.edgeDistance && centerDistance < bestMatch.centerDistance)) {
+            bestMatch = { index: idx, edgeDistance, centerDistance };
           }
         });
+
+        if (bestMatch.index !== -1 && bestMatch.index !== hoveredIndex) {
+          setHoveredIndex(bestMatch.index);
+        }
       }}
     >
       <div className="relative flex items-center gap-2">
         {mainNav.map((item, index) => (
-          <motion.div
-            key={item.href}
-            ref={(el) => (itemRefs.current[index] = el)}
-            className="relative flex items-center h-full"
-          >
+          <motion.div key={item.href} ref={(el) => (itemRefs.current[index] = el)} className="relative flex items-center h-full">
             <NavLink
               to={item.href}
               onClick={(e) => {
                 e.preventDefault();
-                // Если мы уже на этой странице, просто скроллим вверх
-                if (location.pathname === item.href) {
-                  scrollToTop({ immediate: false });
-                  return;
-                }
-                // --- ИЗМЕНЕНИЕ 3: При клике "запоминаем" индекс, чтобы подсветка осталась ---
+                if (location.pathname === item.href) { scrollToTop({ immediate: false }); return; }
                 setClickedIndex(index);
                 transitionTo(item.href);
               }}
               onMouseEnter={() => setHoveredIndex(index)}
-              className={({ isActive }) =>
-                `flex items-center px-3 py-1.5 rounded-xl text-[14px] font-medium relative whitespace-nowrap tracking-tight transition-colors duration-300 ${
-                  isActive
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300"
-                }`
-              }
+              className={({ isActive }) => `flex items-center px-3 py-1.5 rounded-xl text-[14px] font-medium relative whitespace-nowrap tracking-tight transition-colors duration-300 ${isActive ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-300"}`}
             >
               {({ isActive }) => {
-                // --- ИЗМЕНЕНИЕ 4: Новая логика для отображения подсветки ---
-                const showLamp =
-                  clickedIndex === index || // 1. Показываем, если этот элемент был кликнут
-                  (clickedIndex === null && hoveredIndex === index) || // 2. Или если на него наведен курсор (и ничего не кликнуто)
-                  (clickedIndex === null && hoveredIndex === null && isActive); // 3. Или если это активная страница (и ничего не кликнуто/не наведено)
-
+                const showLamp = clickedIndex === index || (clickedIndex === null && hoveredIndex === index) || (clickedIndex === null && hoveredIndex === null && isActive);
                 return (
                   <>
                     <span className="relative z-10">{item.title}</span>
                     {showLamp && (
-                      <motion.div
-                        layoutId="lamp"
-                        className={`absolute inset-0 w-full rounded-xl -z-10 ${
-                          isDark ? "bg-slate-700/60" : "bg-blue-100/80"
-                        }`}
-                        initial={false}
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 35,
-                        }}
-                      >
-                        <div
-                          className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full"
-                          style={{
-                            background: isDark
-                              ? "linear-gradient(90deg, #00ffff, #00aaff)"
-                              : "linear-gradient(90deg, #374151, #1f2937)",
-                          }}
-                        >
-                          <div
-                            className="absolute w-12 h-6 rounded-full blur-md -top-2 -left-2"
-                            style={{
-                              background: isDark
-                                ? "rgba(0, 255, 255, 0.2)"
-                                : "rgba(55, 65, 81, 0.25)",
-                            }}
-                          />
-                          <div
-                            className="absolute w-8 h-6 rounded-full blur-md -top-1"
-                            style={{
-                              background: isDark
-                                ? "rgba(0, 255, 255, 0.2)"
-                                : "rgba(55, 65, 81, 0.2)",
-                            }}
-                          />
-                          <div
-                            className="absolute w-4 h-4 rounded-full blur-sm top-0 left-2"
-                            style={{
-                              background: isDark
-                                ? "rgba(0, 255, 255, 0.2)"
-                                : "rgba(55, 65, 81, 0.15)",
-                            }}
-                          />
+                      <motion.div layoutId="lamp" className={`absolute inset-0 w-full rounded-xl -z-10 ${isDark ? "bg-slate-700/60" : "bg-blue-100/80"}`} transition={{ type: "spring", stiffness: 400, damping: 35 }}>
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full" style={{ background: isDark ? "linear-gradient(90deg, #00ffff, #00aaff)" : "linear-gradient(90deg, #374151, #1f2937)" }}>
+                          <div className="absolute w-12 h-6 rounded-full blur-md -top-2 -left-2" style={{ background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.25)" }} />
+                          <div className="absolute w-8 h-6 rounded-full blur-md -top-1" style={{ background: isDark ? "rgba(0, 255, 255, 0.2)" : "rgba(55, 65, 81, 0.2)" }} />
                         </div>
                       </motion.div>
                     )}

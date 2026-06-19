@@ -3,7 +3,6 @@ import { lenis } from "@/lib/lenis";
 import { RefObject, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useNavigationType } from "react-router-dom";
 
-// Глобальная декларация для флага POP перехода
 declare global {
   interface Window {
     __popTransitionInProgress?: boolean;
@@ -14,7 +13,6 @@ declare global {
 const STORAGE_KEY = "scroll_positions_v_final";
 
 // --- AWWWARDS 2026: IN-MEMORY SCROLL CACHE ---
-// Eliminates synchronous disk I/O during 144Hz scroll loops.
 let memoryScrollCache: Record<string, number> | null = null;
 let diskFlushTimeout: NodeJS.Timeout | null = null;
 
@@ -31,10 +29,12 @@ const flushToDisk = () => {
   if (!memoryScrollCache) return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryScrollCache));
+    // Пишем в историю браузера только при остановке скролла (Защита Safari от краша)
+    const state = window.history.state || {};
+    window.history.replaceState({ ...state, _scroll: memoryScrollCache[window.location.pathname + window.location.search] || 0 }, "");
   } catch {}
 };
 
-// Force flush on page unload
 if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", flushToDisk);
 }
@@ -43,29 +43,23 @@ const saveScrollPosition = (path: string, position: number) => {
   initScrollCache();
   const rounded = Math.round(position);
 
-  // 1. O(1) Memory write (Lightning fast for RAF loop)
+  // 1. Быстрая запись в ОЗУ (каждый кадр, 0% нагрузки)
   if (memoryScrollCache) {
     memoryScrollCache[path] = rounded;
   }
 
-  // 2. History state backup (Fast enough)
-  try {
-    const state = window.history.state || {};
-    window.history.replaceState({ ...state, _scroll: rounded }, "");
-  } catch {}
-
-  // 3. Debounced Disk Write (Only touches disk 250ms AFTER scroll stops)
+  // 2. Отложенный сброс на диск (через 250мс после полной остановки)
   if (diskFlushTimeout) clearTimeout(diskFlushTimeout);
   diskFlushTimeout = setTimeout(flushToDisk, 250);
 };
 
 const getScrollPosition = (path: string): number | null => {
   initScrollCache();
-  // Read from lightning-fast memory first
+  // Сначала берем точные данные из ОЗУ
   if (memoryScrollCache && memoryScrollCache[path] != null) {
     return memoryScrollCache[path];
   }
-  // Fallback to history
+  // Если ОЗУ очищено (после перезагрузки), берем бэкап из истории
   try {
     if (window.history.state?._scroll != null) return window.history.state._scroll;
   } catch {}

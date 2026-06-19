@@ -8,7 +8,7 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { lazy, Suspense, useRef } from "react";
 
 // Media imports
-import bg2Img from "@/assets/images/backgrounds/HomePage/2.jpg";
+import bg2Img from "@/assets/images/backgrounds/HomePage/2.webp";
 import renuvoImg from "@/assets/images/products/MobileVersions/Mobile_renuvo.webp";
 import tfPlusImg from "@/assets/images/products/MobileVersions/Mobile_tf-plus.webp";
 import tfTrifactorImg from "@/assets/images/products/MobileVersions/Mobile_tf-trifactor.webp";

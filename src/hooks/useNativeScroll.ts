@@ -5,7 +5,6 @@ import { useIsMobile } from "./useIsMobile";
 // ─── Десктоп ──────────────────────────────────────────────────────────────────
 const HEADER_HEIGHT = 80;
 const LERP_DESKTOP = 0.06;
-const SNAP_TRANSITION = "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)";
 
 function getHeader(): HTMLElement | null {
   return document.querySelector(".header-premium");
@@ -26,17 +25,14 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
 
     const h = getHeader();
     if (h) {
-      h.style.transition = SNAP_TRANSITION;
+      // ТОЛЬКО transform — opacity/visibility управляет motion.header
+      h.style.transition = "none";
       h.style.transform = "translateY(0px) translateZ(0)";
-      h.style.opacity = "1";
-      h.style.visibility = "visible";
 
-      // DEBUG: Логируем что хедер показан
       if (import.meta.env.DEV) {
-        console.log("🔧 showHeader called - header should be visible");
+        console.log("🔧 showHeader called - header transform reset");
       }
     } else {
-      // DEBUG: Хедер не найден
       if (import.meta.env.DEV) {
         console.warn("⚠️ showHeader called but header not found in DOM");
       }
@@ -52,10 +48,9 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     const tryShowHeader = () => {
       const h = getHeader();
       if (h) {
+        // ТОЛЬКО transform — opacity/visibility управляет motion.header
         h.style.transition = "none";
         h.style.transform = "translateY(0px) translateZ(0)";
-        h.style.opacity = "1";
-        h.style.visibility = "visible";
 
         if (import.meta.env.DEV) {
           console.log("✅ Header initialized successfully");
@@ -82,7 +77,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   }, []);
 
   useEffect(() => {
-    if (disabled) return;
+    if (disabled) return; // ВАЖНО: не трогаем хедер если отключено
 
     const header = getHeader();
     if (!header) return;
@@ -90,7 +85,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     // КРИТИЧНО: Принудительно показываем хедер при маунте
     header.style.transition = "none";
     header.style.transform = "translateY(0px) translateZ(0)";
-    header.style.opacity = "1";
+    // opacity/visibility управляет motion.header
 
     prevScrollRef.current = window.scrollY;
 

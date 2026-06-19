@@ -88,8 +88,10 @@ const ProductsHero: React.FC = () => {
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight drop-shadow-2xl">
             Каталог здоровья
           </h1>
-          <p className="text-lg md:text-2xl text-white/90 max-w-2xl mx-auto font-medium drop-shadow-lg mb-10">
-            Откройте для себя инновации 4Life с Трансфер Факторами
+          <p className="text-lg md:text-2xl text-white/90 max-w-2xl mx-auto font-medium drop-shadow-lg mb-10 leading-relaxed">
+            Откройте для себя инновации 4Life
+            <br />
+            с Трансфер Факторами
           </p>
           <button
             style={{ pointerEvents: "auto" }}

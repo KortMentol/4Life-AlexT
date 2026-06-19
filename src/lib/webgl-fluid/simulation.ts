@@ -156,6 +156,33 @@ class Simulation {
     this.hasStarted = false;
   }
 
+  public destroy() {
+    this.stop();
+
+    // Безопасное удаление текстур и буферов из видеокарты
+    const deleteFBO = (fbo: any) => {
+      if (fbo && fbo.texture && this.gl) this.gl.deleteTexture(fbo.texture);
+      if (fbo && fbo.fbo && this.gl) this.gl.deleteFramebuffer(fbo.fbo);
+    };
+
+    if (this._dye) { deleteFBO(this._dye.read); deleteFBO(this._dye.write); }
+    if (this._velocity) { deleteFBO(this._velocity.read); deleteFBO(this._velocity.write); }
+    if (this._pressure) { deleteFBO(this._pressure.read); deleteFBO(this._pressure.write); }
+
+    deleteFBO(this._divergence);
+    deleteFBO(this._curl);
+    deleteFBO(this._bloom);
+    deleteFBO(this._sunrays);
+    deleteFBO(this._sunraysTemp);
+    this.bloomFramebuffers.forEach(deleteFBO);
+
+    // Принудительно отключаем контекст WebGL
+    if (this.gl) {
+      const extension = this.gl.getExtension('WEBGL_lose_context');
+      if (extension) extension.loseContext();
+    }
+  }
+
   private handleMouseDown = (event: MouseEvent) => {
     const posX = this.scaleByPixelRatio(event.offsetX);
     const posY = this.scaleByPixelRatio(event.offsetY);

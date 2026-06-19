@@ -46,6 +46,8 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
   const { theme } = useTheme();
   const splitInstanceRef = useRef<any>(null);
   const scrollTriggerRef = useRef<any>(null);
+  // Добавь новый независимый реф для контекста GSAP:
+  const gsapContextRef = useRef<any>(null);
 
   // КРИТИЧНО: На тач-устройствах СТРОГО отключаем blur и skew, даже если телефон мощный
   const isTouchDevice =
@@ -77,8 +79,8 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
   // Theme-based styling with consistent colors
   const getThemeStyles = () => {
     return {
-      // Премиальные цвета — яркие и контрастные
-      color: theme === "dark" ? "#67e8f9" : "#1e293b", // cyan-300 dark / slate-800 light (темнее для контраста)
+      // Premium neutral Slate-300 for elite reading comfort on dark obsidian
+      color: theme === "dark" ? "#cbd5e1" : "#1e293b",
     };
   };
 
@@ -146,7 +148,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
 
         if (words && words.length > 0) {
           // Apply theme color to words
-          const themeColor = theme === "dark" ? "#67e8f9" : "#1e293b";
+          const themeColor = theme === "dark" ? "#cbd5e1" : "#1e293b";
           words.forEach((word: HTMLElement) => {
             word.style.color = themeColor;
           });
@@ -182,8 +184,10 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
             toProps.skewX = 0;
           }
 
-          // Create the animation
-          scrollTriggerRef.current = window.gsap.fromTo(words, animationProps, toProps);
+          // GSAP Context — изолирует анимации и не ломает рантайм при null-рефах
+          gsapContextRef.current = window.gsap.context(() => {
+            scrollTriggerRef.current = window.gsap.fromTo(words, animationProps, toProps);
+          });
         }
       } catch (error) {
         if (import.meta.env.DEV) {
@@ -194,6 +198,11 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
 
     // Cleanup function
     return () => {
+      // Убиваем контекст GSAP и освобождаем оперативку от ScrollTrigger-зомби
+      if (gsapContextRef.current) {
+        gsapContextRef.current.revert();
+        gsapContextRef.current = null;
+      }
       if (scrollTriggerRef.current) {
         scrollTriggerRef.current.kill();
         scrollTriggerRef.current = null;

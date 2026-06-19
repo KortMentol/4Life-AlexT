@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { Moon, Sun } from "lucide-react";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { logoVariants } from "@/animations/headerAnimations";
@@ -33,9 +33,12 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   const headerRef = useRef<HTMLElement>(null);
   const isMenuAnimatingRef = useRef(false);
+  const [modalVisible, setModalVisible] = useState(true);
+  const [, setIsModalOpen] = useState(false);
+  const isModalOpenRef = useRef(false);
 
   const { showHeader } = useNativeScroll({
-    disabled: isMenuOpen || isMenuAnimatingRef.current,
+    disabled: isMenuOpen || isMenuAnimatingRef.current || isModalOpenRef.current,
   });
 
   // КРИТИЧНО: Принудительно показываем хедер при первом рендере
@@ -52,8 +55,10 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   // уже после того как пелена перехода закрыла экран.
   // НЕ вызываем showHeader() при каждой смене location — это показывало хедер
   // до закрытия пелены.
+  // ВАЖНО: если модалка открыта при маунте — не показываем хедер (он и так скрыт через opacity)
   useEffect(() => {
-    showHeader(); // показываем сразу при маунте
+    if (isModalOpenRef.current) return; // модалка уже открыта — хедер остаётся скрытым
+    showHeader();
     const handleForceShow = () => showHeader();
     window.addEventListener("force-header-show", handleForceShow);
     return () => window.removeEventListener("force-header-show", handleForceShow);
@@ -99,24 +104,44 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }, [isMenuOpen]);
 
-  // Слушатель для плавного скрытия хедера при открытии модалки товаров
+  // Слушатель для плавного скрытия/показа хедера при открытии модалки (без движения — только opacity)
   useEffect(() => {
     const handleModalState = (e: Event) => {
       const customEvent = e as CustomEvent;
       const isModalOpen = customEvent.detail.isOpen;
-
-      if (menuTlRef.current) {
-        if (isModalOpen) {
-          menuTlRef.current.play(); // Плавно уезжает вверх
-        } else if (!isMenuOpen) {
-          menuTlRef.current.reverse(); // Плавно возвращается, если меню не открыто
+      isModalOpenRef.current = isModalOpen;
+      setIsModalOpen(isModalOpen);
+      
+      if (!isModalOpen) {
+        // Задержка перед показом хедера — даём модалке завершить exit-анимацию
+        setTimeout(() => {
+          setModalVisible(true);
+          setIsModalOpen(false);
+        }, 0);
+      } else {
+        setModalVisible(false);
+        // ОСТАВЛЯЕМ хедер там где он был — motion сам плавно анимирует opacity → 0
+        // НЕ трогаем трансформ — хедер может быть скрыт под экраном, motion управляет видимостью
+        if (menuTlRef.current) {
+          menuTlRef.current.pause();
+          menuTlRef.current.progress(1);
         }
       }
     };
 
     window.addEventListener("modal-state-change", handleModalState);
     return () => window.removeEventListener("modal-state-change", handleModalState);
-  }, [isMenuOpen]);
+  }, []);
+
+  // Показываем хедер при маунте (первая загрузка) и по событию force-header-show.
+  // ВАЖНО: если модалка открыта при маунте — не показываем хедер (он и так скрыт через opacity)
+  useEffect(() => {
+    if (isModalOpenRef.current) return; // модалка уже открыта — хедер остаётся скрытым
+    showHeader();
+    const handleForceShow = () => showHeader();
+    window.addEventListener("force-header-show", handleForceShow);
+    return () => window.removeEventListener("force-header-show", handleForceShow);
+  }, [showHeader]);
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
@@ -143,9 +168,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   );
 
   return (
-    <header
+    <motion.header
       data-tier={isGlassEnabled ? tier : "low"}
       ref={headerRef}
+      animate={{ opacity: modalVisible ? 1 : 0, visibility: modalVisible ? "visible" : "hidden" }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       role="banner"
       style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
       className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
@@ -268,7 +295,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
           </div>
         </div>
       </div>
-    </header>
+      </motion.header>
   );
 };
 

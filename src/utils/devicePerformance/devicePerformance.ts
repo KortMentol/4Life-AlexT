@@ -330,12 +330,15 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     else if (score >= 35) tier = "medium";
     else tier = "low";
   } else {
-    if (score >= 65) tier = "high";
-    else if (score >= 35) tier = "medium";
+    // AWWWARDS 2026: Тонкая калибровка встроек и дискреток. 
+    // GTX 1060 (38 GPU) -> High Tier.
+    // Iris Xe (25 GPU) -> Medium Tier.
+    if (score >= 68 && gpuScore >= 30) tier = "high";
+    else if (score >= 40) tier = "medium";
     else tier = "low";
   }
 
-  // Слабые интегрированные GPU = ВСЕГДА LOW
+  // Слабые встроенные GPU (старые Intel HD, базовые Radeon) = ВСЕГДА LOW
   if (isWeakIntegrated) {
     tier = "low";
     score = Math.min(score, 18);

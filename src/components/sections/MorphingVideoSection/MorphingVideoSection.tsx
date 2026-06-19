@@ -1,32 +1,30 @@
 /**
  * @module src/components/sections/MorphingVideoSection/MorphingVideoSection.tsx
- * @description AWWWARDS 2026 секция с тремя отдельными видео блоками и топовыми анимациями.
- * Версия 5.0.0: ПРОФЕССИОНАЛЬНЫЙ РЕФАКТОРИНГ - Единая система устройств и предсказуемые тайминги.
+ * @description AWWWARDS 2026 секция с тремя видео блоками.
  * @author Kort
- * @version 5.0.0 - AWWWARDS Professional Architecture
- * @usage
- * 1. src/pages/HomePage.tsx - В основной секции "Почему 4Life?" для демонстрации преимуществ компании
- * @example
- * <MorphingVideoSection />
+ * @version 8.0.0
  */
 
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useInView, useScroll, useTransform } from "framer-motion";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-// Media — видео обслуживается как статический ассет из public/ (не пакуется в JS-бандл)
 const productionVideo = "/videos/bg-video-products-page.mp4";
-
-// Components
+const posterBase = "/images/backgrounds/HomePage/img/";
+const VIMEO_URL_01 = "https://player.vimeo.com/video/1203804812?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&texttrack=ru";
+const VIMEO_URL_02 = "https://player.vimeo.com/video/1108208519?h=aee2e74b63&autoplay=1&texttrack=ru";
+const VIMEO_URL_03 = "https://player.vimeo.com/video/1203804812?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&texttrack=ru"; // Temporary placeholder (copy of Block 1)
 import { Button, ScrollHeadingReveal } from "@/components/ui";
+import CustomCursor from "@/components/ui/CustomCursor";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
+import { MorphBlock } from "./MorphBlock";
 
-// Hooks
 import SectionFluidEffect from "@/components/effects/SectionFluidEffect";
 import { useParallaxLenis, usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
-// Глобальные типы для GSAP
+import { lenis } from "@/lib/lenis";
+
 declare global {
   interface Window {
     gsap: any;
@@ -35,174 +33,73 @@ declare global {
   }
 }
 
-// AWWWARDS ПРОФЕССИОНАЛЬНАЯ СИСТЕМА УСТРОЙСТВ
 const useDeviceType = () => {
   return useMemo(() => {
     const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    return {
-      isTouchDevice,
-      isDesktop: !isTouchDevice,
-    };
+    return { isTouchDevice, isDesktop: !isTouchDevice };
   }, []);
 };
 
-// AWWWARDS КОНФИГУРАЦИЯ БЛОКОВ - ЛЕГКО НАСТРАИВАТЬ!
 const BLOCK_CONFIG = {
-  // ВЫСОТЫ БЛОКОВ (vh = % от высоты экрана)
-  heights: {
-    touch: 200, // Оптимальный баланс плавности и скорости для тач-устройств
-    desktop: 200, // Только десктоп с мышкой
-  },
-
-  // AWWWARDS 2026: Perfect Symmetrical 40%-10%-40% Timings
   touchTimings: {
-    block1: {
-      fadeInStart: 0.2,
-      fadeInEnd: 0.45, // 40% duration (Ultra-smooth entrance)
-      stickStart: 0.45,
-      stickEnd: 0.55, // 10% duration (Sticky center focus)
-      fadeOutStart: 0.55,
-      fadeOutEnd: 0.9, // 40% duration (Identical, symmetrical ultra-smooth exit)
-    },
-    block2: {
-      fadeInStart: 0.2,
-      fadeInEnd: 0.45,
-      stickStart: 0.45,
-      stickEnd: 0.55,
-      fadeOutStart: 0.55,
-      fadeOutEnd: 0.9,
-    },
-    block3: {
-      fadeInStart: 0.2,
-      fadeInEnd: 0.45,
-      stickStart: 0.45,
-      stickEnd: 0.55,
-      fadeOutStart: 0.55,
-      fadeOutEnd: 0.9,
-    },
+    block1: { fadeInStart: 0.2, fadeInEnd: 0.45, stickStart: 0.45, stickEnd: 0.55, fadeOutStart: 0.55, fadeOutEnd: 0.9 },
+    block2: { fadeInStart: 0.2, fadeInEnd: 0.45, stickStart: 0.45, stickEnd: 0.55, fadeOutStart: 0.55, fadeOutEnd: 0.9 },
+    block3: { fadeInStart: 0.2, fadeInEnd: 0.45, stickStart: 0.45, stickEnd: 0.55, fadeOutStart: 0.55, fadeOutEnd: 0.9 },
   },
-
-  // ТАЙМИНГИ ДЛЯ ДЕСКТОПА (ХОРОШО НАСТРОЕННЫЕ - НЕ ТРОГАТЬ!)
   desktopTimings: {
-    block1: {
-      fadeInStart: 0.12,
-      fadeInEnd: 0.47,
-      stickStart: 0.47,
-      stickEnd: 0.72,
-      fadeOutStart: 0.72,
-      fadeOutEnd: 0.985,
-    },
-    block2: {
-      fadeInStart: 0.14,
-      fadeInEnd: 0.49,
-      stickStart: 0.49,
-      stickEnd: 0.72,
-      fadeOutStart: 0.72,
-      fadeOutEnd: 0.985,
-    },
-    block3: {
-      fadeInStart: 0.16,
-      fadeInEnd: 0.51,
-      stickStart: 0.51,
-      stickEnd: 0.72,
-      fadeOutStart: 0.72,
-      fadeOutEnd: 0.985,
-    },
+    block1: { fadeInStart: 0.12, fadeInEnd: 0.47, stickStart: 0.47, stickEnd: 0.72, fadeOutStart: 0.72, fadeOutEnd: 0.985 },
+    block2: { fadeInStart: 0.14, fadeInEnd: 0.49, stickStart: 0.49, stickEnd: 0.72, fadeOutStart: 0.72, fadeOutEnd: 0.985 },
+    block3: { fadeInStart: 0.16, fadeInEnd: 0.51, stickStart: 0.51, stickEnd: 0.72, fadeOutStart: 0.72, fadeOutEnd: 0.985 },
   },
 };
 
-// Компонент для одного видео блока с AWWWARDS 2026 анимацией
-const BlockVideo: React.FC<{
+/* ------------------------------------------------------------------ */
+/* Scroll-driven video wrapper                                        */
+/* ------------------------------------------------------------------ */
+const VideoBlockWrapper: React.FC<{
   blockRef: React.RefObject<HTMLDivElement>;
   videoSrc: string;
+  posterSrc?: string;
   blockIndex: number;
-}> = ({ blockRef, videoSrc, blockIndex }) => {
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
-  const tier = usePerformanceTier();
-  const { isTouchDevice } = useDeviceType();
-
-  // Тайминги всегда вычисляем до любых условных return (Rules of Hooks)
+  isTouchDevice: boolean;
+  onClick?: () => void;
+  isModalOpen: boolean;
+}> = ({ blockRef, videoSrc, posterSrc, blockIndex, isTouchDevice, onClick, isModalOpen }) => {
   const timings = useMemo(() => {
     const blockKey = `block${blockIndex + 1}` as keyof typeof BLOCK_CONFIG.touchTimings;
     return isTouchDevice ? BLOCK_CONFIG.touchTimings[blockKey] : BLOCK_CONFIG.desktopTimings[blockKey];
   }, [blockIndex, isTouchDevice]);
 
-  // Scroll progress для этого блока
-  // AWWWARDS 2026: Smart offset - video animation starts AFTER sticky content scrolls away
   const { scrollYProgress } = useScroll({
     target: blockRef,
-    offset: isTouchDevice
-      ? ["start 50%", "end 10%"] // Touch: Start when sticky content (01/text) already scrolled past
-      : ["start 90%", "end 10%"], // Desktop: Original timing
+    offset: isTouchDevice ? ["start 50%", "end 10%"] : ["start 90%", "end 10%"],
   });
 
-  // Все useTransform вызываем безусловно — Rules of Hooks
-  const fallbackTimings = BLOCK_CONFIG.touchTimings.block1;
-  const t = timings ?? fallbackTimings;
+  // Trigger-Actor Decoupling: parent owns visibility state, child owns playback
+  const isInView = useInView(blockRef, { 
+    once: false, 
+    margin: isTouchDevice ? "-100px 0px" : "-400px 0px" 
+  });
 
-  const rawY = useTransform(
+  const t = timings ?? BLOCK_CONFIG.touchTimings.block1;
+
+  const y = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     ["100vh", "0vh", "0vh", "0vh", "0vh", "-100vh"],
   );
 
-  const rawOpacity = useTransform(
+  const opacity = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     [0, 1, 1, 1, 1, 0],
   );
-
-  // translateZ убран: создаёт лишние compositing layers, визуально незаметен на 1200px perspective
-  const rawTranslateZ = useTransform(scrollYProgress, [0, 1], [0, 0]);
-
-  // AWWWARDS 2026: Mathematical dampers for URL-bar layout shift protection on Mobile
-  const springConfig = { stiffness: 300, damping: 30, mass: 0.8 };
-
-  // Springs вызываем безусловно — Rules of Hooks; выбор применяем ниже
-  const springY = useSpring(rawY, springConfig);
-  const springTranslateZ = useSpring(rawTranslateZ, springConfig);
-
-  const y = isTouchDevice ? springY : rawY;
-  const translateZ = isTouchDevice ? springTranslateZ : rawTranslateZ;
-  const opacity = rawOpacity; // Opacity does not cause geometry jumps
-
-  // Обработка переходов меню
-  useEffect(() => {
-    if (!isTransitioning) return;
-    const handleComplete = () => setIsTransitioning(false);
-    window.addEventListener("menu-transition-complete", handleComplete, {
-      once: true,
-    });
-    return () => window.removeEventListener("menu-transition-complete", handleComplete);
-  }, [isTransitioning]);
-
-  // Effect for video visibility (Lazy Mounting — предотвращает аллокацию 3 декодеров одновременно)
-  useEffect(() => {
-    const block = blockRef.current;
-    if (!block) return;
-
-    const margin = isTouchDevice ? "100px" : "400px";
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry?.isIntersecting ?? false);
-      },
-      { threshold: 0, rootMargin: `${margin} 0px ${margin} 0px` },
-    );
-
-    observer.observe(block);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [blockRef, isTouchDevice]);
 
   return (
     <div
       className="fixed z-40 flex items-center justify-center pointer-events-none"
       style={{
         perspective: "1200px",
-        // ПРОФИ ФИКС 2026: svh на тач = фиксированная высота без URL bar
         top: 0,
         left: 0,
         right: 0,
@@ -211,74 +108,39 @@ const BlockVideo: React.FC<{
       }}
     >
       <motion.div
-        style={{
-          y,
-          opacity,
-          translateZ,
-          // Chromium compositor fix: при translateZ + opacity Chromium рендерит артефакт-полоску
-          // filter: drop-shadow создаёт отдельный слой, который съедает этот артефакт
-          filter: "drop-shadow(0 0 0 transparent)",
-          // backfaceVisibility НЕ ставим — он триггерит Chromium баг с translateZ
-        }}
-        className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
-        transition={{
-          type: "tween",
-          duration: isTouchDevice ? 1.5 : 1.5, // Увеличено для более нежного прилипания
-          ease: [0.16, 1, 0.3, 1], // Awwwards 2026 signature curve — мягкое ускорение, нежное торможение
-        }}
+        style={{ y, opacity }}
+        className="w-full h-full flex items-center justify-center pointer-events-none"
       >
-        {/* ДОБАВЛЕН gpu-mask-radius ДЛЯ ИДЕАЛЬНЫХ УГЛОВ ПРИ СКРОЛЛЕ */}
-        <div className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-          {/* Убираем border — он создаёт артефакт полоски при GPU compositing с translateZ */}
-          {/* Фоновое изображение */}
+        <motion.div
+          animate={{
+            opacity: isModalOpen ? 0 : 1,
+            scale: isModalOpen ? 0.95 : 1
+          }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
+        >
           <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-            style={{
-              backgroundImage: `url(/images/backgrounds/HomePage/img/${blockIndex + 1}.jpg)`,
-              opacity: isTransitioning ? 1 : 0,
-            }}
-          />
-
-          {/* Видео - рендерится только когда карточка в зоне видимости */}
-          {isIntersecting && (
-            <video
-              className="h-full w-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload={tier === "high" ? "auto" : "metadata"}
-              style={
-                {
-                  imageRendering: tier === "low" ? "auto" : "optimizeQuality",
-                } as React.CSSProperties
-              }
-            >
-              {!isTransitioning && <source src={videoSrc} type="video/mp4" />}
-            </video>
-          )}
-
-          {/* Современные overlay эффекты */}
-          {tier === "high" && (
-            <>
-              {/* Subtle gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/[0.02] via-transparent to-transparent pointer-events-none" />
-              {/* Inner glow effect */}
-              <div
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{
-                  background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)",
-                }}
-              />
-            </>
-          )}
-        </div>
+            data-cursor="block"
+            className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-gradient-to-br from-blue-500/20 to-cyan-500/20"
+            onClick={onClick}
+          >
+            <MorphBlock 
+              videoSrc={videoSrc} 
+              posterSrc={posterSrc} 
+              className="absolute inset-0" 
+              isInView={isInView}
+              isModalOpen={isModalOpen}
+            />
+          </div>
+        </motion.div>
       </motion.div>
     </div>
   );
 };
 
-// Компонент для 3D анимаций
+/* ------------------------------------------------------------------ */
+/* Grid3D                                                             */
+/* ------------------------------------------------------------------ */
 const Grid3D: React.FC<{
   type: 1 | 2 | 3;
   triggerRef: React.RefObject<HTMLElement>;
@@ -294,7 +156,6 @@ const Grid3D: React.FC<{
     };
 
     if (!window.gsap || !window.ScrollTrigger || window.innerWidth < 1024 || !supports3D()) return;
-
     const grid = gridRef.current;
     if (!grid) return;
 
@@ -304,7 +165,6 @@ const Grid3D: React.FC<{
 
     let timeline: any;
 
-    // ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ТЯЖЕЛОЙ МАТЕМАТИКИ
     const initGSAP = () => {
       const scrollTriggerConfig = {
         trigger: triggerRef.current,
@@ -322,17 +182,11 @@ const Grid3D: React.FC<{
           timeline = window.gsap
             .timeline({ scrollTrigger: scrollTriggerConfig })
             .set(gridWrap, { rotationY: 25, force3D: true })
-            .set(gridItems, {
-              z: () => window.gsap.utils.random(-1600, 200),
-              force3D: true,
-            })
+            .set(gridItems, { z: () => window.gsap.utils.random(-1600, 200), force3D: true })
             .fromTo(
               gridItems,
               { xPercent: () => window.gsap.utils.random(-1000, -500) },
-              {
-                xPercent: () => window.gsap.utils.random(500, 1000),
-                ease: "none",
-              },
+              { xPercent: () => window.gsap.utils.random(500, 1000), ease: "none" },
             );
           break;
         case 2:
@@ -342,31 +196,14 @@ const Grid3D: React.FC<{
           grid.style.setProperty("--grid-item-ratio", "0.8");
           grid.style.setProperty("--grid-columns", "6");
           grid.style.setProperty("--grid-gap", "14vw");
-
           timeline = window.gsap
-            .timeline({
-              defaults: { ease: "none" },
-              scrollTrigger: scrollTriggerConfig,
-            })
+            .timeline({ defaults: { ease: "none" }, scrollTrigger: scrollTriggerConfig })
             .set(gridWrap, { rotationX: 20, force3D: true })
-            .set(gridItems, {
-              z: () => window.gsap.utils.random(-3000, -1000), // Полная глубина
-              opacity: 0.3,
-              force3D: true,
-            })
+            .set(gridItems, { z: () => window.gsap.utils.random(-3000, -1000), opacity: 0.3, force3D: true })
             .fromTo(
               gridItems,
-              {
-                yPercent: () => window.gsap.utils.random(100, 1000),
-                rotationY: -45,
-                opacity: 0.3,
-              },
-              {
-                ease: "power2",
-                yPercent: () => window.gsap.utils.random(-1000, -100),
-                rotationY: 45,
-                opacity: 0.7,
-              },
+              { yPercent: () => window.gsap.utils.random(100, 1000), rotationY: -45, opacity: 0.3 },
+              { ease: "power2", yPercent: () => window.gsap.utils.random(-1000, -100), rotationY: 45, opacity: 0.7 },
               0,
             )
             .fromTo(gridWrap, { rotationZ: -5 }, { rotationX: -20, rotationZ: 10, scale: 1.2 }, 0);
@@ -380,7 +217,7 @@ const Grid3D: React.FC<{
             .timeline({ scrollTrigger: scrollTriggerConfig })
             .set(gridItems, {
               transformOrigin: "50% 0%",
-              z: () => window.gsap.utils.random(-5000, -2000), // Полная глубина
+              z: () => window.gsap.utils.random(-5000, -2000),
               rotationX: () => window.gsap.utils.random(-65, -25),
               opacity: 0,
               force3D: true,
@@ -392,22 +229,18 @@ const Grid3D: React.FC<{
               opacity: 0.8,
               ease: "none",
             })
-            .to(gridWrap, { z: 6500, ease: "none" }, 0); // Полный z-range
+            .to(gridWrap, { z: 6500, ease: "none" }, 0);
           break;
       }
     };
 
-    // AWWWARDS HACK: Если меню сейчас анимируется, откладываем GSAP
     if (window.__menuTransitionInProgress) {
       const onComplete = () => {
         initGSAP();
         window.removeEventListener("menu-transition-complete", onComplete);
       };
       window.addEventListener("menu-transition-complete", onComplete);
-    } else {
-      // Обычная загрузка - стартуем сразу
-      initGSAP();
-    }
+    } else initGSAP();
 
     return () => {
       if (timeline) timeline.kill();
@@ -416,7 +249,7 @@ const Grid3D: React.FC<{
 
   const imageCount = useMemo(() => (window.innerWidth >= 1024 ? 20 : 8), []);
   const images = useMemo(
-    () => Array.from({ length: imageCount }, (_, i) => `/images/backgrounds/HomePage/img/${(i % 20) + 1}.jpg`),
+    () => Array.from({ length: imageCount }, (_, i) => `${posterBase}${(i % 20) + 1}.jpg`),
     [imageCount],
   );
 
@@ -432,15 +265,7 @@ const Grid3D: React.FC<{
           <div key={i} className="grid__item aspect-[1.5] overflow-hidden rounded-xl">
             <div
               className="h-full w-full bg-cover bg-center rounded-xl"
-              style={
-                {
-                  backgroundImage: `url(${src})`,
-                  imageRendering: "auto",
-                  WebkitImageRendering: "auto",
-                  MozImageRendering: "auto",
-                  msImageRendering: "auto",
-                } as React.CSSProperties
-              }
+              style={{ backgroundImage: `url(${src})`, imageRendering: "auto" } as React.CSSProperties}
             />
           </div>
         ))}
@@ -449,7 +274,9 @@ const Grid3D: React.FC<{
   );
 };
 
-// Основной компонент секции
+/* ------------------------------------------------------------------ */
+/* Main Section                                                       */
+/* ------------------------------------------------------------------ */
 const MorphingVideoSection: React.FC = () => {
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
@@ -460,21 +287,22 @@ const MorphingVideoSection: React.FC = () => {
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
 
+  const [vimeoOpen, setVimeoOpen] = useState(false);
+  const [vimeoUrl, setVimeoUrl] = useState("");
+  const isCursorEnabled = !isTouchDevice;
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
 
-  // Сила параллакса: на тач используем useParallaxLenis, на десктоп — Framer Motion
   const parallaxStrength = tier === "low" ? 0 : tier === "medium" ? 30 : 60;
 
-  // ТАЧ: параллакс через Lenis RAF — compositor-only, 60fps
   useParallaxLenis(parallaxBgRef, sectionRef, {
-    strength: parallaxStrength * 2, // *2 т.к. фон занимает 100%+200px
+    strength: parallaxStrength * 2,
     disabled: !isTouchDevice || tier === "low",
   });
 
-  // ДЕСКТОП: Framer Motion useTransform
   const bgY = useTransform(
     scrollYProgress,
     [0, 1],
@@ -493,212 +321,342 @@ const MorphingVideoSection: React.FC = () => {
     else window.addEventListener("load", preloadVideos);
   }, []);
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return () => {};
+    const sectionVideos = section.querySelectorAll<HTMLVideoElement>("video");
+    let playTimer: ReturnType<typeof setTimeout>;
+
+    if (vimeoOpen) {
+      sectionVideos.forEach((v) => v.pause());
+    } else {
+      // CRITICAL PERFORMANCE FIX: Wait 450ms (slightly longer than the 400ms exit fade animation)
+      // before initializing and playing the active video. This eliminates 100% of frame drops / thread lag.
+      playTimer = setTimeout(() => {
+        sectionVideos.forEach((v) => {
+          if (v.hasAttribute("src")) v.play().catch(() => {});
+        });
+      }, 450);
+    }
+
+    return () => {
+      if (playTimer) clearTimeout(playTimer);
+    };
+  }, [vimeoOpen]);
+
+  const handleOpenVimeoModal = useCallback((url: string) => {
+    window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: true } }));
+    setVimeoOpen(true);
+    setVimeoUrl(url);
+  }, []);
+
+  const handleOpenVimeo1 = useCallback(() => handleOpenVimeoModal(VIMEO_URL_01), [handleOpenVimeoModal]);
+  const handleOpenVimeo2 = useCallback(() => handleOpenVimeoModal(VIMEO_URL_02), [handleOpenVimeoModal]);
+  const handleOpenVimeo3 = useCallback(() => handleOpenVimeoModal(VIMEO_URL_03), [handleOpenVimeoModal]);
+
+  const handleCloseVimeoModal = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: false } }));
+    setVimeoOpen(false);
+    setVimeoUrl("");
+  }, []);
+
   return (
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
-      {/* WebGL Fluid — только high tier, ограничен границами секции */}
-      {/* Рендерится через портал в body — вне overflow:hidden */}
+      {isCursorEnabled && <CustomCursor />}
+
+      <VimeoModal isOpen={vimeoOpen} onClose={handleCloseVimeoModal} tier={tier} videoUrl={vimeoUrl} />
+
+
       <SectionFluidEffect sectionRef={sectionRef} />
 
-      {/* Параллакс фон */}
-      <div className="absolute inset-0 -z-30 overflow-hidden">
+      <div className="absolute inset-0 -z-30 overflow-hidden bg-[#03050a]">
         <motion.div
           ref={parallaxBgRef}
-          className="parallax-bg absolute inset-0 w-full"
+          className="parallax-bg absolute inset-0 w-full h-full"
           style={{
             y: bgY,
             height: "calc(100% + 200px)",
             top: "-100px",
             willChange: isTouchDevice ? "auto" : "transform",
-            backfaceVisibility: "hidden",
           }}
         >
-          <div
-            className="w-full h-full bg-repeat opacity-100 dark:opacity-0 transition-opacity duration-500"
-            style={{
-              backgroundImage: `url(/images/backgrounds/light-pattern.webp)`,
-              backgroundSize: "400px 400px",
-            }}
-          />
-          {/* ПК версия темного фона */}
-          <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 hidden md:block"
-            style={{
-              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.6) contrast(1.1)",
-            }}
-          />
-          {/* Мобильная версия темного фона (светлее на 10%) */}
-          <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 block md:hidden"
-            style={{
-              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.7) contrast(1.1)",
-            }}
-          />
+          {tier !== "low" && <div className="absolute inset-0 w-full h-full bg-biotech-grid" />}
+          {tier !== "low" && (
+            <>
+              <div className="absolute inset-0 w-full h-full bg-glow-cyan" />
+              <div className="absolute inset-0 w-full h-full bg-glow-blue" />
+            </>
+          )}
+          {tier === "high" && !isTouchDevice && <div className="absolute inset-0 w-full h-full bg-noise-overlay" />}
         </motion.div>
       </div>
 
-      {/* Заголовок секции */}
-      <div className="relative z-30 px-4 pt-24 md:pt-32 pb-12 text-center">
-        <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-4 text-sm font-medium uppercase tracking-[0.2em]"
-            style={{
-              background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
-              backgroundSize: "200% 100%",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              animation: "gradient-shift 6s ease-in-out infinite",
-              textShadow: "0 0 20px rgba(14, 165, 233, 0.3)",
-              filter: "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
-            }}
-          >
-            Наука • Качество • Доверие
-          </h2>
-          <ScrollHeadingReveal tag="h1" className="mb-6 text-center">
-            Почему 4Life?
-          </ScrollHeadingReveal>
-          <div className="typography-lead text-center max-w-4xl mx-auto opacity-80">
-            <ScrollTextReveal>
-              Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая продукты,
-              которые являются результатом фундаментальных исследований и передовых технологий.
-            </ScrollTextReveal>
+      <motion.div
+        animate={{ opacity: vimeoOpen ? 0 : 1 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-30"
+      >
+        <div className="px-4 pt-24 md:pt-32 pb-12 text-center">
+          <div className="mx-auto max-w-4xl">
+            <h2
+              className="mb-4 text-sm font-medium uppercase tracking-[0.2em]"
+              style={{
+                background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                animation: "gradient-shift 6s ease-in-out infinite",
+                textShadow: "0 0 20px rgba(14, 165, 233, 0.3)",
+                filter: "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
+              }}
+            >
+              Наука • Качество • Доверие
+            </h2>
+            <ScrollHeadingReveal tag="h1" className="mb-6 text-center">
+              Почему 4Life?
+            </ScrollHeadingReveal>
+            <div className="typography-lead text-center max-w-4xl mx-auto opacity-80">
+              <ScrollTextReveal>
+                Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая продукты,
+                которые являются результатом фундаментальных исследований и передовых технологий.
+              </ScrollTextReveal>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="relative">
-        {/* Блок 01 - Наука */}
-        <div ref={block1Ref} className="relative">
-          <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-3 order-2 lg:order-1">
-                  <ScrollNumber
-                    number="01"
-                    className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none"
-                  />
-                </div>
-                <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
-                  <ScrollHeadingReveal tag="h2" className="text-left" direction="left" simpleMobile>
-                    Исследования и Инновации
-                  </ScrollHeadingReveal>
-                  <ScrollTextReveal>
-                    В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
-                    уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
-                    функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
-                    создаёт.
-                  </ScrollTextReveal>
+        <div className="relative">
+          <div ref={block1Ref} className="relative">
+            <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
+              <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  <div className="lg:col-span-3 order-2 lg:order-1">
+                    <ScrollNumber number="01" className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none" />
+                  </div>
+                  <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
+                    <ScrollHeadingReveal tag="h2" className="text-left" direction="left" simpleMobile>
+                      Исследования и Инновации
+                    </ScrollHeadingReveal>
+                    <ScrollTextReveal>
+                      В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
+                      уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
+                      функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
+                      создаёт.
+                    </ScrollTextReveal>
+                  </div>
                 </div>
               </div>
             </div>
+            <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
+              {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
+                <Grid3D type={1} triggerRef={block1Ref} filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true} />
+              )}
+            </div>
           </div>
-          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
-            {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
-              <Grid3D
-                type={1}
-                triggerRef={block1Ref}
-                filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
-              />
-            )}
-          </div>
-        </div>
 
-        {/* Блок 02 - Производство */}
-        <div ref={block2Ref} className="relative">
-          <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-9 order-1 space-y-6 text-right">
-                  <ScrollHeadingReveal tag="h2" className="text-right" direction="right" simpleMobile>
-                    Бескомпромиссный Контроль Качества
-                  </ScrollHeadingReveal>
-                  <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl ml-auto">
-                    Каждый этап производства проходит строгий контроль качества. Современные технологии и
-                    сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности
-                    и эффективности продукции.
-                  </ScrollTextReveal>
-                </div>
-                <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
-                  <ScrollNumber
-                    number="02"
-                    className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none lg:translate-x-8"
-                  />
+          <div ref={block2Ref} className="relative">
+            <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
+              <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  <div className="lg:col-span-9 order-1 space-y-6 text-right">
+                    <ScrollHeadingReveal tag="h2" className="text-right" direction="right" simpleMobile>
+                      Бескомпромиссный Контроль Качества
+                    </ScrollHeadingReveal>
+                    <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl ml-auto">
+                      Каждый этап производства проходит строгий контроль качества. Современные технологии и
+                      сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности
+                      и эффективности продукции.
+                    </ScrollTextReveal>
+                  </div>
+                  <div className="lg:col-span-3 order-2 flex justify-end lg:justify-center xl:justify-end">
+                    <ScrollNumber
+                      number="02"
+                      className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-thin leading-none lg:translate-x-8"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+            <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
+              {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
+                <Grid3D type={2} triggerRef={block2Ref} filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true} />
+              )}
+            </div>
           </div>
-          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
-            {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
-              <Grid3D
-                type={2}
-                triggerRef={block2Ref}
-                filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
-              />
-            )}
-          </div>
-        </div>
 
-        {/* Блок 03 - Результат */}
-        <div ref={block3Ref} className="relative">
-          <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
-            <div className="container mx-auto px-4 md:px-8 max-w-6xl">
-              <div className="text-center space-y-8">
-                <ScrollNumber
-                  number="03"
-                  className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none"
-                />
-                <div className="space-y-6">
-                  <ScrollHeadingReveal tag="h2" className="text-center" simpleMobile>
-                    Подтверждённая Эффективность
-                  </ScrollHeadingReveal>
-                  <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
-                    Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом,
-                    мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная
-                    система работает как швейцарские часы. Миллионы людей уже почувствовали эту разницу. Теперь ваша
-                    очередь открыть для себя, каково это — жить в полную силу.
-                  </ScrollTextReveal>
+          <div ref={block3Ref} className="relative">
+            <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
+              <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+                <div className="text-center space-y-8">
+                  <ScrollNumber number="03" className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none" />
+                  <div className="space-y-6">
+                    <ScrollHeadingReveal tag="h2" className="text-center" simpleMobile>
+                      Подтверждённая Эффективность
+                    </ScrollHeadingReveal>
+                    <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
+                      Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом,
+                      мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная
+                      система работает как швейцарские часы. Миллионы людей уже почувствовали эту разницу. Теперь ваша
+                      очередь открыть для себя, каково это — жить в полную силы.
+                    </ScrollTextReveal>
+                  </div>
                 </div>
               </div>
             </div>
+            <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
+              {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
+                <Grid3D type={3} triggerRef={block3Ref} filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true} />
+              )}
+            </div>
           </div>
-          <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
-            {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
-              <Grid3D
-                type={3}
-                triggerRef={block3Ref}
-                filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
-              />
-            )}
-          </div>
+
+          <div className="h-[12vh] lg:h-[20vh]"></div>
         </div>
 
-        {/* Пространство после секции */}
-        <div className="h-[12vh] lg:h-[20vh]"></div>
-      </div>
-
-      {/* CTA кнопка */}
-      <div className="relative z-30 px-4 pb-24 text-center">
-        <div className="mx-auto max-w-4xl">
-          <Button
-            to="/about"
-            variant="primary"
-            size="lg"
-            className="from-cyan-600 to-blue-600 shadow-lg"
-            icon={<Icons.Info className="w-5 h-5" />}
-          >
-            Узнать больше о компании
-          </Button>
+        <div className="px-4 pb-24 text-center">
+          <div className="mx-auto max-w-4xl">
+            <Button to="/about" variant="primary" size="lg" className="from-cyan-600 to-blue-600 shadow-lg" icon={<Icons.Info className="w-5 h-5" />}>
+              Узнать больше о компании
+            </Button>
+          </div>
         </div>
-      </div>
-      {/* Все три видео компонента */}
-      <BlockVideo blockRef={block1Ref} videoSrc={productionVideo} blockIndex={0} />
-      <BlockVideo blockRef={block2Ref} videoSrc={productionVideo} blockIndex={1} />
-      <BlockVideo blockRef={block3Ref} videoSrc={productionVideo} blockIndex={2} />
+      </motion.div>
+
+        <VideoBlockWrapper
+          blockRef={block1Ref}
+          videoSrc={productionVideo}
+          posterSrc={tier === "low" ? `${posterBase}1.jpg` : undefined}
+          blockIndex={0}
+          isTouchDevice={isTouchDevice}
+          onClick={handleOpenVimeo1}
+          isModalOpen={vimeoOpen}
+        />
+        <VideoBlockWrapper
+          blockRef={block2Ref}
+          videoSrc={productionVideo}
+          posterSrc={tier === "low" ? `${posterBase}2.jpg` : undefined}
+          blockIndex={1}
+          isTouchDevice={isTouchDevice}
+          onClick={handleOpenVimeo2}
+          isModalOpen={vimeoOpen}
+        />
+        <VideoBlockWrapper
+          blockRef={block3Ref}
+          videoSrc={productionVideo}
+          posterSrc={tier === "low" ? `${posterBase}3.jpg` : undefined}
+          blockIndex={2}
+          isTouchDevice={isTouchDevice}
+          onClick={handleOpenVimeo3}
+          isModalOpen={vimeoOpen}
+        />
     </section>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Vimeo Modal — автоплей со звуком через JS SDK                      */
+/* ------------------------------------------------------------------ */
+const VimeoModal: React.FC<{ isOpen: boolean; onClose: () => void; tier: "low" | "medium" | "high"; videoUrl: string }> = ({
+  isOpen,
+  onClose,
+  tier,
+  videoUrl,
+}) => {
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  // Perfect Scroll Lock
+  useEffect(() => {
+    if (isOpen) {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.touchAction = "none";
+      lenis?.stop();
+    } else {
+      closeTimeoutRef.current = setTimeout(() => {
+        document.body.style.overflow = "";
+        document.body.style.touchAction = "";
+        document.documentElement.style.overflow = "";
+        document.documentElement.style.touchAction = "";
+        lenis?.start();
+      }, 450);
+    }
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.touchAction = "";
+      lenis?.start();
+    };
+  }, [isOpen]);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = modalRef.current;
+    if (!el || !isOpen) return;
+    const preventWheel = (e: WheelEvent) => e.preventDefault();
+    el.addEventListener("wheel", preventWheel, { passive: false });
+    return () => el.removeEventListener("wheel", preventWheel);
+  }, [isOpen]);
+
+  return (
+    <div
+      ref={modalRef}
+      style={{ pointerEvents: isOpen ? "auto" : "none" }}
+      className="fixed inset-0 z-[200] touch-action-none"
+    >
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="vimeo-modal"
+            className="fixed inset-0 flex items-center justify-center p-4 md:p-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div
+              className={[
+                "absolute inset-0",
+                tier === "low" ? "bg-[#03050a]/98" : "bg-[#03050a]/90 backdrop-blur-xl",
+              ].join(" ")}
+              onClick={onClose}
+            />
+            <motion.div
+              className="relative w-full max-w-6xl"
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={onClose}
+                className="absolute -top-14 right-0 md:-top-10 md:-right-10 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:scale-110 active:scale-95 focus:outline-none"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10">
+                <iframe
+                  ref={iframeRef}
+                  src={videoUrl || VIMEO_URL_02}
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                  frameBorder="0"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                  title="Vimeo Presentation"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

@@ -1,4 +1,5 @@
 export { default as Button } from "./Button";
+export { CustomCursor } from "./CustomCursor";
 export { default as DynamicLogo } from "./DynamicLogo";
 export { default as FAQItem } from "./FAQItem";
 export { default as HamburgerButton } from "./HamburgerButton";

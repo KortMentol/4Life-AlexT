@@ -26,6 +26,12 @@ class WebGLFluidEnhanced {
     this.simulation.stop();
   }
 
+  public destroy() {
+    if (this.simulation) {
+      this.simulation.destroy();
+    }
+  }
+
   public togglePause(drawWhilePaused = false): boolean {
     if (!this.simulation.hasStarted) return false;
     this.simulation.paused = !this.simulation.paused;
