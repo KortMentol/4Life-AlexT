@@ -559,6 +559,19 @@ const MorphingVideoSection: React.FC = () => {
     return unsub;
   }, []);
 
+  // ── Debug флаг: маска сглаживания краев сетки ──
+  const [gridMask, setGridMask] = useState<boolean>(
+    () => effectsDebugStore.getFlag("grid3dMaskFade") as boolean,
+  );
+
+  useEffect(() => {
+    const unsub = effectsDebugStore.subscribe((flags) => {
+      setRenderBlocks(flags.renderVideoBlocks);
+      setGridMask(flags.grid3dMaskFade);
+    });
+    return unsub;
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -647,7 +660,19 @@ const MorphingVideoSection: React.FC = () => {
             willChange: isTouchDevice ? "auto" : "transform",
           }}
         >
-          {tier !== "low" && <div className="absolute inset-0 w-full h-full bg-biotech-grid" />}
+          {tier !== "low" && (
+            <div
+              className="absolute inset-0 w-full h-full bg-biotech-grid"
+              style={{
+                maskImage: gridMask
+                  ? "linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)"
+                  : "none",
+                WebkitMaskImage: gridMask
+                  ? "linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)"
+                  : "none",
+              }}
+            />
+          )}
           {tier !== "low" && (
             <>
               <div className="absolute inset-0 w-full h-full bg-glow-cyan" />

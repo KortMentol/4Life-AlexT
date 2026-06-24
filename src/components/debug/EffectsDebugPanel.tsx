@@ -41,6 +41,10 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     desc: "Applies a lightweight, dynamic CSS backdrop-filter blur to create a premium depth-of-field lens effect.",
     loc: "HomePage Grid Background",
   },
+  grid3dMaskFade: {
+    desc: "Applies an expensive linear-gradient mask to fade the top and bottom boundaries of the background grid. Heavy on mobile fill-rate.",
+    loc: "HomePage Grid Background",
+  },
   scrollTextWordByWord: {
     desc: "High-performance GSAP ScrollTrigger typography parser animating word opacity and skew per scroll frame.",
     loc: "HomePage Text Sections",
@@ -481,6 +485,18 @@ const EffectsDebugPanel: React.FC = () => {
               onHover={handleHover}
             />
           </div>
+
+          <div className={styles.divider} />
+
+          {/* ── Biotech Background Grid ── */}
+          <div className={styles.sectionLabel}>Biotech Background Grid</div>
+          <ToggleRow
+            label="grid edge mask-fade"
+            flagKey="grid3dMaskFade"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
 
           <div className={styles.divider} />
 

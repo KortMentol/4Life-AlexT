@@ -26,6 +26,7 @@ export interface EffectsDebugFlags {
   molecularNetHighNodes: boolean;
   cardScrollGather: boolean;
   parallaxBackground: boolean;
+  grid3dMaskFade: boolean;
   // ─── Global UI Components ───
   headerGlass: boolean;
   premiumTransitions: boolean;
@@ -55,6 +56,7 @@ const DEFAULTS: EffectsDebugFlags = {
   premiumTransitions: true,
   auroraText: true,
   textShineAnimation: true,
+  grid3dMaskFade: true,
 };
 
 type Listener = (flags: EffectsDebugFlags) => void;
@@ -127,6 +129,7 @@ class EffectsDebugStore {
       this.flags.auroraText = false;
       this.flags.renderVideoBlocks = true;
       this.flags.textShineAnimation = false;
+      this.flags.grid3dMaskFade = false;
     } else if (tier === "medium") {
       // Отключаем только самые тяжелые High-tier фичи
       this.flags.webglFluid = true;
@@ -145,11 +148,13 @@ class EffectsDebugStore {
       this.flags.headerGlass = true;
       this.flags.premiumTransitions = true;
       this.flags.auroraText = true;
+      this.flags.grid3dMaskFade = false;
     } else {
       // High или Auto - включаем всё по дефолту
       const newFlags = { ...DEFAULTS };
       newFlags.tierOverride = tier;
       this.flags = newFlags;
+      this.flags.grid3dMaskFade = true;
     }
 
     this.save();

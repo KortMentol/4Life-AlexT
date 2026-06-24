@@ -193,6 +193,17 @@ const EffectsDebugMobile: React.FC = () => {
 
               <div className={styles.divider} />
 
+              {/* ── Biotech Background Grid ── */}
+              <div className={styles.sectionLabel}>Biotech Background Grid</div>
+              <ToggleRowMobile
+                label="grid edge mask-fade"
+                flagKey="grid3dMaskFade"
+                flags={flags}
+                onChange={handleToggle}
+              />
+
+              <div className={styles.divider} />
+
               {/* ── Grid3D ── only show if width >= 1024px */}
               {!isTabletScreen && (
                 <>
