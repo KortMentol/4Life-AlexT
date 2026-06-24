@@ -141,9 +141,7 @@ const VideoBlockWrapper: React.FC<{
     [0, 1, 1, 1, 1, 0],
   );
 
-  // Умное динамическое переключение кликабельности (Капкан прозрачности решен!)
-  // Если карточка прозрачнее чем 0.15 — она пропускает клики сквозь себя
-  const pointerEvents = useTransform(opacity, (o) => (o > 0.15 ? "auto" : "none"));
+  // Кликабельность управляется через isIntersecting (off-screen карточки не перехватывают клики)
 
   const rawTranslateZ = useTransform(scrollYProgress, [0, 1], [0, 0]);
 
@@ -220,7 +218,7 @@ const VideoBlockWrapper: React.FC<{
     };
   }, []);
 
-  // Высокопроизводительный прямой DOM-апдейт прогресса круга (0ms React Overhead)
+  // Прогресс круга через timeupdate (без RAF, экономим main thread)
   useEffect(() => {
     const video = videoRef.current;
     const circle = progressCircleRef.current;
@@ -232,23 +230,21 @@ const VideoBlockWrapper: React.FC<{
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
     circle.style.strokeDashoffset = `${circumference}`;
 
-    let rafId: number;
-    let lastTime = 0;
-
-    const updateProgress = (time: number) => {
-      if (time - lastTime >= 33) {
-        lastTime = time;
-        if (video.duration && !isNaN(video.duration)) {
-          const progress = video.currentTime / video.duration;
-          const offset = circumference - progress * circumference;
-          circle.style.strokeDashoffset = `${offset}`;
-        }
+    const handleTimeUpdate = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        const progress = video.currentTime / video.duration;
+        const offset = circumference - progress * circumference;
+        circle.style.strokeDashoffset = `${offset.toFixed(1)}`;
       }
-      rafId = requestAnimationFrame(updateProgress);
     };
 
-    rafId = requestAnimationFrame(updateProgress);
-    return () => cancelAnimationFrame(rafId);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    circle.style.transition = "stroke-dashoffset 0.25s linear";
+
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      circle.style.transition = "";
+    };
   }, [showProgressOrb, isIntersecting, isVideoLoaded]);
 
   // Вызовы глобального курсора
@@ -273,7 +269,7 @@ const VideoBlockWrapper: React.FC<{
       }}
     >
       <motion.div
-        style={{ y, opacity, translateZ, pointerEvents }}
+        style={{ y, opacity, translateZ }}
         className="w-full h-full flex items-center justify-center pointer-events-none"
       >
         <motion.div
@@ -290,13 +286,7 @@ const VideoBlockWrapper: React.FC<{
             data-cursor="block"
             className="relative aspect-video overflow-hidden rounded-2xl bg-[#03050a] cursor-pointer"
             onClick={onClick}
-            style={{
-              transform: "translate3d(0, 0, 0)",
-              WebkitTransform: "translate3d(0, 0, 0)",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              isolation: "isolate",
-            }}
+            style={{ isolation: "isolate" }}
             onMouseEnter={!isTouchDevice ? handleMouseEnter : undefined}
             onMouseLeave={!isTouchDevice ? handleMouseLeave : undefined}
           >

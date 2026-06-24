@@ -189,22 +189,9 @@ const EffectsDebugMobile: React.FC = () => {
                   disabled={!flags.webglFluid}
                   onChange={handleToggle}
                 />
-              </div>
+               </div>
 
-              <div className={styles.divider} />
-
-              {/* ── Biotech Background Grid ── */}
-              <div className={styles.sectionLabel}>Biotech Background Grid</div>
-              <ToggleRowMobile
-                label="grid edge mask-fade"
-                flagKey="grid3dMaskFade"
-                flags={flags}
-                onChange={handleToggle}
-              />
-
-              <div className={styles.divider} />
-
-              {/* ── Grid3D ── only show if width >= 1024px */}
+                {/* ── Grid3D ── only show if width >= 1024px */}
               {!isTabletScreen && (
                 <>
                   <div className={styles.sectionLabel}>Grid 3D (MorphingVideo)</div>
@@ -244,6 +231,17 @@ const EffectsDebugMobile: React.FC = () => {
               <div className={styles.divider} />
             </>
           )}
+
+          {/* ── Biotech Background Grid — visible on all devices (CSS mask toggle) ── */}
+          <div className={styles.sectionLabel}>Biotech Background Grid</div>
+          <ToggleRowMobile
+            label="grid edge mask-fade"
+            flagKey="grid3dMaskFade"
+            flags={flags}
+            onChange={handleToggle}
+          />
+
+          <div className={styles.divider} />
 
           {/* Video Central Progress Orb — показываем на ВСЕХ устройствах (и мобильных, и ПК) */}
           <div className={styles.sectionLabel}>Video Central Progress Orb</div>
