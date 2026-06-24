@@ -113,11 +113,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       setIsModalOpen(isModalOpen);
       
       if (!isModalOpen) {
-        // Задержка перед показом хедера — даём модалке завершить exit-анимацию
-        setTimeout(() => {
-          setModalVisible(true);
-          setIsModalOpen(false);
-        }, 0);
+        setModalVisible(true);
+        setIsModalOpen(false);
       } else {
         setModalVisible(false);
         // ОСТАВЛЯЕМ хедер там где он был — motion сам плавно анимирует opacity → 0
