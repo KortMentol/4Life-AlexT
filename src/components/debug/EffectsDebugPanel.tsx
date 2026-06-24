@@ -53,6 +53,14 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     desc: "Boosts 3D perspective scroll magnitude on why-us video blocks to ±400px for intense spatial immersion.",
     loc: "HomePage Video Blocks",
   },
+  videoProgressOrb: {
+    desc: "Direct-DOM calculated circular SVG progress tracker and play indicator in the center of the card. Non-reactive animation loop (0ms React render overhead).",
+    loc: "HomePage Video Blocks",
+  },
+  renderVideoBlocks: {
+    desc: "Globally enables or disables all three video blocks (01/02/03). Zero FPS cost when disabled — no video elements, no rAF, no IntersectionObserver.",
+    loc: "HomePage Video Blocks",
+  },
   molecularNetHighNodes: {
     desc: "Scales dynamic SVG vertices to 12 nodes with bounding-box connection lines and custom orbital drift physics.",
     loc: "Partnership Section 1",
@@ -531,6 +539,24 @@ const EffectsDebugPanel: React.FC = () => {
           <ToggleRow
             label="translateZ ±400 (vs ±200)"
             flagKey="blockVideoTranslateZHigh"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+
+          <div className={styles.sectionLabel}>Video Central Progress Orb</div>
+          <ToggleRow
+            label="Progress Orb (on/off)"
+            flagKey="videoProgressOrb"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+
+          <div className={styles.sectionLabel}>Render Video Blocks 01/02/03</div>
+          <ToggleRow
+            label="Video blocks (on/off)"
+            flagKey="renderVideoBlocks"
             flags={flags}
             onChange={handleToggle}
             onHover={handleHover}

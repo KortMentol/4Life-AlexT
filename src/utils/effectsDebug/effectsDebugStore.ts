@@ -4,16 +4,8 @@
  * Хранит состояние в localStorage — переживает перезагрузку страницы.
  * Только DEV режим. В production не используется.
  *
- * Флаги покрывают все эффекты которые есть на HIGH тире но отсутствуют на MEDIUM:
- * - WebGL Fluid (SectionFluidEffect)
- * - Grid3D (MorphingVideoSection)
- * - Grid3D filter:blur (CSS на .grid__item)
- * - ScrollText пословный режим (ScrollText)
- * - translateZ magnitude на BlockVideo
- * - MolecularNet nodes count (PartnershipSection/Science)
- *
  * @author Kort
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 export type PerformanceTierOverride = "auto" | "low" | "medium" | "high";
@@ -28,6 +20,8 @@ export interface EffectsDebugFlags {
   grid3dFilterBlur: boolean;
   scrollTextWordByWord: boolean;
   scrollNumberAnimation: boolean; // Scroll-driven color fill of digits 01, 02, 03
+  videoProgressOrb: boolean; // Глобальный переключатель кругового прогресс-бара на видео
+  renderVideoBlocks: boolean; // Глобальный переключатель всех видео-блоков 01/02/03
   blockVideoTranslateZHigh: boolean;
   molecularNetHighNodes: boolean;
   cardScrollGather: boolean;
@@ -51,6 +45,8 @@ const DEFAULTS: EffectsDebugFlags = {
   grid3dFilterBlur: true,
   scrollTextWordByWord: true,
   scrollNumberAnimation: true,
+  videoProgressOrb: true, // По умолчанию включен везде для сохранения целостности дизайна
+  renderVideoBlocks: true, // По умолчанию включены все видео-блоки
   blockVideoTranslateZHigh: true,
   molecularNetHighNodes: true,
   cardScrollGather: true,
@@ -77,7 +73,6 @@ class EffectsDebugStore {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return { ...DEFAULTS };
       const parsed = JSON.parse(raw) as Partial<EffectsDebugFlags>;
-      // Merge с defaults — новые флаги получают дефолтное значение
       return { ...DEFAULTS, ...parsed };
     } catch {
       return { ...DEFAULTS };
@@ -122,6 +117,7 @@ class EffectsDebugStore {
       this.flags.grid3d = false;
       this.flags.scrollTextWordByWord = false;
       this.flags.scrollNumberAnimation = false;
+      this.flags.videoProgressOrb = true; // Сохраняем круг для дизайна даже на Low тире
       this.flags.blockVideoTranslateZHigh = false;
       this.flags.molecularNetHighNodes = false;
       this.flags.cardScrollGather = false;
@@ -129,9 +125,10 @@ class EffectsDebugStore {
       this.flags.headerGlass = false;
       this.flags.premiumTransitions = false;
       this.flags.auroraText = false;
+      this.flags.renderVideoBlocks = true;
       this.flags.textShineAnimation = false;
     } else if (tier === "medium") {
-      // Отключаем только High-tier фичи
+      // Отключаем только самые тяжелые High-tier фичи
       this.flags.webglFluid = true;
       this.flags.webglFluidPressureHigh = false;
       this.flags.webglFluidSunrays = false;
@@ -139,8 +136,11 @@ class EffectsDebugStore {
       this.flags.grid3dFilterBlur = false;
       this.flags.blockVideoTranslateZHigh = false;
       this.flags.molecularNetHighNodes = false;
+      this.flags.videoProgressOrb = true;
       this.flags.scrollTextWordByWord = true;
+      this.flags.scrollNumberAnimation = true;
       this.flags.cardScrollGather = true;
+      this.flags.renderVideoBlocks = true;
       this.flags.parallaxBackground = true;
       this.flags.headerGlass = true;
       this.flags.premiumTransitions = true;
@@ -167,11 +167,9 @@ class EffectsDebugStore {
   }
 }
 
-// Singleton — один экземпляр на всё приложение
 export const effectsDebugStore = new EffectsDebugStore();
 
-/** Читает tierOverride из localStorage синхронно (для usePerformanceTier) */
 export const getTierOverride = (): PerformanceTierOverride => {
   if (typeof window === "undefined") return "auto";
-  return effectsDebugStore.getFlag("tierOverride");
+  return effectsDebugStore.getFlag("tierOverride") as PerformanceTierOverride;
 };

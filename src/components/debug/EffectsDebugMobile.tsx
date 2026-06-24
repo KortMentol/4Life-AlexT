@@ -234,6 +234,25 @@ const EffectsDebugMobile: React.FC = () => {
             </>
           )}
 
+          {/* Video Central Progress Orb — показываем на ВСЕХ устройствах (и мобильных, и ПК) */}
+          <div className={styles.sectionLabel}>Video Central Progress Orb</div>
+          <ToggleRowMobile
+            label="Progress Orb (on/off)"
+            flagKey="videoProgressOrb"
+            flags={flags}
+            onChange={handleToggle}
+          />
+
+          <div className={styles.sectionLabel}>Render Video Blocks 01/02/03</div>
+          <ToggleRowMobile
+            label="Video blocks (on/off)"
+            flagKey="renderVideoBlocks"
+            flags={flags}
+            onChange={handleToggle}
+          />
+
+          <div className={styles.divider} />
+
           {/* Scroll Number filling - Independent parameter, shown on BOTH PC and mobile */}
           <div className={styles.sectionLabel}>Scroll Number</div>
           <ToggleRowMobile
