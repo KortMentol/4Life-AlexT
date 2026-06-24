@@ -542,9 +542,22 @@ const MorphingVideoSection: React.FC = () => {
     () => effectsDebugStore.getFlag("renderVideoBlocks") as boolean,
   );
 
+  const [renderBg, setRenderBg] = useState<boolean>(
+    () => effectsDebugStore.getFlag("morphingBackground") as boolean,
+  );
+
   useEffect(() => {
     const unsub = effectsDebugStore.subscribe((flags) => {
       setRenderBlocks(flags.renderVideoBlocks);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = effectsDebugStore.subscribe((flags) => {
+      setRenderBlocks(flags.renderVideoBlocks);
+      setGridMask(flags.grid3dMaskFade);
+      setRenderBg(flags.morphingBackground);
     });
     return unsub;
   }, []);
@@ -639,38 +652,44 @@ const MorphingVideoSection: React.FC = () => {
 
       <SectionFluidEffect sectionRef={sectionRef} />
 
-      <div className="absolute inset-0 -z-30 overflow-hidden bg-[#03050a]">
-        <motion.div
-          ref={parallaxBgRef}
-          className="parallax-bg absolute inset-0 w-full h-full"
-          style={{
-            y: bgY,
-            height: "calc(100% + 200px)",
-            top: "-100px",
-            willChange: isTouchDevice ? "auto" : "transform",
-          }}
-        >
-          {tier !== "low" && (
-            <div
-              className="absolute inset-0 w-full h-full bg-biotech-grid"
-              style={{
-                maskImage: gridMask
-                  ? "linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)"
-                  : "none",
-                WebkitMaskImage: gridMask
-                  ? "linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)"
-                  : "none",
-              }}
-            />
-          )}
-          {tier !== "low" && (
-            <>
-              <div className="absolute inset-0 w-full h-full bg-glow-cyan" />
-              <div className="absolute inset-0 w-full h-full bg-glow-blue" />
-            </>
-          )}
-          {tier === "high" && !isTouchDevice && <div className="absolute inset-0 w-full h-full bg-noise-overlay" />}
-        </motion.div>
+      <div className="absolute inset-0 -z-30 overflow-hidden bg-transparent">
+        {renderBg && (
+          <motion.div
+            ref={parallaxBgRef}
+            className="parallax-bg absolute inset-0 w-full"
+            style={{
+              y: bgY,
+              height: "calc(100% + 200px)",
+              top: "-100px",
+              willChange: isTouchDevice ? "auto" : "transform",
+              backfaceVisibility: "hidden",
+            }}
+          >
+            {/* Biotech Grid, Glows, Noise (High Tier) */}
+            {tier !== "low" && (
+              <div
+                className="absolute inset-0 w-full h-full bg-biotech-grid"
+                style={{
+                  maskImage: gridMask
+                    ? "linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)"
+                    : "none",
+                  WebkitMaskImage: gridMask
+                    ? "linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)"
+                    : "none",
+                }}
+              />
+            )}
+            {tier !== "low" && (
+              <>
+                <div className="absolute inset-0 w-full h-full bg-glow-cyan" />
+                <div className="absolute inset-0 w-full h-full bg-glow-blue" />
+              </>
+            )}
+            {tier === "high" && !isTouchDevice && (
+              <div className="absolute inset-0 w-full h-full bg-noise-overlay" />
+            )}
+          </motion.div>
+        )}
       </div>
 
       <motion.div

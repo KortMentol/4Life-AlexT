@@ -252,6 +252,14 @@ const EffectsDebugMobile: React.FC = () => {
             onChange={handleToggle}
           />
 
+          <div className={styles.sectionLabel}>Morphing Background</div>
+          <ToggleRowMobile
+            label="Background elements (on/off)"
+            flagKey="morphingBackground"
+            flags={flags}
+            onChange={handleToggle}
+          />
+
           <div className={styles.sectionLabel}>Render Video Blocks 01/02/03</div>
           <ToggleRowMobile
             label="Video blocks (on/off)"

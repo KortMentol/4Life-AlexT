@@ -45,6 +45,10 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     desc: "Applies an expensive linear-gradient mask to fade the top and bottom boundaries of the background grid. Heavy on mobile fill-rate.",
     loc: "HomePage Grid Background",
   },
+  morphingBackground: {
+    desc: "Renders the heavy biotech grid, glowing orbs, and noise overlay in the MorphingVideoSection background.",
+    loc: "MorphingVideoSection Background",
+  },
   scrollTextWordByWord: {
     desc: "High-performance GSAP ScrollTrigger typography parser animating word opacity and skew per scroll frame.",
     loc: "HomePage Text Sections",
@@ -568,6 +572,16 @@ const EffectsDebugPanel: React.FC = () => {
             onChange={handleToggle}
             onHover={handleHover}
           />
+
+          <div className={styles.sectionLabel}>Morphing Background</div>
+          <ToggleRow
+            label="Background elements (on/off)"
+            flagKey="morphingBackground"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+          <div className={styles.divider} />
 
           <div className={styles.sectionLabel}>Render Video Blocks 01/02/03</div>
           <ToggleRow

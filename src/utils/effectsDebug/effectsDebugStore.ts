@@ -26,6 +26,7 @@ export interface EffectsDebugFlags {
   molecularNetHighNodes: boolean;
   cardScrollGather: boolean;
   parallaxBackground: boolean;
+  morphingBackground: boolean; // Renders the heavy biotech grid, glowing orbs, and noise overlay in the MorphingVideoSection background
   grid3dMaskFade: boolean;
   // ─── Global UI Components ───
   headerGlass: boolean;
@@ -52,6 +53,7 @@ const DEFAULTS: EffectsDebugFlags = {
   molecularNetHighNodes: true,
   cardScrollGather: true,
   parallaxBackground: true,
+  morphingBackground: true,
   headerGlass: true,
   premiumTransitions: true,
   auroraText: true,
@@ -124,6 +126,7 @@ class EffectsDebugStore {
       this.flags.molecularNetHighNodes = false;
       this.flags.cardScrollGather = false;
       this.flags.parallaxBackground = false;
+      this.flags.morphingBackground = false;
       this.flags.headerGlass = false;
       this.flags.premiumTransitions = false;
       this.flags.auroraText = false;
@@ -145,6 +148,7 @@ class EffectsDebugStore {
       this.flags.cardScrollGather = true;
       this.flags.renderVideoBlocks = true;
       this.flags.parallaxBackground = true;
+      this.flags.morphingBackground = true;
       this.flags.headerGlass = true;
       this.flags.premiumTransitions = true;
       this.flags.auroraText = true;
