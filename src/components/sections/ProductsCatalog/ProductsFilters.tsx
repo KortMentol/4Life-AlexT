@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-import { useTheme } from "@/hooks";
+import { usePerformanceTier, useTheme } from "@/hooks";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
@@ -30,6 +30,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
   onClose,
 }) => {
   const { theme } = useTheme();
+  const tier = usePerformanceTier();
 
   return (
     <AnimatePresence>
@@ -49,6 +50,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
 
           {/* Filter Capsule */}
           <motion.div
+            data-tier={tier}
             initial={{ y: 150, opacity: 0, scale: 0.95 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 150, opacity: 0, scale: 0.95 }}

@@ -14,7 +14,6 @@
 import { useTheme } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
-import { useInView } from "framer-motion";
 import React, { useEffect, useMemo, useRef } from "react";
 import { ScrollTextRevealProps } from "./ScrollTextReveal.types";
 import { DEFAULT_CONFIG, PERFORMANCE_CONFIGS, TextSplitter } from "./ScrollTextReveal.utils";
@@ -70,12 +69,6 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
     return TextSplitter.handleEdgeCases(sanitized);
   }, [children]);
 
-  // Viewport detection with performance optimization
-  const inView = useInView(containerRef, {
-    once: false,
-    margin: DEFAULT_CONFIG.performance.inViewMargin,
-  });
-
   // Theme-based styling with consistent colors
   const getThemeStyles = () => {
     return {
@@ -86,7 +79,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
 
   // GSAP Animation Effect (like original demo 4)
   useEffect(() => {
-    if (!window.gsap || !window.ScrollTrigger || !containerRef.current || !inView) return;
+    if (!window.gsap || !window.ScrollTrigger || !containerRef.current) return;
 
     const container = containerRef.current;
 
@@ -136,8 +129,8 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
               textData.words,
               textData.preservedSpacing,
               textData.lineBreaks,
-              (word, index) =>
-                `<span class="word-${index}" style="display: inline-block; margin-right: 0.75rem; margin-top: 0.75rem;">${word}</span>`,
+            (word, index) =>
+              `<span class="word-${index}" style="display: inline-block;">${word}</span>`,
             );
             container.innerHTML = wordsHTML.join("");
           }
@@ -212,7 +205,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
         splitInstanceRef.current = null;
       }
     };
-  }, [inView, resolvedTier, validatedText, theme, staggerDelay, easingFunction, performanceConfig]);
+  }, [resolvedTier, validatedText, theme, staggerDelay, easingFunction, performanceConfig]);
 
   // Error boundary wrapper
   const renderWithErrorBoundary = (content: React.ReactNode) => {
