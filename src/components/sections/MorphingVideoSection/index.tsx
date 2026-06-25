@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useEffect, useMemo, useRef } from "react";
 
 import SectionFluidEffect from "@/components/effects/SectionFluidEffect";
+import BiotechBackground from "@/components/effects/BiotechBackground";
 import { useParallaxLenis, usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
 
@@ -61,8 +62,8 @@ const MorphingVideoSection: React.FC = () => {
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
       <SectionFluidEffect sectionRef={sectionRef} />
 
-      {/* Оригинальный Awwwards 2026 фон из золотого коммита */}
-      <div className="absolute inset-0 -z-30 overflow-hidden bg-[#03050a]">
+      {/* Адаптивный фоновый слой с аппаратным параллаксом */}
+      <div className="absolute inset-0 -z-30 overflow-hidden bg-transparent">
         <motion.div
           ref={parallaxBgRef}
           className="parallax-bg absolute inset-0 w-full"
@@ -74,30 +75,7 @@ const MorphingVideoSection: React.FC = () => {
             backfaceVisibility: "hidden",
           }}
         >
-          <div
-            className="w-full h-full bg-repeat opacity-100 dark:opacity-0 transition-opacity duration-500"
-            style={{ backgroundImage: `url(/images/backgrounds/light-pattern.webp)`, backgroundSize: "400px 400px" }}
-          />
-
-          {/* ПК версия темного фона */}
-          <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 hidden md:block"
-            style={{
-              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.6) contrast(1.1)",
-            }}
-          />
-
-          {/* Мобильная версия темного фона */}
-          <div
-            className="absolute inset-0 w-full h-full bg-repeat opacity-0 dark:opacity-100 transition-opacity duration-500 block md:hidden"
-            style={{
-              backgroundImage: `url(/images/backgrounds/dark-pattern.png)`,
-              backgroundSize: "400px 400px",
-              filter: "brightness(0.7) contrast(1.1)",
-            }}
-          />
+          <BiotechBackground />
         </motion.div>
       </div>
 

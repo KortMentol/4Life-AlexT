@@ -27,13 +27,6 @@
   --grid-inner-scale: 1;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
 
 /* ─── Base ───────────────────────────────────────────────────────────────────── */
 body {
@@ -232,43 +225,103 @@ section {
   filter: none !important;
 }
 
-/* ─── AWWWARDS 2026: CLINICAL OBSIDIAN BACKGROUND ─── */
+/* ─── AWWWARDS 2026: CLINICAL OBSIDIAN BACKGROUND (MONO-THEME) ─── */
 
-/* 1. Базовый фон для всего сайта (вместо старых градиентов) */
-body {
-  background-color: #03050a;
-  color: #f8fafc;
+:root {
+  --bg-biotech-main: #03050a;
+  --bg-biotech-grid-color: rgba(255, 255, 255, 0.015);
+  --bg-biotech-glow-cyan: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+  --bg-biotech-glow-blue: radial-gradient(circle, rgba(59, 130, 246, 0.03) 0%, transparent 70%);
+  --bg-noise-opacity: 0.025;
+  --bg-fade-color: #03050a;
 }
 
-/* 2. Инженерная микро-сетка */
+body {
+  background-color: var(--bg-biotech-main) !important;
+  color: #f8fafc !important;
+}
+
+/* Высокопроизводительная инженерная микро-сетка */
 .bg-biotech-grid {
+  position: absolute;
+  inset: 0;
   background-size: 40px 40px;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-}
-
-/* Apply the fade mask dynamically only on desktop browsers with pointing devices
-   Mobile masking is controlled by React flag grid3dMaskFade via inline styles */
-@media (hover: hover) and (pointer: fine) {
-  .bg-biotech-grid {
-    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-  }
-}
-
-/* 3. Субпиксельный шум (Аппаратно-ускоренный Base64) */
-.bg-noise-overlay {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  mix-blend-mode: overlay;
+    linear-gradient(to right, var(--bg-biotech-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bg-biotech-grid-color) 1px, transparent 1px);
   pointer-events: none;
 }
 
-/* 4. Объемные радиальные свечения (Volumetric Glows) */
-.bg-glow-cyan {
-  background: radial-gradient(circle at 0% 50%, rgba(6, 182, 212, 0.07) 0%, transparent 50%);
+/* Аппаратное затухание краев без использования дорогого mask-image */
+.bg-biotech-grid::before,
+.bg-biotech-grid::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 15vh;
+  pointer-events: none;
+  z-index: 1;
 }
+.bg-biotech-grid::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--bg-fade-color), transparent);
+}
+.bg-biotech-grid::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg-fade-color), transparent);
+}
+
+/* Аппаратно-ускоренный субпиксельный шум без mix-blend-mode (Оптимизация под Safari/iOS) */
+.bg-noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+/* Объемные радиальные свечения на чистых слоях (Compositor-only) */
+.bg-glow-cyan {
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  background: var(--bg-biotech-glow-cyan);
+  pointer-events: none;
+}
+
 .bg-glow-blue {
-  background: radial-gradient(circle at 100% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  position: absolute;
+  width: 50vw;
+  height: 50vw;
+  border-radius: 50%;
+  background: var(--bg-biotech-glow-blue);
+  pointer-events: none;
+}
+
+/* Размытие применяется только на High Tier */
+.bg-glow-blurred {
+  filter: blur(80px);
+}
+
+/* Анимации свечений: вынесены на уровень Compositor (не нагружают Main Thread) */
+@keyframes glow-drift-cyan {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(5%, -5%, 0) scale(1.08); }
+}
+
+@keyframes glow-drift-blue {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-4%, 4%, 0) scale(0.92); }
+}
+
+.animate-glow-cyan {
+  animation: glow-drift-cyan 18s ease-in-out infinite alternate;
+}
+
+.animate-glow-blue {
+  animation: glow-drift-blue 22s ease-in-out infinite alternate;
 }

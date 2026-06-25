@@ -1,6 +1,4 @@
-export { ThemeProvider } from "./ThemeProvider";
-export { ThemeContext } from "./ThemeContext.helpers";
-export type { Theme, ThemeContextType } from "./ThemeContext.types";
+export type { Theme, ThemeContextType } from "../hooks/useTheme";
 
 export { FluidProvider } from "./FluidProvider";
 export { FluidContext } from "./FluidContext.helpers";

@@ -21,7 +21,6 @@ export const useEffectsDebug = (): EffectsDebugFlags => {
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-    // Подписываемся на изменения store
     const unsub = effectsDebugStore.subscribe(setFlags);
     return unsub;
   }, []);
@@ -29,10 +28,6 @@ export const useEffectsDebug = (): EffectsDebugFlags => {
   return flags;
 };
 
-/**
- * Читает один конкретный флаг — для компонентов которым нужен только один флаг.
- * Чуть эффективнее чем useEffectsDebug() если нужен только один флаг.
- */
 export const useEffectsDebugFlag = <K extends keyof EffectsDebugFlags>(
   key: K,
 ): EffectsDebugFlags[K] => {
@@ -40,17 +35,12 @@ export const useEffectsDebugFlag = <K extends keyof EffectsDebugFlags>(
   return flags[key];
 };
 
-/**
- * Умный переключатель фич:
- * В DEV-режиме отдает приоритет ручным тумблерам из EffectsDebugStore.
- * В PROD-режиме опирается на переданное условие (hardware tier).
- */
 export const useFeatureFlag = (
   flagKey: keyof EffectsDebugFlags,
   prodCondition: boolean,
 ): boolean => {
   const flags = useEffectsDebug();
-  if (typeof window !== "undefined" && import.meta.env.DEV) {
+  if (import.meta.env.DEV) {
     return flags[flagKey] as boolean;
   }
   return prodCondition;

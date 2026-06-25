@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
-import { Moon, Sun } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -8,14 +7,13 @@ import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 import { useTransition } from "@/context";
-import { useFeatureFlag, useIsMobile, useNativeScroll, usePerformanceTier, useTheme } from "@/hooks";
+import { useFeatureFlag, useIsMobile, useNativeScroll, usePerformanceTier } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
 import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
 
 // Logo imports
 import logoLight from "@/assets/images/brand/4life-logo-light.svg";
-import logoDark from "@/assets/images/brand/4life-logo.svg";
 
 interface HeaderProps {
   isMenuOpen: boolean;
@@ -24,8 +22,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark";
   const { transitionTo } = useTransition();
   const isMobile = useIsMobile();
   const tier = usePerformanceTier();
@@ -51,11 +47,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   }, []); // Пустой массив зависимостей - выполнится только один раз
 
   // Показываем хедер при маунте (первая загрузка) и по событию force-header-show.
-  // force-header-show диспатчится из RouteChangeHandler после восстановления скролла —
-  // уже после того как пелена перехода закрыла экран.
-  // НЕ вызываем showHeader() при каждой смене location — это показывало хедер
-  // до закрытия пелены.
-  // ВАЖНО: если модалка открыта при маунте — не показываем хедер (он и так скрыт через opacity)
   useEffect(() => {
     if (isModalOpenRef.current) return; // модалка уже открыта — хедер остаётся скрытым
     showHeader();
@@ -96,29 +87,25 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     const tl = menuTlRef.current;
 
     if (isMenuOpen) {
-      // Играем вперёд из текущей позиции
       tl.play();
     } else {
-      // Реверсируем из текущей позиции
       tl.reverse();
     }
   }, [isMenuOpen]);
 
-  // Слушатель для плавного скрытия/показа хедера при открытии модалки (без движения — только opacity)
+  // Слушатель для плавного скрытия/показа хедера при открытии модалки
   useEffect(() => {
     const handleModalState = (e: Event) => {
       const customEvent = e as CustomEvent;
       const isModalOpen = customEvent.detail.isOpen;
       isModalOpenRef.current = isModalOpen;
       setIsModalOpen(isModalOpen);
-      
+
       if (!isModalOpen) {
         setModalVisible(true);
         setIsModalOpen(false);
       } else {
         setModalVisible(false);
-        // ОСТАВЛЯЕМ хедер там где он был — motion сам плавно анимирует opacity → 0
-        // НЕ трогаем трансформ — хедер может быть скрыт под экраном, motion управляет видимостью
         if (menuTlRef.current) {
           menuTlRef.current.pause();
           menuTlRef.current.progress(1);
@@ -131,7 +118,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   }, []);
 
   // Показываем хедер при маунте (первая загрузка) и по событию force-header-show.
-  // ВАЖНО: если модалка открыта при маунте — не показываем хедер (он и так скрыт через opacity)
   useEffect(() => {
     if (isModalOpenRef.current) return; // модалка уже открыта — хедер остаётся скрытым
     showHeader();
@@ -139,10 +125,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     window.addEventListener("force-header-show", handleForceShow);
     return () => window.removeEventListener("force-header-show", handleForceShow);
   }, [showHeader]);
-
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
 
   const handleLogoClick = () => {
     if (isMobile) {
@@ -159,9 +141,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   // Мемоизация CSS переменных для производительности
   const cssVars = useMemo(
     () => ({
-      "--header-glow-rgb": isDark ? "0, 212, 255" : "59, 130, 246",
+      "--header-glow-rgb": "0, 212, 255",
     }),
-    [isDark],
+    [],
   );
 
   return (
@@ -172,7 +154,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       role="banner"
       style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
-      className={`header-premium ${isDark ? "header-premium--dark" : "header-premium--light"}`}
+      className="header-premium"
     >
       <div className="header-content">
         <div className="flex items-center justify-between w-full">
@@ -192,12 +174,12 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 animate="animate"
                 whileHover={undefined}
               >
-                <img src={isDark ? logoLight : logoDark} alt="4Life Logo" className="h-8 w-auto relative z-10" />
+                <img src={logoLight} alt="4Life Logo" className="h-8 w-auto relative z-10" />
               </motion.div>
               <motion.div
                 style={{
-                  color: isDark ? "white" : "#1e293b",
-                  textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                  color: "white",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                 }}
                 className="flex flex-col items-center"
               >
@@ -208,8 +190,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 <div
                   className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1"
                   style={{
-                    color: isDark ? "#e6b800" : "#8a6600",
-                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "none",
+                    color: "#e6b800",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.5)",
                     fontWeight: 600,
                   }}
                 >
@@ -229,8 +211,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 <motion.div
                   className="text-center flex flex-col items-center"
                   style={{
-                    color: isDark ? "white" : "#1e293b",
-                    textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.3)" : "0 1px 1px rgba(0,0,0,0.1)",
+                    color: "white",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                   }}
                 >
                   <TextShineEffect
@@ -240,8 +222,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   <div
                     className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1"
                     style={{
-                      color: isDark ? "#e6b800" : "#8a6600",
-                      textShadow: isDark ? "0 1px 2px rgba(0,0,0,0.5)" : "none",
+                      color: "#e6b800",
+                      textShadow: "0 1px 2px rgba(0,0,0,0.5)",
                       fontWeight: 600,
                     }}
                   >
@@ -265,25 +247,19 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 damping: 25,
                 delay: 0.2,
               }}
-              style={{ color: isDark ? "white" : "#1e293b" }}
+              style={{ color: "white" }}
             >
               <div>
                 <ProductListIcon />
               </div>
-              <div className="w-px h-6 mx-1 bg-slate-700 dark:bg-slate-100" />
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-full transition-colors duration-200"
-                aria-label="Переключить тему"
-              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
+              <div className="w-px h-6 mx-1 bg-slate-700/50" />
+              {/* Место для будущей иконки (пока пустота, разметка не поедет) */}
+              <div className="w-9 h-9" />
             </motion.div>
             <div
               className="md:hidden"
               style={{
-                color: isDark ? "white" : "#1e293b",
+                color: "white",
                 contain: "layout style paint",
               }}
             >
@@ -292,7 +268,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
           </div>
         </div>
       </div>
-      </motion.header>
+    </motion.header>
   );
 };
 

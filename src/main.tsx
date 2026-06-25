@@ -4,7 +4,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import App from "./App";
 import { FluidProvider } from "./context/FluidProvider";
-import { ThemeProvider } from "./context/ThemeProvider";
 import { TransitionProvider } from "./context/TransitionProvider";
 
 // Import variable fonts
@@ -42,13 +41,11 @@ const initApp = () => {
         path="*"
         element={
           <HelmetProvider>
-            <ThemeProvider>
-              <FluidProvider>
-                <TransitionProvider>
-                  <App />
-                </TransitionProvider>
-              </FluidProvider>
-            </ThemeProvider>
+            <FluidProvider>
+              <TransitionProvider>
+                <App />
+              </TransitionProvider>
+            </FluidProvider>
           </HelmetProvider>
         }
       />,

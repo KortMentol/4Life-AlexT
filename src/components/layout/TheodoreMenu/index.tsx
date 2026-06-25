@@ -1,5 +1,4 @@
 import DynamicLogo from "@/components/ui/DynamicLogo";
-import SciFiThemeToggle from "@/components/ui/SciFiThemeToggle";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { mainNav } from "@/site-config/site";
 import { scrollToTop } from "@/utils/navigationUtils";
@@ -423,7 +422,8 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
           ))}
         </nav>
         <div className="menu-footer">
-          <SciFiThemeToggle />
+          {/* Футер очищен от переключателя тем, разметка сбалансирована */}
+          <div className="h-8" />
         </div>
       </div>
       <svg
