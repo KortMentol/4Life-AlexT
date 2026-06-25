@@ -79,6 +79,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
 
   // GSAP Animation Effect (like original demo 4)
   useEffect(() => {
+    if (isTouchDevice) return; // Touch devices get 100% static paragraphs to guarantee maximum FPS
     if (!window.gsap || !window.ScrollTrigger || !containerRef.current) return;
 
     const container = containerRef.current;

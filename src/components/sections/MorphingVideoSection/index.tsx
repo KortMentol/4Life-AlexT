@@ -5,7 +5,7 @@
  * @author Geminis AI & Kort
  */
 
-import { Button, ScrollHeadingReveal } from "@/components/ui";
+import { Button } from "@/components/ui";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
@@ -104,9 +104,7 @@ const MorphingVideoSection: React.FC = () => {
             >
               Наука • Качество • Доверие
             </h2>
-            <ScrollHeadingReveal tag="h1" className="mb-6 text-center">
-              Почему 4Life?
-            </ScrollHeadingReveal>
+            <h1 className="typography-h1 mb-6 text-center text-white">Почему 4Life?</h1>
             <div className="typography-lead text-center max-w-4xl mx-auto opacity-80">
               <ScrollTextReveal>
                 Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая
@@ -129,9 +127,7 @@ const MorphingVideoSection: React.FC = () => {
                     />
                   </div>
                   <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
-                    <ScrollHeadingReveal tag="h2" className="text-left" direction="left" simpleMobile>
-                      Исследования и Инновации
-                    </ScrollHeadingReveal>
+                    <h2 className="typography-h2 text-left text-white">Исследования и Инновации</h2>
                     <ScrollTextReveal>
                       В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
                       уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
@@ -159,9 +155,7 @@ const MorphingVideoSection: React.FC = () => {
               <div className="container mx-auto px-4 md:px-8 max-w-6xl">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                   <div className="lg:col-span-9 order-1 space-y-6 text-right">
-                    <ScrollHeadingReveal tag="h2" className="text-right" direction="right" simpleMobile>
-                      Бескомпромиссный Контроль Качества
-                    </ScrollHeadingReveal>
+                    <h2 className="typography-h2 text-right text-white">Бескомпромиссный Контроль Качества</h2>
                     <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl ml-auto">
                       Каждый этап производства проходит строгий контроль качества. Современные технологии и
                       сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты,
@@ -198,9 +192,7 @@ const MorphingVideoSection: React.FC = () => {
                     className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-thin leading-none"
                   />
                   <div className="space-y-6">
-                    <ScrollHeadingReveal tag="h2" className="text-center" simpleMobile>
-                      Подтверждённая Эффективность
-                    </ScrollHeadingReveal>
+                    <h2 className="typography-h2 text-center text-white">Подтверждённая Эффективность</h2>
                     <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
                       Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт
                       ключом, мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша

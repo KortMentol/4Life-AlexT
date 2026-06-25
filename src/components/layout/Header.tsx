@@ -1,3 +1,10 @@
+/**
+ * @module src/components/layout/Header.tsx
+ * @description Premium SOTD 2026 Header Capsule.
+ * Implements clean, conflict-free coordinate-scrolling and modular modal animation layers.
+ * @author Geminis AI & Kort
+ */
+
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -12,7 +19,6 @@ import { siteConfig } from "@/site-config/site";
 import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
 
-// Logo imports
 import logoLight from "@/assets/images/brand/4life-logo-light.svg";
 
 interface HeaderProps {
@@ -44,11 +50,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       headerRef.current.style.opacity = "1";
       headerRef.current.style.visibility = "visible";
     }
-  }, []); // Пустой массив зависимостей - выполнится только один раз
+  }, []);
 
-  // Показываем хедер при маунте (первая загрузка) и по событию force-header-show.
+  // Показываем хедер при маунте (первая загрузка) и по событию force-header-show
   useEffect(() => {
-    if (isModalOpenRef.current) return; // модалка уже открыта — хедер остаётся скрытым
+    if (isModalOpenRef.current) return;
     showHeader();
     const handleForceShow = () => showHeader();
     window.addEventListener("force-header-show", handleForceShow);
@@ -62,7 +68,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     const header = headerRef.current;
     if (!header) return;
 
-    // Создаём timeline один раз если его нет
     if (!menuTlRef.current) {
       menuTlRef.current = gsap
         .timeline({
@@ -93,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }, [isMenuOpen]);
 
-  // Слушатель для плавного скрытия/показа хедера при открытии модалки
+  // Слушатель для плавного скрытия хедера при открытии модалки
   useEffect(() => {
     const handleModalState = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -101,14 +106,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       isModalOpenRef.current = isModalOpen;
       setIsModalOpen(isModalOpen);
 
-      if (!isModalOpen) {
-        setModalVisible(true);
-        setIsModalOpen(false);
-      } else {
-        setModalVisible(false);
-        if (menuTlRef.current) {
-          menuTlRef.current.pause();
-          menuTlRef.current.progress(1);
+      if (menuTlRef.current) {
+        if (isModalOpen) {
+          setModalVisible(false);
+        } else {
+          setModalVisible(true);
         }
       }
     };
@@ -116,15 +118,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     window.addEventListener("modal-state-change", handleModalState);
     return () => window.removeEventListener("modal-state-change", handleModalState);
   }, []);
-
-  // Показываем хедер при маунте (первая загрузка) и по событию force-header-show.
-  useEffect(() => {
-    if (isModalOpenRef.current) return; // модалка уже открыта — хедер остаётся скрытым
-    showHeader();
-    const handleForceShow = () => showHeader();
-    window.addEventListener("force-header-show", handleForceShow);
-    return () => window.removeEventListener("force-header-show", handleForceShow);
-  }, [showHeader]);
 
   const handleLogoClick = () => {
     if (isMobile) {
@@ -138,10 +131,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   };
 
-  // Мемоизация CSS переменных для производительности
   const cssVars = useMemo(
     () => ({
-      "--header-glow-rgb": "0, 212, 255",
+      "--header-dark-glow-rgb": "0, 212, 255",
     }),
     [],
   );
@@ -154,7 +146,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       role="banner"
       style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
-      className="header-premium"
+      className="header-premium header-premium--dark"
     >
       <div className="header-content">
         <div className="flex items-center justify-between w-full">
@@ -188,11 +180,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   className="font-semibold text-sm leading-tight whitespace-nowrap"
                 />
                 <div
-                  className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1"
+                  className="text-xs font-medium mt-0.5"
                   style={{
                     color: "#e6b800",
                     textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                    fontWeight: 600,
+                    fontWeight: 500,
                   }}
                 >
                   Builder Elite
@@ -220,11 +212,11 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                     className="font-semibold text-sm leading-tight whitespace-nowrap"
                   />
                   <div
-                    className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1"
+                    className="text-xs font-medium mt-0.5"
                     style={{
                       color: "#e6b800",
                       textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                      fontWeight: 600,
+                      fontWeight: "500",
                     }}
                   >
                     Builder Elite
@@ -252,8 +244,9 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               <div>
                 <ProductListIcon />
               </div>
-              <div className="w-px h-6 mx-1 bg-slate-700/50" />
-              {/* Место для будущей иконки (пока пустота, разметка не поедет) */}
+              {/* Sleek vertical separator returning to its spot */}
+              <div className="w-px h-6 mx-1 bg-white/60" />
+              {/* Future empty slot */}
               <div className="w-9 h-9" />
             </motion.div>
             <div
