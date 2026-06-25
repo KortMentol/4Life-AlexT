@@ -1,3 +1,10 @@
+/**
+ * @module src/components/sections/MorphingVideoSection/index.tsx
+ * @description Awwwards 2026 - Morphing Video Section.
+ * Coordinates 3 distinct video blocks with precise performance tiers and layout alignment.
+ * @author Geminis AI & Kort
+ */
+
 import { Button, ScrollHeadingReveal } from "@/components/ui";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
@@ -5,8 +12,8 @@ import { Icons } from "@/utils/icons";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useEffect, useMemo, useRef } from "react";
 
-import SectionFluidEffect from "@/components/effects/SectionFluidEffect";
 import BiotechBackground from "@/components/effects/BiotechBackground";
+import SectionFluidEffect from "@/components/effects/SectionFluidEffect";
 import { useParallaxLenis, usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
 
@@ -51,7 +58,7 @@ const MorphingVideoSection: React.FC = () => {
       const link = document.createElement("link");
       link.rel = "preload";
       link.as = "video";
-      link.href = VIDEO_ASSETS.productionVideo;
+      link.href = VIDEO_ASSETS.video1;
       document.head.appendChild(link);
     };
     if (document.readyState === "complete") preloadVideos();
@@ -234,25 +241,10 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Видео контейнеры - СТРОГО ИДЕНТИЧНО СТАРОМУ ФАЙЛУ */}
-      <VideoBlock
-        blockRef={block1Ref}
-        videoSrc={VIDEO_ASSETS.productionVideo}
-        blockIndex={0}
-        isTouchDevice={isTouchDevice}
-      />
-      <VideoBlock
-        blockRef={block2Ref}
-        videoSrc={VIDEO_ASSETS.productionVideo}
-        blockIndex={1}
-        isTouchDevice={isTouchDevice}
-      />
-      <VideoBlock
-        blockRef={block3Ref}
-        videoSrc={VIDEO_ASSETS.productionVideo}
-        blockIndex={2}
-        isTouchDevice={isTouchDevice}
-      />
+      {/* ВИДЕО КАРТОЧКИ: Каждая рендерится со своим уникальным ассетом */}
+      <VideoBlock blockRef={block1Ref} videoSrc={VIDEO_ASSETS.video1} blockIndex={0} isTouchDevice={isTouchDevice} />
+      <VideoBlock blockRef={block2Ref} videoSrc={VIDEO_ASSETS.video2} blockIndex={1} isTouchDevice={isTouchDevice} />
+      <VideoBlock blockRef={block3Ref} videoSrc={VIDEO_ASSETS.video3} blockIndex={2} isTouchDevice={isTouchDevice} />
     </section>
   );
 };

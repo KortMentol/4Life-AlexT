@@ -1,5 +1,7 @@
 export const VIDEO_ASSETS = {
-  productionVideo: "/videos/bg-video-products-page.mp4",
+  video1: "/videos/why-4life-transfer-factor.webm", // Имя файла 1
+  video2: "/videos/bg-video-products-page.mp4", // Имя файла 2
+  video3: "/videos/bg-video-products-page.mp4", // Имя файла 3 (или другой ассет)
 };
 
 export const BLOCK_CONFIG = {
