@@ -2,29 +2,20 @@
  * @module SectionFluidEffect
  * @description WebGL fluid эффект, ограниченный границами секции через WebGL scissor test.
  *
- * Архитектура:
- * - Canvas: position fixed, 100vw × 100vh — полноэкранный
- * - Физика: симулируется на весь viewport — жидкость проходит сквозь границы секции
- * - Рендер: WebGL scissor test обрезает вывод только внутри секции
- * - Портал в body — вне overflow:hidden родителей
- * - GPU: stop()/start() через IntersectionObserver с rootMargin 200px
- * - Оптимизация: один RAF для scissor, без clip-path, без bounds в шейдерах
+ * THE FIX:
+ * - Внедрен паттерн Callback Ref для абсолютной реактивности холста.
+ * - При выключении флага `isFluidEnabled` узел размонтируется, вызывая очистку и уничтожение WebGL контекста.
+ * - При повторном включении холст рендерится заново без утечек памяти и зависших "зеленых кадров".
  */
 
 import { FluidInstance } from "@/context/FluidContext.types";
-import { useEffectsDebug } from "@/hooks/useEffectsDebug";
+import { useFeatureFlag } from "@/hooks/useEffectsDebug";
 import { useFluid } from "@/hooks/useFluid";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { useTheme } from "@/hooks/useTheme";
-import WebGLFluidEnhanced from "@/lib/webgl-fluid/index";
 import { rafLoop } from "@/lib/rafLoop";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import WebGLFluidEnhanced from "@/lib/webgl-fluid/index";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const TRANSITION_START = "menu-transition-start";
@@ -38,59 +29,22 @@ const runIdle = (cb: () => void) => {
   }
 };
 
-  const getFluidConfig = (
-    tier: string,
-    isMobile: boolean,
-    pressureHigh: boolean,
-    sunraysEnabled: boolean,
-    shading: boolean,
-  ) => ({
-    dyeResolution: isMobile ? 512 : 1024,
-    simResolution: isMobile ? 150 : 200,
-    densityDissipation: 1,
-    velocityDissipation: isMobile ? 0.9 : 0.3,
-    pressure: 0.01,
-    pressureIterations: pressureHigh
-      ? tier === "high"
-        ? 25
-        : tier === "medium"
-          ? 15
-          : 10
-      : 15,
-    curl: isMobile ? 25 : 30,
-    splatRadius: isMobile ? 0.18 : 0.22,
-    splatForce: isMobile ? 6000 : 7000,
-    shading: tier === "high" && shading,
-    // PROD: sunrays OFF (экономит ~1ms GPU). DEV: управляется через effectsDebug панель.
-    sunrays: import.meta.env.DEV ? (tier === "high" && sunraysEnabled) : false,
-  });
-
-const getCommonConfig = (
-  theme: string,
-  isMobile: boolean,
-  isTouchDevice: boolean,
-) => {
+const getCommonConfig = (theme: string) => {
   const isLightTheme = theme === "light";
   return {
     transparent: true,
-    brightness: isMobile ? 1.1 : isLightTheme ? 0.9 : 0.7,
+    brightness: isLightTheme ? 0.9 : 0.7,
     colorPalette: isLightTheme
       ? ["#172554", "#1e3a8a", "#312e81", "#0b1945", "#283593"]
       : ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"],
     colorful: true,
     colorUpdateSpeed: 10,
-    hover: !isTouchDevice,
+    hover: true,
     backgroundColor: "#000000",
     inverted: false,
-    bloom: isMobile && isLightTheme,
-    bloomIterations: 6,
-    bloomResolution: isMobile ? 128 : 196,
-    bloomIntensity: isMobile ? 0.3 : 0.6,
-    bloomThreshold: isMobile ? 0.4 : 0.7,
-    bloomSoftKnee: isMobile ? 0.3 : 0.5,
+    bloom: false,
     sunraysResolution: 196,
     sunraysWeight: 1.0,
-    ...(isMobile && { paused: false, embedded: true, multipleSplats: 0 }),
   };
 };
 
@@ -98,38 +52,35 @@ interface SectionFluidEffectProps {
   sectionRef: React.RefObject<HTMLElement>;
 }
 
-const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
-  sectionRef,
-}) => {
+const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) => {
   const tier = usePerformanceTier();
-  const efxFlags = useEffectsDebug();
   const { theme } = useTheme();
   const { setFluidInstance, resetKey } = useFluid();
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  // Жестко отключаем на тач-устройствах (мобилках)
+  const isTouchDevice = useMemo(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+    [],
+  );
+
+  // Читаем DEV-флаги
+  const isFluidEnabled = useFeatureFlag("webglFluid", tier !== "low");
+  const isPressureHigh = useFeatureFlag("webglFluidPressureHigh", tier === "high");
+  const isSunrays = useFeatureFlag("webglFluidSunrays", tier === "high");
+  const isShading = useFeatureFlag("webglFluidShading", tier === "high");
+
+  // THE FIX: Callback Ref вместо useRef гарантирует, что мы получим живой DOM-узел
+  // ровно в момент его монтирования/размонтирования, избегая race conditions.
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    setContainer(node);
+  }, []);
+
   const simulationRef = useRef<WebGLFluidEnhanced | null>(null);
   const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRunningRef = useRef<boolean>(false);
   const isInViewportRef = useRef<boolean>(false);
   const [isVisible, setIsVisible] = useState(false);
-
-  const isTouchDevice = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(pointer: coarse)").matches,
-    [],
-  );
-  const isMobile = useMemo(
-    () =>
-      typeof navigator !== "undefined" &&
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      ),
-    [],
-  );
-
-  // РАННИЕ ВОЗВРАТЫ перенесены ВНИЗ — после всех хуков (Rules of Hooks).
-  // Здесь только вычисления, которые нужны хукам ниже.
 
   const startAnimation = useCallback(() => {
     if (simulationRef.current && !isRunningRef.current) {
@@ -152,64 +103,35 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
     }, 7000);
   }, []);
 
-  /**
-   * ОПТИМИЗАЦИЯ: Scissor rect обновляется через rafLoop singleton
-   * вместо отдельного requestAnimationFrame.
-   * Экономит 1 concurrent RAF callback → меньше main thread contention.
-   */
+  // ИНИЦИАЛИЗАЦИЯ (Реагирует напрямую на монтирование контейнера)
   useEffect(() => {
-    const section = sectionRef.current;
-    const simulation = simulationRef.current;
-    if (!section || !simulation) return;
-
-    const updateScissor = () => {
-      if (!isInViewportRef.current) return;
-
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-
-      if (rect.bottom <= 0 || rect.top >= vh) {
-        simulation.clearScissor();
-      } else {
-        const top = Math.max(0, rect.top);
-        const bottom = Math.min(vh, rect.bottom);
-        const left = Math.max(0, rect.left);
-        const right = Math.min(window.innerWidth, rect.right);
-
-        const width = right - left;
-        const height = bottom - top;
-        const y = vh - bottom;
-
-        simulation.setScissor(left, y, width, height);
-      }
-    };
-
-    // Подписываемся на глобальный RAF вместо создания собственного
-    const unsub = rafLoop.subscribe(updateScissor);
-
-    return () => {
-      unsub();
-      simulation.clearScissor();
-    };
-  }, [sectionRef]);
-
-  // ИНИЦИАЛИЗАЦИЯ
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (isTouchDevice || !isFluidEnabled || !container) {
+      setFluidInstance(null);
+      return;
+    }
 
     try {
       simulationRef.current = new WebGLFluidEnhanced(container);
-      const fluidConfig = getFluidConfig(
-        tier,
-        isMobile,
-        import.meta.env.DEV ? efxFlags.webglFluidPressureHigh : true,
-        import.meta.env.DEV ? efxFlags.webglFluidSunrays : true,
-        import.meta.env.DEV ? efxFlags.webglFluidShading : true,
-      );
-      const commonConfig = getCommonConfig(theme, isMobile, isTouchDevice);
+
+      const fluidConfig = {
+        dyeResolution: 1024,
+        simResolution: 200,
+        densityDissipation: 1,
+        velocityDissipation: 0.3,
+        pressure: 0.01,
+        pressureIterations: isPressureHigh ? 50 : 15,
+        curl: 30,
+        splatRadius: 0.22,
+        splatForce: 7000,
+        shading: isShading,
+        sunrays: isSunrays,
+      };
+
+      const commonConfig = getCommonConfig(theme);
       simulationRef.current.setConfig({ ...fluidConfig, ...commonConfig });
       setFluidInstance(simulationRef.current as unknown as FluidInstance);
+
+      if (isInViewportRef.current) startAnimation();
     } catch (error) {
       console.error("[SectionFluidEffect] Init Error:", error);
     }
@@ -231,17 +153,50 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
   }, [
     setFluidInstance,
     theme,
-    tier,
     isTouchDevice,
-    isMobile,
     resetKey,
-    efxFlags,
+    container, // THE FIX: Жизненный цикл завязан на стейт контейнера
+    isFluidEnabled,
+    isPressureHigh,
+    isSunrays,
+    isShading,
+    startAnimation,
   ]);
 
-  // INTERSECTION OBSERVER — прогрев 200px
+  // SCISSOR TEST
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    const simulation = simulationRef.current;
+    if (!section || !simulation || !isFluidEnabled || !container) return;
+
+    const updateScissor = () => {
+      if (!isInViewportRef.current) return;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+
+      if (rect.bottom <= 0 || rect.top >= vh) {
+        simulation.clearScissor();
+      } else {
+        const top = Math.max(0, rect.top);
+        const bottom = Math.min(vh, rect.bottom);
+        const left = Math.max(0, rect.left);
+        const right = Math.min(window.innerWidth, rect.right);
+
+        simulation.setScissor(left, vh - bottom, right - left, bottom - top);
+      }
+    };
+
+    const unsub = rafLoop.subscribe(updateScissor);
+    return () => {
+      unsub();
+      simulation.clearScissor();
+    };
+  }, [sectionRef, isFluidEnabled, container]);
+
+  // INTERSECTION OBSERVER
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !isFluidEnabled || !container) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -264,14 +219,13 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
 
     observer.observe(section);
     return () => observer.disconnect();
-  }, [sectionRef, startAnimation]);
+  }, [sectionRef, startAnimation, isFluidEnabled, container]);
 
-  // СОБЫТИЯ МЫШИ — слушаем на секции
+  // MOUSE EVENTS
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    if (!section || !isFluidEnabled || !container) return;
 
-    let lastTouchEvent: TouchEvent | null = null;
     let animationFrameId: number | null = null;
     let lastMouseEvent: MouseEvent | null = null;
 
@@ -280,7 +234,22 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
         animationFrameId = null;
         return;
       }
-      handleEvent(lastMouseEvent);
+      const canvas = container.querySelector("canvas");
+      if (canvas) {
+        startAnimation();
+        scheduleStopAnimation();
+        canvas.dispatchEvent(
+          new MouseEvent(lastMouseEvent.type, {
+            clientX: lastMouseEvent.clientX,
+            clientY: lastMouseEvent.clientY,
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            button: lastMouseEvent.button,
+            buttons: lastMouseEvent.buttons,
+          }),
+        );
+      }
       animationFrameId = null;
     };
 
@@ -291,107 +260,14 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
       }
     };
 
-    function handleEvent(event: Event) {
-      if (!containerRef.current) return;
-      const canvas = containerRef.current.querySelector("canvas");
-      if (!canvas) return;
-
-      startAnimation();
-
-      if (["mouseup", "touchend", "mousemove"].includes(event.type)) {
-        scheduleStopAnimation();
-      }
-
-      if (event instanceof MouseEvent) {
-        canvas.dispatchEvent(
-          new MouseEvent(event.type, {
-            clientX: event.clientX,
-            clientY: event.clientY,
-            bubbles: true,
-            cancelable: true,
-            view: window,
-            button: event.button,
-            buttons: event.buttons,
-          }),
-        );
-      } else if (event instanceof TouchEvent) {
-        const touch = event.touches[0] || event.changedTouches[0];
-        if (!touch) return;
-        if (event.type === "touchmove") lastTouchEvent = event;
-
-        const mouseEventType =
-          event.type === "touchstart"
-            ? "mousedown"
-            : event.type === "touchend"
-              ? "mouseup"
-              : "mousemove";
-        canvas.dispatchEvent(
-          new MouseEvent(mouseEventType, {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            bubbles: true,
-            cancelable: true,
-            view: window,
-            button: 0,
-            buttons: event.type === "touchend" ? 0 : 1,
-          }),
-        );
-
-        if (event.type === "touchstart") {
-          if (animationFrameId) cancelAnimationFrame(animationFrameId);
-          const simulateMove = () => {
-            if (lastTouchEvent?.touches[0] && canvas) {
-              canvas.dispatchEvent(
-                new MouseEvent("mousemove", {
-                  clientX: lastTouchEvent.touches[0].clientX,
-                  clientY: lastTouchEvent.touches[0].clientY,
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                  button: 0,
-                  buttons: 1,
-                }),
-              );
-              animationFrameId = requestAnimationFrame(simulateMove);
-            }
-          };
-          animationFrameId = requestAnimationFrame(simulateMove);
-        } else if (event.type === "touchend") {
-          if (animationFrameId) cancelAnimationFrame(animationFrameId);
-          lastTouchEvent = null;
-        }
-      }
-    }
-
-    const directEventTypes = [
-      "mousedown",
-      "mouseup",
-      "touchstart",
-      "touchmove",
-      "touchend",
-    ];
-    directEventTypes.forEach((type) =>
-      section.addEventListener(type, handleEvent, { passive: true }),
-    );
-    section.addEventListener(
-      "mousemove",
-      throttledMouseMoveHandler as EventListener,
-      { passive: true },
-    );
-
+    section.addEventListener("mousemove", throttledMouseMoveHandler, { passive: true });
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      directEventTypes.forEach((type) =>
-        section.removeEventListener(type, handleEvent),
-      );
-      section.removeEventListener(
-        "mousemove",
-        throttledMouseMoveHandler as EventListener,
-      );
+      section.removeEventListener("mousemove", throttledMouseMoveHandler);
     };
-  }, [sectionRef, startAnimation, scheduleStopAnimation]);
+  }, [sectionRef, startAnimation, scheduleStopAnimation, isFluidEnabled, container]);
 
-  // ПАУЗА при переходах между страницами
+  // TRANSITIONS
   useEffect(() => {
     const onStart = () => {
       if (simulationRef.current && isRunningRef.current) {
@@ -400,22 +276,17 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({
       }
     };
     const onComplete = () => {
-      if (isInViewportRef.current) runIdle(() => startAnimation());
+      if (isInViewportRef.current && isFluidEnabled && container) runIdle(() => startAnimation());
     };
-    window.addEventListener(TRANSITION_START, onStart as EventListener);
-    window.addEventListener(TRANSITION_COMPLETE, onComplete as EventListener);
+    window.addEventListener(TRANSITION_START, onStart);
+    window.addEventListener(TRANSITION_COMPLETE, onComplete);
     return () => {
-      window.removeEventListener(TRANSITION_START, onStart as EventListener);
-      window.removeEventListener(
-        TRANSITION_COMPLETE,
-        onComplete as EventListener,
-      );
+      window.removeEventListener(TRANSITION_START, onStart);
+      window.removeEventListener(TRANSITION_COMPLETE, onComplete);
     };
-  }, [startAnimation]);
+  }, [startAnimation, isFluidEnabled, container]);
 
-  // ─── РАННИЕ ВОЗВРАТЫ — после всех хуков (Rules of Hooks соблюдены) ───
-  if (isTouchDevice || tier === "low") return null;
-  if (import.meta.env.DEV && !efxFlags.webglFluid) return null;
+  if (isTouchDevice || !isFluidEnabled) return null;
 
   return createPortal(
     <div

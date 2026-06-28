@@ -2,6 +2,8 @@
  * @module src/components/layout/Header.tsx
  * @description Premium SOTD 2026 Header Capsule.
  * Implements clean, conflict-free coordinate-scrolling and modular modal animation layers.
+ * THE FIX: data-tier directly respects the glass toggle to allow accurate debugging
+ * and prevents the low-tier CSS override from blocking the glassmorphism blur.
  * @author Geminis AI & Kort
  */
 
@@ -31,6 +33,8 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const { transitionTo } = useTransition();
   const isMobile = useIsMobile();
   const tier = usePerformanceTier();
+
+  // Истинный переключатель: если мы на Low тире, но юзер дернул ползунок в "on" — вернет true
   const isGlassEnabled = useFeatureFlag("headerGlass", tier !== "low");
 
   const headerRef = useRef<HTMLElement>(null);
@@ -43,7 +47,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     disabled: isMenuOpen || isMenuAnimatingRef.current || isModalOpenRef.current,
   });
 
-  // КРИТИЧНО: Принудительно показываем хедер при первом рендере
   useEffect(() => {
     if (headerRef.current) {
       headerRef.current.style.transform = "translateY(0px) translateZ(0)";
@@ -52,7 +55,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }, []);
 
-  // Показываем хедер при маунте (первая загрузка) и по событию force-header-show
   useEffect(() => {
     if (isModalOpenRef.current) return;
     showHeader();
@@ -61,7 +63,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     return () => window.removeEventListener("force-header-show", handleForceShow);
   }, [showHeader]);
 
-  // Хедер при открытии/закрытии меню
   const menuTlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
@@ -98,7 +99,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }, [isMenuOpen]);
 
-  // Слушатель для плавного скрытия хедера при открытии модалки
   useEffect(() => {
     const handleModalState = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -140,10 +140,12 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
 
   return (
     <motion.header
-      data-tier={isGlassEnabled ? tier : "low"}
+      // THE FIX: Передаем "high" (или любой тир выше low), если эффекты включены ползунком,
+      // чтобы CSS не блокировал размытие (backdrop-filter) через директиву !important.
+      data-tier={isGlassEnabled ? "high" : "low"}
       ref={headerRef}
       animate={{ opacity: modalVisible ? 1 : 0, visibility: modalVisible ? "visible" : "hidden" }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       role="banner"
       style={{ ...cssVars, contain: "layout style paint" } as React.CSSProperties}
       className="header-premium header-premium--dark"
@@ -244,9 +246,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               <div>
                 <ProductListIcon />
               </div>
-              {/* Sleek vertical separator returning to its spot */}
               <div className="w-px h-6 mx-1 bg-white/60" />
-              {/* Future empty slot */}
               <div className="w-9 h-9" />
             </motion.div>
             <div

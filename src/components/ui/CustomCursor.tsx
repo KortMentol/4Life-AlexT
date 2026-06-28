@@ -23,7 +23,7 @@ export const CustomCursor: React.FC = () => {
   const springY = useSpring(mouseY, { stiffness: 800, damping: 35, mass: 0.5 });
 
   useEffect(() => {
-    // На тач-устройствах курсор не нужен вообще
+    // На тач-устройствах курсор не нужен вообще (Hardware protection)
     if ("ontouchstart" in window || navigator.maxTouchPoints > 0) return;
 
     const onMove = (e: MouseEvent) => {
@@ -63,6 +63,7 @@ export const CustomCursor: React.FC = () => {
         y: springY,
         translateX: "-50%",
         translateY: "-50%",
+        willChange: active ? "transform" : "auto",
       }}
     >
       <motion.div

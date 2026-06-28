@@ -1,11 +1,11 @@
 /**
  * @module src/components/debug/EffectsDebugPanel
- * @description GUI panel for testing HIGH-tier effects.
+ * @description GUI panel for testing HIGH-tier effects on PC.
  * Allows toggling tier (low/medium/high/auto) and individual effects.
  * DEV mode only. Positioned below PerformanceDebug.
  *
  * @author Kort
- * @version 3.0.0
+ * @version 4.2.0
  */
 
 import { useMediaQuery } from "@/hooks";
@@ -42,15 +42,19 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     loc: "HomePage Grid Background",
   },
   grid3dMaskFade: {
-    desc: "Applies an expensive linear-gradient mask to fade the top and bottom boundaries of the background grid. Heavy on mobile fill-rate.",
+    desc: "Applies a high-performance CSS mask-image linear gradient on the static wrapper to smoothly fade grid boundaries.",
     loc: "HomePage Grid Background",
   },
   morphingBackground: {
     desc: "Renders the heavy biotech grid, glowing orbs, and noise overlay in the MorphingVideoSection background.",
     loc: "MorphingVideoSection Background",
   },
-  scrollTextWordByWord: {
-    desc: "High-performance GSAP ScrollTrigger typography parser animating word opacity and skew per scroll frame.",
+  scrollTextBlur: {
+    desc: "High-performance GSAP ScrollTrigger typography parser animating word opacity, blur (6px) and skew per scroll frame.",
+    loc: "HomePage Text Sections",
+  },
+  scrollTextOpacity: {
+    desc: "Lightweight GSAP ScrollTrigger typography parser animating word opacity only. Completely safe for standard office PCs.",
     loc: "HomePage Text Sections",
   },
   scrollNumberAnimation: {
@@ -533,8 +537,15 @@ const EffectsDebugPanel: React.FC = () => {
           {/* ── ScrollText ── */}
           <div className={styles.sectionLabel}>ScrollText</div>
           <ToggleRow
-            label="Word-by-word animation (vs opacity)"
-            flagKey="scrollTextWordByWord"
+            label="Word-by-word (Blur)"
+            flagKey="scrollTextBlur"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+          <ToggleRow
+            label="Word-by-word (Opacity)"
+            flagKey="scrollTextOpacity"
             flags={flags}
             onChange={handleToggle}
             onHover={handleHover}
@@ -542,7 +553,7 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── Scroll Number ── Independent parameter (NOT nested under ScrollText) */}
+          {/* ── Scroll Number ── */}
           <div className={styles.sectionLabel}>Scroll Number</div>
           <ToggleRow
             label="Scroll number filling"

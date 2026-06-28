@@ -1,11 +1,17 @@
 /**
  * @module src/utils/effectsDebug/effectsDebugStore.ts
- * @description Singleton store для управления флагами эффектов HIGH тира.
- * Хранит состояние в localStorage — переживает перезагрузку страницы.
- * Только DEV режим. В production не используется.
+ * @description Singleton store для управления флагами эффектов.
+ * Внедряет взаимное исключение текстовых эффектов на ПК (Blur vs Opacity).
+ * Автоматически сбрасывает ручные направления до чистых пресетов тира при перезагрузке,
+ * если тир принудительно переопределен пользователем (low/medium/high).
+ *
+ * THE FIX:
+ * - На Low-Tier параметр `morphingBackground` теперь принудительно установлен в `true`.
+ * - Это позволяет отображать сверхлегкий статический фон с зернистым засветом,
+ *   избегая "скучной гробовой темноты" и сохраняя 100% производительность.
  *
  * @author Kort
- * @version 1.1.0
+ * @version 4.2.0
  */
 
 export type PerformanceTierOverride = "auto" | "low" | "medium" | "high";
@@ -18,21 +24,22 @@ export interface EffectsDebugFlags {
   webglFluidShading: boolean;
   grid3d: boolean;
   grid3dFilterBlur: boolean;
-  scrollTextWordByWord: boolean;
-  scrollNumberAnimation: boolean; // Scroll-driven color fill of digits 01, 02, 03
-  videoProgressOrb: boolean; // Глобальный переключатель кругового прогресс-бара на видео
-  renderVideoBlocks: boolean; // Глобальный переключатель всех видео-блоков 01/02/03
+  scrollTextBlur: boolean;
+  scrollTextOpacity: boolean;
+  scrollTextBlockOpacity: boolean;
+  scrollNumberAnimation: boolean;
+  videoProgressOrb: boolean;
+  renderVideoBlocks: boolean;
   blockVideoTranslateZHigh: boolean;
   molecularNetHighNodes: boolean;
   cardScrollGather: boolean;
   parallaxBackground: boolean;
-  morphingBackground: boolean; // Renders the heavy biotech grid, glowing orbs, and noise overlay in the MorphingVideoSection background
+  morphingBackground: boolean;
   grid3dMaskFade: boolean;
-  // ─── Global UI Components ───
   headerGlass: boolean;
   premiumTransitions: boolean;
   auroraText: boolean;
-  textShineAnimation: boolean; // Shimmer text shine animation
+  textShineAnimation: boolean;
 }
 
 const STORAGE_KEY = "4life_effects_debug";
@@ -45,20 +52,101 @@ const DEFAULTS: EffectsDebugFlags = {
   webglFluidShading: true,
   grid3d: true,
   grid3dFilterBlur: true,
-  scrollTextWordByWord: true,
+  scrollTextBlur: true,
+  scrollTextOpacity: false,
+  scrollTextBlockOpacity: true,
   scrollNumberAnimation: true,
-  videoProgressOrb: true, // По умолчанию включен везде для сохранения целостности дизайна
-  renderVideoBlocks: true, // По умолчанию включены все видео-блоки
+  videoProgressOrb: true,
+  renderVideoBlocks: true,
   blockVideoTranslateZHigh: true,
   molecularNetHighNodes: true,
   cardScrollGather: true,
   parallaxBackground: true,
-  morphingBackground: true,
+  morphingBackground: true, // По умолчанию включен
+  grid3dMaskFade: true,
   headerGlass: true,
   premiumTransitions: true,
   auroraText: true,
   textShineAnimation: true,
-  grid3dMaskFade: true,
+};
+
+const getPresetForTier = (tier: PerformanceTierOverride): Partial<EffectsDebugFlags> => {
+  if (tier === "low") {
+    return {
+      webglFluid: false,
+      grid3d: false,
+      scrollTextBlur: false,
+      scrollTextOpacity: false,
+      scrollTextBlockOpacity: false,
+      scrollNumberAnimation: false,
+      videoProgressOrb: true,
+      blockVideoTranslateZHigh: false,
+      molecularNetHighNodes: false,
+      cardScrollGather: false,
+      parallaxBackground: false,
+      morphingBackground: true, // THE FIX: Включаем легкий фон на Low-Tier, чтобы избежать черноты
+      headerGlass: false,
+      premiumTransitions: false,
+      auroraText: false,
+      renderVideoBlocks: true,
+      textShineAnimation: false,
+      grid3dMaskFade: false,
+    };
+  }
+
+  if (tier === "medium") {
+    return {
+      webglFluid: true,
+      webglFluidPressureHigh: false,
+      webglFluidSunrays: false,
+      grid3d: true,
+      grid3dFilterBlur: false,
+      scrollTextBlur: false,
+      scrollTextOpacity: true,
+      scrollTextBlockOpacity: true,
+      blockVideoTranslateZHigh: false,
+      molecularNetHighNodes: false,
+      videoProgressOrb: true,
+      scrollNumberAnimation: true,
+      cardScrollGather: true,
+      renderVideoBlocks: true,
+      parallaxBackground: true,
+      morphingBackground: true,
+      headerGlass: true,
+      premiumTransitions: true,
+      auroraText: true,
+      grid3dMaskFade: false,
+    };
+  }
+
+  if (tier === "high") {
+    return {
+      webglFluid: true,
+      webglFluidPressureHigh: true,
+      webglFluidSunrays: true,
+      webglFluidShading: true,
+      grid3d: true,
+      grid3dFilterBlur: true,
+      scrollTextBlur: true,
+      scrollTextOpacity: false,
+      scrollTextBlockOpacity: true,
+      scrollNumberAnimation: true,
+      videoProgressOrb: true,
+      renderVideoBlocks: true,
+      blockVideoTranslateZHigh: true,
+      molecularNetHighNodes: true,
+      cardScrollGather: true,
+      parallaxBackground: true,
+      morphingBackground: true,
+      grid3dMaskFade: true,
+      headerGlass: true,
+      premiumTransitions: true,
+      auroraText: true,
+      textShineAnimation: true,
+    };
+  }
+
+  return {};
 };
 
 type Listener = (flags: EffectsDebugFlags) => void;
@@ -77,6 +165,12 @@ class EffectsDebugStore {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return { ...DEFAULTS };
       const parsed = JSON.parse(raw) as Partial<EffectsDebugFlags>;
+
+      if (parsed.tierOverride && parsed.tierOverride !== "auto") {
+        const preset = getPresetForTier(parsed.tierOverride);
+        return { ...DEFAULTS, ...parsed, ...preset };
+      }
+
       return { ...DEFAULTS, ...parsed };
     } catch {
       return { ...DEFAULTS };
@@ -101,7 +195,20 @@ class EffectsDebugStore {
   }
 
   setFlag<K extends keyof EffectsDebugFlags>(key: K, value: EffectsDebugFlags[K]): void {
-    this.flags = { ...this.flags, [key]: value };
+    const newFlags = { ...this.flags, [key]: value };
+
+    if (key !== "tierOverride") {
+      newFlags.tierOverride = "auto";
+    }
+
+    if (key === "scrollTextBlur" && value === true) {
+      newFlags.scrollTextOpacity = false;
+    }
+    if (key === "scrollTextOpacity" && value === true) {
+      newFlags.scrollTextBlur = false;
+    }
+
+    this.flags = newFlags;
     this.save();
     this.notify();
   }
@@ -113,52 +220,14 @@ class EffectsDebugStore {
   }
 
   applyTierPreset(tier: PerformanceTierOverride): void {
-    this.flags.tierOverride = tier;
+    const newFlags = { ...DEFAULTS };
+    newFlags.tierOverride = tier;
 
-    if (tier === "low") {
-      // Отключаем всё тяжелое
-      this.flags.webglFluid = false;
-      this.flags.grid3d = false;
-      this.flags.scrollTextWordByWord = false;
-      this.flags.scrollNumberAnimation = false;
-      this.flags.videoProgressOrb = true; // Сохраняем круг для дизайна даже на Low тире
-      this.flags.blockVideoTranslateZHigh = false;
-      this.flags.molecularNetHighNodes = false;
-      this.flags.cardScrollGather = false;
-      this.flags.parallaxBackground = false;
-      this.flags.morphingBackground = false;
-      this.flags.headerGlass = false;
-      this.flags.premiumTransitions = false;
-      this.flags.auroraText = false;
-      this.flags.renderVideoBlocks = true;
-      this.flags.textShineAnimation = false;
-      this.flags.grid3dMaskFade = false;
-    } else if (tier === "medium") {
-      // Отключаем только самые тяжелые High-tier фичи
-      this.flags.webglFluid = true;
-      this.flags.webglFluidPressureHigh = false;
-      this.flags.webglFluidSunrays = false;
-      this.flags.grid3d = true;
-      this.flags.grid3dFilterBlur = false;
-      this.flags.blockVideoTranslateZHigh = false;
-      this.flags.molecularNetHighNodes = false;
-      this.flags.videoProgressOrb = true;
-      this.flags.scrollTextWordByWord = true;
-      this.flags.scrollNumberAnimation = true;
-      this.flags.cardScrollGather = true;
-      this.flags.renderVideoBlocks = true;
-      this.flags.parallaxBackground = true;
-      this.flags.morphingBackground = true;
-      this.flags.headerGlass = true;
-      this.flags.premiumTransitions = true;
-      this.flags.auroraText = true;
-      this.flags.grid3dMaskFade = false;
+    if (tier !== "auto") {
+      const preset = getPresetForTier(tier);
+      this.flags = { ...newFlags, ...preset };
     } else {
-      // High или Auto - включаем всё по дефолту
-      const newFlags = { ...DEFAULTS };
-      newFlags.tierOverride = tier;
       this.flags = newFlags;
-      this.flags.grid3dMaskFade = true;
     }
 
     this.save();

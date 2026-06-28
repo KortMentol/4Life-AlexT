@@ -1,24 +1,20 @@
 /**
  * @module src/components/ui/ScrollTextReveal/ScrollTextReveal.tsx
- * @description Modern blur/skew text reveal component implementing Codrops demo 4 effect
+ * @description Высокопроизводительный текстовый парсер на базе GSAP ScrollTrigger.
+ * Реализует жесткую стейт-машину для трех независимых режимов анимации
+ * (Word-by-word Blur, Word-by-word Opacity, Block Opacity) с полной защитой от невидимости.
+ *
  * @author Kort
- * @version 2.0.0 - GSAP Performance Optimized
- * @usage
- * Drop-in replacement for ScrollText component with enhanced visual effects
- * @example
- * <ScrollTextReveal className="text-lg leading-relaxed">
- *   Your text content here...
- * </ScrollTextReveal>
+ * @version 4.1.0
  */
 
 import { useTheme } from "@/hooks";
-import { useEffectsDebug } from "@/hooks/useEffectsDebug";
+import { useFeatureFlag } from "@/hooks/useEffectsDebug";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import React, { useEffect, useMemo, useRef } from "react";
 import { ScrollTextRevealProps } from "./ScrollTextReveal.types";
-import { DEFAULT_CONFIG, PERFORMANCE_CONFIGS, TextSplitter } from "./ScrollTextReveal.utils";
+import { TextSplitter } from "./ScrollTextReveal.utils";
 
-// Global GSAP types
 declare global {
   interface Window {
     gsap: any;
@@ -27,209 +23,151 @@ declare global {
   }
 }
 
-/**
- * ScrollTextReveal Component
- *
- * Implements the 4th text reveal effect from Codrops ScrollBlurTypography demo
- * with performance optimization and theme integration using pure GSAP.
- */
-const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
-  children,
-  className = "",
-  staggerDelay = DEFAULT_CONFIG.animation.staggerDelay,
-  easingFunction = DEFAULT_CONFIG.animation.easingFunction,
-}) => {
+const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className = "" }) => {
   const containerRef = useRef<HTMLParagraphElement>(null);
   const tier = usePerformanceTier();
-  const efxFlags = useEffectsDebug();
   const { theme } = useTheme();
+
   const splitInstanceRef = useRef<any>(null);
   const scrollTriggerRef = useRef<any>(null);
-  // Добавь новый независимый реф для контекста GSAP:
   const gsapContextRef = useRef<any>(null);
 
-  // КРИТИЧНО: На тач-устройствах СТРОГО отключаем blur и skew, даже если телефон мощный
   const isTouchDevice =
     typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
-  // На мобилках СТРОГО medium tier — никаких blur/skew эффектов!
-  const effectiveTier = isTouchDevice ? "medium" : tier;
+  // Читаем индивидуальные флаги из дебаг-стора
+  const isBlurRequested = useFeatureFlag("scrollTextBlur", tier === "high");
+  const isOpacityRequested = useFeatureFlag("scrollTextOpacity", tier === "medium");
+  const isBlockOpacityRequested = useFeatureFlag("scrollTextBlockOpacity", tier !== "low");
 
-  // Get performance configuration
-  const performanceConfig = PERFORMANCE_CONFIGS[effectiveTier];
+  // ОПРЕДЕЛЕНИЕ РЕЖИМА АНИМАЦИИ (Жесткая стейт-машина)
+  type AnimType = "static" | "block_opacity" | "word_by_word_blur" | "word_by_word_opacity";
+  let animMode: AnimType = "static";
 
-  // DEV: Check effects debug flags
-  const wordByWordEnabled = import.meta.env.DEV ? efxFlags.scrollTextWordByWord : true;
+  if (isTouchDevice) {
+    // На тач-устройствах (телефонах) никогда не дробим по словам, это слишком дорого для GPU.
+    // Используем плавный бледный фейд всего блока целиком, либо оставляем статичным.
+    animMode = isBlockOpacityRequested ? "block_opacity" : "static";
+  } else {
+    // На десктопе даем полную свободу ручным ползункам дебаггера
+    if (isBlurRequested) {
+      animMode = "word_by_word_blur";
+    } else if (isOpacityRequested) {
+      animMode = "word_by_word_opacity";
+    } else {
+      animMode = "static";
+    }
+  }
 
-  const resolvedTier = effectiveTier === "high" && !wordByWordEnabled ? "medium" : effectiveTier;
-
-  // Validate and sanitize input text
   const validatedText = useMemo(() => {
-    const sanitized = TextSplitter.validateText(children);
-    return TextSplitter.handleEdgeCases(sanitized);
+    return TextSplitter.handleEdgeCases(TextSplitter.validateText(children));
   }, [children]);
 
-  // Theme-based styling with consistent colors
-  const getThemeStyles = () => {
-    return {
-      // Premium neutral Slate-300 for elite reading comfort on dark obsidian
-      color: theme === "dark" ? "#cbd5e1" : "#1e293b",
-    };
-  };
-
-  // GSAP Animation Effect (like original demo 4)
   useEffect(() => {
-    if (isTouchDevice) return; // Touch devices get 100% static paragraphs to guarantee maximum FPS
     if (!window.gsap || !window.ScrollTrigger || !containerRef.current) return;
 
     const container = containerRef.current;
 
-    // LOW TIER: No animation
-    if (resolvedTier === "low") return;
-
-    // Clean up previous instances
-    if (scrollTriggerRef.current) {
-      scrollTriggerRef.current.kill();
-      scrollTriggerRef.current = null;
+    // THE FIX: Если режим "static" (например, Low Tier без оверрайдов), мы обязаны
+    // сбросить все инлайн-стили в исходное видимое состояние. Это предотвращает баг,
+    // когда выключение ползунка скрывало текст полностью из-за зависшего начального состояния.
+    if (animMode === "static") {
+      window.gsap.set(container, { opacity: 1, y: 0, filter: "none", skewX: 0, clearProps: "all" });
+      const words = container.querySelectorAll('[class*="word-"]');
+      if (words.length > 0) {
+        window.gsap.set(words, { opacity: 1, filter: "none", skewX: 0, clearProps: "all" });
+      }
+      return; // Выходим из эффекта, текст останется 100% видимым
     }
-    if (splitInstanceRef.current) {
-      splitInstanceRef.current.revert();
-      splitInstanceRef.current = null;
-    }
 
-    // MEDIUM/HIGH TIER: Word-by-word animation
-    if (isTouchDevice) {
-      // ДЛЯ МОБИЛОК: Никакого разбиения на слова. Одна легкая анимация на весь блок.
-      scrollTriggerRef.current = window.gsap.fromTo(
-        container,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: container,
-            start: "top bottom-=10%",
-            end: "bottom center",
-            scrub: true,
+    if (animMode === "block_opacity") {
+      // Изолируем анимацию блока
+      gsapContextRef.current = window.gsap.context(() => {
+        scrollTriggerRef.current = window.gsap.fromTo(
+          container,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            ease: "power2.out",
+            scrollTrigger: { trigger: container, start: "top bottom-=10%", end: "bottom center", scrub: true },
           },
-        },
-      );
-    } else if (performanceConfig.enableWordSplitting && validatedText) {
+        );
+      });
+    }
+    // ─── 2. РЕЖИМЫ: ПОСЛОВНОЕ ПОЯВЛЕНИЕ (Desktop Medium/High) ───
+    else {
       try {
-        // Use SplitType like in original demo (if available) or fallback to manual splitting
+        // Нарезка текста на слова с помощью библиотеки SplitType или кастомного фоллбэка
         if (window.SplitType) {
-          splitInstanceRef.current = new window.SplitType(container, {
-            types: "words",
-          });
+          splitInstanceRef.current = new window.SplitType(container, { types: "words" });
         } else {
-          // Manual word splitting fallback
           const textData = TextSplitter.splitText(validatedText);
           if (textData.words.length > 0) {
             const wordsHTML = TextSplitter.preserveFormatting(
               textData.words,
               textData.preservedSpacing,
               textData.lineBreaks,
-            (word, index) =>
-              `<span class="word-${index}" style="display: inline-block;">${word}</span>`,
+              (word, index) => `<span class="word-${index}" style="display: inline-block;">${word}</span>`,
             );
             container.innerHTML = wordsHTML.join("");
           }
         }
 
-        // Get words for animation
         const words = splitInstanceRef.current?.words || container.querySelectorAll('[class*="word-"]');
-
         if (words && words.length > 0) {
-          // Apply theme color to words
           const themeColor = theme === "dark" ? "#cbd5e1" : "#1e293b";
           words.forEach((word: HTMLElement) => {
             word.style.color = themeColor;
           });
 
-          // GSAP Animation (exactly like demo 4)
-          const animationProps: any = {
-            opacity: 0,
-            willChange: "opacity, transform", // УБРАЛИ filter — экономим GPU память!
-          };
+          const isBlurMode = animMode === "word_by_word_blur";
 
-          const toProps: any = {
-            ease: easingFunction === "sine" ? "sine" : "none",
-            opacity: 1,
-            stagger: staggerDelay,
-            scrollTrigger: {
-              trigger: container,
-              start: "top bottom-=15%",
-              end: "bottom center+=15%",
-              scrub: true,
-            },
-          };
-
-          // Add blur only for HIGH tier (НЕ на мобилках!)
-          // 6px вместо 8px — визуально тот же туман, GPU на 25% легче
-          if (resolvedTier === "high" && performanceConfig.enableBlurEffect) {
-            animationProps.filter = "blur(6px)";
-            toProps.filter = "blur(0px)";
-          }
-
-          // Add skew only for HIGH tier (like demo 4)
-          if (resolvedTier === "high" && performanceConfig.enableSkewEffect) {
-            animationProps.skewX = -20;
-            toProps.skewX = 0;
-          }
-
-          // GSAP Context — изолирует анимации и не ломает рантайм при null-рефах
           gsapContextRef.current = window.gsap.context(() => {
-            scrollTriggerRef.current = window.gsap.fromTo(words, animationProps, toProps);
+            scrollTriggerRef.current = window.gsap.fromTo(
+              words,
+              {
+                opacity: 0,
+                filter: isBlurMode ? "blur(6px)" : "none",
+                skewX: isBlurMode ? -20 : 0,
+                willChange: "opacity, transform",
+              },
+              {
+                opacity: 1,
+                filter: "blur(0px)",
+                skewX: 0,
+                ease: "sine",
+                stagger: 0.04,
+                scrollTrigger: {
+                  trigger: container,
+                  start: "top bottom-=15%",
+                  end: "bottom center+=15%",
+                  scrub: true,
+                },
+              },
+            );
           });
         }
       } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error("[ScrollTextReveal] GSAP animation failed:", error);
-        }
+        console.error("[ScrollTextReveal] GSAP initialization failed:", error);
       }
     }
 
-    // Cleanup function
     return () => {
-      // Убиваем контекст GSAP и освобождаем оперативку от ScrollTrigger-зомби
-      if (gsapContextRef.current) {
-        gsapContextRef.current.revert();
-        gsapContextRef.current = null;
-      }
-      if (scrollTriggerRef.current) {
-        scrollTriggerRef.current.kill();
-        scrollTriggerRef.current = null;
-      }
-      if (splitInstanceRef.current) {
-        splitInstanceRef.current.revert();
-        splitInstanceRef.current = null;
-      }
+      if (gsapContextRef.current) gsapContextRef.current.revert();
+      if (scrollTriggerRef.current) scrollTriggerRef.current.kill();
+      if (splitInstanceRef.current) splitInstanceRef.current.revert();
     };
-  }, [resolvedTier, validatedText, theme, staggerDelay, easingFunction, performanceConfig]);
+  }, [animMode, validatedText, theme]);
 
-  // Error boundary wrapper
-  const renderWithErrorBoundary = (content: React.ReactNode) => {
-    try {
-      return content;
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("[ScrollTextReveal] Render error:", error);
-      }
-      // Fallback to static text
-      return (
-        <p className={`typography-body relative ${className}`} style={getThemeStyles()}>
-          {validatedText}
-        </p>
-      );
-    }
-  };
-
-  // Render the container
-  return renderWithErrorBoundary(
-    <p ref={containerRef} className={`typography-body relative ${className}`} style={getThemeStyles()}>
+  return (
+    <p
+      ref={containerRef}
+      className={`typography-body relative ${className}`}
+      style={{ color: theme === "dark" ? "#cbd5e1" : "#1e293b" }}
+    >
       {validatedText}
-    </p>,
+    </p>
   );
 };
 

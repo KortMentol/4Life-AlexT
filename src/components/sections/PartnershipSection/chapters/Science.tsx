@@ -1,105 +1,104 @@
 /**
  * @module PartnershipSection/chapters/Science.tsx
  * Глава 1 — партнёрство: тезисы и философия.
- * MolecularNet (ambient SVG) — только high/medium.
+ * MolecularNet (ambient SVG) — корректно читает флаги ползунков.
  */
 
-import { useEffectsDebug } from "@/hooks/useEffectsDebug";
+import { useFeatureFlag } from "@/hooks/useEffectsDebug";
 import type { PerformanceTier } from "@/hooks/usePerformanceTier";
 import { motion, useInView } from "framer-motion";
 import { forwardRef, memo, useEffect, useMemo, useRef } from "react";
 import type { Palette } from "../constants";
 import ClipLine from "../ui/ClipLine";
 
-// ─── MolecularNet — ambient декор, остаётся ──────────────────────────────────
-const MolecularNet = memo(
-  ({ tier, palette, highNodes = true }: { tier: PerformanceTier; palette: Palette; highNodes?: boolean }) => {
-    const count = tier === "high" && highNodes ? 12 : 7;
+const MolecularNet = memo(({ tier, palette }: { tier: PerformanceTier; palette: Palette }) => {
+  // Истинный переключатель: работает на любом тире, если дернули ползунок
+  const isHighNodes = useFeatureFlag("molecularNetHighNodes", tier === "high");
+  const count = isHighNodes ? 12 : 7;
 
-    const nodes = useMemo(
-      () =>
-        Array.from({ length: count }, (_, i) => ({
-          id: i,
-          x: 10 + Math.random() * 80,
-          y: 10 + Math.random() * 80,
-          r: 2 + Math.random() * 3,
-          dur: 8 + Math.random() * 10,
-          dx: (Math.random() - 0.5) * 12,
-          dy: (Math.random() - 0.5) * 12,
-        })),
-      [count],
-    );
+  const nodes = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: 10 + Math.random() * 80,
+        y: 10 + Math.random() * 80,
+        r: 2 + Math.random() * 3,
+        dur: 8 + Math.random() * 10,
+        dx: (Math.random() - 0.5) * 12,
+        dy: (Math.random() - 0.5) * 12,
+      })),
+    [count],
+  );
 
-    const edges = useMemo(() => {
-      const pairs: [number, number][] = [];
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const ni = nodes[i]!;
-          const nj = nodes[j]!;
-          const dx = ni.x - nj.x;
-          const dy = ni.y - nj.y;
-          if (Math.sqrt(dx * dx + dy * dy) < 35) pairs.push([i, j]);
-        }
+  const edges = useMemo(() => {
+    const pairs: [number, number][] = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const ni = nodes[i]!;
+        const nj = nodes[j]!;
+        const dx = ni.x - nj.x;
+        const dy = ni.y - nj.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 35) pairs.push([i, j]);
       }
-      return pairs;
-    }, [nodes]);
+    }
+    return pairs;
+  }, [nodes]);
 
-    if (tier === "low") return null;
+  if (tier === "low") return null;
 
-    return (
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden="true"
-      >
-        <defs>
-          <style>{`
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      <defs>
+        <style>{`
           @keyframes molOrbit {
             0%, 100% { transform: translate(0, 0); }
             33%  { transform: translate(var(--dx), var(--dy)); }
             66%  { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * 1.2)); }
           }
         `}</style>
-        </defs>
-        {edges.map(([a, b], i) => {
-          const na = nodes[a as number];
-          const nb = nodes[b as number];
-          if (!na || !nb) return null;
-          return (
-            <line
-              key={i}
-              x1={`${na.x}%`}
-              y1={`${na.y}%`}
-              x2={`${nb.x}%`}
-              y2={`${nb.y}%`}
-              stroke={palette.gold}
-              strokeWidth="0.15"
-              opacity="0.15"
-            />
-          );
-        })}
-        {nodes.map((n) => (
-          <circle
-            key={n.id}
-            cx={`${n.x}%`}
-            cy={`${n.y}%`}
-            r={n.r * 0.3}
-            fill={palette.gold}
-            opacity="0.4"
-            style={
-              {
-                "--dx": `${n.dx}%`,
-                "--dy": `${n.dy}%`,
-                animation: `molOrbit ${n.dur}s ease-in-out infinite`,
-              } as React.CSSProperties
-            }
+      </defs>
+      {edges.map(([a, b], i) => {
+        const na = nodes[a as number];
+        const nb = nodes[b as number];
+        if (!na || !nb) return null;
+        return (
+          <line
+            key={i}
+            x1={`${na.x}%`}
+            y1={`${na.y}%`}
+            x2={`${nb.x}%`}
+            y2={`${nb.y}%`}
+            stroke={palette.gold}
+            strokeWidth="0.15"
+            opacity="0.15"
           />
-        ))}
-      </svg>
-    );
-  },
-);
+        );
+      })}
+      {nodes.map((n) => (
+        <circle
+          key={n.id}
+          cx={`${n.x}%`}
+          cy={`${n.y}%`}
+          r={n.r * 0.3}
+          fill={palette.gold}
+          opacity="0.4"
+          style={
+            {
+              "--dx": `${n.dx}%`,
+              "--dy": `${n.dy}%`,
+              animation: `molOrbit ${n.dur}s ease-in-out infinite`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </svg>
+  );
+});
 MolecularNet.displayName = "MolecularNet";
 
 // ─── Science ──────────────────────────────────────────────────────────────────
@@ -129,7 +128,6 @@ const Science = memo(
     const ref = useRef<HTMLElement>(null);
     const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
     const inView = useInView(activeRef, { margin: "-35%" });
-    const efxFlags = useEffectsDebug();
 
     useEffect(() => {
       if (inView) onChapter(1);
@@ -141,11 +139,7 @@ const Science = memo(
         className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40 overflow-hidden"
         style={{ background: palette.bg }}
       >
-        <MolecularNet
-          tier={tier}
-          palette={palette}
-          highNodes={import.meta.env.DEV ? efxFlags.molecularNetHighNodes : true}
-        />
+        <MolecularNet tier={tier} palette={palette} />
 
         <div className="relative z-10 max-w-7xl mx-auto">
           <motion.div

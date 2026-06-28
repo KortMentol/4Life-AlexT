@@ -10,16 +10,18 @@ import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
 import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BiotechBackground from "@/components/effects/BiotechBackground";
 import SectionFluidEffect from "@/components/effects/SectionFluidEffect";
+import CustomCursor from "@/components/ui/CustomCursor";
 import { useParallaxLenis, usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
 
 import { Grid3D } from "./components/Grid3D";
 import { VideoBlock } from "./components/VideoBlock";
-import { VIDEO_ASSETS } from "./config";
+import { VimeoModal } from "./components/VimeoModal";
+import { VIDEO_ASSETS, VIMEO_URLS } from "./config";
 
 const useDeviceType = () => {
   return useMemo(() => {
@@ -38,6 +40,10 @@ const MorphingVideoSection: React.FC = () => {
   const block1Ref = useRef<HTMLDivElement>(null);
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
+
+  const [vimeoOpen, setVimeoOpen] = useState(false);
+  const [vimeoUrl, setVimeoUrl] = useState("");
+  const isCursorEnabled = !isTouchDevice;
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   const parallaxStrength = tier === "low" ? 0 : tier === "medium" ? 30 : 60;
@@ -65,11 +71,29 @@ const MorphingVideoSection: React.FC = () => {
     else window.addEventListener("load", preloadVideos);
   }, []);
 
+  const handleOpenVimeoModal = useCallback((url: string) => {
+    window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: true } }));
+    setVimeoOpen(true);
+    setVimeoUrl(url);
+  }, []);
+
+  const handleCloseVimeoModal = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: false } }));
+    setVimeoOpen(false);
+    setVimeoUrl("");
+  }, []);
+
+  const handleOpenVimeo1 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[0]!), [handleOpenVimeoModal]);
+  const handleOpenVimeo2 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[1]!), [handleOpenVimeoModal]);
+  const handleOpenVimeo3 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[2]!), [handleOpenVimeoModal]);
+
   return (
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
+      {isCursorEnabled && <CustomCursor />}
+
+      <VimeoModal isOpen={vimeoOpen} onClose={handleCloseVimeoModal} tier={tier} videoUrl={vimeoUrl} />
       <SectionFluidEffect sectionRef={sectionRef} />
 
-      {/* Адаптивный фоновый слой с аппаратным параллаксом */}
       <div className="absolute inset-0 -z-30 overflow-hidden bg-transparent">
         <motion.div
           ref={parallaxBgRef}
@@ -86,7 +110,14 @@ const MorphingVideoSection: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="relative z-30">
+      {/* ИНЖЕНЕРНЫЙ ФИКС: Оборачиваем весь фон в motion.div для синхронного затухания */}
+      <motion.div
+        className="relative z-30"
+        initial={false}
+        animate={{ opacity: vimeoOpen ? 0 : 1, filter: vimeoOpen ? "blur(4px)" : "blur(0px)" }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        style={{ pointerEvents: vimeoOpen ? "none" : "auto" }}
+      >
         <div className="px-4 pt-24 md:pt-32 pb-12 text-center">
           <div className="mx-auto max-w-4xl">
             <h2
@@ -115,7 +146,6 @@ const MorphingVideoSection: React.FC = () => {
         </div>
 
         <div className="relative">
-          {/* Блок 01 - Наука */}
           <div ref={block1Ref} className="relative">
             <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
               <div className="container mx-auto px-4 md:px-8 max-w-6xl">
@@ -149,7 +179,6 @@ const MorphingVideoSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Блок 02 - Производство */}
           <div ref={block2Ref} className="relative">
             <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
               <div className="container mx-auto px-4 md:px-8 max-w-6xl">
@@ -182,7 +211,6 @@ const MorphingVideoSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Блок 03 - Результат */}
           <div ref={block3Ref} className="relative">
             <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
               <div className="container mx-auto px-4 md:px-8 max-w-6xl">
@@ -217,7 +245,6 @@ const MorphingVideoSection: React.FC = () => {
           <div className="h-[12vh] lg:h-[20vh]"></div>
         </div>
 
-        {/* CTA кнопка */}
         <div className="relative z-30 px-4 pb-24 text-center">
           <div className="mx-auto max-w-4xl">
             <Button
@@ -231,12 +258,36 @@ const MorphingVideoSection: React.FC = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* ВИДЕО КАРТОЧКИ: Каждая рендерится со своим уникальным ассетом */}
-      <VideoBlock blockRef={block1Ref} videoSrc={VIDEO_ASSETS.video1} blockIndex={0} isTouchDevice={isTouchDevice} />
-      <VideoBlock blockRef={block2Ref} videoSrc={VIDEO_ASSETS.video2} blockIndex={1} isTouchDevice={isTouchDevice} />
-      <VideoBlock blockRef={block3Ref} videoSrc={VIDEO_ASSETS.video3} blockIndex={2} isTouchDevice={isTouchDevice} />
+      {/* ВИДЕО КАРТОЧКИ: Они лежат отдельно, поэтому мы тоже должны затушить их */}
+      <VideoBlock
+        blockRef={block1Ref}
+        videoSrc={VIDEO_ASSETS.video1}
+        posterSrc="/images/backgrounds/HomePage/img/1.jpg"
+        blockIndex={0}
+        isTouchDevice={isTouchDevice}
+        onClick={handleOpenVimeo1}
+        isModalOpen={vimeoOpen}
+      />
+      <VideoBlock
+        blockRef={block2Ref}
+        videoSrc={VIDEO_ASSETS.video2}
+        posterSrc="/images/backgrounds/HomePage/img/2.jpg"
+        blockIndex={1}
+        isTouchDevice={isTouchDevice}
+        onClick={handleOpenVimeo2}
+        isModalOpen={vimeoOpen}
+      />
+      <VideoBlock
+        blockRef={block3Ref}
+        videoSrc={VIDEO_ASSETS.video3}
+        posterSrc="/images/backgrounds/HomePage/img/3.jpg"
+        blockIndex={2}
+        isTouchDevice={isTouchDevice}
+        onClick={handleOpenVimeo3}
+        isModalOpen={vimeoOpen}
+      />
     </section>
   );
 };
