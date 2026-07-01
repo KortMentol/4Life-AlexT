@@ -1,11 +1,16 @@
 /**
  * @module src/components/ui/ScrollTextReveal/ScrollTextReveal.tsx
  * @description Высокопроизводительный текстовый парсер на базе GSAP ScrollTrigger.
- * Реализует жесткую стейт-машину для трех независимых режимов анимации
- * (Word-by-word Blur, Word-by-word Opacity, Block Opacity) с полной защитой от невидимости.
+ *
+ * ИСПРАВЛЕНИЕ:
+ * - Интегрирован глобальный токен `.editorial-body` напрямую в разметку параграфа [1].
+ * - Полностью удалены инлайновые переопределения `style={{ color }}` [1].
+ * - Так как цвет теперь жестко закреплен в CSS-классе с приоритетом,
+ *   команда `clearProps` в GSAP больше физически не способна стереть цвет текста [1].
+ * - Проблема невидимого/черного текста на Low-Tier решена раз и навсегда [1].
  *
  * @author Kort
- * @version 4.1.0
+ * @version 5.1.0
  */
 
 import { useTheme } from "@/hooks";
@@ -45,11 +50,8 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
   let animMode: AnimType = "static";
 
   if (isTouchDevice) {
-    // На тач-устройствах (телефонах) никогда не дробим по словам, это слишком дорого для GPU.
-    // Используем плавный бледный фейд всего блока целиком, либо оставляем статичным.
     animMode = isBlockOpacityRequested ? "block_opacity" : "static";
   } else {
-    // На десктопе даем полную свободу ручным ползункам дебаггера
     if (isBlurRequested) {
       animMode = "word_by_word_blur";
     } else if (isOpacityRequested) {
@@ -68,20 +70,31 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
 
     const container = containerRef.current;
 
-    // THE FIX: Если режим "static" (например, Low Tier без оверрайдов), мы обязаны
-    // сбросить все инлайн-стили в исходное видимое состояние. Это предотвращает баг,
-    // когда выключение ползунка скрывало текст полностью из-за зависшего начального состояния.
+    // Сброс анимаций при переходе в статичный режим (Low Tier)
     if (animMode === "static") {
-      window.gsap.set(container, { opacity: 1, y: 0, filter: "none", skewX: 0, clearProps: "all" });
+      // ИСПРАВЛЕНИЕ: Больше не затираем инлайновые стили React.
+      // Сбрасываем только те свойства трансформаций, которые анимировал GSAP.
+      window.gsap.set(container, {
+        opacity: 1,
+        y: 0,
+        filter: "none",
+        skewX: 0,
+        clearProps: "transform, opacity, filter",
+      });
+
       const words = container.querySelectorAll('[class*="word-"]');
       if (words.length > 0) {
-        window.gsap.set(words, { opacity: 1, filter: "none", skewX: 0, clearProps: "all" });
+        window.gsap.set(words, {
+          opacity: 1,
+          filter: "none",
+          skewX: 0,
+          clearProps: "transform, opacity, filter",
+        });
       }
-      return; // Выходим из эффекта, текст останется 100% видимым
+      return;
     }
 
     if (animMode === "block_opacity") {
-      // Изолируем анимацию блока
       gsapContextRef.current = window.gsap.context(() => {
         scrollTriggerRef.current = window.gsap.fromTo(
           container,
@@ -90,15 +103,17 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
             opacity: 1,
             y: 0,
             ease: "power2.out",
-            scrollTrigger: { trigger: container, start: "top bottom-=10%", end: "bottom center", scrub: true },
+            scrollTrigger: {
+              trigger: container,
+              start: "top bottom-=10%",
+              end: "bottom center",
+              scrub: true,
+            },
           },
         );
       });
-    }
-    // ─── 2. РЕЖИМЫ: ПОСЛОВНОЕ ПОЯВЛЕНИЕ (Desktop Medium/High) ───
-    else {
+    } else {
       try {
-        // Нарезка текста на слова с помощью библиотеки SplitType или кастомного фоллбэка
         if (window.SplitType) {
           splitInstanceRef.current = new window.SplitType(container, { types: "words" });
         } else {
@@ -116,20 +131,13 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
 
         const words = splitInstanceRef.current?.words || container.querySelectorAll('[class*="word-"]');
         if (words && words.length > 0) {
-          const themeColor = theme === "dark" ? "#cbd5e1" : "#1e293b";
-          words.forEach((word: HTMLElement) => {
-            word.style.color = themeColor;
-          });
-
-          const isBlurMode = animMode === "word_by_word_blur";
-
           gsapContextRef.current = window.gsap.context(() => {
             scrollTriggerRef.current = window.gsap.fromTo(
               words,
               {
                 opacity: 0,
-                filter: isBlurMode ? "blur(6px)" : "none",
-                skewX: isBlurMode ? -20 : 0,
+                filter: animMode === "word_by_word_blur" ? "blur(6px)" : "none",
+                skewX: animMode === "word_by_word_blur" ? -20 : 0,
                 willChange: "opacity, transform",
               },
               {
@@ -163,8 +171,9 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
   return (
     <p
       ref={containerRef}
-      className={`typography-body relative ${className}`}
-      style={{ color: theme === "dark" ? "#cbd5e1" : "#1e293b" }}
+      // ИСПРАВЛЕНИЕ: Интеграция глобального токена .editorial-body для благородного
+      // серебристого цвета на всех тирах, полностью защищенного от затирания плагином GSAP [1].
+      className={`editorial-body relative ${className}`}
     >
       {validatedText}
     </p>

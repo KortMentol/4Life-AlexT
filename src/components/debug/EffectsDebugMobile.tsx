@@ -1,11 +1,14 @@
 /**
  * @module components/debug/EffectsDebugMobile
- * @description Touch-optimized Effects Debug Panel.
- * STRICTLY filters out PC-only features (WebGL, Grid3D, ScrollNumber filling, TextShine).
- * Adds mobile-native controls like Block Opacity Fade-in for text blocks.
+ * @description Сенсорная панель управления эффектами на мобильных (DEV).
+ * Сбалансированный UI с выводом активного режима в свернутом заголовке.
+ * Поддерживает восстановление "Last Preset" и ручную кастомизацию.
+ * Содержит атрибут `data-lenis-prevent` для блокировки скролла подлежащей страницы.
+ * Отрегулирован послойный стек zIndex для бесконфликтной интеграции с панелью FPS.
+ * Все названия параметров переведены на английский язык для консистентности системы.
  *
  * @author Kort
- * @version 4.1.0
+ * @version 5.0.4
  */
 
 import { EffectsDebugFlags, PerformanceTierOverride, effectsDebugStore } from "@/utils/effectsDebug/effectsDebugStore";
@@ -43,8 +46,13 @@ const EffectsDebugMobile: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [offsetY, setOffsetY] = useState(45);
 
+  const [isLastPresetDisabled, setIsLastPresetDisabled] = useState(() => effectsDebugStore.isLastPresetDisabled());
+
   useEffect(() => {
-    const unsub = effectsDebugStore.subscribe(setFlags);
+    const unsub = effectsDebugStore.subscribe((newFlags) => {
+      setFlags(newFlags);
+      setIsLastPresetDisabled(effectsDebugStore.isLastPresetDisabled());
+    });
     return unsub;
   }, []);
 
@@ -65,7 +73,10 @@ const EffectsDebugMobile: React.FC = () => {
 
   const handleTier = useCallback((tier: PerformanceTierOverride) => {
     effectsDebugStore.applyTierPreset(tier);
-    window.location.reload();
+  }, []);
+
+  const handleRestoreLastPreset = useCallback(() => {
+    effectsDebugStore.restoreLastPreset();
   }, []);
 
   const handleReset = useCallback(() => {
@@ -83,7 +94,7 @@ const EffectsDebugMobile: React.FC = () => {
     label: string;
     value: PerformanceTierOverride;
   }[] = [
-    { label: "Auto", value: "auto" },
+    { label: "Current", value: "current" },
     { label: "Low", value: "low" },
     { label: "Mid", value: "medium" },
     { label: "High", value: "high" },
@@ -94,14 +105,16 @@ const EffectsDebugMobile: React.FC = () => {
       className={`${styles.container} ${isCompact ? styles.containerCompact : ""}`}
       style={{
         transform: isCompact ? `translateY(calc(100% - ${offsetY + 45}px))` : "translateY(0)",
-        zIndex: isCompact ? 99998 : 99999,
+        // КРИТИЧЕСКИЙ ФИКС: Устанавливаем zIndex 99997 в свернутом виде.
+        // Это убирает наложение непрозрачного фона шторки поверх панели FPS (zIndex 99999).
+        zIndex: isCompact ? 99997 : 99999,
       }}
     >
-      {/* Header */}
+      {/* Header — показывает активный режим (Current, Low, Medium, High) */}
       <div className={styles.header} onClick={toggleCompact}>
         <div className={styles.headerLeft}>
           <Sliders size={13} />
-          <span>Effects Debug (Touch)</span>
+          <span>Effects Debug ({flags.tierOverride})</span>
         </div>
         <div className={styles.headerActions}>
           <button
@@ -125,7 +138,7 @@ const EffectsDebugMobile: React.FC = () => {
 
       {/* Body */}
       {!isCompact && (
-        <div className={styles.body}>
+        <div className={styles.body} data-lenis-prevent>
           <div className={styles.sectionLabel}>Performance Tier</div>
           <div className={styles.tierRow}>
             {tierBtns.map(({ label, value }) => (
@@ -139,9 +152,26 @@ const EffectsDebugMobile: React.FC = () => {
             ))}
           </div>
 
+          <button
+            className={styles.resetBtn}
+            disabled={isLastPresetDisabled}
+            onClick={handleRestoreLastPreset}
+            style={{
+              marginTop: "0.2rem",
+              marginBottom: "0.6rem",
+              opacity: isLastPresetDisabled ? 0.35 : 1,
+              cursor: isLastPresetDisabled ? "not-allowed" : "pointer",
+              border: isLastPresetDisabled ? "1px dashed rgba(255,255,255,0.08)" : "1px solid rgba(0,212,255,0.3)",
+              color: isLastPresetDisabled ? "rgba(255,255,255,0.3)" : "#00ffff",
+              background: isLastPresetDisabled ? "transparent" : "rgba(0,212,255,0.05)",
+            }}
+          >
+            {isLastPresetDisabled ? "Last Preset (Empty)" : "↺ Restore Last Preset"}
+          </button>
+
           <div className={styles.divider} />
 
-          {/* ─── TYPOGRAPHY (Only touch-compatible ones) ─── */}
+          {/* ─── TYPOGRAPHY ─── */}
           <div className={styles.sectionLabel}>Typography & Motion</div>
           <ToggleRowMobile
             label="Block Opacity Fade-in"
@@ -179,6 +209,13 @@ const EffectsDebugMobile: React.FC = () => {
             onChange={handleToggle}
           />
           <ToggleRowMobile label="Grid Edge Mask Fade" flagKey="grid3dMaskFade" flags={flags} onChange={handleToggle} />
+          {/* НОВЫЙ ПОЛЗУНОК ДЛЯ ШАРОВ СВЕТА НА АНГЛИЙСКОМ */}
+          <ToggleRowMobile
+            label="Background glow (orbs)"
+            flagKey="bgGlowLights"
+            flags={flags}
+            onChange={handleToggle}
+          />
           <ToggleRowMobile
             label="Parallax BG (Sections 1,3,5)"
             flagKey="parallaxBackground"
@@ -205,7 +242,7 @@ const EffectsDebugMobile: React.FC = () => {
           />
 
           <button className={styles.resetBtn} onClick={handleReset}>
-            ↺ Reset all &amp; reload
+            ↺ Reset to Hardware Defaults
           </button>
         </div>
       )}

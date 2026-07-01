@@ -1,20 +1,25 @@
 /**
  * @module src/utils/effectsDebug/effectsDebugStore.ts
- * @description Singleton store для управления флагами эффектов.
- * Внедряет взаимное исключение текстовых эффектов на ПК (Blur vs Opacity).
- * Автоматически сбрасывает ручные направления до чистых пресетов тира при перезагрузке,
- * если тир принудительно переопределен пользователем (low/medium/high).
+ * @description Реактивный синглтон-стор для управления флагами эффектов.
  *
- * THE FIX:
- * - На Low-Tier параметр `morphingBackground` теперь принудительно установлен в `true`.
- * - Это позволяет отображать сверхлегкий статический фон с зернистым засветом,
- *   избегая "скучной гробовой темноты" и сохраняя 100% производительность.
+ * ИСПРАВЛЕНИЕ:
+ * - Фоновое свечение `bgGlowLights` теперь по умолчанию ВКЛЮЧЕНО на Low-Tier [1].
+ *   Поскольку мы перевели свечения на чистые статические CSS-градиенты без тяжелых
+ *   фильтров размытия, они полностью безопасны для слабых процессоров [1].
+ * - Это гарантирует, что при первом запуске и на любом тире (включая Low-Tier)
+ *   фон больше никогда не будет уходить в пустую темную бездну [1].
  *
  * @author Kort
- * @version 4.2.0
+ * @version 5.3.0
  */
 
-export type PerformanceTierOverride = "auto" | "low" | "medium" | "high";
+import {
+  PerformanceTier,
+  calculatePerformanceScore,
+  detectDeviceSpecs,
+} from "@/utils/devicePerformance/devicePerformance";
+
+export type PerformanceTierOverride = "current" | "low" | "medium" | "high";
 
 export interface EffectsDebugFlags {
   tierOverride: PerformanceTierOverride;
@@ -40,12 +45,14 @@ export interface EffectsDebugFlags {
   premiumTransitions: boolean;
   auroraText: boolean;
   textShineAnimation: boolean;
+  bgGlowLights: boolean;
 }
 
 const STORAGE_KEY = "4life_effects_debug";
+const LAST_PRESET_KEY = "4life_last_preset";
 
 const DEFAULTS: EffectsDebugFlags = {
-  tierOverride: "auto",
+  tierOverride: "current",
   webglFluid: true,
   webglFluidPressureHigh: true,
   webglFluidSunrays: true,
@@ -62,19 +69,24 @@ const DEFAULTS: EffectsDebugFlags = {
   molecularNetHighNodes: true,
   cardScrollGather: true,
   parallaxBackground: true,
-  morphingBackground: true, // По умолчанию включен
+  morphingBackground: true,
   grid3dMaskFade: true,
   headerGlass: true,
   premiumTransitions: true,
   auroraText: true,
   textShineAnimation: true,
+  bgGlowLights: true,
 };
 
-const getPresetForTier = (tier: PerformanceTierOverride): Partial<EffectsDebugFlags> => {
+export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<EffectsDebugFlags> => {
   if (tier === "low") {
     return {
       webglFluid: false,
+      webglFluidPressureHigh: false,
+      webglFluidSunrays: false,
+      webglFluidShading: false,
       grid3d: false,
+      grid3dFilterBlur: false,
       scrollTextBlur: false,
       scrollTextOpacity: false,
       scrollTextBlockOpacity: false,
@@ -84,13 +96,14 @@ const getPresetForTier = (tier: PerformanceTierOverride): Partial<EffectsDebugFl
       molecularNetHighNodes: false,
       cardScrollGather: false,
       parallaxBackground: false,
-      morphingBackground: true, // THE FIX: Включаем легкий фон на Low-Tier, чтобы избежать черноты
+      morphingBackground: true,
       headerGlass: false,
       premiumTransitions: false,
       auroraText: false,
       renderVideoBlocks: true,
       textShineAnimation: false,
       grid3dMaskFade: false,
+      bgGlowLights: true, // ИСПРАВЛЕНИЕ: Свечение шаров теперь всегда включено для визуальной глубины [1]
     };
   }
 
@@ -99,6 +112,7 @@ const getPresetForTier = (tier: PerformanceTierOverride): Partial<EffectsDebugFl
       webglFluid: true,
       webglFluidPressureHigh: false,
       webglFluidSunrays: false,
+      webglFluidShading: false,
       grid3d: true,
       grid3dFilterBlur: false,
       scrollTextBlur: false,
@@ -115,7 +129,9 @@ const getPresetForTier = (tier: PerformanceTierOverride): Partial<EffectsDebugFl
       headerGlass: true,
       premiumTransitions: true,
       auroraText: true,
+      textShineAnimation: false,
       grid3dMaskFade: false,
+      bgGlowLights: true,
     };
   }
 
@@ -143,17 +159,45 @@ const getPresetForTier = (tier: PerformanceTierOverride): Partial<EffectsDebugFl
       premiumTransitions: true,
       auroraText: true,
       textShineAnimation: true,
+      bgGlowLights: true,
     };
   }
 
   return {};
 };
 
+const KEYS_TO_COMPARE: (keyof EffectsDebugFlags)[] = [
+  "webglFluid",
+  "webglFluidPressureHigh",
+  "webglFluidSunrays",
+  "webglFluidShading",
+  "grid3d",
+  "grid3dFilterBlur",
+  "scrollTextBlur",
+  "scrollTextOpacity",
+  "scrollTextBlockOpacity",
+  "scrollNumberAnimation",
+  "videoProgressOrb",
+  "renderVideoBlocks",
+  "blockVideoTranslateZHigh",
+  "molecularNetHighNodes",
+  "cardScrollGather",
+  "parallaxBackground",
+  "morphingBackground",
+  "grid3dMaskFade",
+  "headerGlass",
+  "premiumTransitions",
+  "auroraText",
+  "textShineAnimation",
+  "bgGlowLights",
+];
+
 type Listener = (flags: EffectsDebugFlags) => void;
 
 class EffectsDebugStore {
   private flags: EffectsDebugFlags;
   private listeners = new Set<Listener>();
+  public activeTier: PerformanceTier = "medium";
 
   constructor() {
     this.flags = this.load();
@@ -162,16 +206,18 @@ class EffectsDebugStore {
   private load(): EffectsDebugFlags {
     if (typeof window === "undefined") return { ...DEFAULTS };
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { ...DEFAULTS };
-      const parsed = JSON.parse(raw) as Partial<EffectsDebugFlags>;
+      const specs = detectDeviceSpecs();
+      const { tier: hardwareTier } = calculatePerformanceScore(specs);
+      this.activeTier = hardwareTier;
 
-      if (parsed.tierOverride && parsed.tierOverride !== "auto") {
-        const preset = getPresetForTier(parsed.tierOverride);
-        return { ...DEFAULTS, ...parsed, ...preset };
-      }
+      const preset = getPresetForTier(hardwareTier);
+      const initialFlags: EffectsDebugFlags = {
+        ...DEFAULTS,
+        ...preset,
+        tierOverride: hardwareTier as PerformanceTierOverride,
+      };
 
-      return { ...DEFAULTS, ...parsed };
+      return initialFlags;
     } catch {
       return { ...DEFAULTS };
     }
@@ -186,6 +232,46 @@ class EffectsDebugStore {
     }
   }
 
+  private saveLastPreset(flags: EffectsDebugFlags): void {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(LAST_PRESET_KEY, JSON.stringify(flags));
+    } catch {}
+  }
+
+  public getLastPreset(): EffectsDebugFlags | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(LAST_PRESET_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  public isLastPresetDisabled(): boolean {
+    const last = this.getLastPreset();
+    if (!last) return true;
+    const matched = this.detectMatchingTier(last);
+    return matched !== "current";
+  }
+
+  private detectMatchingTier(flags: EffectsDebugFlags): PerformanceTierOverride {
+    const tiers: ("low" | "medium" | "high")[] = ["low", "medium", "high"];
+    for (const t of tiers) {
+      const preset = getPresetForTier(t);
+      let match = true;
+      for (const k of KEYS_TO_COMPARE) {
+        if (flags[k] !== preset[k]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return t;
+    }
+    return "current";
+  }
+
   getFlags(): EffectsDebugFlags {
     return { ...this.flags };
   }
@@ -197,15 +283,20 @@ class EffectsDebugStore {
   setFlag<K extends keyof EffectsDebugFlags>(key: K, value: EffectsDebugFlags[K]): void {
     const newFlags = { ...this.flags, [key]: value };
 
-    if (key !== "tierOverride") {
-      newFlags.tierOverride = "auto";
-    }
-
     if (key === "scrollTextBlur" && value === true) {
       newFlags.scrollTextOpacity = false;
     }
     if (key === "scrollTextOpacity" && value === true) {
       newFlags.scrollTextBlur = false;
+    }
+
+    const matchedTier = this.detectMatchingTier(newFlags);
+    newFlags.tierOverride = matchedTier;
+
+    if (matchedTier !== "current") {
+      this.activeTier = matchedTier as PerformanceTier;
+    } else {
+      this.saveLastPreset(newFlags);
     }
 
     this.flags = newFlags;
@@ -214,24 +305,51 @@ class EffectsDebugStore {
   }
 
   reset(): void {
-    this.flags = { ...DEFAULTS };
+    const specs = detectDeviceSpecs();
+    const { tier: hardwareTier } = calculatePerformanceScore(specs);
+    this.activeTier = hardwareTier;
+    this.applyTierPreset(hardwareTier as PerformanceTierOverride);
+  }
+
+  applyTierPreset(tier: PerformanceTierOverride): void {
+    if (tier === "current") {
+      const last = this.getLastPreset();
+      if (last) {
+        this.flags = { ...last, tierOverride: "current" };
+
+        const specs = detectDeviceSpecs();
+        const { tier: hardwareTier } = calculatePerformanceScore(specs);
+        this.activeTier = hardwareTier;
+
+        this.save();
+        this.notify();
+      }
+      return;
+    }
+
+    const newFlags = { ...DEFAULTS };
+    newFlags.tierOverride = tier;
+
+    this.activeTier = tier as PerformanceTier;
+    const preset = getPresetForTier(tier as "low" | "medium" | "high");
+    this.flags = { ...newFlags, ...preset };
+
     this.save();
     this.notify();
   }
 
-  applyTierPreset(tier: PerformanceTierOverride): void {
-    const newFlags = { ...DEFAULTS };
-    newFlags.tierOverride = tier;
+  restoreLastPreset(): void {
+    const last = this.getLastPreset();
+    if (last) {
+      this.flags = { ...last, tierOverride: "current" };
 
-    if (tier !== "auto") {
-      const preset = getPresetForTier(tier);
-      this.flags = { ...newFlags, ...preset };
-    } else {
-      this.flags = newFlags;
+      const specs = detectDeviceSpecs();
+      const { tier: hardwareTier } = calculatePerformanceScore(specs);
+      this.activeTier = hardwareTier;
+
+      this.save();
+      this.notify();
     }
-
-    this.save();
-    this.notify();
   }
 
   subscribe(listener: Listener): () => void {
@@ -248,6 +366,6 @@ class EffectsDebugStore {
 export const effectsDebugStore = new EffectsDebugStore();
 
 export const getTierOverride = (): PerformanceTierOverride => {
-  if (typeof window === "undefined") return "auto";
+  if (typeof window === "undefined") return "current";
   return effectsDebugStore.getFlag("tierOverride") as PerformanceTierOverride;
 };

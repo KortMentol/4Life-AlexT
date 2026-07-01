@@ -2,6 +2,15 @@
  * @module src/components/sections/MorphingVideoSection/index.tsx
  * @description Awwwards 2026 - Morphing Video Section.
  * Coordinates 3 distinct video blocks with precise performance tiers and layout alignment.
+ *
+ * ИСПРАВЛЕНИЕ:
+ * - Внедрен единый параллакс-коэффициент `parallaxStrength` (равный 40) для Medium и High тиров [1].
+ *   Это гарантирует, что фон сдвигается на одинаковое расстояние, и световая нода над кнопкой CTA
+ *   находится на абсолютно идентичной высоте на обоих тирах.
+ * - Устранена ошибка верстки в Блоке 01: добавлены пропущенные классы размера шрифта
+ *   (`text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto`), что привело его к полному
+ *   визуальному соответствию блокам 02 и 03.
+ *
  * @author Geminis AI & Kort
  */
 
@@ -46,7 +55,9 @@ const MorphingVideoSection: React.FC = () => {
   const isCursorEnabled = !isTouchDevice;
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const parallaxStrength = tier === "low" ? 0 : tier === "medium" ? 30 : 60;
+
+  // ИСПРАВЛЕНИЕ: Унифицируем сдвиг фона между Medium и High для идеального совпадения нод внизу скролла
+  const parallaxStrength = tier === "low" ? 0 : 40;
 
   useParallaxLenis(parallaxBgRef, sectionRef, {
     strength: parallaxStrength * 2,
@@ -110,7 +121,6 @@ const MorphingVideoSection: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* ИНЖЕНЕРНЫЙ ФИКС: Оборачиваем весь фон в motion.div для синхронного затухания */}
       <motion.div
         className="relative z-30"
         initial={false}
@@ -158,7 +168,8 @@ const MorphingVideoSection: React.FC = () => {
                   </div>
                   <div className="lg:col-span-9 order-1 lg:order-2 space-y-6">
                     <h2 className="typography-h2 text-left text-white">Исследования и Инновации</h2>
-                    <ScrollTextReveal>
+                    {/* ИСПРАВЛЕНИЕ: Добавлены пропущенные размерные классы для полной идентичности блокам 02 и 03 */}
+                    <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
                       В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
                       уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
                       функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
@@ -260,7 +271,6 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* ВИДЕО КАРТОЧКИ: Они лежат отдельно, поэтому мы тоже должны затушить их */}
       <VideoBlock
         blockRef={block1Ref}
         videoSrc={VIDEO_ASSETS.video1}

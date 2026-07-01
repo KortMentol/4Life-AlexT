@@ -1,8 +1,12 @@
 /**
  * @module src/components/sections/MorphingVideoSection/components/VideoBlock.tsx
  * @description Awwwards 2026 - Optimized Responsive Video Block.
- * PC is returned 1:1 to its original raw string transform.
- * Touch uses 100% smooth, compositor-only opacity & scale animations (Zero CPU lag, 120 FPS).
+ * Полностью отключает рендер разметки и ресурсов, если выключен флаг renderVideoBlocks.
+ *
+ * ВАЖНО: Условие отключения рендера размещено строго ПЕРЕД возвратом JSX.
+ * Все хуки (useScroll, useTransform, useEffect) вызываются безусловно на верхнем уровне,
+ * что полностью предотвращает нарушение Rules of Hooks в React при переключении флага.
+ *
  * @author Geminis AI & Kort
  */
 
@@ -190,6 +194,12 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   const handleMouseLeave = useCallback(() => {
     window.dispatchEvent(new CustomEvent("video-cursor-leave"));
   }, []);
+
+  // КРИТИЧЕСКИЙ ФИКС (RULES OF HOOKS): Рендерим null только здесь!
+  // Это сохраняет порядок вызовов хуков неизменным, защищая React от краша.
+  if (!efxFlags.renderVideoBlocks) {
+    return null;
+  }
 
   return (
     <div

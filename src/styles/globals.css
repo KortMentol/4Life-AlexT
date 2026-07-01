@@ -1,9 +1,16 @@
 /* src/styles/globals.css */
 /**
  * @module src/styles/globals.css
- * @description Глобальные стили приложения. Только используемые классы.
+ * @description Глобальные стили приложения. Полностью оптимизировано под дизайн жидкого металла (Liquid Metal)
+ * и безупречную работу без рендеринг-лагов и сломанных GPU-слоев на любых платформах.
+ * 
+ * ИСПРАВЛЕНИЕ:
+ * - Внедрен глобальный токен `.editorial-body` для элитной серебряной типографики [1].
+ * - Слой шума `.bg-noise-overlay` переведен на `z-index: 35` [1], благодаря чему
+ *   микрозернистость накладывается поверх текста, создавая матовую текстуру металла [1].
+ *
  * @author Kort
- * @version 2.0.0 - Cleaned 2026
+ * @version 6.3.0
  */
 
 /* Import component styles */
@@ -11,7 +18,7 @@
 @import "./base/utilities.css";
 @import "./base/typography.css";
 
-/* ─── CSS Variables ──────────────────────────────────────────────────────────── */
+/* ─── CSS Variables — "Clinical Obsidian" и "Liquid Metal" ─── */
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -25,6 +32,10 @@
   --grid-gap: 2vw;
   --grid-columns: 4;
   --grid-inner-scale: 1;
+
+  /* Токен серебристого цвета (Slate-400) */
+  --slate-body: #94a3b8; /* [1] */
+  --font-body: "Manrope Variable", "Manrope", system-ui, sans-serif; /* [1] */
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────────── */
@@ -65,7 +76,6 @@ html {
 }
 
 /* ─── Theme transitions ──────────────────────────────────────────────────────── */
-/* Scoped to semantic elements only — avoids painting every div on theme switch */
 body,
 main,
 header,
@@ -94,7 +104,7 @@ section {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 9999; /* UPDATED FROM 50 TO 9999 to cover the header capsule */
+  z-index: 9999;
   display: grid;
   grid-template-columns: repeat(14, 1fr);
   grid-template-rows: repeat(8, 1fr);
@@ -137,57 +147,23 @@ section {
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  outline: 1px solid transparent;
+  transform-style: preserve-3d;
 }
 
 .grid__item-inner {
-  position: relative;
-  width: calc(1 / var(--grid-inner-scale) * 100%);
-  height: calc(1 / var(--grid-inner-scale) * 100%);
+  height: 100%;
+  width: 100%;
   background-size: cover;
-  background-position: 50% 50%;
+  background-position: center;
+  border-radius: 12px;
+  image-rendering: auto;
 }
 
-.grid__item--type-1 {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  filter: contrast(1.05);
-}
-.grid__item--type-1 .grid__item-inner {
-  transform: scale(1.01);
-}
-
-.grid__item--type-2 {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  filter: contrast(1.03);
-  outline: 1px solid transparent;
-}
-.grid__item--type-2 .grid__item-inner {
-  -webkit-font-smoothing: subpixel-antialiased;
-  -moz-osx-font-smoothing: auto;
-}
-
-.grid__item--type-3 {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  outline: 1px solid transparent;
-}
-.grid__item--type-3 .grid__item-inner {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: optimizeQuality;
-}
-
-.grid-3d-container {
-  perspective: var(--perspective, 1500px);
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-}
-
-/* ─── Parallax — used by ParallaxSection ────────────────────────────────────── */
-.parallax-bg {
-  contain: layout style paint;
-  isolation: isolate;
+/* ─── prefers-reduced-motion ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pixel-overlay {
+    display: none;
+  }
 }
 
 /* ─── Scrollbar hide — used by ProductStrip, ThumbnailStrip ─────────────────── */
@@ -204,133 +180,48 @@ section {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* ─── prefers-reduced-motion — global override ───────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+/* ─── GLOBAL EDITORIAL TYPOGRAPHY — Unified Slate-Silver Token ──────────────── */
+.editorial-body {
+  font-family: var(--font-body) !important; /* [1] */
+  font-weight: 300 !important; /* Легкое начертание для швейцарского минимализма [1] */
+  color: var(--slate-body) !important; /* Холодное матовое серебро #94a3b8 [1] */
+  line-height: 1.7 !important; /* Воздушный интерлиньяж для легкого чтения [1] */
+  text-wrap: pretty !important; /* Защита от висячих строк (orphans/widows) [1] */
+  max-width: 60ch !important; /* Оптимальная ширина текстового блока [1] */
+}
+
+/* ─── LIQUID METAL HIGH-PERFORMANCE ANIMATIONS (Compositor-only) ─────────────── */
+@keyframes lab-pos {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes lab-spin-rev {
+  to {
+    transform: translate3d(-50%, -50%, 0) rotate(-360deg);
   }
 }
 
-/* ─── EffectsDebug: отключение filter:blur на Grid3D элементах ───────────────── */
-[data-filter="false"] .grid__item,
-[data-filter="false"] .grid__item--type-1,
-[data-filter="false"] .grid__item--type-2,
-[data-filter="false"] .grid__item--type-3 {
-  filter: none !important;
+.anim-pos {
+  animation: lab-pos 28s ease-in-out infinite;
+}
+.anim-spin-rev {
+  animation: lab-spin-rev 110s linear infinite;
 }
 
-/* ─── AWWWARDS 2026: CLINICAL OBSIDIAN BACKGROUND (MONO-THEME) ─── */
-
-:root {
-  --bg-biotech-main: #03050a;
-  --bg-biotech-grid-color: rgba(255, 255, 255, 0.015);
-  --bg-biotech-glow-cyan: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
-  --bg-biotech-glow-blue: radial-gradient(circle, rgba(59, 130, 246, 0.03) 0%, transparent 70%);
-  --bg-noise-opacity: 0.025;
-  --bg-fade-color: #03050a;
-}
-
-body {
-  background-color: var(--bg-biotech-main) !important;
-  color: #f8fafc !important;
-}
-
-/* Высокопроизводительная инженерная микро-сетка */
-.bg-biotech-grid {
-  position: absolute;
-  inset: 0;
-  background-size: 40px 40px;
-  background-image:
-    linear-gradient(to right, var(--bg-biotech-grid-color) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--bg-biotech-grid-color) 1px, transparent 1px);
-  pointer-events: none;
-}
-
-/* Аппаратное затухание краев без использования дорогого mask-image */
-.bg-biotech-grid::before,
-.bg-biotech-grid::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 15vh;
-  pointer-events: none;
-  z-index: 1;
-}
-.bg-biotech-grid::before {
-  top: 0;
-  background: linear-gradient(to bottom, var(--bg-fade-color), transparent);
-}
-.bg-biotech-grid::after {
-  bottom: 0;
-  background: linear-gradient(to top, var(--bg-fade-color), transparent);
-}
-
-/* Аппаратно-ускоренный субпиксельный шум без mix-blend-mode (Оптимизация под Safari/iOS) */
+/* Субпиксельный шум — рендерится поверх текста для придания металлической матовости */
 .bg-noise-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 35; /* ИСПРАВЛЕНИЕ: Перенесен на 35, ложится на буквы, создавая эффект текстуры [1] */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
   background-repeat: repeat;
   pointer-events: none;
-  transform: translateZ(0);
-}
-
-/* Объемные радиальные свечения на чистых слоях (Compositor-only) */
-.bg-glow-cyan {
-  position: absolute;
-  width: 60vw;
-  height: 60vw;
-  border-radius: 50%;
-  background: var(--bg-biotech-glow-cyan);
-  pointer-events: none;
-}
-
-.bg-glow-blue {
-  position: absolute;
-  width: 50vw;
-  height: 50vw;
-  border-radius: 50%;
-  background: var(--bg-biotech-glow-blue);
-  pointer-events: none;
-}
-
-/* Размытие применяется только на High Tier */
-.bg-glow-blurred {
-  filter: blur(80px);
-}
-
-/* Анимации свечений: вынесены на уровень Compositor (не нагружают Main Thread) */
-@keyframes glow-drift-cyan {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(5%, -5%, 0) scale(1.08);
-  }
-}
-
-@keyframes glow-drift-blue {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-4%, 4%, 0) scale(0.92);
-  }
-}
-
-.animate-glow-cyan {
-  animation: glow-drift-cyan 18s ease-in-out infinite alternate;
-}
-
-.animate-glow-blue {
-  animation: glow-drift-blue 22s ease-in-out infinite alternate;
+  transform: translate3d(0, 0, 0);
 }

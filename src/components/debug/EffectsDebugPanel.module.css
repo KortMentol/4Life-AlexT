@@ -10,7 +10,6 @@
   box-shadow:
     0 10px 25px -5px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1);
-  /* overflow: hidden; REMOVED - blocks floating tooltip */
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -78,6 +77,7 @@
   padding: 0.6rem 0.65rem;
   max-height: 70vh;
   overflow-y: auto;
+  overscroll-behavior: contain; /* Блокирует прокрутку самого сайта (scroll chaining) */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   border-bottom-left-radius: 0.75rem;

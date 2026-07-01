@@ -1,12 +1,15 @@
 /**
  * @module components/debug/PerformanceDebugMobile
- * @description Highly optimized touch-friendly performance overlay.
+ * @description Высокопроизводительный сенсорный оверлей мониторинга FPS, FT и аппаратных характеристик (DEV).
+ * Обновляет данные напрямую в DOM через рефы, исключая влияние React-рендеринга на замеры.
+ * Гарантированно рендерится поверх мобильной панели эффектов с помощью явного inline zIndex.
+ *
  * @author Kort
- * @version 2.0.0
+ * @version 5.1.0
  */
 
 import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
-import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore"; // <-- FIX: Import missing function
+import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
 import {
   Bug,
   ChevronDown,
@@ -28,7 +31,7 @@ const PerformanceDebugMobile: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isCompact, setIsCompact] = useState(true);
   const [staticScore, setStaticScore] = useState(0);
-  const [tier, setTier] = useState<"low" | "medium" | "high">("medium");
+  const [tier, setTier] = useState<"low" | "medium" | "high" | "current">("medium");
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpecs>({
     ram: "Unknown",
     cpuCores: 0,
@@ -41,13 +44,12 @@ const PerformanceDebugMobile: React.FC = () => {
     connectionType: "Unknown",
   });
 
-  // WebGPU-level 2026 platform check: True mobile touch device vs PC simulated viewport
   const isPhysicalMobile = React.useMemo(() => {
     if (typeof navigator === "undefined") return false;
     return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }, []);
 
-  // Direct DOM Refs for zero re-renders
+  // Прямые рефы для мгновенного обновления текста в DOM без вызова setState
   const fpsTextRef = useRef<HTMLSpanElement>(null);
   const ftTextRef = useRef<HTMLSpanElement>(null);
   const compactFpsTextRef = useRef<HTMLSpanElement>(null);
@@ -66,7 +68,8 @@ const PerformanceDebugMobile: React.FC = () => {
       setStaticScore(score);
 
       const override = getTierOverride();
-      const finalTier = override !== "auto" ? override : hardwareTier;
+      // ИСПРАВЛЕНИЕ: Сравнение с "current" вместо "auto" для устранения ошибки TS2367
+      const finalTier = override !== "current" ? override : hardwareTier;
       setTier(finalTier as "low" | "medium" | "high");
     } catch (error) {
       console.error("❌ Error initializing PerformanceDebug:", error);
@@ -109,7 +112,7 @@ const PerformanceDebugMobile: React.FC = () => {
 
   const toggleCompactMode = useCallback(() => {
     setIsCompact((prev) => !prev);
-    // Notify the other panel that layout state has changed
+    // Извещаем соседнюю панель об изменении высоты
     window.dispatchEvent(
       new CustomEvent("mobile-debug-layout-change", { detail: { isCompact: !isCompact, panel: "perf" } }),
     );
@@ -124,7 +127,14 @@ const PerformanceDebugMobile: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`}>
+    <div
+      className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`}
+      style={{
+        // КРИТИЧЕСКИЙ ФИКС: Явный inline z-index 99999 гарантирует, что панель всегда на самом верху
+        zIndex: 99999,
+        transform: isCompact ? `translateY(calc(100% - 46px))` : "translateY(0)",
+      }}
+    >
       <div className={styles.debugHeader} onClick={toggleCompactMode} role="button" tabIndex={0}>
         {isCompact ? (
           <>

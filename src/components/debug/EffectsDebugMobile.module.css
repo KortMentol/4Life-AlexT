@@ -52,7 +52,7 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
-  overscroll-behavior: contain;
+  overscroll-behavior: contain; /* Предотвращает скролл цепочки подложкой мобильного браузера */
 }
 
 .sectionLabel {

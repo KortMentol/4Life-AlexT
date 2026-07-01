@@ -1,11 +1,12 @@
 /**
  * @module src/components/debug/EffectsDebugPanel
- * @description GUI panel for testing HIGH-tier effects on PC.
- * Allows toggling tier (low/medium/high/auto) and individual effects.
- * DEV mode only. Positioned below PerformanceDebug.
+ * @description Настольная панель управления эффектами (DEV).
+ * Показывает активный режим в заголовке. Поддерживает восстановление "Last Preset".
+ * Содержит атрибут `data-lenis-prevent` для блокировки скролла подлежащей страницы.
+ * Все названия параметров переведены на английский язык для консистентности системы.
  *
  * @author Kort
- * @version 4.2.0
+ * @version 5.2.1
  */
 
 import { useMediaQuery } from "@/hooks";
@@ -14,7 +15,7 @@ import { ChevronDown, ChevronUp, Info, Move, Sliders, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./EffectsDebugPanel.module.css";
 
-// ─── Effect Help Data ─────────────────────────────────────────────────────────
+// ─── Effect Help Data — All translated to English ─────────────────────────────
 
 const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
   webglFluid: {
@@ -66,15 +67,15 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     loc: "HomePage Video Blocks",
   },
   videoProgressOrb: {
-    desc: "Direct-DOM calculated circular SVG progress tracker and play indicator in the center of the card. Non-reactive animation loop (0ms React render overhead).",
+    desc: "Direct-DOM calculated circular SVG progress tracker and play indicator in the center of the card.",
     loc: "HomePage Video Blocks",
   },
   renderVideoBlocks: {
-    desc: "Globally enables or disables all three video blocks (01/02/03). Zero FPS cost when disabled — no video elements, no rAF, no IntersectionObserver.",
+    desc: "Globally enables or disables all three video blocks (01/02/03). Zero FPS cost when disabled.",
     loc: "HomePage Video Blocks",
   },
   molecularNetHighNodes: {
-    desc: "Scales dynamic SVG vertices to 12 nodes with bounding-box connection lines and custom orbital drift physics.",
+    desc: "Scales dynamic SVG vertices to 12 nodes with connection lines and custom orbital drift physics.",
     loc: "Partnership Section 1",
   },
   cardScrollGather: {
@@ -98,12 +99,14 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     loc: "HomePage Hero Titles",
   },
   textShineAnimation: {
-    desc: "Shimmer text shine animation.",
+    desc: "Shimmer text shine animation on the header name text.",
     loc: "Global Header Names",
   },
+  bgGlowLights: {
+    desc: "Toggles the ambient volumetric glowing circles (cyan and blue) in the background.",
+    loc: "HomePage & MorphingVideoSection Background",
+  },
 };
-
-// ─── Toggle Row ───────────────────────────────────────────────────────────────
 
 const ToggleRow: React.FC<{
   label: string;
@@ -140,8 +143,6 @@ const ToggleRow: React.FC<{
   );
 };
 
-// ─── Main Panel ───────────────────────────────────────────────────────────────
-
 const EffectsDebugPanel: React.FC = () => {
   const [flags, setFlags] = useState<EffectsDebugFlags>(() => effectsDebugStore.getFlags());
   const [isCompact, setIsCompact] = useState(true);
@@ -151,13 +152,16 @@ const EffectsDebugPanel: React.FC = () => {
   const [tooltipPosition, setTooltipPosition] = useState<"left" | "right">("left");
   const [tooltipTop, setTooltipTop] = useState<number>(60);
 
-  // Subscribe to store changes
+  const [isLastPresetDisabled, setIsLastPresetDisabled] = useState(() => effectsDebugStore.isLastPresetDisabled());
+
   useEffect(() => {
-    const unsub = effectsDebugStore.subscribe(setFlags);
+    const unsub = effectsDebugStore.subscribe((newFlags) => {
+      setFlags(newFlags);
+      setIsLastPresetDisabled(effectsDebugStore.isLastPresetDisabled());
+    });
     return unsub;
   }, []);
 
-  // ─── Drag logic ─────────────────────────────────────────────────────────────
   const dragRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0 });
   const isDragging = useRef(false);
@@ -165,7 +169,6 @@ const EffectsDebugPanel: React.FC = () => {
   const wasDragging = useRef(false);
   const hasDragged = useRef(false);
 
-  // Initial position — below PerformanceDebug
   useEffect(() => {
     const el = dragRef.current;
     if (!el) return;
@@ -183,7 +186,7 @@ const EffectsDebugPanel: React.FC = () => {
       if (!el) return;
       const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
       const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
-      if (!clientX && !clientY) return;
+      if (clientX === undefined || clientY === undefined) return;
       const deltaX = clientX - startPos.current.x;
       const deltaY = clientY - startPos.current.y;
       const newX = elementPos.current.x + deltaX;
@@ -194,7 +197,6 @@ const EffectsDebugPanel: React.FC = () => {
       startPos.current = { x: clientX, y: clientY };
       elementPos.current = { x: newX, y: newY };
 
-      // Update tooltip position while dragging if tooltip is visible
       if (hoveredDescription) {
         const rect = el.getBoundingClientRect();
         const tooltipWidth = 240 + 12;
@@ -241,7 +243,7 @@ const EffectsDebugPanel: React.FC = () => {
       if (!el) return;
       const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
       const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
-      if (!clientX && !clientY) return;
+      if (clientX === undefined || clientY === undefined) return;
       const rect = el.getBoundingClientRect();
       startPos.current = { x: clientX, y: clientY };
       elementPos.current = { x: rect.left, y: rect.top };
@@ -262,7 +264,6 @@ const EffectsDebugPanel: React.FC = () => {
     [handleMouseMove, handleMouseUp],
   );
 
-  // Cleanup
   useEffect(() => {
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
@@ -272,20 +273,20 @@ const EffectsDebugPanel: React.FC = () => {
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  // ─── Handlers ─────────────────────────────────────────────────────────────
-
   const handleToggle = useCallback((key: keyof EffectsDebugFlags, value: boolean) => {
     effectsDebugStore.setFlag(key, value);
   }, []);
 
   const handleTier = useCallback((tier: PerformanceTierOverride) => {
     effectsDebugStore.applyTierPreset(tier);
-    window.location.reload();
+  }, []);
+
+  const handleRestoreLastPreset = useCallback(() => {
+    effectsDebugStore.restoreLastPreset();
   }, []);
 
   const handleReset = useCallback(() => {
     effectsDebugStore.reset();
-    window.location.reload();
   }, []);
 
   const toggleCompact = useCallback((e: React.MouseEvent) => {
@@ -299,29 +300,24 @@ const EffectsDebugPanel: React.FC = () => {
       setHoveredDescription(EFFECT_HELP[key]!.desc);
       setHoveredLocation(EFFECT_HELP[key]!.loc);
 
-      // Smart positioning: check available space
       const el = dragRef.current;
       if (el) {
         const rect = el.getBoundingClientRect();
-        const tooltipWidth = 252; // 240 + 12 margin
+        const tooltipWidth = 252;
         const spaceLeft = rect.left;
         const spaceRight = window.innerWidth - rect.right;
 
-        // Prefer left, but switch to right if not enough space
         if (spaceLeft >= tooltipWidth) {
           setTooltipPosition("left");
         } else if (spaceRight >= tooltipWidth) {
           setTooltipPosition("right");
         } else {
-          // Not enough space on either side, prefer right as fallback
           setTooltipPosition("right");
         }
 
-        // Calculate tooltip position relative to hovered element
         if (mouseY !== undefined) {
           const relativeY = mouseY - rect.top;
-          // Center tooltip vertically relative to the hovered row
-          const tooltipHeight = 120; // Approximate height
+          const tooltipHeight = 120;
           const centeredY = Math.max(40, relativeY - tooltipHeight / 2);
           setTooltipTop(centeredY);
         }
@@ -332,9 +328,8 @@ const EffectsDebugPanel: React.FC = () => {
     }
   }, []);
 
-  // ⚠️ ВАЖНО: useMediaQuery хуки должны быть ДО раннего возврата (правила React Hooks)
-  const isTabletScreen = useMediaQuery("(max-width: 1023px)"); // Natively disables Grid3D
-  const isMobileScreen = useMediaQuery("(max-width: 767px)"); // Natively disables Card Scatter/Gather
+  const isTabletScreen = useMediaQuery("(max-width: 1023px)");
+  const isMobileScreen = useMediaQuery("(max-width: 767px)");
 
   if (!isVisible) return null;
 
@@ -343,7 +338,7 @@ const EffectsDebugPanel: React.FC = () => {
     value: PerformanceTierOverride;
     cls: string;
   }[] = [
-    { label: "Auto", value: "auto", cls: styles.tierBtnAuto ?? "" },
+    { label: "Current", value: "current", cls: styles.tierBtnAuto ?? "" },
     { label: "Low", value: "low", cls: styles.tierBtnLow ?? "" },
     { label: "Mid", value: "medium", cls: styles.tierBtnMedium ?? "" },
     { label: "High", value: "high", cls: styles.tierBtnHigh ?? "" },
@@ -351,7 +346,6 @@ const EffectsDebugPanel: React.FC = () => {
 
   return (
     <div ref={dragRef} className={`${styles.container} ${isCompact ? styles.containerCompact : ""}`}>
-      {/* Floating Help Card - Aligned, compact and highly professional */}
       {hoveredDescription && (
         <div
           className={styles.floatingHelper}
@@ -360,41 +354,16 @@ const EffectsDebugPanel: React.FC = () => {
               ? { right: "100%", marginRight: "12px" }
               : { left: "100%", marginLeft: "12px" }),
             top: `${tooltipTop}px`,
-            // Silky smooth vertical glide cubic-bezier
             transition: "left 0.2s ease, right 0.2s ease, top 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {/* Header Row: Info Icon + Cyan Location metadata */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              marginBottom: "8px",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
             <Info size={13} style={{ color: "#00ffff", flexShrink: 0 }} />
-            <span
-              style={{
-                fontSize: "0.62rem",
-                color: "#00ffff",
-                textTransform: "uppercase",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <span style={{ fontSize: "0.62rem", color: "#00ffff", textTransform: "uppercase", whiteSpace: "nowrap" }}>
               {hoveredLocation}
             </span>
           </div>
-
-          {/* Description Row */}
-          <div
-            style={{
-              fontSize: "0.68rem",
-              color: "rgba(255, 255, 255, 0.7)",
-            }}
-          >
-            {hoveredDescription}
-          </div>
+          <div style={{ fontSize: "0.68rem", color: "rgba(255, 255, 255, 0.7)" }}>{hoveredDescription}</div>
         </div>
       )}
 
@@ -408,7 +377,7 @@ const EffectsDebugPanel: React.FC = () => {
         <div className={styles.headerLeft}>
           <Move size={13} />
           <Sliders size={13} />
-          <span>Effects Debug</span>
+          <span>Effects Debug ({flags.tierOverride})</span>
         </div>
         <div className={styles.headerActions}>
           <button
@@ -434,16 +403,15 @@ const EffectsDebugPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Body */}
       {!isCompact && (
         <div
           className={styles.body}
+          data-lenis-prevent
           onClick={(e) => e.stopPropagation()}
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
         >
-          {/* ── Tier Preset ── */}
-          <div className={styles.sectionLabel}>Tier Preset</div>
+          <div className={styles.sectionLabel}>Preset Modes</div>
           <div className={styles.tierRow}>
             {tierBtns.map(({ label, value, cls }) => (
               <button
@@ -456,9 +424,25 @@ const EffectsDebugPanel: React.FC = () => {
             ))}
           </div>
 
+          <button
+            className={styles.resetBtn}
+            disabled={isLastPresetDisabled}
+            onClick={handleRestoreLastPreset}
+            style={{
+              marginTop: "0.2rem",
+              marginBottom: "0.6rem",
+              opacity: isLastPresetDisabled ? 0.35 : 1,
+              cursor: isLastPresetDisabled ? "not-allowed" : "pointer",
+              border: isLastPresetDisabled ? "1px dashed rgba(255,255,255,0.08)" : "1px solid rgba(0,212,255,0.3)",
+              color: isLastPresetDisabled ? "rgba(255,255,255,0.3)" : "#00ffff",
+              background: isLastPresetDisabled ? "transparent" : "rgba(0,212,255,0.05)",
+            }}
+          >
+            {isLastPresetDisabled ? "Last Preset (Empty)" : "↺ Restore Last Preset"}
+          </button>
+
           <div className={styles.divider} />
 
-          {/* ── WebGL Fluid ── */}
           <div className={styles.sectionLabel}>WebGL Fluid</div>
           <ToggleRow
             label="Fluid effect (on/off)"
@@ -496,7 +480,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── Biotech Background Grid ── */}
           <div className={styles.sectionLabel}>Biotech Background Grid</div>
           <ToggleRow
             label="grid edge mask-fade"
@@ -505,10 +488,17 @@ const EffectsDebugPanel: React.FC = () => {
             onChange={handleToggle}
             onHover={handleHover}
           />
+          {/* КРИТИЧЕСКИЙ ФИКС: Название переведено на английский язык */}
+          <ToggleRow
+            label="Background glow (orbs)"
+            flagKey="bgGlowLights"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
 
           <div className={styles.divider} />
 
-          {/* ── Grid3D ── only show if width >= 1024px */}
           {!isTabletScreen && (
             <>
               <div className={styles.sectionLabel}>Grid 3D (MorphingVideo)</div>
@@ -534,7 +524,6 @@ const EffectsDebugPanel: React.FC = () => {
             </>
           )}
 
-          {/* ── ScrollText ── */}
           <div className={styles.sectionLabel}>ScrollText</div>
           <ToggleRow
             label="Word-by-word (Blur)"
@@ -553,7 +542,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── Scroll Number ── */}
           <div className={styles.sectionLabel}>Scroll Number</div>
           <ToggleRow
             label="Scroll number filling"
@@ -565,7 +553,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── BlockVideo ── */}
           <div className={styles.sectionLabel}>BlockVideo translateZ</div>
           <ToggleRow
             label="translateZ ±400 (vs ±200)"
@@ -605,7 +592,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── MolecularNet ── */}
           <div className={styles.sectionLabel}>MolecularNet (Partnership)</div>
           <ToggleRow
             label="12 nodes (vs 7)"
@@ -617,7 +603,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── Cards ── only show if width >= 768px */}
           {!isMobileScreen && (
             <>
               <div className={styles.sectionLabel}>Cards (Products Section)</div>
@@ -633,7 +618,6 @@ const EffectsDebugPanel: React.FC = () => {
             </>
           )}
 
-          {/* ── Parallax Background ── */}
           <div className={styles.sectionLabel}>Parallax Background (sections 1,3,5)</div>
           <ToggleRow
             label="Parallax background (on/off)"
@@ -645,7 +629,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.divider} />
 
-          {/* ── Global UI & Animations ── */}
           <div className={styles.sectionLabel}>Global UI & Animations</div>
           <ToggleRow
             label="Header glassmorphism"
@@ -669,7 +652,6 @@ const EffectsDebugPanel: React.FC = () => {
             onHover={handleHover}
           />
 
-          {/* ── Text Shimmer ── Independent parameter (NOT nested, only show if width >= 768px) */}
           {!isMobileScreen && (
             <ToggleRow
               label="Text shimmer animation"
@@ -680,9 +662,8 @@ const EffectsDebugPanel: React.FC = () => {
             />
           )}
 
-          {/* ── Reset ── */}
           <button className={styles.resetBtn} onClick={handleReset}>
-            ↺ Reset all &amp; reload
+            ↺ Reset to Hardware Defaults
           </button>
         </div>
       )}

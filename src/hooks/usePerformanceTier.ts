@@ -1,55 +1,64 @@
+/**
+ * @module hooks/usePerformanceTier
+ * @description Хук для получения текущего тира производительности.
+ * Теперь полностью реактивен: подписывается на изменения в effectsDebugStore [1],
+ * благодаря чему любое переключение режимов (включая "Restore Last Preset") мгновенно
+ * обновляет все зависимые слои (включая фоновые зеленые фонари и CustomScrollbar).
+ *
+ * @author Kort
+ * @version 5.2.0
+ */
+
 import {
   PerformanceTier,
   calculatePerformanceScore,
   detectDeviceSpecs,
 } from "@/utils/devicePerformance/devicePerformance";
-import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
+import { effectsDebugStore } from "@/utils/effectsDebug/effectsDebugStore";
 import { useEffect, useState } from "react";
 
-// Кэш на уровне модуля — вычисляется ровно 1 раз для всего сайта
 let globalTier: PerformanceTier | null = null;
-let isCalculating = false;
 
-/**
- * @module src/hooks/usePerformanceTier.ts
- * @description Singleton-хук для определения производительности устройства.
- * Rules of Hooks соблюдены: useState и useEffect всегда вызываются безусловно.
- * DEV override проверяется ПОСЛЕ хуков и возвращается в конце.
- */
-export const usePerformanceTier = (): PerformanceTier => {
-  // Синхронно вычисляем тир при первом вызове
-  if (typeof window !== "undefined" && !globalTier && !isCalculating) {
-    isCalculating = true;
-    try {
-      const specs = detectDeviceSpecs();
-      const { score, tier: detectedTier } = calculatePerformanceScore(specs);
-      globalTier = detectedTier;
-      console.log(
-        `🚀 System Performance Initialized: [${globalTier.toUpperCase()}] (Score: ${score})`,
-      );
-    } catch (error) {
-      console.error("❌ Error detecting performance tier:", error);
-      globalTier = "medium";
-    }
-    isCalculating = false;
+if (typeof window !== "undefined") {
+  try {
+    const specs = detectDeviceSpecs();
+    const result = calculatePerformanceScore(specs);
+    globalTier = result.tier;
+  } catch (error) {
+    console.error("Failed to detect performance specs on init:", error);
+    globalTier = "medium";
   }
+}
 
-  // ─── ХУКИ ВСЕГДА ВЫЗЫВАЮТСЯ БЕЗУСЛОВНО (Rules of Hooks) ───
+export const usePerformanceTier = (): PerformanceTier => {
   const [tier, setTier] = useState<PerformanceTier>(globalTier || "medium");
+
+  // Локальный стейт для синхронизации в DEV режиме
+  const [devTier, setDevTier] = useState<PerformanceTier>(() => {
+    if (import.meta.env.DEV && typeof window !== "undefined") {
+      return effectsDebugStore.activeTier;
+    }
+    return globalTier || "medium";
+  });
 
   useEffect(() => {
     if (globalTier && tier !== globalTier) {
       setTier(globalTier);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // только при монтировании — globalTier не меняется после инициализации
+  }, []);
 
-  // ─── DEV override: проверяем ПОСЛЕ хуков ───
+  // КРИТИЧЕСКИЙ ФИКС: Подписываемся на обновления стора в DEV режиме.
+  // Это гарантирует реактивность тира во всех компонентах, которые его используют.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const unsub = effectsDebugStore.subscribe(() => {
+      setDevTier(effectsDebugStore.activeTier);
+    });
+    return unsub;
+  }, []);
+
   if (import.meta.env.DEV && typeof window !== "undefined") {
-    const override = getTierOverride();
-    if (override !== "auto") {
-      return override as PerformanceTier;
-    }
+    return devTier;
   }
 
   return tier;

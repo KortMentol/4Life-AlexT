@@ -21,26 +21,21 @@ import styles from "./PerformanceDebug.module.css";
 /**
  * @module components/debug/PerformanceDebug
  * @description
- * `PerformanceDebug` — Floating developer panel for real-time performance monitoring.
- * Zero-overhead implementation using direct DOM updates via refs instead of React state.
- * Displays key metrics like FPS, frame time, and static performance score.
- * Desktop version of the debug panel.
+ * `PerformanceDebug` — Настольная плавающая панель для мониторинга FPS, FT и аппаратных характеристик.
+ * Обновляет данные напрямую в DOM через рефы, исключая влияние React-рендеринга на замеры.
  *
  * @author Kort
- * @version 4.0.0 - Perfect Design Edition
+ * @version 5.0.0
  *
  * @usage
- * Rendered conditionally in root app file for desktop devices in development mode.
- *
- * @example
- * <PerformanceDebug />
+ * Рендерится на десктопных устройствах в DEV режиме.
  */
 const PerformanceDebug: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isCompact, setIsCompact] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [staticScore, setStaticScore] = useState(0);
-  const [tier, setTier] = useState<"low" | "medium" | "high">("medium");
+  const [tier, setTier] = useState<"low" | "medium" | "high" | "current">("medium");
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpecs>({
     ram: "Unknown",
     cpuCores: 0,
@@ -53,7 +48,7 @@ const PerformanceDebug: React.FC = () => {
     connectionType: "Unknown",
   });
 
-  // Zero-overhead refs for direct DOM updates
+  // Прямые рефы для мгновенного обновления текста в DOM без вызова setState
   const fpsTextRef = React.useRef<HTMLSpanElement>(null);
   const ftTextRef = React.useRef<HTMLSpanElement>(null);
   const compactFpsTextRef = React.useRef<HTMLSpanElement>(null);
@@ -73,8 +68,9 @@ const PerformanceDebug: React.FC = () => {
       setStaticScore(score);
 
       const override = getTierOverride();
-      const finalTier = override !== "auto" ? override : hardwareTier;
-      setTier(finalTier as "low" | "medium" | "high");
+      // ИСПРАВЛЕНИЕ: Сравнение с "current" вместо "auto" для устранения ошибки TS2367
+      const finalTier = override !== "current" ? override : hardwareTier;
+      setTier(finalTier);
 
       console.log("📱 PerformanceDebug initialized:", {
         score,
@@ -96,7 +92,6 @@ const PerformanceDebug: React.FC = () => {
         const calculatedFps = Math.round(1000 / avgFrameTime);
         const calculatedFt = Math.round(avgFrameTime * 100) / 100;
 
-        // Direct DOM updates — zero React overhead
         if (fpsTextRef.current) fpsTextRef.current.textContent = String(calculatedFps);
         if (compactFpsTextRef.current) compactFpsTextRef.current.textContent = String(calculatedFps);
         if (ftTextRef.current) ftTextRef.current.textContent = `${calculatedFt}ms`;
