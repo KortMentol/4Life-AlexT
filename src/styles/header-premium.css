@@ -1,30 +1,29 @@
 /**
  * @module src/styles/header-premium.css
- * @description Premium 3D Smoked Obsidian Glass Capsule with adaptive performance.
+ * @description Premium 3D Smoked Obsidian Capsule.
+ * 
+ * ИСПРАВЛЕНИЕ:
+ * - Восстановлен ВАШ оригинальный код с многослойными 3D-градиентами и тенями, 
+ *   который дает идеальный объем капсуле.
+ * - Полностью удален `backdrop-filter: blur`, так как капсула имеет плотную 
+ *   заливку (через нее ничего не просвечивает). Это экономит 100% ресурсов видеокарты 
+ *   на размытие, сохраняя при этом премиальный 3D-вид на всех тирах (PC и Touch).
+ *
  * @author Geminis AI & Kort
- * @version 2.2.0 - SOTD Balanced Contrast (Clinical Obsidian)
- * @features 3D gradients, specular highlights, and hardware-aware fallback constraints
+ * @version 7.4.0
  */
 
 :root {
   /* Awwwards 2026 Golden Ratio - Тонированный обсидиан с лазерной фаской */
-  --header-dark-bg: #050811; /* Слегка светлее фона сайта для объема */
-  --header-dark-surface: #0a0f1d; /* Глубокий сине-сизый тон */
-  --header-dark-accent: #131b2e; /* Мягкий переход */
-  --header-dark-highlight: #1d283d; /* Благородный металлический блик */
+  --header-dark-bg: #050811;
+  --header-dark-surface: #0a0f1d;
+  --header-dark-accent: #131b2e;
+  --header-dark-highlight: #1d283d;
   --header-dark-glow: #00d4ff;
   --header-dark-glow-rgb: 0, 212, 255;
-
-  /* Light Theme - Premium Glass (Fallback) */
-  --header-light-bg: rgba(255, 255, 255, 0.98);
-  --header-light-surface: rgba(248, 250, 252, 0.95);
-  --header-light-accent: rgba(226, 232, 240, 0.9);
-  --header-light-highlight: rgba(203, 213, 225, 0.8);
-  --header-light-glow: #3b82f6;
-  --header-light-glow-rgb: 59, 130, 246;
 }
 
-/* ─── 1. CORE ARCHITECTURE (Natively Centered, No JS Override Collisions) ─── */
+/* ─── 1. CORE ARCHITECTURE (Парящая капсула — едина для всех тиров) ─── */
 .header-premium {
   position: fixed;
   top: 0.5rem;
@@ -34,21 +33,30 @@
   width: calc(100% - 1rem);
   max-width: 1240px;
   z-index: 100;
-  padding: 0.75rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 9999px;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
   will-change: transform;
   contain: layout style paint;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   isolation: isolate;
 }
 
+@media (min-width: 768px) {
+  .header-premium {
+    padding: 0.75rem 2rem;
+    top: 1rem;
+    width: calc(100% - 2rem);
+  }
+}
+
+/* ─── 2. ОБЪЕМНЫЙ ДИЗАЙН (Идентичен для всех тиров) ─── */
+/* Это ваш оригинальный код, который создает идеальный 3D-цилиндр */
 .header-premium--dark {
   background: 
-    /* Top spotlight creating depth */
+    /* Верхний неоновый блик, создающий объем */
     radial-gradient(ellipse 150% 60% at 50% -10%, rgba(var(--header-dark-glow-rgb), 0.15) 0%, transparent 70%),
-    /* Side highlights for 3D effect */
+    /* Боковые блики для 3D цилиндра */
     linear-gradient(
         90deg,
         transparent 0%,
@@ -58,7 +66,7 @@
         rgba(var(--header-dark-glow-rgb), 0.04) 80%,
         transparent 100%
       ),
-    /* Main capsule gradient with extreme depth */
+    /* Главный 7-шаговый градиент плотного металла */
     linear-gradient(
         135deg,
         var(--header-dark-bg) 0%,
@@ -71,53 +79,18 @@
       );
 
   box-shadow:
-    /* Идеальный белый блик по верхней грани (0.12 - дает стеклянную резкость) */
+    /* Идеальный белый блик по верхней грани (дает стеклянную резкость) */
     inset 0 1.5px 2px rgba(255, 255, 255, 0.12),
-    /* Глубокая тень снизу для объема */ inset 0 -3px 6px rgba(0, 0, 0, 0.95),
-    inset 1.5px 0 3px rgba(var(--header-dark-glow-rgb), 0.06),
+    /* Глубокая тень снизу для объема внутри капсулы */ inset 0 -3px 6px rgba(0, 0, 0, 0.95),
+    /* Неоновые отсветы по бокам */ inset 1.5px 0 3px rgba(var(--header-dark-glow-rgb), 0.06),
     inset -1.5px 0 3px rgba(var(--header-dark-glow-rgb), 0.06),
-    /* Падающая тень на контент */ 0 20px 50px rgba(0, 0, 0, 0.6);
+    /* Падающая 3D тень на контент сайта */ 0 20px 50px rgba(0, 0, 0, 0.6);
 
-  /* Лазерная неоновая нить по краю (0.24 - идеальный баланс видимости) */
+  /* Лазерная неоновая нить по краю */
   border: 1px solid rgba(var(--header-dark-glow-rgb), 0.24);
 }
 
-.header-premium--light {
-  background:
-    radial-gradient(ellipse 150% 60% at 50% -10%, rgba(255, 255, 255, 0.9) 0%, transparent 70%),
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(var(--header-light-glow-rgb), 0.08) 20%,
-      transparent 40%,
-      transparent 60%,
-      rgba(var(--header-light-glow-rgb), 0.08) 80%,
-      transparent 100%
-    ),
-    linear-gradient(
-      135deg,
-      var(--header-light-bg) 0%,
-      var(--header-light-surface) 15%,
-      var(--header-light-accent) 35%,
-      var(--header-light-highlight) 50%,
-      var(--header-light-accent) 65%,
-      var(--header-light-surface) 85%,
-      var(--header-light-bg) 100%
-    );
-
-  box-shadow:
-    0 0 40px rgba(var(--header-light-glow-rgb), 0.2),
-    0 0 80px rgba(var(--header-light-glow-rgb), 0.1),
-    inset 0 2px 4px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
-    inset 2px 0 4px rgba(255, 255, 255, 0.4),
-    inset -2px 0 4px rgba(255, 255, 255, 0.4),
-    0 20px 60px rgba(0, 0, 0, 0.15);
-
-  border: 1px solid rgba(var(--header-light-glow-rgb), 0.3);
-}
-
-/* 3D Capsule Enhancement - мягкий верхний блик (0.06) */
+/* Мягкий верхний блик по всей длине (БЕСПЛАТНО ДЛЯ GPU) */
 .header-premium::before {
   content: "";
   position: absolute;
@@ -135,82 +108,17 @@
   z-index: 10;
   max-width: 112rem;
   margin: 0 auto;
-  padding: 0 1rem;
 }
 
-/* Performance optimizations */
+/* ─── Performance optimizations ─────────────────────────────────────────────────── */
 .header-premium {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform: translateY(0px) translateZ(0);
 }
 
-/* ─── Smart Degradation по tier (desktop + mobile) ──────────────────────────── */
-.header-premium[data-tier="low"] {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.header-premium--dark[data-tier="low"] {
-  background: linear-gradient(135deg, rgba(10, 15, 28, 0.99) 0%, rgba(26, 31, 46, 0.98) 100%) !important;
-}
-
-.header-premium--light[data-tier="low"] {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.98) 100%) !important;
-}
-
-.header-premium[data-tier="medium"] {
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .header-premium {
     transition: none !important;
-  }
-}
-
-/* Mobile optimizations + Smart Degradation Fallback */
-@media (max-width: 768px) {
-  .header-premium {
-    top: 0.5rem; /* Возвращаем оригинальный отступ сверху */
-    padding: 0.5rem 1.5rem; /* Возвращаем оригинальные комфортные паддинги */
-    width: calc(100% - 1rem); /* На всю ширину с отступами по 8px */
-  }
-
-  .header-premium[data-tier="low"],
-  .header-premium[data-tier="medium"] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Dark Theme Fallback: Matte surface with depth for low/medium mobiles */
-  .header-premium--dark[data-tier="low"],
-  .header-premium--dark[data-tier="medium"] {
-    background: linear-gradient(135deg, rgba(5, 8, 18, 0.99) 0%, rgba(15, 20, 32, 0.98) 100%) !important;
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.5),
-      0 10px 30px rgba(0, 0, 0, 0.4) !important;
-    border-color: rgba(var(--header-dark-glow-rgb), 0.24) !important;
-  }
-
-  /* Light Theme Fallback */
-  .header-premium--light[data-tier="low"],
-  .header-premium--light[data-tier="medium"] {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.96) 100%) !important;
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.7),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
-      0 10px 30px rgba(0, 0, 0, 0.1) !important;
-    border-color: rgba(var(--header-light-glow-rgb), 0.2) !important;
-  }
-}
-
-/* SAFE MODE FOR FIREFOX (GECKO) */
-@-moz-document url-prefix() {
-  .header-premium {
-    backdrop-filter: none !important;
-    background-color: rgba(15, 23, 42, 0.98) !important;
   }
 }
