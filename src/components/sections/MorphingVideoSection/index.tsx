@@ -11,9 +11,13 @@
  * - Рамка вокруг вводного описания и вокруг кнопки CTA удалена полностью для разгрузки интерфейса [1].
  * - Числа «01», «02», «03» вынесены за пределы рамок для парящего эффекта.
  * - Ошибки центрирования текста в шапке устранены.
+ * - [ИСПРАВЛЕНИЕ PERFORMANCE]: Отрегулирован рендеринг подложек. Все тач-устройства (мобильные)
+ *   и низкий ПК-тир теперь полностью освобождены от тяжелого backdrop-filter с сохранением глубокого
+ *   полупрозрачного вида Smoked Acrylic. На ПК Medium/High сохранен потрясающий Backdrop Blur.
+ *   Стили импортируются из чистого выделенного файла `src/styles/components/morphing-video.css`.
  *
  * @author Geminis AI & Kort
- * @version 6.9.1
+ * @version 7.1.0
  */
 
 import { Button } from "@/components/ui";
@@ -33,6 +37,9 @@ import { Grid3D } from "./components/Grid3D";
 import { VideoBlock } from "./components/VideoBlock";
 import { VimeoModal } from "./components/VimeoModal";
 import { VIDEO_ASSETS, VIMEO_URLS } from "./config";
+
+// ИМПОРТ ИСПРАВЛЕН: Подключен выделенный файл стилей карточек
+import "@/styles/components/morphing-video.css";
 
 const useDeviceType = () => {
   return useMemo(() => {
@@ -143,10 +150,13 @@ const MorphingVideoSection: React.FC = () => {
 
   const isLow = tier === "low";
 
-  // ИСПРАВЛЕНИЕ: Базовые классы фреймов изменены с rounded-3xl (24px) на явный rounded-[2rem] (32px) для идеального наложения штриха
+  // Базовые классы фреймов
   const boxBaseClass = "relative rounded-[2rem] transition-all duration-300";
-  // Сделали подложки ультра-прозрачными на High/Medium, убирая "темное пятно" [2]
-  const boxEffectClass = isLow ? "bg-[#03050a]/50" : "bg-[#03050a]/10 backdrop-blur-md";
+
+  // КРИТИЧЕСКИЙ ФИКС: Определение эффекта подложки. Разделили логику.
+  // На тачах и лоу-тире используется легкий, но глубокий .glass-smoked-acrylic (0ms GPU нагрузки).
+  // На ПК средних и высоких тирах рендерится чистый .glass-backdrop-blur с настоящим размытием.
+  const boxEffectClass = isTouchDevice || isLow ? "glass-smoked-acrylic" : "glass-backdrop-blur";
   const boxClass = `${boxBaseClass} ${boxEffectClass}`;
 
   return (
@@ -227,7 +237,7 @@ const MorphingVideoSection: React.FC = () => {
                   <div className="lg:col-span-8 order-1 lg:order-2">
                     {/* Вертикальные отступы увеличены до py-10 md:py-12 для идеальной симметрии воздуха [1] */}
                     <div className={`${boxClass} px-8 py-10 md:px-10 md:py-12`}>
-                      {/* Прецизионные лазерные градиентные контуры (на 70% контура, как на наброске в Paint) [5] */}
+                      {/* Прецизионные лазерные градиентные контуры [5] */}
                       <ContinuousGlowFrame blockIndex={1} neonColor1="#06b6d4" neonColor2="#0ea5e9" />
 
                       {/* Тончайший, приглушенный служебный тег перенесен в правый верхний угол [1] */}
