@@ -2,8 +2,10 @@ import { rafLoop } from "@/lib/rafLoop";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
 
-const HEADER_HEIGHT = 80;
-const LERP_DESKTOP = 0.06;
+// Увеличенная константа смещения, чтобы хедер на ПК гарантированно скрывался полностью,
+// преодолевая top: 1rem (16px), высоту капсулы и внешние тени.
+const HEADER_HEIGHT = 110;
+const LERP_DESKTOP = 0.04;
 
 function getHeader(): HTMLElement | null {
   return document.querySelector(".header-premium");
@@ -62,6 +64,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
 
     prevScrollRef.current = window.scrollY;
 
+    // Статичное поведение на тачах — предотвращает конфликты с адресной строкой браузера
     if (isMobile) {
       header.style.transition = "none";
       header.style.transform = "translateY(0px) translateZ(0)";
@@ -96,7 +99,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       prevScrollRef.current = scroll;
 
       if (Math.abs(delta) > 150) {
-        // Skip frame
+        // Пропускаем нефизические скачки скролла
       } else if (Math.abs(delta) > 1) {
         targetYRef.current = delta > 0 ? -HEADER_HEIGHT : 0;
       }

@@ -211,10 +211,10 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                 >
                   <TextShineEffect
                     text={siteConfig.distributor.name}
-                    className="font-semibold text-sm leading-tight whitespace-nowrap"
+                    className="font-semibold text-[13px] sm:text-sm leading-none whitespace-nowrap"
                   />
                   <div
-                    className="text-xs font-medium mt-0.5"
+                    className="text-[10px] sm:text-xs font-medium mt-[2px]"
                     style={{
                       color: "#e6b800",
                       textShadow: "0 1px 2px rgba(0,0,0,0.5)",
