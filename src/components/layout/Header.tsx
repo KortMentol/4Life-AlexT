@@ -16,7 +16,7 @@ import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
 import { useTransition } from "@/context";
-import { useFeatureFlag, useIsMobile, useNativeScroll, usePerformanceTier } from "@/hooks";
+import { useIsMobile, useNativeScroll } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
 import "@/styles/header-premium.css";
 import { scrollToTop } from "@/utils/navigationUtils";
@@ -32,10 +32,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const location = useLocation();
   const { transitionTo } = useTransition();
   const isMobile = useIsMobile();
-  const tier = usePerformanceTier();
-
-  // Истинный переключатель: если мы на Low тире, но юзер дернул ползунок в "on" — вернет true
-  const isGlassEnabled = useFeatureFlag("headerGlass", tier !== "low");
 
   const headerRef = useRef<HTMLElement>(null);
   const isMenuAnimatingRef = useRef(false);
@@ -142,7 +138,6 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     <motion.header
       // THE FIX: Передаем "high" (или любой тир выше low), если эффекты включены ползунком,
       // чтобы CSS не блокировал размытие (backdrop-filter) через директиву !important.
-      data-tier={isGlassEnabled ? "high" : "low"}
       ref={headerRef}
       animate={{ opacity: modalVisible ? 1 : 0, visibility: modalVisible ? "visible" : "hidden" }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}

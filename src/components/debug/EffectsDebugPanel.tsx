@@ -5,8 +5,12 @@
  * Содержит атрибут `data-lenis-prevent` для блокировки скролла подлежащей страницы.
  * Все названия параметров переведены на английский язык для консистентности системы.
  *
+ * ИСПРАВЛЕНИЕ:
+ * - Полностью удален неактивный ползунок `headerGlass`.
+ *   Добавлены новые тумблеры `renderCardsBackground` и `renderHeader`.
+ *
  * @author Kort
- * @version 5.2.1
+ * @version 5.3.0
  */
 
 import { useMediaQuery } from "@/hooks";
@@ -14,8 +18,6 @@ import { EffectsDebugFlags, PerformanceTierOverride, effectsDebugStore } from "@
 import { ChevronDown, ChevronUp, Info, Move, Sliders, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./EffectsDebugPanel.module.css";
-
-// ─── Effect Help Data — All translated to English ─────────────────────────────
 
 const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
   webglFluid: {
@@ -86,10 +88,6 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
     desc: "Enables fixed compositing viewport layer parallax on background textures for mainpage sections 1, 3, and 5.",
     loc: "HomePage Background",
   },
-  headerGlass: {
-    desc: "Activates 12px hardware-accelerated backdrop blur and border-glow on the fixed header capsule.",
-    loc: "Global Header",
-  },
   premiumTransitions: {
     desc: "Enables pixelated block transitions on desktop and organic wave morph transitions on touch screens.",
     loc: "Global Page Routing",
@@ -105,6 +103,14 @@ const EFFECT_HELP: Record<string, { desc: string; loc: string }> = {
   bgGlowLights: {
     desc: "Toggles the ambient volumetric glowing circles (cyan and blue) in the background.",
     loc: "HomePage & MorphingVideoSection Background",
+  },
+  renderCardsBackground: {
+    desc: "Triggers physical mount/unmount of editorial box glass shadows, margins and borders to verify draw call limits.",
+    loc: "MorphingVideoSection Box Cards",
+  },
+  renderHeader: {
+    desc: "Forces a clean React unmount of the floating header widget to measure baseline scrolling without DOM translations.",
+    loc: "Global Header Root",
   },
 };
 
@@ -213,7 +219,7 @@ const EffectsDebugPanel: React.FC = () => {
     [hoveredDescription],
   );
 
-  const handleMouseUp = useCallback(
+  const handleMouseUp = React.useCallback(
     (e: MouseEvent | TouchEvent) => {
       if (!isDragging.current) return;
       const el = dragRef.current;
@@ -488,7 +494,6 @@ const EffectsDebugPanel: React.FC = () => {
             onChange={handleToggle}
             onHover={handleHover}
           />
-          {/* КРИТИЧЕСКИЙ ФИКС: Название переведено на английский язык */}
           <ToggleRow
             label="Background glow (orbs)"
             flagKey="bgGlowLights"
@@ -631,13 +636,6 @@ const EffectsDebugPanel: React.FC = () => {
 
           <div className={styles.sectionLabel}>Global UI & Animations</div>
           <ToggleRow
-            label="Header glassmorphism"
-            flagKey="headerGlass"
-            flags={flags}
-            onChange={handleToggle}
-            onHover={handleHover}
-          />
-          <ToggleRow
             label="Premium page transitions"
             flagKey="premiumTransitions"
             flags={flags}
@@ -661,6 +659,24 @@ const EffectsDebugPanel: React.FC = () => {
               onHover={handleHover}
             />
           )}
+
+          {/* ─── НОВЫЕ ТУМБЛЕРЫ ОТЛАДКИ КОНТЕЙНЕРОВ ─── */}
+          <div className={styles.divider} />
+          <div className={styles.sectionLabel}>Isolate Layout Containers (FPS test)</div>
+          <ToggleRow
+            label="Render Cards Background"
+            flagKey="renderCardsBackground"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
+          <ToggleRow
+            label="Render Header Component"
+            flagKey="renderHeader"
+            flags={flags}
+            onChange={handleToggle}
+            onHover={handleHover}
+          />
 
           <button className={styles.resetBtn} onClick={handleReset}>
             ↺ Reset to Hardware Defaults

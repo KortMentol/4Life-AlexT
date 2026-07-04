@@ -8,6 +8,7 @@ import TheodoreMenu from "@/components/layout/TheodoreMenu";
 import RouteChangeHandler from "@/components/RouteChangeHandler";
 import PopTransitionOverlay from "@/components/transitions/PopTransitionOverlay";
 import { ProductListProvider } from "@/context/ProductListProvider";
+import { useEffectsDebug } from "@/hooks/useEffectsDebug"; // <--- Импорт хука флагов
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useTheodoreMenu } from "@/hooks/useTheodoreMenu";
 import { lenis, updateScroll } from "@/lib/lenis";
@@ -57,6 +58,7 @@ const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
 function App() {
   const isMobile = useIsMobile();
+  const efxFlags = useEffectsDebug(); // <--- Подписка на стор флагов
 
   const { isMenuOpen, toggleMenu, closeMenu, isMenuActionRef, wasMenuOpenRef } = useTheodoreMenu();
 
@@ -126,7 +128,8 @@ function App() {
       <ProductListProvider>
         <RouteChangeHandler isMenuActionRef={isMenuActionRef} wasMenuOpenRef={wasMenuOpenRef} />
         <Suspense fallback={null}>
-          <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />
+          {/* ИСПРАВЛЕНИЕ: Хедер рендерится физически только если включен тумблер renderHeader */}
+          {efxFlags.renderHeader && <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />}
           <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} />
           <Routes>
             <Route path="/" element={<Layout />}>

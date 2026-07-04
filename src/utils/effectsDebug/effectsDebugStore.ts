@@ -3,14 +3,12 @@
  * @description Реактивный синглтон-стор для управления флагами эффектов.
  *
  * ИСПРАВЛЕНИЕ:
- * - Фоновое свечение `bgGlowLights` теперь по умолчанию ВКЛЮЧЕНО на Low-Tier [1].
- *   Поскольку мы перевели свечения на чистые статические CSS-градиенты без тяжелых
- *   фильтров размытия, они полностью безопасны для слабых процессоров [1].
- * - Это гарантирует, что при первом запуске и на любом тире (включая Low-Tier)
- *   фон больше никогда не будет уходить в пустую темную бездну [1].
+ * - Удален неактивный флаг `headerGlass` (поскольку backdrop-blur из хедера убран полностью).
+ * - Добавлены новые отладочные флаги `renderCardsBackground` (управление подложкой)
+ *   и `renderHeader` (физическое размонтирование хедера из DOM).
  *
- * @author Kort
- * @version 5.3.0
+ * @author Geminis AI & Kort
+ * @version 5.4.0
  */
 
 import {
@@ -41,11 +39,13 @@ export interface EffectsDebugFlags {
   parallaxBackground: boolean;
   morphingBackground: boolean;
   grid3dMaskFade: boolean;
-  headerGlass: boolean;
   premiumTransitions: boolean;
   auroraText: boolean;
   textShineAnimation: boolean;
   bgGlowLights: boolean;
+  // Новые отладочные флаги
+  renderCardsBackground: boolean;
+  renderHeader: boolean;
 }
 
 const STORAGE_KEY = "4life_effects_debug";
@@ -71,11 +71,12 @@ const DEFAULTS: EffectsDebugFlags = {
   parallaxBackground: true,
   morphingBackground: true,
   grid3dMaskFade: true,
-  headerGlass: true,
   premiumTransitions: true,
   auroraText: true,
   textShineAnimation: true,
   bgGlowLights: true,
+  renderCardsBackground: true,
+  renderHeader: true,
 };
 
 export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<EffectsDebugFlags> => {
@@ -97,13 +98,14 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       cardScrollGather: false,
       parallaxBackground: false,
       morphingBackground: true,
-      headerGlass: false,
       premiumTransitions: false,
       auroraText: false,
       renderVideoBlocks: true,
       textShineAnimation: false,
       grid3dMaskFade: false,
-      bgGlowLights: true, // ИСПРАВЛЕНИЕ: Свечение шаров теперь всегда включено для визуальной глубины [1]
+      bgGlowLights: true,
+      renderCardsBackground: true,
+      renderHeader: true,
     };
   }
 
@@ -126,12 +128,13 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       renderVideoBlocks: true,
       parallaxBackground: true,
       morphingBackground: true,
-      headerGlass: true,
       premiumTransitions: true,
       auroraText: true,
       textShineAnimation: false,
       grid3dMaskFade: false,
       bgGlowLights: true,
+      renderCardsBackground: true,
+      renderHeader: true,
     };
   }
 
@@ -155,11 +158,12 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       parallaxBackground: true,
       morphingBackground: true,
       grid3dMaskFade: true,
-      headerGlass: true,
       premiumTransitions: true,
       auroraText: true,
       textShineAnimation: true,
       bgGlowLights: true,
+      renderCardsBackground: true,
+      renderHeader: true,
     };
   }
 
@@ -185,11 +189,12 @@ const KEYS_TO_COMPARE: (keyof EffectsDebugFlags)[] = [
   "parallaxBackground",
   "morphingBackground",
   "grid3dMaskFade",
-  "headerGlass",
   "premiumTransitions",
   "auroraText",
   "textShineAnimation",
   "bgGlowLights",
+  "renderCardsBackground",
+  "renderHeader",
 ];
 
 type Listener = (flags: EffectsDebugFlags) => void;

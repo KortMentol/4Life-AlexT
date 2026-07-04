@@ -1,14 +1,13 @@
 /**
  * @module components/debug/EffectsDebugMobile
  * @description Сенсорная панель управления эффектами на мобильных (DEV).
- * Сбалансированный UI с выводом активного режима в свернутом заголовке.
- * Поддерживает восстановление "Last Preset" и ручную кастомизацию.
- * Содержит атрибут `data-lenis-prevent` для блокировки скролла подлежащей страницы.
- * Отрегулирован послойный стек zIndex для бесконфликтной интеграции с панелью FPS.
- * Все названия параметров переведены на английский язык для консистентности системы.
+ *
+ * ИСПРАВЛЕНИЕ:
+ * - Полностью удален неактивный ползунок `headerGlass`.
+ *   Добавлены новые тумблеры `renderCardsBackground` и `renderHeader`.
  *
  * @author Kort
- * @version 5.0.4
+ * @version 5.1.0
  */
 
 import { EffectsDebugFlags, PerformanceTierOverride, effectsDebugStore } from "@/utils/effectsDebug/effectsDebugStore";
@@ -105,12 +104,10 @@ const EffectsDebugMobile: React.FC = () => {
       className={`${styles.container} ${isCompact ? styles.containerCompact : ""}`}
       style={{
         transform: isCompact ? `translateY(calc(100% - ${offsetY + 45}px))` : "translateY(0)",
-        // КРИТИЧЕСКИЙ ФИКС: Устанавливаем zIndex 99997 в свернутом виде.
-        // Это убирает наложение непрозрачного фона шторки поверх панели FPS (zIndex 99999).
         zIndex: isCompact ? 99997 : 99999,
       }}
     >
-      {/* Header — показывает активный режим (Current, Low, Medium, High) */}
+      {/* Header */}
       <div className={styles.header} onClick={toggleCompact}>
         <div className={styles.headerLeft}>
           <Sliders size={13} />
@@ -209,7 +206,6 @@ const EffectsDebugMobile: React.FC = () => {
             onChange={handleToggle}
           />
           <ToggleRowMobile label="Grid Edge Mask Fade" flagKey="grid3dMaskFade" flags={flags} onChange={handleToggle} />
-          {/* НОВЫЙ ПОЛЗУНОК ДЛЯ ШАРОВ СВЕТА НА АНГЛИЙСКОМ */}
           <ToggleRowMobile
             label="Background glow (orbs)"
             flagKey="bgGlowLights"
@@ -227,7 +223,6 @@ const EffectsDebugMobile: React.FC = () => {
 
           {/* ─── GLOBAL SYSTEM INTERACTION ─── */}
           <div className={styles.sectionLabel}>Global UI & Extras</div>
-          <ToggleRowMobile label="Header Glassmorphism" flagKey="headerGlass" flags={flags} onChange={handleToggle} />
           <ToggleRowMobile
             label="Premium Nav Transitions"
             flagKey="premiumTransitions"
@@ -237,6 +232,22 @@ const EffectsDebugMobile: React.FC = () => {
           <ToggleRowMobile
             label="Partnership SVG Nodes (12v7)"
             flagKey="molecularNetHighNodes"
+            flags={flags}
+            onChange={handleToggle}
+          />
+
+          {/* ─── НОВЫЕ ТУМБЛЕРЫ ОТЛАДКИ КОНТЕЙНЕРОВ ─── */}
+          <div className={styles.divider} />
+          <div className={styles.sectionLabel}>Isolate Layout Containers</div>
+          <ToggleRowMobile
+            label="Render Cards Background"
+            flagKey="renderCardsBackground"
+            flags={flags}
+            onChange={handleToggle}
+          />
+          <ToggleRowMobile
+            label="Render Header Component"
+            flagKey="renderHeader"
             flags={flags}
             onChange={handleToggle}
           />
