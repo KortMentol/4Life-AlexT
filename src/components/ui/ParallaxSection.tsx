@@ -1,14 +1,15 @@
-// === Файл: src/components/ui/ParallaxSection.tsx ===
 /**
- * Параллакс секция — паттерн Olivier Larose.
+ * @module components/ui/ParallaxSection
+ * @description Параллакс секция — паттерн Olivier Larose.
  *
- * Desktop: фон всегда fixed (как у Оливье) + motion.div с y через useTransform.
- * Никакого динамического переключения position — ноль layout reflow.
+ * ВНЕДРЕНО (ШАГ 7):
+ * - Удален жесткий хардкод `tier === "low"`.
+ * - Анимации `useTransform` и `touchStrength` теперь полностью зависят от `isParallaxEnabled`.
+ * - Это дает 100% контроль дебагеру в DEV-режиме, а в PROD-режиме автоматически
+ *   отключает параллакс на Low-устройствах для спасения FPS.
  *
- * Touch: useParallaxLenis через RAF синглтон — compositor-only.
- *
- * edgeFade: аппаратные overlay-градиенты (pointer-events-none).
- * mask-image удалён — он создавал stacking context и блокировал compositor layer для fixed фона.
+ * @author Geminis AI & Kort
+ * @version 8.0.0
  */
 
 import { useFeatureFlag, usePerformanceTier } from "@/hooks";
@@ -62,7 +63,9 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const inView = useInView(containerRef, { once: true, margin: "200px" });
   const tier = usePerformanceTier();
-  const isParallaxEnabled = useFeatureFlag("parallaxBackground", IS_TOUCH ? tier !== "low" : true);
+
+  // ИНТЕЛЛЕКТУАЛЬНЫЙ ФЛАГ: В PROD параллакс отключается на Low-тире. В DEV - управляется дебагером.
+  const isParallaxEnabled = useFeatureFlag("parallaxBackground", tier !== "low");
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -79,7 +82,8 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
   }, []);
 
-  const touchStrength = tier === "low" ? 0 : 300;
+  // ИСПРАВЛЕНИЕ: Сила зависит только от флага, а не от тира.
+  const touchStrength = isParallaxEnabled ? 300 : 0;
 
   useParallaxLenis(parallaxBgRef, containerRef, {
     strength: IS_TOUCH ? touchStrength : 0,
@@ -91,17 +95,11 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     offset: ["start end", "end start"],
   });
 
-  // Паттерн Оливье Ларозе: проценты от высоты фона, масштабируется под любой экран
-  // Оригинал: ["-10%", "10%"] на фоне 120vh → ~±130px на 1080p
-  // medium и high одинаково — эффект погружения идентичный
-  const desktopYFrom = tier === "low" ? "0%" : "-10%";
-  const desktopYTo = tier === "low" ? "0%" : "10%";
+  // ИСПРАВЛЕНИЕ: Точки трансформации зависят только от флага
+  const desktopYFrom = isParallaxEnabled ? "-10%" : "0%";
+  const desktopYTo = isParallaxEnabled ? "10%" : "0%";
 
-  const desktopY = useTransform(
-    scrollYProgress,
-    [0, 1],
-    !isParallaxEnabled ? ["0%", "0%"] : [desktopYFrom, desktopYTo],
-  );
+  const desktopY = useTransform(scrollYProgress, [0, 1], [desktopYFrom, desktopYTo]);
 
   const finalBackgroundImage = isMobile
     ? backgroundImageMobile || backgroundImage
@@ -242,7 +240,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
           className={`relative w-full h-full ${imageBrightness} pointer-events-none`}
           style={{
             y: desktopY,
-            willChange: tier !== "low" ? "transform" : "auto",
+            willChange: isParallaxEnabled ? "transform" : "auto",
             transform: "translateZ(0)",
             backfaceVisibility: "hidden",
           }}

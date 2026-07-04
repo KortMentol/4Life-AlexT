@@ -1,19 +1,15 @@
 /**
  * @module src/components/sections/MorphingVideoSection/index.tsx
  * @description Awwwards 2026 - Morphing Video Section.
- * Coordinates 3 distinct video blocks with precise performance tiers and layout alignment.
  *
- * ИСПРАВЛЕНИЕ:
- * - Исправлена геометрическая погрешность (кривые углы) на стыках CSS-подложки и SVG-контура [1].
- *   * SVG-контур теперь оборачивается в абсолютно позиционированный контейнер с компенсацией половины толщины обводки (`inset-[0.6px]`).
- * - [ИСПРАВЛЕНИЕ PERFORMANCE]: Отрегулирован рендеринг подложек. Все тач-устройства (мобильные)
- *   и низкий ПК-тир теперь полностью освобождены от тяжелого backdrop-filter с сохранением глубокого
- *   полупрозрачного вида Smoked Acrylic. На ПК Medium/High сохранен потрясающий Backdrop Blur.
- *   Стили импортируются из чистого выделенного файла `src/styles/components/morphing-video.css`.
- * - Добавлено точечное отключение стилей подложки при выключении тумблера `renderCardsBackground`.
+ * ВНЕДРЕНО (ШАГ 5):
+ * - Удален жесткий хардкод `tier === "high"`.
+ * - Все компоненты (Grid3D, Параллакс фона, Стеклянные подложки) теперь управляются
+ *   интеллектуальным хуком `useFeatureFlag`. Это дает 100% контроль дебагеру в DEV-режиме,
+ *   сохраняя идеальные фоллбэки по производительности для PROD.
  *
  * @author Geminis AI & Kort
- * @version 7.2.0
+ * @version 7.3.0
  */
 
 import { Button } from "@/components/ui";
@@ -27,14 +23,13 @@ import BiotechBackground from "@/components/effects/BiotechBackground";
 import SectionFluidEffect from "@/components/effects/SectionFluidEffect";
 import CustomCursor from "@/components/ui/CustomCursor";
 import { useParallaxLenis, usePerformanceTier } from "@/hooks";
-import { useEffectsDebug } from "@/hooks/useEffectsDebug";
+import { useFeatureFlag } from "@/hooks/useEffectsDebug";
 
 import { Grid3D } from "./components/Grid3D";
 import { VideoBlock } from "./components/VideoBlock";
 import { VimeoModal } from "./components/VimeoModal";
 import { VIDEO_ASSETS, VIMEO_URLS } from "./config";
 
-// ИМПОРТ ИСПРАВЛЕН: Подключен выделенный файл стилей карточек
 import "@/styles/components/morphing-video.css";
 
 const useDeviceType = () => {
@@ -85,8 +80,13 @@ const ContinuousGlowFrame: React.FC<{
 
 const MorphingVideoSection: React.FC = () => {
   const tier = usePerformanceTier();
-  const efxFlags = useEffectsDebug();
   const { isTouchDevice } = useDeviceType();
+
+  // ИНТЕЛЛЕКТУАЛЬНЫЕ ФЛАГИ: Полный контроль дебагером в DEV, железный фоллбэк в PROD
+  const isGrid3dEnabled = useFeatureFlag("grid3d", tier !== "low");
+  const isGridBlurEnabled = tier === "high";
+  const renderCardsBackground = useFeatureFlag("renderCardsBackground", true);
+  const isParallaxEnabled = useFeatureFlag("parallaxBackground", tier !== "low");
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const parallaxBgRef = useRef<HTMLDivElement>(null);
@@ -104,13 +104,13 @@ const MorphingVideoSection: React.FC = () => {
 
   useParallaxLenis(parallaxBgRef, sectionRef, {
     strength: parallaxStrength * 2,
-    disabled: !isTouchDevice || tier === "low",
+    disabled: !isTouchDevice || !isParallaxEnabled,
   });
 
   const bgY = useTransform(
     scrollYProgress,
     [0, 1],
-    isTouchDevice || tier === "low" ? ["0%", "0%"] : [`-${parallaxStrength / 2}%`, `${parallaxStrength / 2}%`],
+    isTouchDevice || !isParallaxEnabled ? ["0%", "0%"] : [`-${parallaxStrength / 2}%`, `${parallaxStrength / 2}%`],
   );
 
   useEffect(() => {
@@ -145,13 +145,13 @@ const MorphingVideoSection: React.FC = () => {
 
   const boxBaseClass = "relative rounded-[2rem] transition-all duration-300";
 
-  // ИСПРАВЛЕНИЕ: Вычисляем класс подложки только если включен тумблер renderCardsBackground.
-  // Если выключен — рендерим полностью прозрачную, чистую коробку без рамок, градиентов и теней.
-  const boxEffectClass = efxFlags.renderCardsBackground
+  // Умный рендер подложки
+  const boxEffectClass = renderCardsBackground
     ? isTouchDevice || isLow
       ? "glass-smoked-acrylic"
       : "glass-backdrop-blur"
     : "bg-transparent border-none shadow-none";
+
   const boxClass = `${boxBaseClass} ${boxEffectClass}`;
 
   return (
@@ -225,11 +225,9 @@ const MorphingVideoSection: React.FC = () => {
                     />
                   </div>
 
-                  {/* Текстовая плашка со швейцарской рамкой и лазерным градиентным свечением */}
                   <div className="lg:col-span-8 order-1 lg:order-2">
                     <div className={`${boxClass} px-8 py-10 md:px-10 md:py-12`}>
-                      {/* Отрисовка светящегося SVG-контура только если включена подложка */}
-                      {efxFlags.renderCardsBackground && (
+                      {renderCardsBackground && (
                         <ContinuousGlowFrame blockIndex={1} neonColor1="#06b6d4" neonColor2="#0ea5e9" />
                       )}
 
@@ -250,13 +248,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
             <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
-              {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
-                <Grid3D
-                  type={1}
-                  triggerRef={block1Ref}
-                  filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
-                />
-              )}
+              {isGrid3dEnabled && <Grid3D type={1} triggerRef={block1Ref} filterBlur={isGridBlurEnabled} />}
             </div>
           </div>
 
@@ -265,10 +257,9 @@ const MorphingVideoSection: React.FC = () => {
             <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
               <div className="container mx-auto px-4 md:px-8 max-w-5xl">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                  {/* Текстовая плашка со швейцарской рамкой */}
                   <div className="lg:col-span-8 order-1">
                     <div className={`${boxClass} px-8 py-10 md:px-10 md:py-12 text-right`}>
-                      {efxFlags.renderCardsBackground && (
+                      {renderCardsBackground && (
                         <ContinuousGlowFrame blockIndex={2} neonColor1="#3b82f6" neonColor2="#0ea5e9" />
                       )}
 
@@ -295,13 +286,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
             <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
-              {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
-                <Grid3D
-                  type={2}
-                  triggerRef={block2Ref}
-                  filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
-                />
-              )}
+              {isGrid3dEnabled && <Grid3D type={2} triggerRef={block2Ref} filterBlur={isGridBlurEnabled} />}
             </div>
           </div>
 
@@ -315,10 +300,9 @@ const MorphingVideoSection: React.FC = () => {
                     className="text-[10rem] md:text-[16rem] lg:text-[20rem] font-light leading-none"
                   />
 
-                  {/* Текстовая плашка со швейцарской рамкой */}
                   <div className="relative max-w-4xl mx-auto text-center">
                     <div className={`${boxClass} px-8 py-10 md:px-10 md:py-12`}>
-                      {efxFlags.renderCardsBackground && (
+                      {renderCardsBackground && (
                         <ContinuousGlowFrame blockIndex={3} neonColor1="#06b6d4" neonColor2="#3b82f6" />
                       )}
 
@@ -339,13 +323,7 @@ const MorphingVideoSection: React.FC = () => {
               </div>
             </div>
             <div className={`relative z-10 ${isTouchDevice ? "min-h-[180vh]" : "min-h-[200vh]"}`}>
-              {tier === "high" && (!import.meta.env.DEV || efxFlags.grid3d) && (
-                <Grid3D
-                  type={3}
-                  triggerRef={block3Ref}
-                  filterBlur={import.meta.env.DEV ? efxFlags.grid3dFilterBlur : true}
-                />
-              )}
+              {isGrid3dEnabled && <Grid3D type={3} triggerRef={block3Ref} filterBlur={isGridBlurEnabled} />}
             </div>
           </div>
 

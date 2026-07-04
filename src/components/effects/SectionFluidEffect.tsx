@@ -37,7 +37,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
   const isFluidEnabled = useFeatureFlag("webglFluid", tier !== "low");
   const isPressureHigh = useFeatureFlag("webglFluidPressureHigh", tier === "high");
   const isSunrays = useFeatureFlag("webglFluidSunrays", tier === "high");
-  const isShading = useFeatureFlag("webglFluidShading", tier === "high");
+  const isShading = useFeatureFlag("webglFluidShading", tier !== "low");
 
   // Стейт физического присутствия канваса в DOM-дереве
   const [isMounted, setIsMounted] = useState(false);

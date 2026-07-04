@@ -1,5 +1,5 @@
 import { rafLoop } from "@/lib/rafLoop";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
 
 // Увеличенная константа смещения, чтобы хедер на ПК гарантированно скрывался полностью,
@@ -18,7 +18,10 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const displayYRef = useRef(0);
   const prevScrollRef = useRef(0);
 
-  const showHeader = () => {
+  // [ИСПРАВЛЕНИЕ БАГА]: Обернули в useCallback.
+  // Теперь смена контекстов (например при удалении WebGL-канваса) не будет
+  // менять ссылку на эту функцию и провоцировать ложное срабатывание useEffect в Header.tsx
+  const showHeader = useCallback(() => {
     targetYRef.current = 0;
     displayYRef.current = 0;
     prevScrollRef.current = window.scrollY;
@@ -28,7 +31,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       h.style.transition = "none";
       h.style.transform = "translateY(0px) translateZ(0)";
     }
-  };
+  }, []);
 
   useEffect(() => {
     let attempts = 0;
@@ -51,7 +54,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   useEffect(() => {
     window.addEventListener("force-header-show", showHeader);
     return () => window.removeEventListener("force-header-show", showHeader);
-  }, []);
+  }, [showHeader]);
 
   useEffect(() => {
     if (disabled) return;

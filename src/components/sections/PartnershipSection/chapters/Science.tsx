@@ -1,7 +1,11 @@
 /**
  * @module PartnershipSection/chapters/Science.tsx
  * Глава 1 — партнёрство: тезисы и философия.
- * MolecularNet (ambient SVG) — корректно читает флаги ползунков.
+ *
+ * ВНЕДРЕНО (ШАГ 6):
+ * - Убран жесткий хардкод `if (tier === "low") return null`.
+ * - Теперь, если дебагер форсирует включение узлов (isHighNodes = true),
+ *   сетка отрисуется ДАЖЕ на самом слабом устройстве, давая полный контроль разработчику.
  */
 
 import { useFeatureFlag } from "@/hooks/useEffectsDebug";
@@ -14,6 +18,10 @@ import ClipLine from "../ui/ClipLine";
 const MolecularNet = memo(({ tier, palette }: { tier: PerformanceTier; palette: Palette }) => {
   // Истинный переключатель: работает на любом тире, если дернули ползунок
   const isHighNodes = useFeatureFlag("molecularNetHighNodes", tier === "high");
+
+  // ИСПРАВЛЕНИЕ: Даем дебагеру право "перебить" запрет Low-тира
+  const shouldRender = tier !== "low" || isHighNodes;
+
   const count = isHighNodes ? 12 : 7;
 
   const nodes = useMemo(
@@ -44,7 +52,7 @@ const MolecularNet = memo(({ tier, palette }: { tier: PerformanceTier; palette: 
     return pairs;
   }, [nodes]);
 
-  if (tier === "low") return null;
+  if (!shouldRender) return null;
 
   return (
     <svg
