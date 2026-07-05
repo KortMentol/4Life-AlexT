@@ -2,14 +2,15 @@
  * @module components/debug/EffectsDebugMobile
  * @description Сенсорная панель управления эффектами на мобильных (DEV).
  *
- * ВНЕДРЕНО (ФАЗА 2):
+ * ВНЕДРЕНО (ФАЗА 2 - MOBILE ENGINE POWER):
+ * - Engine Power (Soft Bypass): красивый интерактивный выключатель для тотальной заморозки графики на смартфонах.
  * - Топологический роутинг: ползунки группируются и выводятся по смысловому порядку сверху вниз.
  * - Device Filtering: панель автоматически отсекает все тяжелые десктопные ползунки.
  * - Stealth Mode: панель плавно растворяется при переходах, чтобы не ломать эстетику пелены.
  * - TS Safety: решены все конфликты со строгим режимом компиляции TypeScript.
  *
  * @author Geminis AI & Kort
- * @version 7.0.0
+ * @version 7.1.0
  */
 
 import {
@@ -135,7 +136,7 @@ const EffectsDebugMobile: React.FC = () => {
       const meta = FLAGS_METADATA[key];
       if (!meta) return;
 
-      // Оставляем флаги: Глобальные (all) или текущей страницы, И (устройства "all" или "mobile")
+      // Оставляем фланги: Глобальные (all) или текущей страницы, И (устройства "all" или "mobile")
       const routeMatch = meta.routes.includes("all") || meta.routes.includes(currentPath as any);
       const deviceMatch = meta.device === "all" || meta.device === "mobile";
 
@@ -237,6 +238,57 @@ const EffectsDebugMobile: React.FC = () => {
             {isLastPresetDisabled ? "Last Preset (Empty)" : "↺ Restore Last Preset"}
           </button>
 
+          {/* Высокотехнологичный мастер-рубильник Engine Power (Soft Bypass) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: "0.6rem",
+              padding: "0.45rem 0.5rem",
+              borderRadius: "0.5rem",
+              background: flags.globalPower ? "rgba(6,212,255,0.04)" : "rgba(239,68,68,0.04)",
+              border: flags.globalPower ? "1px solid rgba(6,212,255,0.18)" : "1px solid rgba(239,68,68,0.18)",
+              transition: "all 0.25s ease",
+              boxShadow: flags.globalPower ? "0 0 12px rgba(6,212,255,0.05)" : "none",
+            }}
+            onClick={() => handleToggle("globalPower", !flags.globalPower)}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: flags.globalPower ? "#00ffff" : "#ef4444",
+                  boxShadow: flags.globalPower ? "0 0 8px #00ffff" : "0 0 8px #ef4444",
+                  transition: "all 0.25s ease",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color: flags.globalPower ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.35)",
+                  transition: "color 0.25s ease",
+                }}
+              >
+                Engine Power
+              </span>
+            </div>
+            <label className={styles.toggle} style={{ width: 28, height: 16 }} onClick={(e) => e.stopPropagation()}>
+              <input
+                id="master-power-toggle-mobile"
+                type="checkbox"
+                checked={flags.globalPower}
+                onChange={(e) => handleToggle("globalPower", e.target.checked)}
+              />
+              <span className={styles.toggleSlider} style={{ borderRadius: "8px" }} />
+            </label>
+          </div>
+
           {/* ДИНАМИЧЕСКИЙ РЕНДЕР ГРУПП НА ОСНОВЕ МЕТАДАННЫХ */}
           {Object.entries(activeGroups).map(([category, flagKeys]) => {
             if (!flagKeys) return null;
@@ -260,7 +312,14 @@ const EffectsDebugMobile: React.FC = () => {
                   const meta = FLAGS_METADATA[key];
                   if (!meta) return null;
                   return (
-                    <ToggleRowMobile key={key} label={meta.label} flagKey={key} flags={flags} onChange={handleToggle} />
+                    <ToggleRowMobile
+                      key={key}
+                      label={meta.label}
+                      flagKey={key}
+                      flags={flags}
+                      disabled={!flags.globalPower} // Тотально блокируем при Soft Bypass
+                      onChange={handleToggle}
+                    />
                   );
                 })}
 
@@ -271,7 +330,7 @@ const EffectsDebugMobile: React.FC = () => {
                       if (!meta) return null;
 
                       const dependency = meta.dependsOn;
-                      const isDisabled = dependency ? !flags[dependency] : false;
+                      const isDisabled = !flags.globalPower || (dependency ? !flags[dependency] : false); // Тотально блокируем при Soft Bypass
 
                       return (
                         <ToggleRowMobile

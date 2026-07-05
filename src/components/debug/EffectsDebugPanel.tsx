@@ -4,15 +4,16 @@
  * Показывает активный режим в заголовке. Поддерживает восстановление "Last Preset".
  * Содержит атрибут `data-lenis-prevent` для блокировки скролла подлежащей страницы.
  *
- * ВНЕДРЕНО (ФАЗА 2):
- * - Топологический роутинг: группы формируются динамически на основе FLAGS_METADATA
- *   и выводятся сверху вниз по сайту.
- * - Device Filtering: панель игнорирует мобильные ползунки.
- * - Stealth Mode: исчезает при переходах (router transitions).
+ * ВНЕДРЕНО (ФАЗА 2 - STICKY PRESETS, ENGINE POWER, HOVER TOOLTIPS & OVERFLOW FIX):
+ * - Sticky Presets Area: панель пресетов и мастер-рубильник жестко зафиксированы вверху.
+ * - Engine Power (Soft Bypass): красивый выключатель для тотальной заморозки графики.
+ * - Unified Hover Tooltips: восстановлены и дополнены всплывающие подсказки для абсолютно всех
+ *   интерактивных элементов (пресеты, сброс, рубильник, ползунки).
+ * - Overflow Fix: динамическое управление свойством overflow предотвращает клиппинг подсказок.
  * - "noUncheckedIndexedAccess" Safety: полная совместимость со строгими правилами TypeScript.
  *
  * @author Geminis AI & Kort
- * @version 7.0.0
+ * @version 7.2.1
  */
 
 import { useMediaQuery } from "@/hooks";
@@ -27,13 +28,38 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom";
 import styles from "./EffectsDebugPanel.module.css";
 
+// Локальный словарь подсказок для элементов управления фиксированной зоны (не перегружает стор)
+const CUSTOM_HELP: Record<string, { desc: string; loc: string }> = {
+  "preset-current": {
+    desc: "Custom configuration. Reflects your manually modified effect overrides.",
+    loc: "Preset Modes",
+  },
+  "preset-low": {
+    desc: "Preset for low-end hardware. Disables heavy WebGL, 3D grids, and complex animations to guarantee 60 FPS.",
+    loc: "Preset Modes",
+  },
+  "preset-medium": {
+    desc: "Preset for mid-range hardware. Balances visual aesthetics with performance, enabling core effects like shading.",
+    loc: "Preset Modes",
+  },
+  "preset-high": {
+    desc: "Preset for flagship systems. Enables full high-end visual suite, volumetric lighting, and physics.",
+    loc: "Preset Modes",
+  },
+  "restore-preset": { desc: "Restores your last customized configuration preset.", loc: "System Tools" },
+  "global-power": {
+    desc: "Master Switch (Soft Bypass). Freezes all decorative animations and WebGL to measure baseline layout performance without losing your custom configurations.",
+    loc: "System Power",
+  },
+};
+
 const ToggleRow: React.FC<{
   label: string;
   flagKey: keyof EffectsDebugFlags;
   flags: EffectsDebugFlags;
   disabled?: boolean;
   onChange: (key: keyof EffectsDebugFlags, value: boolean) => void;
-  onHover: (key: keyof EffectsDebugFlags | null, mouseY?: number) => void;
+  onHover: (key: keyof EffectsDebugFlags | string | null, mouseY?: number) => void;
 }> = ({ label, flagKey, flags, disabled = false, onChange, onHover }) => {
   const value = flags[flagKey] as boolean;
   const id = `efx-${flagKey}`;
@@ -240,38 +266,55 @@ const EffectsDebugPanel: React.FC = () => {
     setIsCompact((p) => !p);
   }, []);
 
-  const handleHover = useCallback((key: keyof EffectsDebugFlags | null, mouseY?: number) => {
-    if (key && FLAGS_METADATA[key as keyof typeof FLAGS_METADATA]) {
+  const handleHover = useCallback((key: keyof EffectsDebugFlags | string | null, mouseY?: number) => {
+    if (!key) {
+      setHoveredDescription(null);
+      setHoveredLocation(null);
+      return;
+    }
+
+    // [ИСПРАВЛЕНИЕ ХОВЕРОВ]: Сначала проверяем локальный словарь пресетов и рубильника
+    if (typeof key === "string" && key in CUSTOM_HELP) {
+      const item = CUSTOM_HELP[key];
+      if (item) {
+        setHoveredDescription(item.desc);
+        setHoveredLocation(item.loc);
+      }
+    }
+    // Если это стандартный ключ стора — вытаскиваем из FLAGS_METADATA
+    else if (FLAGS_METADATA[key as keyof typeof FLAGS_METADATA]) {
       const meta = FLAGS_METADATA[key as keyof typeof FLAGS_METADATA];
-      if (!meta) return;
-      setHoveredDescription(meta.desc);
-      setHoveredLocation(meta.category);
-
-      const el = dragRef.current;
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        const tooltipWidth = 252;
-        const spaceLeft = rect.left;
-        const spaceRight = window.innerWidth - rect.right;
-
-        if (spaceLeft >= tooltipWidth) {
-          setTooltipPosition("left");
-        } else if (spaceRight >= tooltipWidth) {
-          setTooltipPosition("right");
-        } else {
-          setTooltipPosition("right");
-        }
-
-        if (mouseY !== undefined) {
-          const relativeY = mouseY - rect.top;
-          const tooltipHeight = 120;
-          const centeredY = Math.max(40, relativeY - tooltipHeight / 2);
-          setTooltipTop(centeredY);
-        }
+      if (meta) {
+        setHoveredDescription(meta.desc);
+        setHoveredLocation(meta.category);
       }
     } else {
       setHoveredDescription(null);
       setHoveredLocation(null);
+      return;
+    }
+
+    const el = dragRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const tooltipWidth = 252;
+      const spaceLeft = rect.left;
+      const spaceRight = window.innerWidth - rect.right;
+
+      if (spaceLeft >= tooltipWidth) {
+        setTooltipPosition("left");
+      } else if (spaceRight >= tooltipWidth) {
+        setTooltipPosition("right");
+      } else {
+        setTooltipPosition("right");
+      }
+
+      if (mouseY !== undefined) {
+        const relativeY = mouseY - rect.top;
+        const tooltipHeight = 120;
+        const centeredY = Math.max(40, relativeY - tooltipHeight / 2);
+        setTooltipTop(centeredY);
+      }
     }
   }, []);
 
@@ -296,7 +339,7 @@ const EffectsDebugPanel: React.FC = () => {
           groups[meta.category] = [];
         }
 
-        // Надежное извлечение массива и добавление элемента без undefined-конфликтов
+        // Надежное добавление элемента без undefined-конфликтов
         const groupArray = groups[meta.category];
         if (groupArray) {
           groupArray.push(key);
@@ -309,11 +352,11 @@ const EffectsDebugPanel: React.FC = () => {
 
   if (!isVisible || isMobileScreen) return null;
 
-  const tierBtns: { label: string; value: PerformanceTierOverride; cls: string }[] = [
-    { label: "Current", value: "current", cls: styles.tierBtnAuto ?? "" },
-    { label: "Low", value: "low", cls: styles.tierBtnLow ?? "" },
-    { label: "Mid", value: "medium", cls: styles.tierBtnMedium ?? "" },
-    { label: "High", value: "high", cls: styles.tierBtnHigh ?? "" },
+  const tierBtns: { label: string; value: PerformanceTierOverride; key: string }[] = [
+    { label: "Current", value: "current", key: "preset-current" },
+    { label: "Low", value: "low", key: "preset-low" },
+    { label: "Mid", value: "medium", key: "preset-medium" },
+    { label: "High", value: "high", key: "preset-high" },
   ];
 
   return (
@@ -321,9 +364,14 @@ const EffectsDebugPanel: React.FC = () => {
       ref={dragRef}
       className={`${styles.container} ${isCompact ? styles.containerCompact : ""}`}
       style={{
+        display: "flex",
+        flexDirection: "column",
+        maxHeight: isCompact ? "36px" : "85vh", // Ограничиваем высоту в развернутом виде для скролла
         opacity: isTransitioning ? 0 : 1,
         pointerEvents: isTransitioning ? "none" : "auto",
-        transition: "opacity 0.4s ease, transform 0.3s ease",
+        transition: "opacity 0.4s ease, transform 0.3s ease, max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        // [РЕШЕНИЕ КЛИППИНГА]: Разрешаем выход за границы только в развернутом виде, чтобы подсказки не обрезались!
+        overflow: isCompact ? "hidden" : "visible",
       }}
     >
       {/* Tooltip Overlay */}
@@ -348,8 +396,8 @@ const EffectsDebugPanel: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className={styles.header} onMouseDown={handleMouseDown} onClick={toggleCompact}>
+      {/* ── ЗОНА 1 (Фиксированная): Заголовок хедера ── */}
+      <div className={styles.header} onMouseDown={handleMouseDown} onClick={toggleCompact} style={{ flexShrink: 0 }}>
         <div className={styles.headerLeft}>
           <Move size={13} />
           <Sliders size={13} />
@@ -377,21 +425,25 @@ const EffectsDebugPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Body */}
+      {/* ── ЗОНА 2 (Фиксированная): Пресеты и Мастер-рубильник ── */}
       {!isCompact && (
         <div
-          className={styles.body}
-          data-lenis-prevent
-          onClick={(e) => e.stopPropagation()}
-          onWheel={(e) => e.stopPropagation()}
+          style={{
+            padding: "0.6rem 0.65rem 0.6rem 0.65rem",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+            flexShrink: 0,
+            background: "rgba(15, 23, 42, 0.95)",
+          }}
         >
           <div className={styles.sectionLabel}>Preset Modes</div>
           <div className={styles.tierRow}>
-            {tierBtns.map(({ label, value, cls }) => (
+            {tierBtns.map(({ label, value, key }) => (
               <button
                 key={value}
-                className={`${styles.tierBtn} ${cls} ${flags.tierOverride === value ? styles.tierBtnActive : ""}`}
+                className={`${styles.tierBtn} ${styles.tierBtnAuto} ${flags.tierOverride === value ? styles.tierBtnActive : ""}`}
                 onClick={() => handleTier(value)}
+                onMouseEnter={(e) => handleHover(key, e.clientY)}
+                onMouseLeave={() => handleHover(null)}
               >
                 {label}
               </button>
@@ -402,6 +454,8 @@ const EffectsDebugPanel: React.FC = () => {
             className={styles.resetBtn}
             disabled={isLastPresetDisabled}
             onClick={handleRestoreLastPreset}
+            onMouseEnter={(e) => handleHover("restore-preset", e.clientY)}
+            onMouseLeave={() => handleHover(null)}
             style={{
               marginTop: "0.2rem",
               marginBottom: "0.6rem",
@@ -415,7 +469,75 @@ const EffectsDebugPanel: React.FC = () => {
             {isLastPresetDisabled ? "Last Preset (Empty)" : "↺ Restore Last Preset"}
           </button>
 
-          {/* ДИНАМИЧЕСКИЙ РЕНДЕР ГРУПП НА ОСНОВЕ МЕТАДАННЫХ */}
+          {/* Высокотехнологичный мастер-рубильник Engine Power (Soft Bypass) с ховером */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: "0.6rem",
+              padding: "0.45rem 0.5rem",
+              borderRadius: "0.5rem",
+              background: flags.globalPower ? "rgba(6,212,255,0.04)" : "rgba(239,68,68,0.04)",
+              border: flags.globalPower ? "1px solid rgba(6,212,255,0.18)" : "1px solid rgba(239,68,68,0.18)",
+              transition: "all 0.25s ease",
+              boxShadow: flags.globalPower ? "0 0 12px rgba(6,212,255,0.05)" : "none",
+              cursor: "pointer",
+            }}
+            onClick={() => handleToggle("globalPower", !flags.globalPower)}
+            onMouseEnter={(e) => handleHover("global-power", e.clientY)}
+            onMouseLeave={() => handleHover(null)}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: flags.globalPower ? "#00ffff" : "#ef4444",
+                  boxShadow: flags.globalPower ? "0 0 8px #00ffff" : "0 0 8px #ef4444",
+                  transition: "all 0.25s ease",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color: flags.globalPower ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.35)",
+                  transition: "color 0.25s ease",
+                }}
+              >
+                Engine Power
+              </span>
+            </div>
+            <label className={styles.toggle} style={{ width: 28, height: 16 }} onClick={(e) => e.stopPropagation()}>
+              <input
+                id="master-power-toggle"
+                type="checkbox"
+                checked={flags.globalPower}
+                onChange={(e) => handleToggle("globalPower", e.target.checked)}
+              />
+              <span className={styles.toggleSlider} style={{ borderRadius: "8px" }} />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* ── ЗОНА 3 (Скроллируемая): Динамический список ползунков секций ── */}
+      {!isCompact && (
+        <div
+          className={styles.body}
+          data-lenis-prevent
+          style={{
+            flexGrow: 1,
+            overflowY: "auto",
+            padding: "0.2rem 0.65rem 0.6rem 0.65rem",
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
+        >
           {Object.entries(activeGroups).map(([category, flagKeys]) => {
             if (!flagKeys) return null;
 
@@ -443,6 +565,7 @@ const EffectsDebugPanel: React.FC = () => {
                       label={meta.label}
                       flagKey={key}
                       flags={flags}
+                      disabled={!flags.globalPower} // Тотально блокируем при Soft Bypass
                       onChange={handleToggle}
                       onHover={handleHover}
                     />
@@ -456,7 +579,7 @@ const EffectsDebugPanel: React.FC = () => {
                       if (!meta) return null;
 
                       const dependency = meta.dependsOn;
-                      const isDisabled = dependency ? !flags[dependency] : false;
+                      const isDisabled = !flags.globalPower || (dependency ? !flags[dependency] : false); // Тотально блокируем при Soft Bypass
 
                       return (
                         <ToggleRow

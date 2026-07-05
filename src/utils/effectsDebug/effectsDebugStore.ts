@@ -12,7 +12,7 @@
  * ============================================================================
  *
  * @author Geminis AI & Kort
- * @version 7.0.0
+ * @version 7.1.0
  */
 
 import {
@@ -35,6 +35,7 @@ export type RoutePath =
 
 export interface EffectsDebugFlags {
   tierOverride: PerformanceTierOverride;
+  globalPower: boolean; // Master bypass switch (DAW pattern)
   // --- Global ---
   renderHeader: boolean;
   textShineAnimation: boolean;
@@ -77,8 +78,9 @@ export interface FlagMeta {
  * METADATA MAP
  * The visual rendering order of Groups in the UI matches the sequential key order here.
  * Organised strictly Top-to-Bottom: Global first, then HomePage sections, then specific sub-pages.
+ * Note: `globalPower` is intentionally omitted here as it renders in the fixed header area.
  */
-export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverride">, FlagMeta> = {
+export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverride" | "globalPower">, FlagMeta> = {
   // ─── [GLOBAL] HEADER & LAYOUT ───
   renderHeader: {
     label: "Render Header Component",
@@ -260,6 +262,7 @@ const LAST_PRESET_KEY = "4life_last_preset";
 
 const DEFAULTS: EffectsDebugFlags = {
   tierOverride: "current",
+  globalPower: true,
   renderHeader: true,
   textShineAnimation: true,
   premiumTransitions: true,
@@ -287,6 +290,7 @@ const DEFAULTS: EffectsDebugFlags = {
 export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<EffectsDebugFlags> => {
   if (tier === "low") {
     return {
+      globalPower: true,
       webglFluid: false,
       webglFluidPressureHigh: false,
       webglFluidSunrays: false,
@@ -314,6 +318,7 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
 
   if (tier === "medium") {
     return {
+      globalPower: true,
       webglFluid: true,
       webglFluidPressureHigh: false,
       webglFluidSunrays: false,
@@ -341,6 +346,7 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
 
   if (tier === "high") {
     return {
+      globalPower: true,
       webglFluid: true,
       webglFluidPressureHigh: true,
       webglFluidSunrays: true,
