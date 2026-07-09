@@ -4,12 +4,17 @@
  * High/Medium Tier: Smoked Obsidian Glass (no backdrop-filter).
  * Low Tier: Solid color (Performance safe).
  * Tactile feedback: spring shrink (scale 0.85) on mousedown.
+ *
+ * FIX (Awwwards 2026): Реализован ручной Raycasting (elementFromPoint)
+ * внутри RAF-цикла для преодоления бага браузеров, которые отключают
+ * события hover/mouseenter во время скролла колесом.
  * @author Kort
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { rafLoop } from "@/lib/rafLoop";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export const CustomCursor: React.FC = () => {
   const [active, setActive] = useState(false);
@@ -22,33 +27,62 @@ export const CustomCursor: React.FC = () => {
   const springX = useSpring(mouseX, { stiffness: 800, damping: 35, mass: 0.5 });
   const springY = useSpring(mouseY, { stiffness: 800, damping: 35, mass: 0.5 });
 
+  const activeRef = useRef(false);
+  const lastMousePos = useRef({ x: -100, y: -100 });
+
   useEffect(() => {
     // На тач-устройствах курсор не нужен вообще (Hardware protection)
     if ("ontouchstart" in window || navigator.maxTouchPoints > 0) return;
 
     const onMove = (e: MouseEvent) => {
+      lastMousePos.current = { x: e.clientX, y: e.clientY };
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
+      checkHitTarget(); // Мгновенная проверка при движении мыши
     };
 
     const onDown = () => setIsClicked(true);
     const onUp = () => setIsClicked(false);
 
-    const onEnter = () => setActive(true);
-    const onLeave = () => setActive(false);
+    // Функция ручного определения цели под курсором
+    const checkHitTarget = () => {
+      const { x, y } = lastMousePos.current;
+      if (x < 0 || y < 0) return;
+
+      // Получаем элемент, над которым сейчас находится курсор
+      const el = document.elementFromPoint(x, y);
+
+      // Ищем класс-триггер вверх по дереву
+      const isOverVideo = !!el?.closest(".video-cursor-target");
+
+      if (activeRef.current !== isOverVideo) {
+        activeRef.current = isOverVideo;
+        setActive(isOverVideo);
+      }
+    };
+
+    let frameCount = 0;
+    // Подписываемся на скролл, чтобы отслеживать проплывающие под курсором элементы
+    const onRaf = () => {
+      frameCount++;
+      // Троттлинг: проверяем только каждый 3-й кадр (~20 раз в секунду).
+      // Этого достаточно для идеальной плавности, но экономит 66% времени CPU,
+      // предотвращая layout thrashing во время скролла.
+      if (frameCount % 3 === 0) {
+        checkHitTarget();
+      }
+    };
 
     window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("mousedown", onDown);
     window.addEventListener("mouseup", onUp);
-    window.addEventListener("video-cursor-enter", onEnter);
-    window.addEventListener("video-cursor-leave", onLeave);
+    const unsubRaf = rafLoop.subscribe(onRaf);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mousedown", onDown);
       window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("video-cursor-enter", onEnter);
-      window.removeEventListener("video-cursor-leave", onLeave);
+      unsubRaf();
     };
   }, [mouseX, mouseY]);
 

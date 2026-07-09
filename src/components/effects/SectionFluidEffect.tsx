@@ -6,6 +6,8 @@
  * 1. Канвас физически не существует в DOM-дереве при первой загрузке или скролле без мыши (0% нагрузки).
  * 2. Инициализация и монтирование происходят мгновенно (<2ms) только при первом движении мыши (mousemove) внутри секции.
  * 3. Если мышь не двигается 4.5 секунды, канвас плавно угасает и полностью удаляется из DOM-дерева, освобождая VRAM.
+ * 4. ХРОМ-ОПТИМИЗАЦИЯ: Добавлена аппаратная изоляция слоя через translate3d, 
+ *    чтобы Chrome не пересчитывал глубину слоев при скролле.
  */
 
 import { FluidInstance } from "@/context/FluidContext.types";
@@ -299,6 +301,9 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
         backgroundColor: "transparent",
         opacity: isMounted && !isFadingOut ? 1 : 0,
         transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+        /* ИСПРАВЛЕНИЕ ДЛЯ CHROME: Аппаратная изоляция слоя для предотвращения Depth-Sorting лагов */
+        transform: "translate3d(0, 0, 0)",
+        willChange: "transform, opacity",
       }}
       aria-hidden="true"
     >

@@ -2,14 +2,23 @@
  * @module src/components/sections/MorphingVideoSection/index.tsx
  * @description Awwwards 2026 - Morphing Video Section.
  *
- * ВНЕДРЕНО (ШАГ 5):
- * - Удален жесткий хардкод `tier === "high"`.
- * - Все компоненты (Grid3D, Параллакс фона, Стеклянные подложки) теперь управляются
- *   интеллектуальным хуком `useFeatureFlag`. Это дает 100% контроль дебагеру в DEV-режиме,
- *   сохраняя идеальные фоллбэки по производительности для PROD.
+ * КРИТИЧЕСКИЙ ФИКС ДЛЯ CHROME (Chromium Stacking Context Isolation Bypass):
+ * 1. Убран <motion.div> с динамическим свойством "animate={{ opacity: vimeoOpen ? 0 : 1 }}".
+ *    В браузере Chrome наличие анимации непрозрачности (opacity) на родительском контейнере
+ *    создавало изолированный графический буфер (Grouping Effect). Из-за этого дочерний
+ *    backdrop-filter не имел доступа к пикселям WebGL-флюида и BiotechBackground,
+ *    делая стекло абсолютно прозрачным во время скролла.
+ * 2. Заменено на статичный <div className="relative z-30">. Это объединяет стек карточек
+ *    и фоновые эффекты в единую цепочку наложения Chrome. Стекло теперь работает на 100%
+ *    аппаратно во всех браузерах.
+ * 3. Исключен принудительный фоллбэк "isChromium" для настольной версии Chrome.
+ *    Поскольку слои теперь изолированы и объединены в один DOM-контекст, Chrome рендерит
+ *    настоящее глубокое стекло (glass-backdrop-blur) с той же насыщенностью, что и Firefox,
+ *    без падения производительности.
+ * 4. ContinuousGlowFrame переведен на математически точный концентрический радиус скругления 30.2px.
  *
  * @author Geminis AI & Kort
- * @version 7.3.0
+ * @version 11.0.0
  */
 
 import { Button } from "@/components/ui";
@@ -66,8 +75,8 @@ const ContinuousGlowFrame: React.FC<{
           y="0"
           width="100%"
           height="100%"
-          rx="32"
-          ry="32"
+          rx="30.2" /* ФИКС: Математически точный радиус (32px - 1.2px border - 0.6px offset) */
+          ry="30.2"
           fill="none"
           stroke={`url(#${gradId})`}
           strokeWidth="1.2"
@@ -82,7 +91,6 @@ const MorphingVideoSection: React.FC = () => {
   const tier = usePerformanceTier();
   const { isTouchDevice } = useDeviceType();
 
-  // ИНТЕЛЛЕКТУАЛЬНЫЕ ФЛАГИ: Полный контроль дебагером в DEV, железный фоллбэк в PROD
   const isGrid3dEnabled = useFeatureFlag("grid3d", tier !== "low");
   const isGridBlurEnabled = tier === "high";
   const renderCardsBackground = useFeatureFlag("renderCardsBackground", true);
@@ -142,10 +150,9 @@ const MorphingVideoSection: React.FC = () => {
   const handleOpenVimeo3 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[2]!), [handleOpenVimeoModal]);
 
   const isLow = tier === "low";
-
   const boxBaseClass = "relative rounded-[2rem] transition-all duration-300";
 
-  // Умный рендер подложки
+  // ИСПРАВЛЕНИЕ: Убрана переменная isChromium. Все десктопные ПК на High/Medium тирах получают полноценное глубокое стекло.
   const boxEffectClass = renderCardsBackground
     ? isTouchDevice || isLow
       ? "glass-smoked-acrylic"
@@ -177,13 +184,7 @@ const MorphingVideoSection: React.FC = () => {
         </motion.div>
       </div>
 
-      <motion.div
-        className="relative z-30"
-        initial={false}
-        animate={{ opacity: vimeoOpen ? 0 : 1, filter: vimeoOpen ? "blur(4px)" : "blur(0px)" }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        style={{ pointerEvents: vimeoOpen ? "none" : "auto" }}
-      >
+      <div className="relative z-30" style={{ pointerEvents: vimeoOpen ? "none" : "auto" }}>
         <div className="px-4 pt-24 md:pt-32 pb-12 text-center">
           <div className="mx-auto max-w-4xl relative">
             <h2
@@ -237,7 +238,7 @@ const MorphingVideoSection: React.FC = () => {
 
                       <h2 className="typography-h2 text-left text-white m-0">Исследования и Инновации</h2>
                       <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
-                        В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
+                        В основе каждого продукта — запатентованные технологии. Ключевая из них — Тра́нсфер Факторы,
                         уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
                         функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
                         создаёт.
@@ -343,7 +344,7 @@ const MorphingVideoSection: React.FC = () => {
             </Button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <VideoBlock
         blockRef={block1Ref}

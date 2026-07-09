@@ -2,15 +2,14 @@
  * @module src/components/ui/ScrollTextReveal/ScrollTextReveal.tsx
  * @description Высокопроизводительный текстовый парсер на базе GSAP ScrollTrigger.
  *
- * ИСПРАВЛЕНИЕ:
- * - Интегрирован глобальный токен `.editorial-body` напрямую в разметку параграфа [1].
- * - Полностью удалены инлайновые переопределения `style={{ color }}` [1].
- * - Так как цвет теперь жестко закреплен в CSS-классе с приоритетом,
- *   команда `clearProps` в GSAP больше физически не способна стереть цвет текста [1].
- * - Проблема невидимого/черного текста на Low-Tier решена раз и навсегда [1].
+ * ОПТИМИЗАЦИЯ CHROME (LAYER EXPLOSION & LAYOUT SHIFT FIX):
+ * 1. Удалено `force3D: true` с пословной анимации. Выделение 50 отдельных GPU-текстур
+ *    в Chrome приводит к просадке FPS, так как переполняет видеопамять.
+ * 2. Убрано свойство `contentVisibility: "auto"`. Использование этого свойства на элементах-триггерах
+ *    ScrollTrigger ломает расчет высот страницы, вызывая прыжки макета и некорректный запуск анимации.
  *
  * @author Kort
- * @version 5.1.0
+ * @version 5.4.0
  */
 
 import { useTheme } from "@/hooks";
@@ -40,12 +39,10 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
   const isTouchDevice =
     typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
-  // Читаем индивидуальные флаги из дебаг-стора
   const isBlurRequested = useFeatureFlag("scrollTextBlur", tier === "high");
   const isOpacityRequested = useFeatureFlag("scrollTextOpacity", tier === "medium");
   const isBlockOpacityRequested = useFeatureFlag("scrollTextBlockOpacity", tier !== "low");
 
-  // ОПРЕДЕЛЕНИЕ РЕЖИМА АНИМАЦИИ (Жесткая стейт-машина)
   type AnimType = "static" | "block_opacity" | "word_by_word_blur" | "word_by_word_opacity";
   let animMode: AnimType = "static";
 
@@ -70,10 +67,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
 
     const container = containerRef.current;
 
-    // Сброс анимаций при переходе в статичный режим (Low Tier)
     if (animMode === "static") {
-      // ИСПРАВЛЕНИЕ: Больше не затираем инлайновые стили React.
-      // Сбрасываем только те свойства трансформаций, которые анимировал GSAP.
       window.gsap.set(container, {
         opacity: 1,
         y: 0,
@@ -102,6 +96,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
           {
             opacity: 1,
             y: 0,
+            force3D: true, // Для единичного блока это безопасно и эффективно
             ease: "power2.out",
             scrollTrigger: {
               trigger: container,
@@ -138,7 +133,6 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
                 opacity: 0,
                 filter: animMode === "word_by_word_blur" ? "blur(6px)" : "none",
                 skewX: animMode === "word_by_word_blur" ? -20 : 0,
-                willChange: "opacity, transform",
               },
               {
                 opacity: 1,
@@ -169,12 +163,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
   }, [animMode, validatedText, theme]);
 
   return (
-    <p
-      ref={containerRef}
-      // ИСПРАВЛЕНИЕ: Интеграция глобального токена .editorial-body для благородного
-      // серебристого цвета на всех тирах, полностью защищенного от затирания плагином GSAP [1].
-      className={`editorial-body relative ${className}`}
-    >
+    <p ref={containerRef} className={`editorial-body relative ${className}`}>
       {validatedText}
     </p>
   );

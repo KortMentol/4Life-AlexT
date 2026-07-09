@@ -1,20 +1,22 @@
 /**
  * @module src/components/sections/MorphingVideoSection/components/VideoBlock.tsx
  * @description Awwwards 2026 - Optimized Responsive Video Block.
- * Полностью отключает рендер разметки и ресурсов, если выключен флаг renderVideoBlocks.
  *
- * ВАЖНО: Условие отключения рендера размещено строго ПЕРЕД возвратом JSX.
- * Все хуки (useScroll, useTransform, useEffect) вызываются безусловно на верхнем уровне,
- * что полностью предотвращает нарушение Rules of Hooks в React при переключении флага.
+ * ОПТИМИЗАЦИЯ CHROME:
+ * 1. scale изъят из will-change, используется только валидный transform.
+ * 2. will-change зафиксирован статично на High/Medium-тирах ПК. Динамическое
+ *    включение/выключение will-change при пересечении viewport приводило к сбросу
+ *    текстурных кэшей на GPU (Texture Thrashing) и просадкам FPS.
  *
  * @author Geminis AI & Kort
+ * @version 2.2.0
  */
 
 import { usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
 import { effectsDebugStore } from "@/utils/effectsDebug/effectsDebugStore";
 import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BLOCK_CONFIG } from "../config";
 
 interface VideoBlockProps {
@@ -187,16 +189,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     return () => cancelAnimationFrame(rafId);
   }, [isIntersecting, isVideoLoaded, isLow]);
 
-  const handleMouseEnter = useCallback(() => {
-    window.dispatchEvent(new CustomEvent("video-cursor-enter"));
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    window.dispatchEvent(new CustomEvent("video-cursor-leave"));
-  }, []);
-
-  // КРИТИЧЕСКИЙ ФИКС (RULES OF HOOKS): Рендерим null только здесь!
-  // Это сохраняет порядок вызовов хуков неизменным, защищая React от краша.
   if (!efxFlags.renderVideoBlocks) {
     return null;
   }
@@ -214,7 +206,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
           translateZ,
           pointerEvents,
           backfaceVisibility: "hidden",
-          willChange: isIntersecting ? "transform, opacity, scale" : "auto",
+          willChange: isTouchDevice || isLow ? "auto" : "transform, opacity",
         }}
         className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
       >
@@ -222,10 +214,9 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
           initial={false}
           animate={{ opacity: isModalOpen ? 0 : 1, scale: isModalOpen ? 0.95 : 1 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-[#03050a] border border-blue-500/20 shadow-2xl cursor-pointer group"
+          // ВАЖНО: Добавлен класс video-cursor-target, убраны onMouseEnter/onMouseLeave
+          className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-[#03050a] border border-blue-500/20 shadow-2xl cursor-pointer group video-cursor-target"
           onClick={onClick}
-          onMouseEnter={!isTouchDevice ? handleMouseEnter : undefined}
-          onMouseLeave={!isTouchDevice ? handleMouseLeave : undefined}
           style={{
             transform: "translate3d(0, 0, 0)",
             WebkitTransform: "translate3d(0, 0, 0)",
@@ -237,6 +228,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             style={{
               backgroundImage: `url(${posterSrc})`,
               opacity: isTransitioning || !isVideoLoaded ? 1 : 0,
+              transform: "translateZ(0)",
             }}
           />
 
@@ -252,6 +244,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
                 {
                   opacity: isTransitioning || !isVideoLoaded ? 0 : 1,
                   imageRendering: tier === "high" ? "optimizeQuality" : "auto",
+                  transform: "translateZ(0)",
                 } as any
               }
             />
