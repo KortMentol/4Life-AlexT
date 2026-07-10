@@ -1,41 +1,24 @@
+/**
+ * @module components/debug/PerformanceDebug
+ * @description Настольная плавающая панель для мониторинга FPS, FT и аппаратных характеристик (DEV).
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
+ *
+ * @author Kort
+ * @version 5.1.1
+ */
+
 import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
 import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
-import {
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Cpu,
-  Gauge,
-  HardDrive,
-  Info,
-  Move,
-  PieChart,
-  Smartphone,
-  Star,
-  X,
-  Zap,
-} from "lucide-react";
+import { Icons } from "@/utils/icons";
 import React, { useEffect, useState } from "react";
 import styles from "./PerformanceDebug.module.css";
 
-/**
- * @module components/debug/PerformanceDebug
- * @description
- * `PerformanceDebug` — Настольная плавающая панель для мониторинга FPS, FT и аппаратных характеристик.
- * Обновляет данные напрямую в DOM через рефы, исключая влияние React-рендеринга на замеры.
- *
- * @author Kort
- * @version 5.0.0
- *
- * @usage
- * Рендерится на десктопных устройствах в DEV режиме.
- */
 const PerformanceDebug: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isCompact, setIsCompact] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [staticScore, setStaticScore] = useState(0);
-  const [tier, setTier] = useState<"low" | "medium" | "high" | "current">("medium");
+  const [tier, setTier] = useState<"low" | "medium" | "high" | "current" | "current">("medium");
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpecs>({
     ram: "Unknown",
     cpuCores: 0,
@@ -48,7 +31,6 @@ const PerformanceDebug: React.FC = () => {
     connectionType: "Unknown",
   });
 
-  // Прямые рефы для мгновенного обновления текста в DOM без вызова setState
   const fpsTextRef = React.useRef<HTMLSpanElement>(null);
   const ftTextRef = React.useRef<HTMLSpanElement>(null);
   const compactFpsTextRef = React.useRef<HTMLSpanElement>(null);
@@ -68,7 +50,6 @@ const PerformanceDebug: React.FC = () => {
       setStaticScore(score);
 
       const override = getTierOverride();
-      // ИСПРАВЛЕНИЕ: Сравнение с "current" вместо "auto" для устранения ошибки TS2367
       const finalTier = override !== "current" ? override : hardwareTier;
       setTier(finalTier);
 
@@ -265,8 +246,8 @@ const PerformanceDebug: React.FC = () => {
             color: "rgba(255, 255, 255, 0.9)",
           }}
         >
-          <Move size={13} style={{ color: "rgba(255, 255, 255, 0.5)", cursor: "move" }} />
-          <Gauge size={13} style={{ color: "rgba(255, 255, 255, 0.5)" }} />
+          <Icons.Move size={13} style={{ color: "rgba(255, 255, 255, 0.5)", cursor: "move" }} />
+          <Icons.Gauge size={13} style={{ color: "rgba(255, 255, 255, 0.5)" }} />
           <span>{isCompact ? "Perf" : "Perf Debug"}</span>
         </div>
 
@@ -330,7 +311,7 @@ const PerformanceDebug: React.FC = () => {
               }}
               title="Show info"
             >
-              <Info size={14} />
+              <Icons.Info size={14} />
             </button>
           )}
           <button
@@ -341,7 +322,7 @@ const PerformanceDebug: React.FC = () => {
             }}
             title={isCompact ? "Expand" : "Collapse"}
           >
-            {isCompact ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+            {isCompact ? <Icons.ChevronDown size={14} /> : <Icons.ChevronUp size={14} />}
           </button>
           <button
             className={styles.iconBtn}
@@ -351,7 +332,7 @@ const PerformanceDebug: React.FC = () => {
             }}
             title="Close debugger"
           >
-            <X size={14} />
+            <Icons.X size={14} />
           </button>
         </div>
       </div>
@@ -412,38 +393,38 @@ const PerformanceDebug: React.FC = () => {
               <p
                 style={{
                   fontSize: "0.65rem",
-                  color: "rgba(255,255,255,0.7)",
+                  color: "rgba(255, 255, 255, 0.7)",
                   margin: "4px 0",
                 }}
               >
-                <strong>FPS:</strong> Frames Per Second. Higher is smoother.
+                <strong>Icons.Gauge:</strong> Frames Per Second. Higher is smoother.
               </p>
               <p
                 style={{
                   fontSize: "0.65rem",
-                  color: "rgba(255,255,255,0.7)",
+                  color: "rgba(255, 255, 255, 0.7)",
                   margin: "4px 0",
                 }}
               >
-                <strong>FT:</strong> Frame Time (ms). Lower is faster.
+                <strong>Icons.Clock:</strong> Frame Time (ms). Lower is faster.
               </p>
               <p
                 style={{
                   fontSize: "0.65rem",
-                  color: "rgba(255,255,255,0.7)",
+                  color: "rgba(255, 255, 255, 0.7)",
                   margin: "4px 0",
                 }}
               >
-                <strong>Score:</strong> Static hardware performance rating.
+                <strong>Icons.Star:</strong> Static hardware performance rating.
               </p>
             </div>
           )}
 
-          {/* Metrics Grid: 3 columns */}
+          {/* Metrics Grid */}
           <div className={styles.metricsGrid}>
             <div className={styles.metricItem} title="Frames Per Second">
               <div className={styles.metricIcon}>
-                <Gauge size={16} />
+                <Icons.Gauge size={16} />
               </div>
               <span className={styles.metricLabel}>FPS</span>
               <span ref={fpsTextRef} className={`${styles.metricValue} ${styles.valueGood}`}>
@@ -452,7 +433,7 @@ const PerformanceDebug: React.FC = () => {
             </div>
             <div className={styles.metricItem} title="Frame Time">
               <div className={styles.metricIcon}>
-                <Clock size={16} />
+                <Icons.Clock size={16} />
               </div>
               <span className={styles.metricLabel}>Frame</span>
               <span ref={ftTextRef} className={styles.metricValue}>
@@ -461,7 +442,7 @@ const PerformanceDebug: React.FC = () => {
             </div>
             <div className={styles.metricItem} title={`Performance Score: ${staticScore} (${tier.toUpperCase()})`}>
               <div className={styles.metricIcon}>
-                <Star size={16} />
+                <Icons.Star size={16} />
               </div>
               <span className={styles.metricLabel}>Score</span>
               <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>{staticScore}</span>
@@ -470,39 +451,39 @@ const PerformanceDebug: React.FC = () => {
 
           <div className={styles.sectionDivider} />
 
-          {/* Device Info Grid: 2 columns, vertical cards */}
+          {/* Device Info */}
           <div className={styles.deviceInfoSection}>
             <div className={styles.infoRow} title={`RAM: ${deviceSpecs.ram}`}>
               <strong>
-                <HardDrive size={12} className={styles.infoIcon} />
+                <Icons.HardDrive size={12} className={styles.infoIcon} />
                 RAM
               </strong>
               <span className={styles.infoValue}>{deviceSpecs.ram}</span>
             </div>
             <div className={styles.infoRow} title={`CPU: ${deviceSpecs.cpuCores} cores`}>
               <strong>
-                <Cpu size={12} className={styles.infoIcon} />
+                <Icons.Cpu size={12} className={styles.infoIcon} />
                 CPU
               </strong>
               <span className={styles.infoValue}>{deviceSpecs.cpuCores} cores</span>
             </div>
             <div className={styles.infoRow} title={`GPU: ${deviceSpecs.gpu}`}>
               <strong>
-                <PieChart size={12} className={styles.infoIcon} />
+                <Icons.PieChart size={12} className={styles.infoIcon} />
                 GPU
               </strong>
               <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
             </div>
             <div className={styles.infoRow} title={`WebGL: ${deviceSpecs.webglVersion}`}>
               <strong>
-                <Zap size={12} className={styles.infoIcon} />
+                <Icons.Zap size={12} className={styles.infoIcon} />
                 WebGL
               </strong>
               <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
             </div>
             <div className={styles.infoRow} title={`Touch: ${deviceSpecs.touchSupport ? "Yes" : "No"}`}>
               <strong>
-                <Smartphone size={12} className={styles.infoIcon} />
+                <Icons.Smartphone size={12} className={styles.infoIcon} />
                 Touch
               </strong>
               <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>

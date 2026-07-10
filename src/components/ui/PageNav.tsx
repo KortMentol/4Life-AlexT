@@ -12,7 +12,6 @@
  * - Жидкая полоска через layoutId — плавное перетекание
  */
 
-import { useTheme } from "@/hooks/useTheme";
 import { scrollTo } from "@/lib/lenis";
 import { LayoutGroup, motion } from "framer-motion";
 import { memo } from "react";
@@ -33,14 +32,11 @@ interface PageNavProps {
 }
 
 const PageNav = memo(({ sections, activeIndex }: PageNavProps) => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   if (IS_TOUCH) return null;
 
   const gold = "#B9974A";
-  const cream = isDark ? "rgba(240,237,232,0.55)" : "rgba(26,24,20,0.50)";
-  const dim = isDark ? "rgba(240,237,232,0.18)" : "rgba(26,24,20,0.13)";
+  const cream = "rgba(240,237,232,0.55)";
+  const dim = "rgba(240,237,232,0.18)";
 
   const handleClick = (
     ref: React.RefObject<HTMLElement | HTMLDivElement | null>,

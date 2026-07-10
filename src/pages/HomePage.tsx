@@ -106,8 +106,6 @@ const HomePage: React.FC = () => {
         includeWebSiteSearch
       />
 
-      {/* Вертикальная навигация по секциям убрана — на главной есть header */}
-
       <div ref={heroSectionRef}>
         <ParallaxSection
           backgroundVideo={heroVideoWebm}
@@ -197,8 +195,6 @@ const HomePage: React.FC = () => {
         </ParallaxSection>
       </div>
 
-      {/* Стык 1: Hero → MorphingVideo — двусторонняя вуаль */}
-
       {/* MorphingVideoSection */}
       <div className="relative">
         <MorphingVideoSection />
@@ -213,7 +209,6 @@ const HomePage: React.FC = () => {
           edgeFade={{
             top: 160,
             bottom: 150,
-            colorLight: "#ffffff",
             colorDark: "#030712",
           }}
         >
@@ -262,8 +257,6 @@ const HomePage: React.FC = () => {
           </div>
         </ParallaxSection>
       </section>
-
-      {/* Стык 3: Products → Partnership — вуаль внутри Products (fadeBottom) */}
 
       <PartnershipSection />
 

@@ -95,7 +95,6 @@ const Footer: React.FC = () => {
                   alt="4Life Logo"
                   className=""
                   size="lg"
-                  themeOverride={tier === "high" ? "dark" : undefined}
                 />
               </a>
               <p className="footer-description text-gray-300 mb-6 text-pretty">

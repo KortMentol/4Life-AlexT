@@ -1,13 +1,14 @@
 /**
  * @module SectionFluidEffect
- * @description WebGL fluid эффект, ограниченный границами секции через WebGL scissor test.
+ * @description Оптимизированный WebGL fluid эффект с мягким засыпанием.
  *
- * ОПТИМИЗАЦИЯ "ШВЕЙЦАРСКИЕ ЧАСЫ" (0% GPU в простое):
- * 1. Канвас физически не существует в DOM-дереве при первой загрузке или скролле без мыши (0% нагрузки).
- * 2. Инициализация и монтирование происходят мгновенно (<2ms) только при первом движении мыши (mousemove) внутри секции.
- * 3. Если мышь не двигается 4.5 секунды, канвас плавно угасает и полностью удаляется из DOM-дерева, освобождая VRAM.
- * 4. ХРОМ-ОПТИМИЗАЦИЯ: Добавлена аппаратная изоляция слоя через translate3d, 
- *    чтобы Chrome не пересчитывал глубину слоев при скролле.
+ * ИСПРАВЛЕНИЕ ДЖАНКОВ ПРИ СКРОЛЛЕ (Zero-Jank Sleep Architecture):
+ * 1. Мы полностью убрали метод resetFluid() из таймера бездействия. Теперь при засыпании
+ *    эффекта (через 4.5 сек) расчеты физики просто останавливаются через simulation.stop().
+ *    Это мгновенная операция (0 мс процессора), которая полностью устранила микро-фризы
+ *    страницы во время скролла.
+ * 2. Очистка контекста (resetFluid) сохранена строго на событии возвращения на вкладку
+ *    после долгого отсутствия (>4.5с), когда пользователь не совершает активных действий скролла.
  */
 
 import { FluidInstance } from "@/context/FluidContext.types";
@@ -27,24 +28,19 @@ interface SectionFluidEffectProps {
 
 const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) => {
   const tier = usePerformanceTier();
-  const { setFluidInstance, resetKey } = useFluid();
+  const { setFluidInstance, resetFluid, resetKey } = useFluid();
 
-  // Жестко отключаем на тач-устройствах (мобилках)
   const isTouchDevice = useMemo(
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
     [],
   );
 
-  // Читаем флаги оптимизации из стора
   const isFluidEnabled = useFeatureFlag("webglFluid", tier !== "low");
   const isPressureHigh = useFeatureFlag("webglFluidPressureHigh", tier === "high");
   const isSunrays = useFeatureFlag("webglFluidSunrays", tier === "high");
   const isShading = useFeatureFlag("webglFluidShading", tier !== "low");
 
-  // Стейт физического присутствия канваса в DOM-дереве
-  const [isMounted, setIsMounted] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
-
   const containerRef = useCallback((node: HTMLDivElement | null) => {
     setContainer(node);
   }, []);
@@ -53,9 +49,13 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
   const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRunningRef = useRef<boolean>(false);
   const isInViewportRef = useRef<boolean>(false);
-  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Плавный и быстрый запуск симуляции
+  // Рефы для отслеживания времени сворачивания вкладки и мгновенного DOM-скрытия
+  const outerWrapperRef = useRef<HTMLDivElement>(null);
+  const tabHiddenTimeRef = useRef<number>(0);
+  const wasRunningBeforeHideRef = useRef<boolean>(false);
+
   const startAnimation = useCallback(() => {
     if (simulationRef.current && !isRunningRef.current) {
       simulationRef.current.start();
@@ -65,30 +65,30 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       clearTimeout(stopTimerRef.current);
       stopTimerRef.current = null;
     }
-    setIsFadingOut(false);
+    setIsVisible(true);
   }, []);
 
-  // Плавное угасание и ПОЛНОЕ удаление канваса из DOM
   const scheduleStopAnimation = useCallback(() => {
     if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
 
+    // Мягкое засыпание через 4.5 секунды бездействия
     stopTimerRef.current = setTimeout(() => {
-      setIsFadingOut(true);
-      // Даем 500ms на плавный CSS-переход непрозрачности перед размонтированием
+      setIsVisible(false); // Плавно гасим прозрачность через CSS Transition (0.5s)
+
       stopTimerRef.current = setTimeout(() => {
         if (simulationRef.current && isRunningRef.current) {
-          simulationRef.current.stop();
+          simulationRef.current.stop(); // Останавливаем расчеты физики (0% GPU)
           isRunningRef.current = false;
         }
-        setIsMounted(false); // Полностью вырезаем канвас из DOM
-        setContainer(null);
+        // 🛑 resetFluid() УБРАН ИЗ ТАЙМЕРА СНА.
+        // Это предотвращает тяжелую компиляцию шейдеров во время активного скролла страницы!
       }, 500);
-    }, 4500); // 4.5 секунды бездействия (идеально для LERP_DISSIPATION = 1.5)
-  }, [setIsFadingOut, setContainer]);
+    }, 4500);
+  }, []); // Пустой массив зависимостей гарантирует стабильную ссылку на колбэк
 
-  // ИНИЦИАЛИЗАЦИЯ И НАСТРОЙКА WEBGL (Реагирует на монтирование контейнера)
+  // ИНИЦИАЛИЗАЦИЯ И НАСТРОЙКА WEBGL
   useEffect(() => {
-    if (isTouchDevice || !isFluidEnabled || !container || !isMounted) {
+    if (isTouchDevice || !isFluidEnabled || !container) {
       setFluidInstance(null);
       return;
     }
@@ -96,7 +96,6 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     try {
       simulationRef.current = new WebGLFluidEnhanced(container);
 
-      // Адаптивная конфигурация физики и разрешений
       const fluidConfig = {
         dyeResolution: tier === "high" ? 1024 : 512,
         simResolution: 200,
@@ -114,7 +113,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       const commonConfig = {
         transparent: true,
         brightness: 0.7,
-        colorPalette: ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"], // Палитра Clinical Obsidian
+        colorPalette: ["#2563eb", "#4f46e5", "#7c3aed", "#8b5cf6", "#6366f1"],
         colorful: true,
         colorUpdateSpeed: 10,
         hover: true,
@@ -127,10 +126,6 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
 
       simulationRef.current.setConfig({ ...fluidConfig, ...commonConfig });
       setFluidInstance(simulationRef.current as unknown as FluidInstance);
-
-      if (isInViewportRef.current) {
-        startAnimation();
-      }
     } catch (error) {
       console.error("[SectionFluidEffect] WebGL Init Error:", error);
     }
@@ -154,20 +149,18 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     isTouchDevice,
     resetKey,
     container,
-    isMounted,
     isFluidEnabled,
     isPressureHigh,
     isSunrays,
     isShading,
     tier,
-    startAnimation,
   ]);
 
-  // SCISSOR TEST (Ограничение области рендеринга видеокарты)
+  // SCISSOR TEST
   useEffect(() => {
     const section = sectionRef.current;
     const simulation = simulationRef.current;
-    if (!section || !simulation || !isFluidEnabled || !container || !isMounted) return;
+    if (!section || !simulation || !isFluidEnabled || !container) return;
 
     const updateScissor = () => {
       if (!isInViewportRef.current) return;
@@ -191,9 +184,9 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       unsub();
       simulation.clearScissor();
     };
-  }, [sectionRef, isFluidEnabled, container, isMounted]);
+  }, [sectionRef, isFluidEnabled, container]);
 
-  // INTERSECTION OBSERVER (Следит за присутствием секции на экране)
+  // INTERSECTION OBSERVER
   useEffect(() => {
     const section = sectionRef.current;
     if (!section || !isFluidEnabled) return;
@@ -203,13 +196,12 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
         entries.forEach((entry) => {
           isInViewportRef.current = entry.isIntersecting;
           if (!entry.isIntersecting) {
-            // Если секция ушла с экрана — мгновенно вырезаем канвас из DOM
             if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
             if (simulationRef.current && isRunningRef.current) {
               simulationRef.current.stop();
               isRunningRef.current = false;
             }
-            setIsMounted(false);
+            setIsVisible(false);
           }
         });
       },
@@ -220,7 +212,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     return () => observer.disconnect();
   }, [sectionRef, isFluidEnabled]);
 
-  // СЛУШАТЕЛЬ МЫШИ (Монтирует канвас строго при первом движении мыши внутри секции)
+  // СЛУШАТЕЛЬ МЫШИ
   useEffect(() => {
     const section = sectionRef.current;
     if (!section || !isFluidEnabled) return;
@@ -230,13 +222,6 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
 
     const updateAnimation = () => {
       if (!lastMouseEvent) {
-        animationFrameId = null;
-        return;
-      }
-
-      // Если канвас еще не примонтирован — монтируем его мгновенно
-      if (!isMounted) {
-        setIsMounted(true);
         animationFrameId = null;
         return;
       }
@@ -272,7 +257,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       section.removeEventListener("mousemove", throttledMouseMoveHandler);
     };
-  }, [sectionRef, startAnimation, scheduleStopAnimation, isFluidEnabled, isMounted, container]);
+  }, [sectionRef, startAnimation, scheduleStopAnimation, isFluidEnabled, container]);
 
   // ИНТЕГРАЦИЯ С ПЕРЕХОДАМИ СТРАНИЦ
   useEffect(() => {
@@ -281,7 +266,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
         simulationRef.current.stop();
         isRunningRef.current = false;
       }
-      setIsMounted(false);
+      setIsVisible(false);
     };
     window.addEventListener(TRANSITION_START, onStart);
     return () => {
@@ -289,25 +274,75 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     };
   }, []);
 
+  // 🛑 ИНТЕЛЛЕКТУАЛЬНЫЙ КОНТРОЛЬ СВЕРТЫВАНИЯ ВКЛАДКИ (VISIBILITY API)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        tabHiddenTimeRef.current = Date.now();
+        wasRunningBeforeHideRef.current = isRunningRef.current;
+
+        // ОСТАНАВЛИВАЕМ таймер сна при уходе, чтобы он не ушел вперед физики WebGL!
+        if (stopTimerRef.current) {
+          clearTimeout(stopTimerRef.current);
+          stopTimerRef.current = null;
+        }
+      } else {
+        const timeAway = (Date.now() - tabHiddenTimeRef.current) / 1000;
+
+        if (timeAway > 4.5 && wasRunningBeforeHideRef.current) {
+          // Долгое отсутствие: краска уже полностью растворилась.
+          if (simulationRef.current && isRunningRef.current) {
+            simulationRef.current.stop();
+            isRunningRef.current = false;
+          }
+
+          // 💎 МГНОВЕННЫЙ СИНХРОННЫЙ СБРОС ВИДИМОСТИ (Bypassing React state delay):
+          // Напрямую на уровне DOM сбрасываем стили, чтобы старый замороженный WebGL-буфер
+          // не успел отобразиться на экране за те 16мс, пока React планирует перерисовку!
+          if (outerWrapperRef.current) {
+            outerWrapperRef.current.style.transition = "none";
+            outerWrapperRef.current.style.opacity = "0";
+          }
+
+          setIsVisible(false);
+          resetFluid();
+        } else if (wasRunningBeforeHideRef.current) {
+          // Короткое отсутствие: Размораживаем WebGL и перезапускаем таймер бездействия на полные 4.5 сек
+          if (simulationRef.current && !isRunningRef.current) {
+            simulationRef.current.start();
+            isRunningRef.current = true;
+          }
+          setIsVisible(true);
+          scheduleStopAnimation();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [resetFluid, scheduleStopAnimation]);
+
   if (isTouchDevice || !isFluidEnabled) return null;
 
   return createPortal(
     <div
+      ref={outerWrapperRef}
       className="fixed inset-0 w-full pointer-events-none"
       style={{
         zIndex: -11,
         height: "100lvh",
         maxHeight: "100vh",
         backgroundColor: "transparent",
-        opacity: isMounted && !isFadingOut ? 1 : 0,
+        opacity: isVisible ? 1 : 0,
         transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-        /* ИСПРАВЛЕНИЕ ДЛЯ CHROME: Аппаратная изоляция слоя для предотвращения Depth-Sorting лагов */
         transform: "translate3d(0, 0, 0)",
-        willChange: "transform, opacity",
+        willChange: "opacity",
       }}
       aria-hidden="true"
     >
-      {isMounted && <div ref={containerRef} className="w-full h-full" />}
+      <div ref={containerRef} className="w-full h-full" />
     </div>,
     document.body,
   );

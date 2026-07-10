@@ -13,10 +13,8 @@ export default {
         bg: "var(--bg)",
         "bg-muted": "var(--bg-muted)",
         border: "var(--border)",
-        // Сохраняем старые цвета для обратной совместимости
         background: {
-          DEFAULT: "#f9fafb",
-          dark: "#1a1a1a",
+          DEFAULT: "#03050a", // Clinical Obsidian
         },
       },
       fontFamily: {

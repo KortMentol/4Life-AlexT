@@ -3,21 +3,14 @@
  * @description Awwwards 2026 — Immersive featured product showcase.
  * Scroll-driven: боковые карточки разлетаются по X, сходятся при центрировании.
  * Apple 2026 image style: продукт парит без квадратного контейнера.
- * Magnetic hover medium+high desktop.
- * @version 3.0.0
+ * Pure Dark Theme Strict ("Clinical Obsidian").
+ * @version 3.1.0
  */
 
 import { useTransition } from "@/context";
-import { useIsMobile, usePerformanceTier, useTheme } from "@/hooks";
+import { useIsMobile, usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
-import {
-  motion,
-  useInView,
-  useMotionValue,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import React, { lazy, memo, Suspense, useCallback, useRef } from "react";
 
 const KineticProductCarousel = lazy(() => import("./KineticProductCarousel"));
@@ -34,10 +27,7 @@ interface ImmersiveProductShowcaseProps {
   products: ShowcaseProduct[];
 }
 
-const IS_TOUCH =
-  typeof window !== "undefined"
-    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
-    : false;
+const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
 const MAGNETIC = { stiffness: 100, damping: 18, mass: 0.5, restDelta: 0.001 };
 const MAGNETIC_MEDIUM = {
@@ -48,7 +38,6 @@ const MAGNETIC_MEDIUM = {
 };
 
 // X-offset per card when "разлетелись": левая влево, центр на месте, правая вправо
-// 0 = центральная карточка (не двигается)
 const SPREAD_X = [-120, 0, 120]; // px
 
 // Spring: пружинистый, реагирует на смену направления
@@ -61,10 +50,9 @@ const ShowcaseCard: React.FC<{
   index: number;
   isInView: boolean;
   tier: "low" | "medium" | "high";
-  isDark: boolean;
   // 0 = разлетелись, 1 = на своих позициях
   gatherProgress: ReturnType<typeof useSpring>;
-}> = ({ product, index, isInView, tier, isDark, gatherProgress }) => {
+}> = ({ product, index, isInView, tier, gatherProgress }) => {
   const ref = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const { transitionTo } = useTransition();
@@ -76,13 +64,10 @@ const ShowcaseCard: React.FC<{
   const springY = useSpring(rawY, MAGNETIC);
   const springXMedium = useSpring(rawX, MAGNETIC_MEDIUM);
   const springYMedium = useSpring(rawY, MAGNETIC_MEDIUM);
-  const mx =
-    tier === "high" ? springX : tier === "medium" ? springXMedium : rawX;
-  const my =
-    tier === "high" ? springY : tier === "medium" ? springYMedium : rawY;
+  const mx = tier === "high" ? springX : tier === "medium" ? springXMedium : rawX;
+  const my = tier === "high" ? springY : tier === "medium" ? springYMedium : rawY;
 
   // 3D tilt для изображения — отдельные motion values
-  // Прямое обновление DOM через style — 0 ре-рендеров React
   const tiltEnabled = tier !== "low" && !IS_TOUCH;
   const magnetEnabled = tier !== "low" && !IS_TOUCH;
 
@@ -94,7 +79,7 @@ const ShowcaseCard: React.FC<{
   // Opacity: карточки появляются по мере схождения
   const cardOpacity = useTransform(gatherProgress, [0, 0.4], [0.3, 1]);
 
-  // Magnetic X + scroll-driven X — вызываем useTransform безусловно (Rules of Hooks)
+  // Magnetic X + scroll-driven X combined
   const combinedX = useTransform([mx, cardScrollX], ([mxVal, csVal]: number[]) => (mxVal ?? 0) + (csVal ?? 0));
   const cardX = magnetEnabled ? combinedX : cardScrollX;
 
@@ -122,8 +107,7 @@ const ShowcaseCard: React.FC<{
     rawY.set(0);
     // Плавный возврат tilt к нулю
     if (tiltEnabled && imgRef.current) {
-      imgRef.current.style.transform =
-        "perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+      imgRef.current.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0px)";
     }
   }, [rawX, rawY, tiltEnabled]);
 
@@ -135,22 +119,14 @@ const ShowcaseCard: React.FC<{
     [product.link, transitionTo],
   );
 
-  // Apple 2026 card style — no border, depth via shadow only
-  const cardStyle = isDark
-    ? {
-        background: "rgba(10, 14, 26, 0.88)",
-        boxShadow:
-          tier === "high" && !IS_TOUCH
-            ? "0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px -12px rgba(0,0,0,0.75)"
-            : "0 0 0 1px rgba(255,255,255,0.05), 0 12px 40px -8px rgba(0,0,0,0.65)",
-      }
-    : {
-        background: "rgba(255,255,255,0.97)",
-        boxShadow:
-          tier === "high" && !IS_TOUCH
-            ? "0 24px 64px -12px rgba(0,0,0,0.2), 0 4px 16px -4px rgba(0,0,0,0.08)"
-            : "0 12px 40px -8px rgba(0,0,0,0.14), 0 2px 8px -2px rgba(0,0,0,0.06)",
-      };
+  // Apple 2026 card style — strictly dark "Clinical Obsidian", depth via shadow only
+  const cardStyle = {
+    background: "rgba(10, 14, 26, 0.88)",
+    boxShadow:
+      tier === "high" && !IS_TOUCH
+        ? "0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px -12px rgba(0,0,0,0.75)"
+        : "0 0 0 1px rgba(255,255,255,0.05), 0 12px 40px -8px rgba(0,0,0,0.65)",
+  };
 
   return (
     <motion.div
@@ -165,12 +141,11 @@ const ShowcaseCard: React.FC<{
         ease: [0.16, 1, 0.3, 1],
       }}
       style={{
-        // Magnetic X + scroll-driven X combined
         x: cardX,
         y: magnetEnabled ? my : 0,
         opacity: cardOpacity,
         isolation: "isolate",
-        zIndex: index === 1 ? 3 : 2, // центральная поверх
+        zIndex: index === 1 ? 3 : 2, // центральная поверх остальных
       }}
       className="group relative cursor-pointer"
       onClick={handleClick}
@@ -179,17 +154,12 @@ const ShowcaseCard: React.FC<{
       onKeyDown={(e) => e.key === "Enter" && handleClick(e as any)}
       aria-label={`Перейти к продукту: ${product.title}`}
     >
-      <div
-        className="relative rounded-2xl overflow-hidden"
-        style={{ contain: "layout paint", ...cardStyle }}
-      >
+      <div className="relative rounded-2xl overflow-hidden" style={{ contain: "layout paint", ...cardStyle }}>
         {/* Apple inner top highlight */}
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none z-10"
           style={{
-            background: isDark
-              ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent)"
-              : "linear-gradient(90deg, transparent, rgba(255,255,255,1), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent)",
           }}
         />
 
@@ -198,15 +168,13 @@ const ShowcaseCard: React.FC<{
           <div
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
             style={{
-              background: isDark
-                ? "radial-gradient(ellipse at 50% 0%, rgba(6,182,212,0.08) 0%, transparent 65%)"
-                : "radial-gradient(ellipse at 50% 0%, rgba(6,182,212,0.07) 0%, transparent 65%)",
+              background: "radial-gradient(ellipse at 50% 0%, rgba(6,182,212,0.08) 0%, transparent 65%)",
               willChange: "opacity",
             }}
           />
         )}
 
-        {/* Image — 2026: 3D tilt через прямой DOM, без GPU хаков = максимальная чёткость */}
+        {/* Image — 2026: 3D tilt через прямой DOM */}
         <div
           className="relative pt-6 pb-2 px-6 flex items-center justify-center min-h-[200px] lg:min-h-[280px]"
           style={{ perspective: "600px" }}
@@ -219,9 +187,7 @@ const ShowcaseCard: React.FC<{
             decoding="async"
             className="w-full max-h-[190px] lg:max-h-[266px] object-contain"
             style={{
-              // Transition для плавного возврата при mouseLeave
               transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
-              // Без backfaceVisibility, без translateZ — чистый рендер = sharp текст
               transformStyle: "preserve-3d",
             }}
           />
@@ -231,32 +197,20 @@ const ShowcaseCard: React.FC<{
         <div
           className="mx-5 h-px"
           style={{
-            background: isDark
-              ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)"
-              : "linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
           }}
         />
 
         {/* Content */}
         <div className="p-5 md:p-6">
-          <h3
-            className={`font-semibold text-lg md:text-xl leading-snug mb-2 ${
-              isDark ? "text-white/95" : "text-slate-900"
-            }`}
-          >
-            {product.title}
-          </h3>
-          <p
-            className={`text-sm leading-relaxed line-clamp-2 mb-4 ${isDark ? "text-slate-400/80" : "text-slate-500"}`}
-          >
-            {product.description}
-          </p>
+          <h3 className="font-semibold text-lg md:text-xl leading-snug mb-2 text-white/95">{product.title}</h3>
+          <p className="text-sm leading-relaxed line-clamp-2 mb-4 text-slate-400/80">{product.description}</p>
 
           {/* CTA */}
           <div
-            className={`flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 ${
-              isDark ? "text-cyan-400" : "text-cyan-600"
-            } ${!IS_TOUCH ? "group-hover:gap-2.5" : ""}`}
+            className={`flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 text-cyan-400 ${
+              !IS_TOUCH ? "group-hover:gap-2.5" : ""
+            }`}
           >
             <span>Подробнее</span>
             <svg
@@ -266,11 +220,7 @@ const ShowcaseCard: React.FC<{
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5l7 7-7 7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </div>
         </div>
@@ -281,14 +231,10 @@ const ShowcaseCard: React.FC<{
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({
-  products,
-}) => {
+const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({ products }) => {
   const tier = usePerformanceTier();
-  const { theme } = useTheme();
   const efxFlags = useEffectsDebug();
   const isMobile = useIsMobile();
-  const isDark = theme === "dark";
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-10%" });
 
@@ -300,13 +246,8 @@ const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({
     offset: ["start 90%", "end 10%"],
   });
 
-  const rawGather = useTransform(
-    scrollYProgress,
-    [0, 0.15, 0.85, 1],
-    gatherEnabled ? [0, 1, 1, 0] : [1, 1, 1, 1], // если выключен — всегда 1 (на месте)
-  );
+  const rawGather = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], gatherEnabled ? [0, 1, 1, 0] : [1, 1, 1, 1]);
 
-  // Spring — пружинистая реакция при смене направления
   const gatherProgress = useSpring(rawGather, ALIGN_SPRING);
 
   return (
@@ -331,7 +272,6 @@ const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({
               index={i}
               isInView={isInView}
               tier={tier}
-              isDark={isDark}
               gatherProgress={gatherProgress}
             />
           ))}

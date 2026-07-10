@@ -1,16 +1,8 @@
 import { useProductList } from "@/hooks/useProductList";
+import { Icons } from "@/utils/icons"; // <--- ЕДИНСТВЕННЫЙ ИМПОРТ ИКОНОК
 import { Dialog, Transition } from "@headlessui/react";
-import {
-  ClipboardDocumentListIcon as ClipboardListIcon,
-  MinusIcon,
-  PaperAirplaneIcon,
-  PlusIcon,
-  TrashIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { FaTelegram, FaWhatsapp } from "react-icons/fa";
 import "./ProductListIcon.css";
 
 interface ProductListIconProps {
@@ -33,66 +25,23 @@ const messengerButtonVariants = {
   },
 };
 
-/**
- * @module components/ui/ProductListIcon
- * @description Многофункциональный компонент, который отображает иконку списка покупок с количеством товаров и открывает модальное окно со всем списком.
- * Модальное окно позволяет пользователям управлять списком: изменять количество товаров, удалять позиции, очищать список и отправлять его в мессджеры (Telegram, WhatsApp).
- * Компонент использует `useProductList` для управления состоянием, `Headless UI` для доступного модального окна и `framer-motion` для анимаций.
- *
- * @author Kort
- * @version 1.0.0
- *
- * @param {string} [className] - Дополнительные CSS-классы для позиционирования иконки.
- *
- * @see useProductList - Хук для управления состоянием списка продуктов.
- * @see Dialog - Компонент модального окна из Headless UI.
- * @see Transition - Компонент для анимации из Headless UI.
- * @see motion - Компонент для анимации из framer-motion.
- *
- * @usage
- * Обычно размещается в `App.tsx` или в главном layout-компоненте, чтобы быть доступным на всех страницах.
- * Часто используется как плавающая кнопка (Floating Action Button).
- *
- * @example
- * // В App.tsx или Layout.tsx
- * <ProductListIcon className="fixed bottom-8 right-8 z-50" />
- */
 const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
-  const {
-    items,
-    removeFromList,
-    updateItemQuantity,
-    getTotalItems,
-    clearList,
-  } = useProductList();
+  const { items, removeFromList, updateItemQuantity, getTotalItems, clearList } = useProductList();
 
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Следим за состоянием модального окна для корректного обновления цвета иконки
   useEffect(() => {
-    // Этот эффект запускается при изменении isOpen
-    // и гарантирует, что состояние иконки всегда соответствует состоянию модального окна
-
-    // Добавляем обработчик события Escape для закрытия модального окна
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) {
         closeModal();
       }
     };
 
-    // Добавляем обработчик клика вне модального окна
     const handleClickOutside = (event: Event) => {
-      // Если модальное окно открыто и клик был не по кнопке
-      if (
-        isOpen &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        // Проверяем, был ли клик по диалогу (не закрываем в этом случае)
+      if (isOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         const dialogElement = document.querySelector('[role="dialog"]');
         if (dialogElement && !dialogElement.contains(event.target as Node)) {
-          // Клик был вне диалога и вне кнопки - закрываем
           closeModal();
         }
       }
@@ -101,9 +50,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
     if (isOpen) {
       document.addEventListener("keydown", handleEscapeKey);
       document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside, {
-        passive: true,
-      });
+      document.addEventListener("touchstart", handleClickOutside, { passive: true });
     }
 
     return () => {
@@ -112,12 +59,10 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isOpen]);
+
   const [showMessengerOptions, setShowMessengerOptions] = useState(false);
   const [clientId, setClientId] = useState<string>(
-    () =>
-      (typeof window !== "undefined" &&
-        localStorage.getItem("clientId4life")) ||
-      "",
+    () => (typeof window !== "undefined" && localStorage.getItem("clientId4life")) || "",
   );
 
   useEffect(() => {
@@ -132,15 +77,13 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
 
   const openModal = () => setIsOpen(true);
 
-  // Обработчик для клика по оверлею (вне модального окна)
   const handleBackdropClick = (e: React.MouseEvent) => {
-    // Проверяем, что клик был именно по оверлею, а не по содержимому модального окна
     if (e.target === e.currentTarget) {
-      // Принудительно устанавливаем isOpen в false при клике по оверлею
       setIsOpen(false);
       setShowMessengerOptions(false);
     }
   };
+
   const closeModal = () => {
     setIsOpen(false);
     setShowMessengerOptions(false);
@@ -148,7 +91,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
 
   const generateMessage = () => {
     let message = `Здравствуйте, ${fatherName}! Хочу приобрести у вас:\n\n`;
-    items.forEach((item: (typeof items)[number]) => {
+    items.forEach((item) => {
       message += `- ${item.name} (${item.quantity} шт.)\n`;
     });
     if (clientId) {
@@ -181,7 +124,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
         whileTap={{ scale: 0.9 }}
         aria-label="Мой Список"
       >
-        <ClipboardListIcon className="h-6 w-6 header-adaptive-text" />
+        <Icons.ShoppingBag className="h-6 w-6 header-adaptive-text" />
         <AnimatePresence>
           {getTotalItems() > 0 && (
             <motion.span
@@ -197,13 +140,11 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
         </AnimatePresence>
       </motion.button>
 
-      {/* Modal */}
       <Transition show={isOpen} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-50"
           onClose={() => {
-            // Принудительно устанавливаем isOpen в false при любом закрытии диалога
             setIsOpen(false);
             setShowMessengerOptions(false);
           }}
@@ -231,7 +172,6 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
             }}
             role="button"
             tabIndex={0}
-            aria-label="Закрыть модальное окно"
           >
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
@@ -243,27 +183,24 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 text-left shadow-xl transition-all dark:from-gray-900 dark:to-black relative text-white">
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-black p-8 text-left shadow-xl transition-all relative text-white">
                   <button
                     type="button"
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors duration-200"
                     onClick={closeModal}
-                    aria-label="Закрыть"
                   >
-                    <XMarkIcon className="h-7 w-7" />
+                    <Icons.X className="h-7 w-7" />
                   </button>
                   <Dialog.Title className="text-2xl font-bold text-blue-400 mb-6 border-b border-gray-700 pb-3">
                     Ваш Список
                   </Dialog.Title>
 
                   {items.length === 0 ? (
-                    <p className="text-gray-400 text-center py-10">
-                      Ваш список пуст. Добавьте продукты!
-                    </p>
+                    <p className="text-gray-400 text-center py-10">Ваш список пуст. Добавьте продукты!</p>
                   ) : (
                     <>
                       <ul className="divide-y divide-gray-700 max-h-96 overflow-y-auto pr-2">
-                        {items.map((item: (typeof items)[number]) => (
+                        {items.map((item) => (
                           <motion.li
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -271,75 +208,33 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                             exit={{ opacity: 0, x: -50 }}
                             className="py-4 flex items-center space-x-4"
                           >
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-16 h-16 object-contain rounded-md"
-                            />
+                            <img src={item.image} alt={item.name} className="w-16 h-16 object-contain rounded-md" />
                             <div className="flex-grow">
-                              <h4 className="text-lg font-semibold text-white">
-                                {item.name}
-                              </h4>
-                              <p className="text-gray-400 text-sm line-clamp-2">
-                                {item.shortDescription}
-                              </p>
+                              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
+                              <p className="text-gray-400 text-sm line-clamp-2">{item.shortDescription}</p>
                             </div>
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() =>
-                                  updateItemQuantity(item.id, item.quantity - 1)
-                                }
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    updateItemQuantity(
-                                      item.id,
-                                      item.quantity - 1,
-                                    );
-                                  }
-                                }}
+                                onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
-                                tabIndex={0}
-                                aria-label="Уменьшить количество"
                               >
-                                <MinusIcon className="h-4 w-4" />
+                                <Icons.Minus className="h-4 w-4" />
                               </button>
                               <span className="text-white text-md font-semibold min-w-[1.5rem] text-center">
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() =>
-                                  updateItemQuantity(item.id, item.quantity + 1)
-                                }
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    updateItemQuantity(
-                                      item.id,
-                                      item.quantity + 1,
-                                    );
-                                  }
-                                }}
+                                onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
                                 className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
-                                tabIndex={0}
-                                aria-label="Увеличить количество"
                               >
-                                <PlusIcon className="h-4 w-4" />
+                                <Icons.Plus className="h-4 w-4" />
                               </button>
                             </div>
                             <button
                               onClick={() => removeFromList(item.id)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  removeFromList(item.id);
-                                }
-                              }}
                               className="p-1 rounded-full text-red-400 hover:text-red-600 transition-colors duration-200"
-                              tabIndex={0}
-                              aria-label="Удалить из списка"
                             >
-                              <TrashIcon className="h-6 w-6" />
+                              <Icons.Trash2 className="h-6 w-6" />
                             </button>
                           </motion.li>
                         ))}
@@ -350,7 +245,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                           onClick={clearList}
                           className="text-red-400 hover:text-red-600 transition-colors duration-200 text-sm flex items-center mb-4 md:mb-0"
                         >
-                          <TrashIcon className="h-5 w-5 mr-1" /> Очистить список
+                          <Icons.Trash2 className="h-5 w-5 mr-1" /> Очистить список
                         </button>
                         <div className="relative">
                           {!showMessengerOptions ? (
@@ -359,17 +254,14 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                               whileHover={{ scale: 1.03 }}
                               whileTap={{ scale: 0.97 }}
                               className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 w-full justify-center"
-                              layoutId="send-order-button"
                             >
-                              <PaperAirplaneIcon className="h-6 w-6" />
+                              <Icons.Send className="h-6 w-6" />
                               <span>Отправить Заказ</span>
                             </motion.button>
                           ) : clientId.trim() === "" ? (
                             <div className="flex flex-col space-y-4 w-full">
                               <label className="text-sm text-gray-300 flex flex-col items-start w-full">
-                                <span className="mb-1">
-                                  Введите ваш ID клиента 4Life (если есть):
-                                </span>
+                                <span className="mb-1">Введите ваш ID клиента 4Life:</span>
                                 <input
                                   type="text"
                                   value={clientId}
@@ -379,10 +271,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                 />
                               </label>
                               <motion.button
-                                onClick={() =>
-                                  clientId.trim() &&
-                                  setShowMessengerOptions(true)
-                                }
+                                onClick={() => clientId.trim() && setShowMessengerOptions(true)}
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
                                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all duration-300 w-full"
@@ -407,7 +296,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                   onClick={() => handleSendMessage("telegram")}
                                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-sky-600 text-white rounded-lg font-bold shadow-lg hover:from-blue-600 hover:to-sky-700 transition-all duration-300 flex items-center space-x-2 justify-center"
                                 >
-                                  <FaTelegram className="h-6 w-6" />
+                                  <Icons.Telegram className="h-6 w-6" />
                                   <span>В Telegram</span>
                                 </motion.button>
                                 <motion.button
@@ -418,7 +307,7 @@ const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
                                   onClick={() => handleSendMessage("whatsapp")}
                                   className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 justify-center"
                                 >
-                                  <FaWhatsapp className="h-6 w-6" />
+                                  <Icons.WhatsApp className="h-6 w-6" />
                                   <span>В WhatsApp</span>
                                 </motion.button>
                               </motion.div>

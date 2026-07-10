@@ -8,8 +8,6 @@
 import React from "react";
 
 interface SectionDividerProps {
-  /** Color at the solid end of the fade */
-  toColor?: string;
   /** Color at the solid end in dark mode */
   toColorDark?: string;
   /** Height of the divider. Can be a number (pixels) or a fluid CSS string (e.g., clamp()) */
@@ -20,7 +18,6 @@ interface SectionDividerProps {
 }
 
 const SectionDivider: React.FC<SectionDividerProps> = ({
-  toColor = "#f9fafb",
   toColorDark = "#030712",
   height = "clamp(60px, 8vw, 120px)", // Fluid by default: scales between 60px and 120px
   direction = "up",
@@ -40,18 +37,9 @@ const SectionDivider: React.FC<SectionDividerProps> = ({
       }}
       aria-hidden="true"
     >
-      {/* Light theme */}
+      {/* Dark theme — Always active */}
       <div
-        className="absolute inset-0 dark:hidden"
-        style={{
-          background: isUp
-            ? `linear-gradient(to bottom, transparent, ${toColor})`
-            : `linear-gradient(to bottom, ${toColor}, transparent)`,
-        }}
-      />
-      {/* Dark theme */}
-      <div
-        className="absolute inset-0 hidden dark:block"
+        className="absolute inset-0"
         style={{
           background: isUp
             ? `linear-gradient(to bottom, transparent, ${toColorDark})`

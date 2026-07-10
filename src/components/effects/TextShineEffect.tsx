@@ -1,4 +1,15 @@
-import { useFeatureFlag, useIsMobile, usePerformanceTier, useTheme } from "@/hooks";
+/**
+ * @module components/effects/TextShineEffect
+ * @description Компонент для создания анимированного эффекта "блеска" на тексте.
+ * Использует Framer Motion useAnimationFrame для GPU-ускоренной анимации на десктопе.
+ * На мобильных устройствах эффект отключен для сохранения 60 FPS и батареи.
+ * Полностью переведен на темную тему Clinical Obsidian (серебряный базовый текст с неоновым циановым блеском).
+ *
+ * @author Kort
+ * @version 5.1.0
+ */
+
+import { useFeatureFlag, useIsMobile, usePerformanceTier } from "@/hooks";
 import { motion, useAnimationFrame, useMotionValue, useTransform } from "framer-motion";
 import React, { useRef } from "react";
 
@@ -9,56 +20,26 @@ interface ShineTextProps {
   delay?: number;
 }
 
-/**
- * @module components/effects/TextShineEffect
- * @description Компонент для создания анимированного эффекта "блеска" на тексте.
- * Использует Framer Motion useAnimationFrame для GPU-ускоренной анимации на десктопе.
- * На мобильных устройствах эффект отключен для сохранения 60 FPS и батареи.
- *
- * @author Kort
- * @version 5.0.0 - Mobile-optimized (Awwwards 2026 best practice)
- *
- * @param {string} text - Текст, к которому применяется эффект.
- * @param {string} [className] - Дополнительные CSS-классы для контейнера.
- * @param {number} [speed=3] - Длительность одной итерации анимации в секундах (только десктоп).
- * @param {number} [delay=2.5] - Пауза между проходами в секундах (только десктоп).
- *
- * @usage
- * Используется для акцентирования внимания на важных текстовых элементах.
- *
- * 1. **В шапке сайта (`src/components/layout/Header.tsx`):**
- *    - Для имени "Александр Тощев" в десктопной версии (на мобильных - обычный текст).
- *
- * 2. **На странице "Как купить" (`src/pages/HowToBuyPage.tsx`):**
- *    - Для заголовка "Как Приобрести Продукцию 4Life".
- *
- * @example
- * <TextShineEffect text="Важный заголовок" speed={3} delay={2.5} />
- */
 const TextShineEffect: React.FC<ShineTextProps> = ({ text, className = "", speed = 3, delay = 2.5 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const isMobile = useIsMobile();
   const tier = usePerformanceTier();
   const isShineEnabled = useFeatureFlag("textShineAnimation", tier !== "low");
 
-  // Мобильные или disabled: простой текст без анимации (60 FPS + экономия батареи)
+  // Мобильные или слабые устройства: простой текст без анимации для экономии батареи и кадров
   if (isMobile || !isShineEnabled) {
     return <span className={className}>{text}</span>;
   }
 
   // Десктоп: shine-эффект через Framer Motion RAF
-  return <DesktopShineText text={text} className={className} speed={speed} delay={delay} isDark={isDark} />;
+  return <DesktopShineText text={text} className={className} speed={speed} delay={delay} />;
 };
 
-// Отдельный компонент для десктопа (чтобы hooks не вызывались на мобильных)
 const DesktopShineText: React.FC<{
   text: string;
   className: string;
   speed: number;
   delay: number;
-  isDark: boolean;
-}> = ({ text, className, speed, delay, isDark }) => {
+}> = ({ text, className, speed, delay }) => {
   const progress = useMotionValue(0);
   const elapsedRef = useRef(0);
   const lastTimeRef = useRef<number | null>(null);
@@ -84,7 +65,7 @@ const DesktopShineText: React.FC<{
       const p = (cycleTime / animationDuration) * 100;
       progress.set(p);
     } else {
-      // Пауза: держим shine за экраном
+      // Пауза: держим shine за пределами видимости
       progress.set(100);
     }
   });
@@ -92,12 +73,11 @@ const DesktopShineText: React.FC<{
   // Transform: p=0 → 150% (справа), p=100 → -50% (слева)
   const backgroundPosition = useTransform(progress, (p) => `${150 - p * 2}% center`);
 
-  // Цвета как раньше:
-  // Базовый текст наследуется от родителя (currentColor)
-  // Темная тема: белый текст + голубой shine
-  // Светлая тема: темно-серый текст + золотой shine
+  // Премиальная Clinical Obsidian палитра:
+  // Базовый цвет текста наследуется от родителя (currentColor — серебряный / slate-400),
+  // а пробегающий блеск окрашен в яркий неоновый циан (#00ccff).
   const color = "currentColor";
-  const shineColor = isDark ? "#00ccff" : "#ffcc00";
+  const shineColor = "#00ccff";
 
   const gradientStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(110deg, ${color} 0%, ${color} 40%, ${shineColor} 50%, ${color} 60%, ${color} 100%)`,

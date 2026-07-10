@@ -12,7 +12,7 @@
  * ============================================================================
  *
  * @author Geminis AI & Kort
- * @version 7.1.0
+ * @version 7.2.0
  */
 
 import {
@@ -74,12 +74,6 @@ export interface FlagMeta {
   dependsOn?: keyof EffectsDebugFlags;
 }
 
-/**
- * METADATA MAP
- * The visual rendering order of Groups in the UI matches the sequential key order here.
- * Organised strictly Top-to-Bottom: Global first, then HomePage sections, then specific sub-pages.
- * Note: `globalPower` is intentionally omitted here as it renders in the fixed header area.
- */
 export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverride" | "globalPower">, FlagMeta> = {
   // ─── [GLOBAL] HEADER & LAYOUT ───
   renderHeader: {
@@ -110,7 +104,7 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
   parallaxBackground: {
     label: "Parallax Backgrounds (Sec 1, 3, 5)",
     category: "[Home] 1. Hero Section",
-    routes: ["/"], // Restrict strictly to Homepage to prevent clutter on other pages
+    routes: ["/"],
     device: "all",
     desc: "Fixed viewport layer parallax on background textures in sections 1, 3 and 5.",
   },
@@ -122,7 +116,7 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     desc: "Multi-stop gradient rotation on Hero titles.",
   },
 
-  // ─── [HOME] 2. MORPHING VIDEO (Visual blocks & layout) ───
+  // ─── [HOME] 2. MORPHING VIDEO ───
   renderVideoBlocks: {
     label: "Render 01/02/03 Video Blocks",
     category: "[Home] 2. Morphing Video",
@@ -171,7 +165,7 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     label: "Block Opacity Fade-in",
     category: "[Home] 2. Typography",
     routes: ["/"],
-    device: "mobile", // Hidden on PC since desktop always uses word-by-word reveal
+    device: "mobile",
     desc: "Fade whole paragraph block at once on mobile/tablet devices.",
   },
   scrollNumberAnimation: {
@@ -399,6 +393,13 @@ class EffectsDebugStore {
         ...preset,
         tierOverride: hardwareTier as PerformanceTierOverride,
       };
+
+      // ИСПРАВЛЕНИЕ: Восстанавливаем сохраненные разработчиком оверрайды при загрузке
+      const savedRaw = localStorage.getItem(STORAGE_KEY);
+      if (savedRaw) {
+        const saved = JSON.parse(savedRaw);
+        return { ...initialFlags, ...saved };
+      }
 
       return initialFlags;
     } catch {

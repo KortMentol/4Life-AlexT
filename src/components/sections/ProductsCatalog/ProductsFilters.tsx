@@ -1,11 +1,12 @@
 /**
  * @module src/components/sections/ProductsCatalog/ProductsFilters.tsx
  * @description Стеклянная капсула фильтров продуктов
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
  * @author Kort
- * @version 1.0.0
+ * @version 1.1.0
  */
 
-import { usePerformanceTier, useTheme } from "@/hooks";
+import { usePerformanceTier } from "@/hooks";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
@@ -29,7 +30,6 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { theme } = useTheme();
   const tier = usePerformanceTier();
 
   return (
@@ -43,9 +43,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             onClick={onClose}
-            className={`fixed inset-0 z-40 ${
-              theme === "dark" ? "bg-black/15" : "bg-black/10"
-            }`}
+            className="fixed inset-0 z-40 bg-black/15"
           />
 
           {/* Filter Capsule */}
@@ -59,7 +57,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
               ease: [0.16, 1, 0.3, 1],
               opacity: { duration: 0.3 },
             }}
-            className={`filter-capsule ${theme === "dark" ? "filter-capsule--dark" : "filter-capsule--light"}`}
+            className="filter-capsule filter-capsule--dark"
             data-lenis-prevent="true"
             onPointerDown={(e) => e.stopPropagation()}
             onWheel={(e) => e.stopPropagation()}
@@ -69,31 +67,11 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
               {/* Header */}
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
-                  <svg
-                    className={`w-5 h-5 flex-shrink-0 ${theme === "dark" ? "text-cyan-400" : "text-blue-600"}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
-                  </svg>
-                  <h3
-                    className={`text-base font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
-                  >
-                    Фильтры
-                  </h3>
+                  <Icons.Filter className="w-5 h-5 flex-shrink-0 text-cyan-400" strokeWidth={2} />
+                  <h3 className="text-base font-semibold text-white">Фильтры</h3>
                   <span
                     key={productCount}
-                    className={`product-counter changed text-xs font-bold px-2.5 py-1 rounded-full ${
-                      theme === "dark"
-                        ? "bg-cyan-500/20 text-cyan-400 border border-cyan-400/30"
-                        : "bg-blue-500/20 text-blue-600 border border-blue-400/30"
-                    }`}
+                    className="product-counter changed text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-400/30"
                   >
                     {productCount}
                   </span>
@@ -110,11 +88,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
                         onClick={() => onCategoryChange(null)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`text-sm font-medium transition-colors duration-200 ${
-                          theme === "dark"
-                            ? "text-gray-400 hover:text-cyan-400"
-                            : "text-gray-500 hover:text-blue-600"
-                        }`}
+                        className="text-sm font-medium transition-colors duration-200 text-gray-400 hover:text-cyan-400"
                       >
                         Сбросить
                       </motion.button>
@@ -125,11 +99,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
                     whileHover={{ scale: 1.08, rotate: 90 }}
                     whileTap={{ scale: 0.92 }}
                     transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 flex-shrink-0 ${
-                      theme === "dark"
-                        ? "bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-900"
-                    }`}
+                    className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 flex-shrink-0 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white"
                     aria-label="Закрыть фильтры"
                   >
                     <Icons.X className="w-4 h-4" strokeWidth={2.5} />
@@ -142,20 +112,14 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
                 {categories.map((cat) => (
                   <motion.button
                     key={cat}
-                    onClick={() =>
-                      onCategoryChange(selectedCategory === cat ? null : cat)
-                    }
+                    onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
                     whileHover={{ scale: 1.03, y: -2 }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                       selectedCategory === cat
-                        ? theme === "dark"
-                          ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/40"
-                          : "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/40"
-                        : theme === "dark"
-                          ? "bg-white/10 text-gray-300 hover:bg-white/15 hover:text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/40"
+                        : "bg-white/10 text-gray-300 hover:bg-white/15 hover:text-white"
                     }`}
                   >
                     {cat}

@@ -52,7 +52,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: #000000;
+  background: #ffffff;
   opacity: 0;
   z-index: 1;
   pointer-events: none;
@@ -75,12 +75,6 @@
      Only intentional hovers will trigger the beautiful scale effect. */
 
   .product-card-tibico:hover .product-image-container::before {
-    opacity: 0.05;
-    transition-delay: 60ms;
-  }
-
-  .dark .product-card-tibico:hover .product-image-container::before {
-    background: #ffffff;
     opacity: 0.03;
     transition-delay: 60ms;
   }
@@ -89,13 +83,9 @@
     /* Moves up slightly and scales, creating a 3D pop-out effect */
     transform: translate3d(0, -4px, 0) scale(1.06);
     /* Soft shadow directly on the product inside the container */
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
     transition-delay: 60ms;
     will-change: transform, filter;
-  }
-
-  .dark .product-card-tibico:hover .product-image-premium {
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
   }
 }
 
@@ -122,12 +112,8 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.25);
-  z-index: -1;
-}
-
-.dark .product-card-inner::after {
   box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.6);
+  z-index: -1;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -157,12 +143,8 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.22);
-  z-index: -1;
-}
-
-.dark .product-card-horizontal::after {
   box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.55);
+  z-index: -1;
 }
 
 @media (hover: hover) and (pointer: fine) {

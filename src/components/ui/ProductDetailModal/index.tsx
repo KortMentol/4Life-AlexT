@@ -4,7 +4,7 @@
  * Desktop: fixed modal, media left, content right
  */
 import { DetailedProduct, GalleryItem } from "@/data/productsData";
-import { usePerformanceTier, useTheme } from "@/hooks";
+import { usePerformanceTier } from "@/hooks";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
@@ -42,7 +42,6 @@ interface SharedProps {
   setMediaIndex: (i: number) => void;
   products: DetailedProduct[];
   productIndex: number;
-  isDark: boolean;
   tier: "low" | "medium" | "high";
   borderColor: string;
   bg: string;
@@ -58,7 +57,6 @@ const MobileLayout: React.FC<SharedProps> = ({
   setMediaIndex,
   products,
   productIndex,
-  isDark,
   tier,
   borderColor,
   bg,
@@ -73,7 +71,7 @@ const MobileLayout: React.FC<SharedProps> = ({
         style={{
           width: "100%",
           aspectRatio: "4/3",
-          background: isDark ? "#0f172a" : "#f1f5f9",
+          background: "#0f172a",
           position: "relative",
           overflow: "hidden",
         }}
@@ -82,7 +80,6 @@ const MobileLayout: React.FC<SharedProps> = ({
           gallery={gallery}
           activeIndex={mediaIndex}
           onIndexChange={setMediaIndex}
-          isDark={isDark}
           isMobile
           onSwipeLeft={() => {
             const n = products[(productIndex + 1) % products.length];
@@ -105,14 +102,14 @@ const MobileLayout: React.FC<SharedProps> = ({
             exit={tier !== "low" ? { opacity: 0, y: -6 } : {}}
             transition={FADE}
           >
-            <ContentPanel product={currentProduct} isDark={isDark} isMobile onAddToCart={handleAddToCart} />
+            <ContentPanel product={currentProduct} isMobile onAddToCart={handleAddToCart} />
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Carousel + CTA */}
       <div style={{ borderTop: `1px solid ${borderColor}`, background: bg }}>
-        <ProductCarousel products={products} activeIndex={productIndex} onSelect={navigateTo} isDark={isDark} />
+        <ProductCarousel products={products} activeIndex={productIndex} onSelect={navigateTo} />
         <div style={{ padding: "4px 16px 16px" }}>
           <button
             onClick={handleAddToCart}
@@ -124,9 +121,7 @@ const MobileLayout: React.FC<SharedProps> = ({
               gap: 10,
               padding: "14px 20px",
               borderRadius: 16,
-              background: isDark
-                ? "linear-gradient(135deg,#06b6d4,#3b82f6)"
-                : "linear-gradient(135deg,#2563eb,#06b6d4)",
+              background: "linear-gradient(135deg,#06b6d4,#3b82f6)",
               color: "#fff",
               fontSize: 15,
               border: "none",
@@ -157,7 +152,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   setMediaIndex,
   products,
   productIndex,
-  isDark,
   tier,
   borderColor,
   navigateTo,
@@ -177,7 +171,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
           flexShrink: 0,
           borderRadius: 16,
           overflow: "hidden",
-          background: isDark ? "#0f172a" : "#f1f5f9",
+          background: "#0f172a",
           position: "relative",
         }}
       >
@@ -195,7 +189,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 gallery={gallery}
                 activeIndex={mediaIndex}
                 onIndexChange={setMediaIndex}
-                isDark={isDark}
                 isMobile={false}
               />
             )}
@@ -223,14 +216,14 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
             transition={FADE}
           >
             {currentProduct && (
-              <ContentPanel product={currentProduct} isDark={isDark} isMobile={false} onAddToCart={handleAddToCart} />
+              <ContentPanel product={currentProduct} isMobile={false} onAddToCart={handleAddToCart} />
             )}
           </motion.div>
         </AnimatePresence>
       </div>
     </div>
     <div style={{ borderTop: `1px solid ${borderColor}`, flexShrink: 0 }}>
-      <ProductCarousel products={products} activeIndex={productIndex} onSelect={navigateTo} isDark={isDark} />
+      <ProductCarousel products={products} activeIndex={productIndex} onSelect={navigateTo} />
     </div>
   </>
 );
@@ -239,9 +232,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
 const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailModalProps>(
   ({ product, products, isOpen, onClose }, ref) => {
     const { addToCart } = useShoppingCart();
-    const { theme } = useTheme();
     const tier = usePerformanceTier();
-    const isDark = theme === "dark";
     const [, setSearchParams] = useSearchParams();
 
     const panelRef = useRef<HTMLDivElement>(null);
@@ -351,10 +342,10 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
       [handleClose, dragY],
     );
 
-    const bg = isDark ? "#080d18" : "#ffffff";
-    const borderColor = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
+    const bg = "#080d18";
+    const borderColor = "rgba(255,255,255,0.07)";
     const spring = tier === "low" ? SPRING_LOW : SPRING_HIGH;
-    const backdropBg = isDark ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.55)";
+    const backdropBg = "rgba(0,0,0,0.85)";
     const backdropBlur = IS_TOUCH ? 0 : tier === "high" ? 16 : tier === "medium" ? 8 : 0;
 
     const sharedProps: SharedProps = {
@@ -364,7 +355,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
       setMediaIndex,
       products,
       productIndex,
-      isDark,
       tier,
       borderColor,
       bg,
@@ -438,7 +428,7 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
                     userSelect: "none",
                   }}
                 >
-                  <DragHandle isDark={isDark} />
+                  <DragHandle />
                 </motion.div>
 
                 {/* Close button */}
@@ -480,9 +470,7 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
                     overflow: "hidden",
                     pointerEvents: "auto",
                     position: "relative",
-                    boxShadow: isDark
-                      ? "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)"
-                      : "0 24px 80px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06)",
+                    boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
                   }}
                 >
                   <DesktopLayout {...sharedProps} closeButtonRef={closeButtonRef} handleClose={handleClose} />

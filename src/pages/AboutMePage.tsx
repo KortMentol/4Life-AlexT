@@ -89,7 +89,7 @@ const AboutMePage: React.FC = () => {
               filter: "brightness(0.35)",
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-white dark:to-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
         </motion.div>
 
         <div className="relative z-10 container mx-auto px-4 py-24 text-center">
@@ -119,7 +119,7 @@ const AboutMePage: React.FC = () => {
       </section>
 
       {/* Story Section */}
-      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+      <section className="py-20 md:py-32 bg-gray-950">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -129,10 +129,10 @@ const AboutMePage: React.FC = () => {
               transition={{ duration: 0.8 }}
               className="order-2 lg:order-1"
             >
-              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                 Моя история
               </h2>
-              <div className="space-y-6 text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
+              <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
                 <p>
                   Всё началось с моего собственного пути к здоровью.
                   Столкнувшись с проблемами самочувствия, я начал искать
@@ -175,7 +175,7 @@ const AboutMePage: React.FC = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="container mx-auto px-4 max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -184,10 +184,10 @@ const AboutMePage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Мои ценности
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Принципы, которыми я руководствуюсь в работе
             </p>
           </motion.div>
@@ -201,18 +201,18 @@ const AboutMePage: React.FC = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={tier !== "low" ? { y: -8 } : {}}
-                className="p-8 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 text-center"
+                className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 text-center"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-900/30 mb-6">
                   <value.icon
-                    className="w-8 h-8 text-blue-600 dark:text-cyan-400"
+                    className="w-8 h-8 text-cyan-400"
                     strokeWidth={1.5}
                   />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-xl font-bold text-white mb-3">
                   {value.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-gray-400 leading-relaxed">
                   {value.description}
                 </p>
               </motion.div>
@@ -222,7 +222,7 @@ const AboutMePage: React.FC = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+      <section className="py-20 md:py-32 bg-gray-950">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -230,10 +230,10 @@ const AboutMePage: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Почему я это делаю
             </h2>
-            <div className="space-y-6 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+            <div className="space-y-6 text-lg text-gray-300 leading-relaxed">
               <p>
                 Я верю, что каждый заслуживает жить полной, здоровой и
                 счастливой жизнью. Моя миссия — помогать людям обретать здоровье
@@ -255,7 +255,7 @@ const AboutMePage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-900 dark:to-cyan-900 text-white">
+      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-900 to-cyan-900 text-white">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -275,7 +275,7 @@ const AboutMePage: React.FC = () => {
               to="/contact"
               variant="secondary"
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-gray-900 dark:text-cyan-400 dark:hover:bg-gray-800"
+              className="bg-gray-900 text-cyan-400 hover:bg-gray-800"
               icon={<Icons.MessageCircle className="w-5 h-5" />}
             >
               Связаться со мной

@@ -8,14 +8,12 @@ import React from "react";
 
 interface ContentPanelProps {
   product: DetailedProduct;
-  isDark: boolean;
   isMobile: boolean;
   onAddToCart: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const ContentPanel: React.FC<ContentPanelProps> = ({
   product,
-  isDark,
   isMobile,
   onAddToCart,
 }) => {
@@ -26,22 +24,16 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
       : null;
 
   const t = {
-    text: isDark ? "text-white" : "text-slate-900",
-    muted: isDark ? "text-slate-400" : "text-slate-500",
-    subtle: isDark ? "text-slate-500" : "text-slate-400",
-    border: isDark ? "border-white/[0.08]" : "border-slate-200",
-    tag: isDark
-      ? "bg-white/5 text-slate-300 border border-white/10"
-      : "bg-slate-100 text-slate-600 border border-slate-200",
-    support: isDark
-      ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20"
-      : "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    science: isDark
-      ? "bg-blue-500/5 border border-blue-400/10"
-      : "bg-blue-50 border border-blue-200",
-    scienceText: isDark ? "text-slate-400" : "text-slate-600",
-    scienceLabel: isDark ? "text-blue-400/70" : "text-blue-600",
-    composition: isDark ? "text-slate-500" : "text-slate-500",
+    text: "text-white",
+    muted: "text-slate-400",
+    subtle: "text-slate-500",
+    border: "border-white/[0.08]",
+    tag: "bg-white/5 text-slate-300 border border-white/10",
+    support: "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20",
+    science: "bg-blue-500/5 border border-blue-400/10",
+    scienceText: "text-slate-400",
+    scienceLabel: "text-blue-400/70",
+    composition: "text-slate-500",
   };
 
   return (
@@ -67,7 +59,7 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
 
       {/* Price + volume */}
       <div
-        className={`flex items-center gap-4 py-3 px-4 rounded-2xl border ${t.border} ${isDark ? "bg-white/[0.02]" : "bg-slate-50"}`}
+        className={`flex items-center gap-4 py-3 px-4 rounded-2xl border ${t.border} bg-white/[0.02]`}
       >
         <div>
           <p
@@ -76,7 +68,7 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
             Цена
           </p>
           <p
-            className={`text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent ${isDark ? "from-cyan-400 to-blue-400" : "from-blue-600 to-cyan-500"}`}
+            className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent from-cyan-400 to-blue-400"
           >
             {product.lp} LP
           </p>
@@ -84,7 +76,7 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
         {qty && (
           <>
             <div
-              className={`w-px h-8 ${isDark ? "bg-white/10" : "bg-slate-200"}`}
+              className="w-px h-8 bg-white/10"
             />
             <div>
               <p
@@ -136,10 +128,10 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
             {product.keyBenefits.map((b, i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <div
-                  className={`mt-1 w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${isDark ? "bg-emerald-400/15 border border-emerald-400/30" : "bg-emerald-100 border border-emerald-300"}`}
+                  className="mt-1 w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-400/15 border border-emerald-400/30"
                 >
                   <Icons.Check
-                    className={`w-2 h-2 ${isDark ? "text-emerald-400" : "text-emerald-600"}`}
+                    className="w-2 h-2 text-emerald-400"
                   />
                 </div>
                 <span className={`text-xs leading-relaxed ${t.muted}`}>
@@ -201,11 +193,7 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
         <div className={`pt-4 border-t ${t.border}`}>
           <button
             onClick={onAddToCart}
-            className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-semibold text-base text-white transition-all duration-200 active:scale-[0.98] shadow-lg ${
-              isDark
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-cyan-500/20 hover:shadow-cyan-500/30"
-                : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 shadow-blue-500/20"
-            }`}
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-semibold text-base text-white transition-all duration-200 active:scale-[0.98] shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-cyan-500/20 hover:shadow-cyan-500/30"
           >
             <Icons.ShoppingCart className="w-5 h-5" />
             <span>Добавить в список</span>

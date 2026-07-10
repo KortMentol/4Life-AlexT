@@ -29,13 +29,13 @@ const ClipLine = memo(
     return (
       <div ref={ref} className={`overflow-hidden ${className ?? ""}`}>
         <motion.div
-          initial={tier !== "low" ? { y: "105%", opacity: 0 } : { opacity: 1 }}
+          initial={tier !== "low" ? { y: "105%", opacity: 0 } : { y: "0%", opacity: 1 }}
           animate={
             tier !== "low"
               ? inView
                 ? { y: "0%", opacity: 1 }
                 : { y: "105%", opacity: 0 }
-              : { opacity: 1 }
+              : { y: "0%", opacity: 1 } // Принудительный сброс координат на low-tier при смене на лету
           }
           transition={{ duration: 0.85, delay, ease: [0.16, 1, 0.3, 1] }}
         >

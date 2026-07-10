@@ -1,6 +1,7 @@
 /**
  * @module src/components/ui/ScrollTextReveal/ScrollTextReveal.tsx
  * @description Высокопроизводительный текстовый парсер на базе GSAP ScrollTrigger.
+ * Полностью исключена фейковая логика useTheme для предотвращения ре-рендеров при скролле.
  *
  * ОПТИМИЗАЦИЯ CHROME (LAYER EXPLOSION & LAYOUT SHIFT FIX):
  * 1. Удалено `force3D: true` с пословной анимации. Выделение 50 отдельных GPU-текстур
@@ -9,10 +10,9 @@
  *    ScrollTrigger ломает расчет высот страницы, вызывая прыжки макета и некорректный запуск анимации.
  *
  * @author Kort
- * @version 5.4.0
+ * @version 5.5.0
  */
 
-import { useTheme } from "@/hooks";
 import { useFeatureFlag } from "@/hooks/useEffectsDebug";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import React, { useEffect, useMemo, useRef } from "react";
@@ -30,7 +30,6 @@ declare global {
 const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className = "" }) => {
   const containerRef = useRef<HTMLParagraphElement>(null);
   const tier = usePerformanceTier();
-  const { theme } = useTheme();
 
   const splitInstanceRef = useRef<any>(null);
   const scrollTriggerRef = useRef<any>(null);
@@ -58,6 +57,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
     }
   }
 
+  // Мемоизируем валидацию текста
   const validatedText = useMemo(() => {
     return TextSplitter.handleEdgeCases(TextSplitter.validateText(children));
   }, [children]);
@@ -67,6 +67,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
 
     const container = containerRef.current;
 
+    // Сбрасываем стили в статическое состояние для неподдерживаемых тиров / отключенных флагов
     if (animMode === "static") {
       window.gsap.set(container, {
         opacity: 1,
@@ -88,6 +89,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
       return;
     }
 
+    // Режим анимации целого блока (для тачскринов и слабых устройств)
     if (animMode === "block_opacity") {
       gsapContextRef.current = window.gsap.context(() => {
         scrollTriggerRef.current = window.gsap.fromTo(
@@ -108,6 +110,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
         );
       });
     } else {
+      // Высокопроизводительный пословный рендеринг (для ПК high/medium)
       try {
         if (window.SplitType) {
           splitInstanceRef.current = new window.SplitType(container, { types: "words" });
@@ -160,7 +163,7 @@ const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({ children, className
       if (scrollTriggerRef.current) scrollTriggerRef.current.kill();
       if (splitInstanceRef.current) splitInstanceRef.current.revert();
     };
-  }, [animMode, validatedText, theme]);
+  }, [animMode, validatedText]); // Убрали theme из зависимостей для предотвращения лишних перерасчетов
 
   return (
     <p ref={containerRef} className={`editorial-body relative ${className}`}>

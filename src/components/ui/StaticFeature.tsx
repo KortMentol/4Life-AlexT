@@ -64,14 +64,14 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
   > = {
     green: {
       icon: "from-green-500 to-green-600",
-      border: "border-green-100 dark:border-green-900/50",
-      hoverText: "group-hover:text-green-600 dark:group-hover:text-green-400",
+      border: "border-green-900/50",
+      hoverText: "group-hover:text-green-400",
       hoverBar: "from-green-400 to-green-600",
     },
     blue: {
       icon: "from-blue-500 to-blue-600",
-      border: "border-blue-100 dark:border-blue-900/50",
-      hoverText: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
+      border: "border-blue-900/50",
+      hoverText: "group-hover:text-blue-400",
       hoverBar: "from-blue-400 to-blue-600",
     },
   };
@@ -107,7 +107,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
         variants={containerVariants}
         initial="hidden"
         animate={controls}
-        className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg ${className || ""}`}
+        className={`bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg ${className || ""}`}
         style={{ contain: "content" }}
       >
         <div
@@ -116,10 +116,10 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
           <Icon className="w-8 h-8 text-white" />
         </div>
 
-        <h3 className={`text-xl font-bold mb-4 text-gray-800 dark:text-white`}>
+        <h3 className="text-xl font-bold mb-4 text-white">
           {title}
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+        <p className="text-gray-300 leading-relaxed">
           {description}
         </p>
 
@@ -132,7 +132,7 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
 
   return (
     <div
-      className={`bg-white/80 dark:bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className || ""}`}
+      className={`bg-gray-800/80 p-8 rounded-xl border ${theme.border} shadow-lg hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 ${className || ""}`}
       style={{ contain: "content" }}
     >
       <div
@@ -142,11 +142,11 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
       </div>
 
       <h3
-        className={`text-xl font-bold mb-4 text-gray-800 dark:text-white ${theme.hoverText} transition-colors duration-300`}
+        className={`text-xl font-bold mb-4 text-white ${theme.hoverText} transition-colors duration-300`}
       >
         {title}
       </h3>
-      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+      <p className="text-gray-300 leading-relaxed">
         {description}
       </p>
 

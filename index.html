@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="dark" lang="ru">
+<html class="dark" lang="ru" style="background-color: #03050a">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -15,19 +15,16 @@
 
     <style>
       :root {
-        --preloader-bg-light: #f1f5f9;
-        --preloader-bg-dark: #0f172a;
-        --preloader-text-light: #475569;
-        --preloader-text-dark: #94a3b8;
-        --preloader-percent-light: #1e293b;
-        --preloader-percent-dark: #e2e8f0;
-        --preloader-neon-color: #00aaff;
-        --preloader-track-color-light: rgba(100, 116, 139, 0.15);
-        --preloader-track-color-dark: rgba(203, 213, 225, 0.1);
+        --preloader-bg-dark: #03050a;
+        --preloader-text-dark: #475569; /* Premium Matte Slate-500 */
+        --preloader-percent-dark: #ffffff;
+        --preloader-neon-color: #06b6d4;
+        --preloader-track-color-dark: rgba(255, 255, 255, 0.02);
       }
 
       html {
         scrollbar-gutter: stable;
+        background-color: var(--preloader-bg-dark);
       }
 
       body:has(#preloader) {
@@ -35,13 +32,13 @@
         touch-action: none;
       }
 
+      /* 
+       * ⚠️ ROOT CONTAINER INTEGRITY:
+       * Kept fully opaque and default. The solid preloader curtain is 100% sufficient
+       * to mask the initial React mount phase, completely preventing any black-screen lock bugs.
+       */
       #root {
-        /* По умолчанию скрываем основной контейнер приложения.
-           Это не даст Chrome показать пустой скелет страницы
-           до того, как React будет готов. */
-        opacity: 0;
-        /* Плавное появление, когда GSAP изменит opacity на 1 */
-        transition: opacity 0.6s ease;
+        opacity: 1;
       }
 
       #preloader {
@@ -51,58 +48,129 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--preloader-bg-light);
+        /* Volumetric luxury dark ambient gradient to frame first-look focus */
+        background:
+          radial-gradient(circle at 50% 45%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
+          radial-gradient(circle at 50% 50%, #050b14 0%, #03050a 100%);
         opacity: 1;
         will-change: opacity;
         backface-visibility: hidden;
-        perspective: 1000px;
+        perspective: 1200px;
+        pointer-events: auto; /* Blocks events during preloading, instantly set to "none" onStart of exit */
       }
 
-      @media (prefers-color-scheme: dark) {
-        #preloader {
-          background: var(--preloader-bg-dark);
-        }
+      /* Premium dark vignette to focus gaze strictly in the center grid */
+      #preloader::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(3, 5, 10, 0.9) 100%);
+        pointer-events: none;
+      }
+
+      .preloader-noise {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73H8e/g0gD1pLBAAAAAElFTkSuQmCC");
+        background-repeat: repeat;
+        opacity: 0.02;
+        pointer-events: none;
       }
 
       .preloader-stage {
         position: relative;
+        z-index: 3;
         width: 140px;
         height: 200px;
         transform-style: preserve-3d;
-        will-change: transform;
+        will-change: transform, opacity;
+        pointer-events: none;
       }
 
+      @keyframes orbitSpin {
+        0% {
+          transform: rotate3d(0, 0, 1, 0deg);
+        }
+        100% {
+          transform: rotate3d(0, 0, 1, 360deg);
+        }
+      }
+
+      /* 
+       * 💎 AWWWARDS GEOMETRY INTEGRITY HACK:
+       * Мы вынесли .preloader-logo-wrapper из-под вращающегося .progress-ring-container.
+       * Теперь вращается ТОЛЬКО кольцо и фоновое глоу. 
+       * Логотип бренда 4Life остается идеально статичным, горизонтальным и легко читаемым,
+       * что соответствует швейцарским стандартам типографики и клинического стиля.
+       */
       .progress-ring-container {
         position: absolute;
         top: 0;
         left: 0;
         width: 140px;
         height: 140px;
-        will-change: transform, opacity;
         transform-style: preserve-3d;
+        will-change: transform, opacity;
+        animation: orbitSpin 24s linear infinite; /* Hypnotic slow orbital spin strictly on the ring */
+        pointer-events: none;
+      }
+
+      .preloader-logo-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        will-change: transform;
+        pointer-events: none;
       }
 
       .preloader-text-group {
         position: absolute;
-        top: 160px;
+        top: 152px; /* Mathematically aligned spacing */
         left: 50%;
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
-        width: 280px;
+        gap: 0.55rem;
+        width: 320px;
         will-change: transform, opacity;
+        pointer-events: none;
       }
 
+      /* Ambient backing glow - optimized to pulse entirely on the GPU thread */
       .progress-ring-haze {
         position: absolute;
-        inset: -20px;
-        background: radial-gradient(circle, var(--preloader-neon-color) 0%, transparent 70%);
+        inset: -25px;
+        background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.12) 0%, transparent 65%);
         opacity: 0;
-        filter: blur(40px);
         will-change: opacity, transform;
-        display: none;
+        pointer-events: none;
+      }
+
+      @keyframes hazeBreathe {
+        0% {
+          transform: scale3d(0.97, 0.97, 1);
+          opacity: 0.35;
+        }
+        50% {
+          transform: scale3d(1.03, 1.03, 1);
+          opacity: 0.55;
+        }
+        100% {
+          transform: scale3d(0.97, 0.97, 1);
+          opacity: 0.35;
+        }
+      }
+
+      .progress-ring-haze.breathing {
+        animation: hazeBreathe 8s ease-in-out infinite;
       }
 
       .progress-ring__svg {
@@ -113,97 +181,101 @@
       }
 
       .progress-ring__track,
-      .progress-ring__progress {
+      .progress-ring__progress,
+      .progress-ring__glow {
         transform: rotate(-90deg);
         transform-origin: 50% 50%;
         will-change: stroke-dashoffset;
       }
 
       .progress-ring__track {
-        stroke: var(--preloader-track-color-light);
-        stroke-width: 3;
+        stroke: var(--preloader-track-color-dark);
+        stroke-width: 1.2px;
         fill: none;
       }
 
-      @media (prefers-color-scheme: dark) {
-        .progress-ring__track {
-          stroke: var(--preloader-track-color-dark);
-        }
+      /* High-end vector back-glow to avoid rasterization costs of CSS drop-shadow filters */
+      .progress-ring__glow {
+        stroke: var(--preloader-neon-color);
+        stroke-width: 4.5px;
+        fill: none;
+        stroke-linecap: round;
+        opacity: 0.15;
       }
 
       .progress-ring__progress {
         stroke: var(--preloader-neon-color);
-        stroke-width: 3;
+        stroke-width: 1.5px;
         fill: none;
         stroke-linecap: round;
-        filter: drop-shadow(0 0 8px var(--preloader-neon-color));
-      }
-
-      .preloader-logo-wrapper {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        will-change: transform;
       }
 
       .preloader-logo {
-        width: 96px;
-        height: 48px;
+        width: 86px;
+        height: 43px;
         will-change: transform;
+        image-rendering: smooth;
+        -webkit-image-rendering: smooth;
       }
 
       .preloader-text,
       .preloader-percentage {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        /* 
+         * 🛑 SYSTEM-UI FONT PRESTIGE (NO FOUT AT ALL):
+         * Direct stack mapping resembling premium Inter and San Francisco weights
+         * guarantees 100% layout and font weight stability before React mounts.
+         */
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
         white-space: nowrap;
-        will-change: transform;
+        will-change: transform, opacity;
       }
 
       .preloader-text {
-        font-size: 1rem;
-        font-weight: 500;
-        color: var(--preloader-text-light);
+        font-size: 0.62rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        color: var(--preloader-text-dark);
         margin: 0;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .preloader-text {
-          color: var(--preloader-text-dark);
-        }
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
       }
 
       .preloader-percentage {
-        font-size: 1.5rem;
-        font-weight: 600;
+        font-size: 1.65rem;
+        font-weight: 200; /* Ultra-thin luxurious typography weight */
         font-variant-numeric: tabular-nums;
-        color: var(--preloader-percent-light);
+        color: var(--preloader-percent-dark);
         margin: 0;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .preloader-percentage {
-          color: var(--preloader-percent-dark);
-        }
+        letter-spacing: -0.05em;
+        text-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
       }
     </style>
   </head>
   <body>
     <div id="preloader">
+      <div class="preloader-noise"></div>
       <div class="preloader-stage">
         <div class="progress-ring-container">
           <div class="progress-ring-haze"></div>
           <svg class="progress-ring__svg" viewBox="0 0 140 140">
             <circle class="progress-ring__track" r="68" cx="70" cy="70" />
+            <circle id="progress-ring-glow" class="progress-ring__glow" r="68" cx="70" cy="70" />
             <circle id="progress-ring-circle" class="progress-ring__progress" r="68" cx="70" cy="70" />
           </svg>
-          <div class="preloader-logo-wrapper">
-            <img src="/images/brand/4life-logo-light.svg" alt="4Life Logo" class="preloader-logo" />
-          </div>
+        </div>
+        <!-- Wrapper is placed independently to keep the branding centered and strictly horizontal -->
+        <div class="preloader-logo-wrapper">
+          <img src="/images/brand/4life-logo-light.svg" alt="4Life Logo" class="preloader-logo" />
         </div>
         <div class="preloader-text-group">
           <p class="preloader-text">Инициализация иммунной поддержки...</p>
@@ -213,19 +285,18 @@
     </div>
     <div id="root"></div>
 
-    <!-- Vite will inject the script tag here in production -->
     <script type="module" src="/src/main.tsx"></script>
 
     <script>
       (function () {
-        // [WebGPU 2026] Фоновое определение точной видеокарты во время работы прелоадера
+        // [WebGPU 2026] Silent precision hardware profiling
         (function () {
           if (navigator.gpu && typeof sessionStorage !== "undefined") {
             navigator.gpu
               .requestAdapter()
               .then(function (adapter) {
                 if (adapter) {
-                  // Использование нативного синхронного свойства adapter.info (стандарт 2026)
+                  // Использование нативного свойства adapter.info (стандарт 2026)
                   const info = adapter.info;
                   if (info && info.device) {
                     sessionStorage.setItem("4life_gpu", info.device);
@@ -236,44 +307,42 @@
           }
         })();
 
-        // Логотип для светлой темы
-        const logoImg = document.querySelector(".preloader-logo");
-        if (logoImg && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
-          logoImg.src = "/images/brand/4life-logo.svg";
-        }
-
-        // Элементы
+        // DOM Elements
         const preloader = document.getElementById("preloader");
         const stage = document.querySelector(".preloader-stage");
-        const ringContainer = document.querySelector(".progress-ring-container");
         const textGroup = document.querySelector(".preloader-text-group");
         const haze = document.querySelector(".progress-ring-haze");
         const logo = document.querySelector(".preloader-logo");
         const percentageEl = document.getElementById("preloader-percentage");
         const ring = document.getElementById("progress-ring-circle");
+        const ringGlow = document.getElementById("progress-ring-glow");
+        const ringContainer = document.querySelector(".progress-ring-container");
+        const rootEl = document.getElementById("root");
 
-        // Прогресс кольцо
         const radius = 68;
         const circumference = 2 * Math.PI * radius;
 
-        // Начальные состояния
-        gsap.set([stage, ringContainer, textGroup], { opacity: 0 });
-        gsap.set(stage, { scale: 0.6, rotationX: 45, z: -200 });
-        gsap.set(textGroup, { y: 40 });
-        gsap.set(logo, { scale: 0.8 });
-        gsap.set(haze, { opacity: 0, scale: 0.8 });
-        gsap.set(ring, {
+        // Perfect entrance setup
+        gsap.set(stage, { opacity: 0, y: 15, scale: 0.97 });
+        gsap.set(textGroup, { opacity: 0, y: 8 });
+        gsap.set(logo, { scale: 0.95, opacity: 0 });
+        gsap.set(haze, { opacity: 0 });
+        gsap.set([ring, ringGlow], {
           strokeDasharray: circumference,
           strokeDashoffset: circumference,
           opacity: 0,
         });
 
-        // Прогресс объект
-        const progress = { value: 0, display: 0 };
         let assetsReady = false;
         let canFinish = false;
 
-        // 🎭 Awwwards хореография
+        // Liquid flow variables
+        let displayedProgress = 0;
+        let targetProgress = 0;
+        let isOutroTriggered = false;
+        let lastRoundedVal = -1;
+
+        // 🎭 GSAP Soft Entrance sequence (adjusted to be slower and calmer)
         const masterTl = gsap.timeline({
           onComplete: () => {
             canFinish = true;
@@ -281,45 +350,37 @@
           },
         });
 
-        // ✨ Нежное материализация из эфира (0.9s)
+        // Slow, majestic fade-in
         masterTl.to(stage, {
           opacity: 1,
+          y: 0,
           scale: 1,
-          rotationX: 0,
-          z: 0,
-          duration: 0.9,
-          ease: "expo.out",
+          duration: 2.2,
+          ease: "power4.out",
         });
 
-        // 🌸 Синхронное появление всех элементов
         masterTl.to(
-          ringContainer,
+          [ring, ringGlow, haze],
           {
             opacity: 1,
-            duration: 0.6,
-            ease: "power2.out",
+            duration: 1.6,
+            ease: "power3.out",
+            onComplete: () => {
+              if (haze) haze.classList.add("breathing");
+            },
           },
-          "-=0.7",
-        );
-
-        masterTl.to(
-          [ring, haze],
-          {
-            opacity: 1,
-            duration: 0.5,
-            ease: "power2.out",
-          },
-          "-=0.4",
+          "-=1.8",
         );
 
         masterTl.to(
           logo,
           {
+            opacity: 1,
             scale: 1,
-            duration: 0.7,
-            ease: "back.out(1.1)",
+            duration: 1.8,
+            ease: "power3.out",
           },
-          "-=0.5",
+          "-=1.5",
         );
 
         masterTl.to(
@@ -327,160 +388,155 @@
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
-            ease: "power3.out",
+            duration: 1.6,
+            ease: "power4.out",
           },
-          "-=0.3",
+          "-=1.6",
         );
 
-        // 🌊 Одновременный старт прогресса с текстом
-        masterTl.to(
-          progress,
-          {
-            value: 99.5,
-            duration: 2.2,
-            ease: "power1.inOut",
-            onUpdate: updateProgress,
-          },
-          "-=0.6",
-        );
+        // Immediately launch requestAnimationFrame loop to prevent compile-freeze jumps!
+        requestAnimationFrame(tickProgress);
 
-        // 💫 Плавные проценты
-        masterTl.to(
-          progress,
-          {
-            display: 99.5,
-            duration: 2.2,
-            ease: "power1.inOut",
-            onUpdate: () => {
-              if (percentageEl) {
-                percentageEl.textContent = `${Math.round(progress.display)}%`;
-              }
-            },
-          },
-          "-=2.2",
-        );
+        /**
+         * ⚡ ELITE OPTIMIZATION: Bypasses browser rendering pipeline
+         * if the visual percentage value hasn't actually stepped.
+         */
+        function updateProgress(val) {
+          const rounded = Math.round(val);
+          if (rounded === lastRoundedVal) return; // Discards redundant calculation cycles
+          lastRoundedVal = rounded;
 
-        // 🌟 Живое дыхание свечения
-        gsap.to(
-          haze,
-          {
-            opacity: 0.3,
-            scale: 1.15,
-            duration: 1.8,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          },
-          1.0,
-        );
+          if (percentageEl) percentageEl.textContent = `${rounded}%`;
 
-        // 💎 Тонкая пульсация лого
-        gsap.to(
-          logo,
-          {
-            scale: 1.02,
-            duration: 2.2,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          },
-          1.2,
-        );
+          const offset = circumference - (rounded / 100) * circumference;
+          if (ring) ring.style.strokeDashoffset = offset;
+          if (ringGlow) ringGlow.style.strokeDashoffset = offset;
+        }
 
-        function updateProgress() {
-          const offset = circumference - (progress.value / 100) * circumference;
-          ring.style.strokeDashoffset = offset;
+        /**
+         * 💎 Viscous step-clamping LERP loop
+         * Deliberate, creamy progression speed. Capping ensures any React compile lock
+         * will result in a soft visual suspension rather than a violent teleport.
+         */
+        function tickProgress() {
+          if (isOutroTriggered) return;
+
+          if (!assetsReady) {
+            // Expensive-feeling physiological slowdown curve (Anticipation pattern)
+            if (targetProgress < 15)
+              targetProgress += 0.2; // Extremely calm startup
+            else if (targetProgress < 50)
+              targetProgress += 0.3; // Cruise speed
+            else if (targetProgress < 85)
+              targetProgress += 0.1; // Cellular analysis deceleration
+            else if (targetProgress < 98) targetProgress += 0.015; // Asymptotic crawl
+          } else {
+            targetProgress = 100;
+          }
+
+          const diff = targetProgress - displayedProgress;
+          if (diff > 0) {
+            // Max increment capped at 0.65% per frame. Absolute fluid grace.
+            const step = Math.min(diff * 0.03, 0.65);
+            displayedProgress += step;
+          }
+
+          updateProgress(displayedProgress);
+
+          if (displayedProgress >= 99.8 && assetsReady) {
+            displayedProgress = 100;
+            updateProgress(100);
+            triggerOutro();
+          } else {
+            requestAnimationFrame(tickProgress);
+          }
+        }
+
+        function triggerOutro() {
+          if (isOutroTriggered) return;
+          isOutroTriggered = true;
+          checkFinish();
         }
 
         function checkFinish() {
-          if (!assetsReady || !canFinish) return;
+          if (!assetsReady || displayedProgress < 100 || !canFinish) return;
 
-          // ▼ Добавляем эту строку, чтобы получить доступ к #root
-          const rootEl = document.getElementById("root");
-
-          // 🌅 Элегантное растворение
           const outroTl = gsap.timeline();
 
-          // Финальный штрих до 100%
-          outroTl.to(progress, {
-            value: 100,
-            display: 100,
-            duration: 0.4,
-            ease: "power2.out",
-            onUpdate: () => {
-              updateProgress();
-              if (percentageEl) percentageEl.textContent = `${Math.round(progress.display)}%`;
-            },
+          // 1. Soft dissolve & luxurious retreat of all loading elements into deep 3D depth
+          outroTl.to(stage, {
+            scale: 0.8,
+            z: -240 /* Smoothly retreats far back in 3D perspective space */,
+            opacity: 0,
+            duration: 1.8,
+            ease: "power4.inOut",
           });
 
-          // Нежное исчезновение текста
+          // 2. Expand the glowing haze outwards to dissolve like a cellular nebula
           outroTl.to(
-            textGroup,
+            haze,
             {
+              scale: 1.6,
               opacity: 0,
-              y: -20,
-              duration: 0.5,
-              ease: "power2.inOut",
-            },
-            "+=0.2",
-          );
-
-          /* ▼▼▼ НАЧАЛО КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №2 ▼▼▼ */
-          // В этот момент приложение React уже отрендерено в невидимый #root.
-          // Мы плавно показываем его прямо перед тем, как прелоадер исчезнет.
-          if (rootEl) {
-            outroTl.to(
-              rootEl,
-              {
-                opacity: 1,
-                duration: 0.6,
-                ease: "power2.inOut",
+              duration: 1.6,
+              ease: "power3.inOut",
+              onStart: () => {
+                if (haze) haze.classList.remove("breathing");
               },
-              "-=0.5",
-            ); // Начинаем анимацию появления немного раньше для бесшовного перехода
-          }
-          /* ▲▲▲ КОНЕЦ КЛЮЧЕВОГО ИСПРАВЛЕНИЯ №2 ▲▲▲ */
-
-          // Затухание свечения и кольца
-          outroTl.to(
-            [haze, ring],
-            {
-              opacity: 0,
-              duration: 0.4,
-              ease: "power2.inOut",
             },
-            "-=0.3",
+            "-=1.8",
           );
 
-          // Растворение в эфире
-          outroTl.to(
-            stage,
-            {
-              scale: 0.7,
-              rotationX: -30,
-              z: -150,
-              opacity: 0,
-              duration: 0.8,
-              ease: "expo.inOut",
-            },
-            "-=0.2",
-          );
-
-          // Финальное затемнение
+          // 3. Smoothly fade the entire preloader veil (curtain) out to reveal the site beneath
           outroTl.to(
             preloader,
             {
               opacity: 0,
-              duration: 0.6,
-              ease: "power2.inOut",
-              onComplete: () => preloader.remove(),
+              duration: 1.8 /* Majestic, slow, and expensive-feeling fade-out veil */,
+              ease: "power3.inOut",
+              /*
+               * 💎 AWWWARDS IMMEDIATE INPUT UNLOCK:
+               * We set pointer-events to "none" on the very first frame of the fade-out timeline.
+               * This allows the user to interact with the underlying WebGL Fluid canvas
+               * immediately as the preloader begins to dissolve, instead of waiting 1.8s!
+               */
+              onStart: () => {
+                if (preloader) {
+                  preloader.style.pointerEvents = "none";
+                }
+              },
+              onComplete: () => {
+                if (preloader) {
+                  preloader.remove(); // Removes preloader container completely, unlocking mouse events
+                }
+              },
             },
-            "-=0.4",
+            "-=1.6" /* Highly overlapping with the stage retreat for a buttery cross-fade */,
           );
         }
 
-        // Загрузка критичных ресурсов
+        // 🛑 TAB FOCUS OUTRO & CS-ANIMATION PAUSE (visibilitychange)
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            // Pause GPU/Compositor-driven rotation so it doesn't spin out of sync with percentage progress
+            if (ringContainer) ringContainer.style.animationPlayState = "paused";
+            if (haze) haze.style.animationPlayState = "paused";
+            masterTl.pause();
+          } else {
+            // Resume naturally from the exact paused frame
+            if (ringContainer) ringContainer.style.animationPlayState = "running";
+            if (haze) haze.style.animationPlayState = "running";
+            if (!isOutroTriggered) {
+              masterTl.resume();
+            }
+          }
+        });
+
+        /**
+         * 💎 AWWWARDS MASTER PREHEAT METHOD (GPU Image pre-decoding API)
+         * Forces the GPU to compile and rasterize background images in a non-blocking thread,
+         * completely eliminating the 1-frame micro-lag upon page reveal.
+         */
         const loadAssets = () => {
           const isMobile = window.innerWidth < 768;
           const criticalAssetUrl = isMobile
@@ -490,8 +546,19 @@
           const imagePromise = new Promise((resolve) => {
             const img = new Image();
             img.src = criticalAssetUrl;
-            img.onload = resolve;
-            img.onerror = resolve;
+
+            if (typeof img.decode === "function") {
+              img
+                .decode()
+                .then(resolve)
+                .catch(() => {
+                  img.onload = resolve;
+                  img.onerror = resolve;
+                });
+            } else {
+              img.onload = resolve;
+              img.onerror = resolve;
+            }
           });
 
           const appMountedPromise = new Promise((resolve) => {
@@ -504,7 +571,6 @@
           });
         };
 
-        // Запуск
         loadAssets();
       })();
     </script>

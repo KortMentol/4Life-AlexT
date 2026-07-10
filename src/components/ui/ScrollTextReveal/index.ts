@@ -1,8 +1,8 @@
 /**
  * @module src/components/ui/ScrollTextReveal/index.ts
- * @description Barrel export for ScrollTextReveal component
+ * @description Barrel export for ScrollTextReveal component.
  * @author Kort
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 export { default } from "./ScrollTextReveal";
@@ -13,7 +13,6 @@ export type {
   ScrollTextRevealConfig,
   ScrollTextRevealProps,
   TextSplitterResult,
-  ThemeMode,
   WordAnimationState,
   WordRevealProps,
 } from "./ScrollTextReveal.types";

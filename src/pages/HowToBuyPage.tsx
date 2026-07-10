@@ -122,7 +122,7 @@ const HowToBuyPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-950 dark:to-gray-900 overflow-hidden">
+      <section className="relative py-24 md:py-32 bg-gradient-to-br from-gray-950 to-gray-900 overflow-hidden">
         <div className="absolute inset-0 opacity-30">
           <div
             className="absolute inset-0"
@@ -140,14 +140,14 @@ const HowToBuyPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Как приобрести
               <br />
               <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 продукты 4Life
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
               Получите лучшие условия и экспертную поддержку, следуя простым
               шагам
             </p>
@@ -156,7 +156,7 @@ const HowToBuyPage: React.FC = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+      <section className="py-20 md:py-32 bg-gray-950">
         <div className="container mx-auto px-4 max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -165,10 +165,10 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Преимущества Приоритетного Клиента
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Зарегистрируйтесь один раз и получайте выгоду от каждой покупки
             </p>
           </motion.div>
@@ -182,18 +182,18 @@ const HowToBuyPage: React.FC = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={tier !== "low" ? { y: -8 } : {}}
-                className="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800 border border-blue-100 dark:border-gray-700"
+                className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-900/30 mb-6">
                   <benefit.icon
-                    className="w-8 h-8 text-blue-600 dark:text-cyan-400"
+                    className="w-8 h-8 text-cyan-400"
                     strokeWidth={1.5}
                   />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-xl font-bold text-white mb-3">
                   {benefit.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-gray-400 leading-relaxed">
                   {benefit.description}
                 </p>
               </motion.div>
@@ -203,7 +203,7 @@ const HowToBuyPage: React.FC = () => {
       </section>
 
       {/* Steps Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="container mx-auto px-4 max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -212,10 +212,10 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Три простых шага
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
+            <p className="text-xl text-gray-300">
               От регистрации до получения продукции
             </p>
           </motion.div>
@@ -242,10 +242,10 @@ const HowToBuyPage: React.FC = () => {
 
                   {/* Content */}
                   <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
                       {step.title}
                     </h3>
-                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                    <p className="text-lg text-gray-300 mb-6 leading-relaxed">
                       {step.description}
                     </p>
                     <Button
@@ -281,7 +281,7 @@ const HowToBuyPage: React.FC = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+      <section className="py-20 md:py-32 bg-gray-950">
         <div className="container mx-auto px-4 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -290,7 +290,7 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Часто задаваемые вопросы
             </h2>
           </motion.div>
@@ -311,7 +311,7 @@ const HowToBuyPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-900 dark:to-cyan-900 text-white">
+      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-900 to-cyan-900 text-white">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -330,7 +330,7 @@ const HowToBuyPage: React.FC = () => {
               to="/contact"
               variant="secondary"
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-gray-900 dark:text-cyan-400 dark:hover:bg-gray-800"
+              className="bg-gray-900 text-cyan-400 hover:bg-gray-800"
               icon={<Icons.MessageCircle className="w-5 h-5" />}
             >
               Получить консультацию

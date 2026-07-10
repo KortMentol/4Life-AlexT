@@ -1,5 +1,3 @@
-export type { Theme, ThemeContextType } from "../hooks/useTheme";
-
 export { FluidProvider } from "./FluidProvider";
 export { FluidContext } from "./FluidContext.helpers";
 export type { FluidContextType, FluidInstance } from "./FluidContext.types";

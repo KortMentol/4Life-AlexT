@@ -59,7 +59,7 @@ const ContactPage: React.FC = () => {
         type="website"
       />
 
-      <section className="min-h-screen flex items-center justify-center py-20 px-4 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+      <section className="min-h-screen flex items-center justify-center py-20 px-4 bg-gradient-to-br from-gray-950 to-gray-900">
         <div className="container mx-auto max-w-5xl">
           {/* Header */}
           <motion.div
@@ -68,10 +68,10 @@ const ContactPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Свяжитесь со мной
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
               Готовы начать свой путь к здоровью и благополучию? У меня есть
               ответы на ваши вопросы, и я готов помочь на каждом этапе
             </p>
@@ -129,9 +129,9 @@ const ContactPage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-center"
           >
-            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <Icons.Clock className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
-              <p className="text-gray-700 dark:text-gray-300">
+            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-full bg-blue-900/20 border border-blue-800">
+              <Icons.Clock className="w-5 h-5 text-cyan-400" />
+              <p className="text-gray-300">
                 Отвечаю в течение нескольких часов. Выберите удобный способ
                 связи
               </p>
@@ -144,17 +144,17 @@ const ContactPage: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+              className="p-6 rounded-2xl bg-gray-900 border border-gray-800"
             >
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Icons.MessageCircle className="w-6 h-6 text-blue-600 dark:text-cyan-400" />
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center">
+                  <Icons.MessageCircle className="w-6 h-6 text-cyan-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-bold text-white mb-2">
                     Консультация по продуктам
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                  <p className="text-gray-400 text-sm leading-relaxed">
                     Помогу подобрать оптимальные продукты 4Life для ваших целей
                     и объясню, как они работают
                   </p>
@@ -166,17 +166,17 @@ const ContactPage: React.FC = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+              className="p-6 rounded-2xl bg-gray-900 border border-gray-800"
             >
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <Icons.Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-900/30 flex items-center justify-center">
+                  <Icons.Users className="w-6 h-6 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-bold text-white mb-2">
                     Партнерство
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                  <p className="text-gray-400 text-sm leading-relaxed">
                     Расскажу о возможностях построения бизнеса с 4Life и помогу
                     начать
                   </p>

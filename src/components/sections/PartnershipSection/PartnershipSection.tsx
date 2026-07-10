@@ -15,7 +15,6 @@
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
-import { useTheme } from "@/hooks/useTheme";
 import { useInView } from "framer-motion";
 import React, { memo, useCallback, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -30,9 +29,7 @@ import Ticker from "./ui/Ticker";
 
 const PartnershipSection = memo(() => {
   const tier = usePerformanceTier();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-  const palette = getPalette(isDark);
+  const palette = getPalette();
   const location = useLocation();
 
   // ChapterNav показывается только на /partnership странице

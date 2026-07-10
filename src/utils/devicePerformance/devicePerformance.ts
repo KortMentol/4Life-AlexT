@@ -4,7 +4,7 @@
  * Future-proof до 2028 года: покрывает RTX 5/6xx, RX 8/9xxx, Adreno X/9xx,
  * MediaTek Immortalis, Mali-G9xx, Intel Arc Battlemage, AMD Radeon 890M.
  * @author Kort
- * @version 4.0.0
+ * @version 4.1.0
  */
 
 export type PerformanceTier = "low" | "medium" | "high";
@@ -97,7 +97,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   let ramValue = parseFloat(specs.ram) || 4;
 
   // Коррекция RAM для мобильных: deviceMemory API округляет вниз
-  // Флагманский GPU + 8 ядер → скорее всего 6GB+
   if (isMobile && ramValue <= 4 && specs.cpuCores >= 8) {
     const gpuLower = specs.gpu.toLowerCase();
     const isFlagshipGpu =
@@ -140,9 +139,9 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
 
   // WebGL/WebGPU API бонус
   if (specs.webglVersion.startsWith("WebGL 2") || specs.webglVersion === "WebGPU") {
-    gpuScore += 10; // WebGL 2.0 или WebGPU (современные API)
+    gpuScore += 10;
   } else if (specs.webglVersion.startsWith("WebGL 1")) {
-    gpuScore += 5; // WebGL 1.0 (устаревший API)
+    gpuScore += 5;
   }
 
   // --- DESKTOP GPU ---
@@ -157,93 +156,100 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
       gpuScore += 38; // RTX 3xxx
     else if (/rtx\s*2\d{3}/.test(gpuString))
       gpuScore += 35; // RTX 2xxx
-    else gpuScore += 34; // Любой неизвестный RTX (будущие серии) → HIGH
+    else gpuScore += 34; // Любой неизвестный RTX (будущие серии)
   }
-  // NVIDIA GTX
+  // NVIDIA GTX — Снижены веса устаревших архитектур для точного отделения Medium от High
   else if (gpuString.includes("gtx")) {
-    if (gpuString.includes("16")) gpuScore += 30;
-    else if (gpuString.includes("10")) gpuScore += 28;
-    else if (gpuString.includes("9")) gpuScore += 25;
-    else gpuScore += 20;
-  } else if (gpuString.includes("geforce")) gpuScore += 18;
+    if (gpuString.includes("1660") || gpuString.includes("1655") || gpuString.includes("1650 ti"))
+      gpuScore += 22; // GTX 1660/1650Ti
+    else if (gpuString.includes("16"))
+      gpuScore += 20; // GTX 1650/1630
+    else if (gpuString.includes("1080") || gpuString.includes("1070"))
+      gpuScore += 20; // Флагманы Pascal
+    else if (gpuString.includes("1060") || gpuString.includes("1050 ti"))
+      gpuScore += 18; // GTX 1060/1050Ti
+    else if (gpuString.includes("10"))
+      gpuScore += 15; // Младшие Pascal
+    else if (gpuString.includes("9"))
+      gpuScore += 12; // Maxwell
+    else gpuScore += 8;
+  } else if (gpuString.includes("geforce")) gpuScore += 12;
   // AMD Radeon RX — точный regex, future-proof до RX 9xxx+
   else if (gpuString.includes("radeon") && gpuString.includes("rx")) {
     if (/rx\s*[89]\d{3}/.test(gpuString))
-      gpuScore += 42; // RX 8xxx/9xxx (2025-2028)
+      gpuScore += 42; // RX 8xxx/9xxx
     else if (/rx\s*7\d{3}/.test(gpuString))
       gpuScore += 38; // RX 7xxx
     else if (/rx\s*6\d{3}/.test(gpuString))
       gpuScore += 35; // RX 6xxx
     else if (/rx\s*5\d{3}/.test(gpuString))
-      gpuScore += 28; // RX 5xxx
-    else gpuScore += 25; // Любой неизвестный RX → HIGH
+      gpuScore += 25; // RX 5xxx
+    else gpuScore += 22;
   }
-  // AMD встроенная графика — мощные APU (Radeon 780M, 890M, 880M и будущие)
+  // AMD встроенная графика — мощные APU
   else if (gpuString.includes("radeon") && /\d{3}m/.test(gpuString)) {
     const amdApu = gpuString.match(/(\d{3})m/);
     const apuNum = amdApu && amdApu[1] ? parseInt(amdApu[1]) : 0;
     if (apuNum >= 800)
-      gpuScore += 28; // Radeon 890M, 880M (2024-2025)
+      gpuScore += 28; // Radeon 890M, 880M
     else if (apuNum >= 700)
-      gpuScore += 25; // Radeon 780M (2023)
+      gpuScore += 25; // Radeon 780M
     else gpuScore += 18;
-  } else if (gpuString.includes("radeon")) gpuScore += 18;
+  } else if (gpuString.includes("radeon")) gpuScore += 15;
   // --- MOBILE GPU ---
-  // MediaTek Immortalis — флагманские чипы Dimensity 9300/9400+ (2024-2028)
+  // MediaTek Immortalis — флагманские чипы Dimensity 9300/9400+
   else if (gpuString.includes("immortalis")) {
     gpuScore += 40;
   }
 
-  // Snapdragon / Adreno — future-proof: Adreno X (ARM ноутбуки) и 9xx (2026-2028)
+  // Snapdragon / Adreno — future-proof
   else if (gpuString.includes("adreno")) {
     const match = gpuString.match(/adreno[^\d]*(\d+)/i);
     const num = match && match[1] ? parseInt(match[1]) : 0;
     if (/adreno\s*x/i.test(gpuString))
-      gpuScore += 42; // Adreno X1/X2 (Snapdragon X Elite)
+      gpuScore += 42; // Adreno X1 (Snapdragon X Elite)
     else if (num >= 900)
-      gpuScore += 42; // Adreno 9xx (2026-2028)
+      gpuScore += 42; // Adreno 9xx
     else if (num >= 800)
-      gpuScore += 38; // Adreno 830+ (Snapdragon 8 Elite)
+      gpuScore += 38; // Adreno 830+
     else if (num >= 740)
-      gpuScore += 35; // Adreno 740/750 (SD 8 Gen 2/3)
+      gpuScore += 35; // Adreno 740/750
     else if (num >= 730)
-      gpuScore += 33; // Adreno 730 (SD 8 Gen 1)
-    else if (num >= 650) gpuScore += 30;
-    else if (num >= 640) gpuScore += 28;
-    else if (num >= 630) gpuScore += 26;
-    else if (num >= 620) gpuScore += 24;
-    else if (num >= 610) gpuScore += 22;
-    else if (num >= 600) gpuScore += 20;
-    else if (num >= 530) gpuScore += 15;
-    else if (num >= 500) gpuScore += 12;
-    else gpuScore += 8;
+      gpuScore += 33; // Adreno 730
+    else if (num >= 650) gpuScore += 28;
+    else if (num >= 640) gpuScore += 24;
+    else if (num >= 630) gpuScore += 22;
+    else if (num >= 620) gpuScore += 20;
+    else if (num >= 610) gpuScore += 18;
+    else if (num >= 600) gpuScore += 16;
+    else if (num >= 530) gpuScore += 12;
+    else if (num >= 500) gpuScore += 10;
+    else gpuScore += 6;
   }
 
-  // Mali — future-proof: G900+ (2026-2028)
+  // Mali — G900+
   else if (gpuString.includes("mali")) {
     const maliMatch = gpuString.match(/mali[^\dg]*g?(\d+)/i);
     const maliNum = maliMatch && maliMatch[1] ? parseInt(maliMatch[1]) : 0;
     if (maliNum >= 900)
-      gpuScore += 35; // Mali-G9xx (future)
+      gpuScore += 35; // Mali-G9xx
     else if (maliNum >= 78)
       gpuScore += 28; // Mali-G78, G77
     else if (maliNum >= 72)
-      gpuScore += 24; // Mali-G76, G72
+      gpuScore += 22; // Mali-G76, G72
     else if (maliNum >= 68)
-      gpuScore += 20; // Mali-G71, G68
+      gpuScore += 18; // Mali-G71, G68
     else if (maliNum >= 57)
       gpuScore += 12; // Mali-G57
     else if (maliNum >= 52)
-      gpuScore += 12; // Mali-G52
-    else if (maliNum >= 51)
-      gpuScore += 7; // Mali-G51
-    else if (maliNum >= 31)
-      gpuScore += 6; // Mali-G31
-    else if (gpuString.includes("g")) gpuScore += 8;
-    else gpuScore += 5;
+      gpuScore += 10; // Mali-G52
+    else if (maliNum >= 51) gpuScore += 6;
+    else if (maliNum >= 31) gpuScore += 5;
+    else if (gpuString.includes("g")) gpuScore += 7;
+    else gpuScore += 4;
   }
 
-  // Apple GPU — точный парсинг из WebGPU строк
+  // Apple GPU
   else if (gpuString.includes("apple")) {
     if (gpuString.includes("m4") || gpuString.includes("ultra")) {
       gpuScore += 45;
@@ -254,32 +260,31 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     } else if (gpuString.includes("m1")) {
       gpuScore += 35;
     } else {
-      // Старый фоллбэк по ядрам для Safari/WebGL, если WebGPU отключен
       const cores = specs.cpuCores;
-      if (cores >= 10) gpuScore += 40;
-      else if (cores >= 8) gpuScore += 35;
-      else gpuScore += 25;
+      if (cores >= 10) gpuScore += 38;
+      else if (cores >= 8) gpuScore += 33;
+      else gpuScore += 22;
     }
   }
 
-  // Snapdragon X Elite / Plus (2024-2026 ARM Windows)
+  // Snapdragon X Elite / Plus
   else if (gpuString.includes("snapdragon") || gpuString.includes("x elite") || gpuString.includes("x plus")) {
     gpuScore += 38;
   }
 
-  // Intel — Arc future-proof (Battlemage+), фикс Intel Core Ultra Graphics
+  // Intel — Arc / Iris / UHD
   else if (gpuString.includes("intel")) {
     if (gpuString.includes("arc"))
       gpuScore += 22; // Arc дискретные + будущие
     else if (gpuString.includes("iris") && gpuString.includes("xe"))
-      gpuScore += 15; // Iris Xe
+      gpuScore += 14; // Iris Xe
     else if (gpuString.includes("iris"))
       gpuScore += 10; // Iris Plus
     else if (gpuString.includes("uhd"))
-      gpuScore += 5; // UHD (слабая встройка)
+      gpuScore += 4; // UHD
     else if (gpuString.includes("hd"))
-      gpuScore += 3; // HD (очень старая)
-    else gpuScore += 8; // Intel Core Ultra Graphics и другие неизвестные Intel → не штрафуем
+      gpuScore += 2; // HD
+    else gpuScore += 6;
   } else {
     gpuScore += 5; // Unknown GPU
   }
@@ -293,8 +298,8 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
 
   // 4. ШТРАФЫ для мобильных
   if (isMobile) {
-    const isGamingMobile = gpuScore >= 33; // Adreno 630+ (36), Mali-G77+ (38), Apple A12+ (38), Immortalis (50)
-    const isBudgetMobile = gpuScore < 20; // Mali-G52, PowerVR, Adreno <600
+    const isGamingMobile = gpuScore >= 33;
+    const isBudgetMobile = gpuScore < 20;
 
     if (!isGamingMobile) {
       if (isBudgetMobile) score *= 0.5;
@@ -303,17 +308,14 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   }
 
   // 5. КРИТИЧЕСКИЙ ШТРАФ для слабых интегрированных GPU
-  // Фикс: Intel Core Ultra "Intel Graphics" (10+ ядер) и AMD Radeon APU НЕ штрафуются
   const isWeakIntegrated =
     gpuString.includes("intel hd") ||
     gpuString.includes("intel uhd") ||
-    // Старый Intel Graphics: <= 8 ядер. Новые Core Ultra: 10+ ядер — не штрафуем
     (gpuString.includes("intel") &&
       gpuString.includes("graphics") &&
       !gpuString.includes("arc") &&
       !gpuString.includes("xe") &&
       specs.cpuCores <= 8) ||
-    // Radeon без RX и без мощных APU серий
     (gpuString.includes("radeon") && !gpuString.includes("rx") && !/\d{3}m/.test(gpuString));
 
   if (isWeakIntegrated) {
@@ -330,15 +332,15 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     else if (score >= 35) tier = "medium";
     else tier = "low";
   } else {
-    // AWWWARDS 2026: Тонкая калибровка встроек и дискреток. 
-    // GTX 1060 (38 GPU) -> High Tier.
-    // Iris Xe (25 GPU) -> Medium Tier.
-    if (score >= 68 && gpuScore >= 30) tier = "high";
+    // AWWWARDS 2026: Тонкая калибровка встроек и дискреток.
+    // RTX 2060 / GTX 1660 Ti+ -> High Tier.
+    // GTX 1060 / Iris Xe -> Medium Tier.
+    if (score >= 78 && gpuScore >= 30) tier = "high";
     else if (score >= 40) tier = "medium";
     else tier = "low";
   }
 
-  // Слабые встроенные GPU (старые Intel HD, базовые Radeon) = ВСЕГДА LOW
+  // Слабые встроенные GPU = ВСЕГДА LOW
   if (isWeakIntegrated) {
     tier = "low";
     score = Math.min(score, 18);

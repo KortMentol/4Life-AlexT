@@ -1,29 +1,15 @@
 /**
  * @module components/debug/PerformanceDebugMobile
  * @description Высокопроизводительный сенсорный оверлей мониторинга FPS, FT и аппаратных характеристик (DEV).
- * Обновляет данные напрямую в DOM через рефы, исключая влияние React-рендеринга на замеры.
- * Гарантированно рендерится поверх мобильной панели эффектов с помощью явного inline zIndex.
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
  *
  * @author Kort
- * @version 5.1.0
+ * @version 5.2.1
  */
 
 import { DeviceSpecs, calculatePerformanceScore, detectDeviceSpecs } from "@/utils/devicePerformance/devicePerformance";
 import { getTierOverride } from "@/utils/effectsDebug/effectsDebugStore";
-import {
-  Bug,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Cpu,
-  Gauge,
-  HardDrive,
-  PieChart,
-  Smartphone,
-  Star,
-  X,
-  Zap,
-} from "lucide-react";
+import { Icons } from "@/utils/icons";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./PerformanceDebugMobile.module.css";
 
@@ -49,7 +35,6 @@ const PerformanceDebugMobile: React.FC = () => {
     return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }, []);
 
-  // Прямые рефы для мгновенного обновления текста в DOM без вызова setState
   const fpsTextRef = useRef<HTMLSpanElement>(null);
   const ftTextRef = useRef<HTMLSpanElement>(null);
   const compactFpsTextRef = useRef<HTMLSpanElement>(null);
@@ -68,7 +53,6 @@ const PerformanceDebugMobile: React.FC = () => {
       setStaticScore(score);
 
       const override = getTierOverride();
-      // ИСПРАВЛЕНИЕ: Сравнение с "current" вместо "auto" для устранения ошибки TS2367
       const finalTier = override !== "current" ? override : hardwareTier;
       setTier(finalTier as "low" | "medium" | "high");
     } catch (error) {
@@ -86,7 +70,6 @@ const PerformanceDebugMobile: React.FC = () => {
         const calculatedFps = Math.round(1000 / avgFrameTime);
         const calculatedFt = Math.round(avgFrameTime * 100) / 100;
 
-        // Directly update DOM text values
         if (fpsTextRef.current) {
           fpsTextRef.current.textContent = String(calculatedFps);
           fpsTextRef.current.className = `${styles.metricValue} ${calculatedFps >= 50 ? styles.valueGood : calculatedFps >= 30 ? styles.valueWarning : styles.valueBad}`;
@@ -112,7 +95,6 @@ const PerformanceDebugMobile: React.FC = () => {
 
   const toggleCompactMode = useCallback(() => {
     setIsCompact((prev) => !prev);
-    // Извещаем соседнюю панель об изменении высоты
     window.dispatchEvent(
       new CustomEvent("mobile-debug-layout-change", { detail: { isCompact: !isCompact, panel: "perf" } }),
     );
@@ -128,9 +110,8 @@ const PerformanceDebugMobile: React.FC = () => {
 
   return (
     <div
-      className={`${styles.debugContainer} ${isCompact ? styles.compactMode : ""}`}
+      className={`${styles.debugContainer} ${isCompact ? styles.containerCompact : ""}`}
       style={{
-        // КРИТИЧЕСКИЙ ФИКС: Явный inline z-index 99999 гарантирует, что панель всегда на самом верху
         zIndex: 99999,
         transform: isCompact ? `translateY(calc(100% - 46px))` : "translateY(0)",
       }}
@@ -140,7 +121,7 @@ const PerformanceDebugMobile: React.FC = () => {
           <>
             <div className={styles.headerMetrics}>
               <div className={styles.headerTitle}>
-                <Bug size={13} />
+                <Icons.Bug size={13} />
                 <span>Perf ({isPhysicalMobile ? "Touch" : "PC"})</span>
               </div>
               <div className={styles.metricItemCompact} style={{ marginLeft: "auto" }}>
@@ -161,7 +142,7 @@ const PerformanceDebugMobile: React.FC = () => {
                   toggleCompactMode();
                 }}
               >
-                <ChevronUp size={16} />
+                <Icons.ChevronUp size={16} />
               </button>
               <button
                 onClick={(e) => {
@@ -169,14 +150,14 @@ const PerformanceDebugMobile: React.FC = () => {
                   setIsVisible(false);
                 }}
               >
-                <X size={16} />
+                <Icons.X size={16} />
               </button>
             </div>
           </>
         ) : (
           <>
             <div className={styles.headerTitle} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Bug size={14} />
+              <Icons.Bug size={14} />
               <span>Performance Debug ({isPhysicalMobile ? "Touch" : "PC"})</span>
             </div>
             <div className={styles.headerActions}>
@@ -186,7 +167,7 @@ const PerformanceDebugMobile: React.FC = () => {
                   toggleCompactMode();
                 }}
               >
-                <ChevronDown size={16} />
+                <Icons.ChevronDown size={16} />
               </button>
               <button
                 onClick={(e) => {
@@ -194,7 +175,7 @@ const PerformanceDebugMobile: React.FC = () => {
                   setIsVisible(false);
                 }}
               >
-                <X size={16} />
+                <Icons.X size={16} />
               </button>
             </div>
           </>
@@ -206,7 +187,7 @@ const PerformanceDebugMobile: React.FC = () => {
           <div className={styles.metricsGrid}>
             <div className={styles.metricItem}>
               <div className={styles.metricIcon}>
-                <Gauge size={14} />
+                <Icons.Gauge size={14} />
               </div>
               <span className={styles.metricLabel}>FPS</span>
               <span ref={fpsTextRef} className={`${styles.metricValue} ${styles.valueGood}`}>
@@ -215,7 +196,7 @@ const PerformanceDebugMobile: React.FC = () => {
             </div>
             <div className={styles.metricItem}>
               <div className={styles.metricIcon}>
-                <Clock size={14} />
+                <Icons.Clock size={14} />
               </div>
               <span className={styles.metricLabel}>Frame</span>
               <span ref={ftTextRef} className={styles.metricValue}>
@@ -224,7 +205,7 @@ const PerformanceDebugMobile: React.FC = () => {
             </div>
             <div className={styles.metricItem} style={{ gridColumn: "span 2" }}>
               <div className={styles.metricIcon}>
-                <Star size={14} />
+                <Icons.Star size={14} />
               </div>
               <span className={styles.metricLabel}>Score</span>
               <span className={`${styles.metricValue} ${getScoreColor(staticScore)}`}>
@@ -238,35 +219,35 @@ const PerformanceDebugMobile: React.FC = () => {
           <div className={styles.deviceInfoSection}>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
-                <HardDrive size={14} />
+                <Icons.HardDrive size={14} />
               </div>
               <strong>RAM:</strong>
               <span className={styles.infoValue}>{deviceSpecs.ram}</span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
-                <Cpu size={14} />
+                <Icons.Cpu size={14} />
               </div>
               <strong>CPU:</strong>
               <span className={styles.infoValue}>{deviceSpecs.cpuCores} cores</span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
-                <PieChart size={14} />
+                <Icons.PieChart size={14} />
               </div>
               <strong>GPU:</strong>
               <span className={styles.infoValue}>{deviceSpecs.gpu}</span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
-                <Zap size={14} />
+                <Icons.Zap size={14} />
               </div>
               <strong>WebGL:</strong>
               <span className={styles.infoValue}>{deviceSpecs.webglVersion}</span>
             </div>
             <div className={styles.infoRow}>
               <div className={styles.infoIcon}>
-                <Smartphone size={14} />
+                <Icons.Smartphone size={14} />
               </div>
               <strong>Touch:</strong>
               <span className={styles.infoValue}>{deviceSpecs.touchSupport ? "Yes" : "No"}</span>

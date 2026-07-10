@@ -1,8 +1,10 @@
 /**
  * MediaSlide — рендерит одно изображение или видео в галерее.
  * Видео: автоплей при isActive, пауза при неактивном слайде.
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
  */
 import { GalleryItem } from "@/data/productsData";
+import { Icons } from "@/utils/icons";
 import React, { useEffect, useRef } from "react";
 
 interface MediaSlideProps {
@@ -41,13 +43,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ item, isActive }) => {
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-14 h-14 rounded-full bg-black/50 border border-white/30 flex items-center justify-center backdrop-blur-sm">
-              <svg
-                className="w-6 h-6 text-white ml-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
+              <Icons.Play fill="currentColor" stroke="none" className="w-6 h-6 text-white ml-1" />
             </div>
           </div>
         )}

@@ -144,7 +144,7 @@ function App() {
             <Route
               path="*"
               element={
-                <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
+                <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 text-gray-200">
                   <div className="card-modern p-12 text-center max-w-lg">
                     <h1 className="text-8xl font-bold mb-4 gradient-heading">404</h1>
                     <p className="text-xl mb-8">Страница не найдена. Возможно, вы ошиблись адресом.</p>

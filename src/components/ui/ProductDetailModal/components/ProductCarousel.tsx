@@ -15,14 +15,12 @@ interface ProductCarouselProps {
   products: DetailedProduct[];
   activeIndex: number;
   onSelect: (id: string) => void;
-  isDark: boolean;
 }
 
 export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   products,
   activeIndex,
   onSelect,
-  isDark,
 }) => {
   const swiperRef = useRef<SwiperType | null>(null);
 
@@ -49,7 +47,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
   return (
     <div
-      className={`flex-shrink-0 border-t ${isDark ? "border-white/[0.08]" : "border-slate-200"}`}
+      className="flex-shrink-0 border-t border-white/[0.08]"
     >
       <Swiper
         modules={[FreeMode]}
@@ -81,14 +79,12 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                   isActive
                     ? "w-[72px] h-[72px] scale-100 opacity-100"
                     : "w-[56px] h-[56px] scale-95 opacity-40 hover:opacity-65"
-                } ${isDark ? "bg-white/5" : "bg-slate-100"}`}
+                } bg-white/5`}
               >
                 {/* Active ring */}
                 {isActive && (
                   <span
-                    className={`absolute inset-0 rounded-2xl ring-2 pointer-events-none ${
-                      isDark ? "ring-cyan-400" : "ring-blue-500"
-                    }`}
+                    className="absolute inset-0 rounded-2xl ring-2 pointer-events-none ring-cyan-400"
                   />
                 )}
                 <img

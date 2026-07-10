@@ -1,16 +1,10 @@
 /**
  * @module components/debug/EffectsDebugMobile
  * @description Сенсорная панель управления эффектами на мобильных (DEV).
- *
- * ВНЕДРЕНО (ФАЗА 2 - MOBILE ENGINE POWER):
- * - Engine Power (Soft Bypass): красивый интерактивный выключатель для тотальной заморозки графики на смартфонах.
- * - Топологический роутинг: ползунки группируются и выводятся по смысловому порядку сверху вниз.
- * - Device Filtering: панель автоматически отсекает все тяжелые десктопные ползунки.
- * - Stealth Mode: панель плавно растворяется при переходах, чтобы не ломать эстетику пелены.
- * - TS Safety: решены все конфликты со строгим режимом компиляции TypeScript.
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
  *
  * @author Geminis AI & Kort
- * @version 7.1.0
+ * @version 7.2.0
  */
 
 import {
@@ -19,7 +13,7 @@ import {
   PerformanceTierOverride,
   effectsDebugStore,
 } from "@/utils/effectsDebug/effectsDebugStore";
-import { ChevronDown, ChevronUp, Sliders, X } from "lucide-react";
+import { Icons } from "@/utils/icons";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./EffectsDebugMobile.module.css";
@@ -62,12 +56,11 @@ const EffectsDebugMobile: React.FC = () => {
   const [flags, setFlags] = useState<EffectsDebugFlags>(() => effectsDebugStore.getFlags());
   const [isCompact, setIsCompact] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
-  const [isTransitioning, setIsTransitioning] = useState(false); // Stealth mode
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [offsetY, setOffsetY] = useState(45);
 
   const [isLastPresetDisabled, setIsLastPresetDisabled] = useState(() => effectsDebugStore.isLastPresetDisabled());
 
-  // Подписка на стор флагов
   useEffect(() => {
     const unsub = effectsDebugStore.subscribe((newFlags) => {
       setFlags(newFlags);
@@ -76,7 +69,6 @@ const EffectsDebugMobile: React.FC = () => {
     return unsub;
   }, []);
 
-  // Синхронизация высоты с PerformanceDebugMobile
   useEffect(() => {
     const handleLayoutChange = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -88,7 +80,6 @@ const EffectsDebugMobile: React.FC = () => {
     return () => window.removeEventListener("mobile-debug-layout-change", handleLayoutChange);
   }, []);
 
-  // Stealth Mode: прячем панель при переходах
   useEffect(() => {
     const handleStart = () => setIsTransitioning(true);
     const handleEnd = () => setIsTransitioning(false);
@@ -126,7 +117,6 @@ const EffectsDebugMobile: React.FC = () => {
     setIsCompact((prev) => !prev);
   }, []);
 
-  // --- УМНАЯ ФИЛЬТРАЦИЯ И ГРУППИРОВКА ---
   const currentPath = location.pathname;
 
   const activeGroups = useMemo(() => {
@@ -136,7 +126,6 @@ const EffectsDebugMobile: React.FC = () => {
       const meta = FLAGS_METADATA[key];
       if (!meta) return;
 
-      // Оставляем фланги: Глобальные (all) или текущей страницы, И (устройства "all" или "mobile")
       const routeMatch = meta.routes.includes("all") || meta.routes.includes(currentPath as any);
       const deviceMatch = meta.device === "all" || meta.device === "mobile";
 
@@ -144,8 +133,6 @@ const EffectsDebugMobile: React.FC = () => {
         if (!groups[meta.category]) {
           groups[meta.category] = [];
         }
-
-        // Надежное добавление элемента без undefined-конфликтов
         const groupArray = groups[meta.category];
         if (groupArray) {
           groupArray.push(key);
@@ -182,7 +169,7 @@ const EffectsDebugMobile: React.FC = () => {
       {/* Header */}
       <div className={styles.header} onClick={toggleCompact}>
         <div className={styles.headerLeft}>
-          <Sliders size={13} />
+          <Icons.Sliders size={13} />
           <span>Effects Debug ({flags.tierOverride})</span>
         </div>
         <div className={styles.headerActions}>
@@ -192,7 +179,7 @@ const EffectsDebugMobile: React.FC = () => {
               toggleCompact();
             }}
           >
-            {isCompact ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {isCompact ? <Icons.ChevronUp size={16} /> : <Icons.ChevronDown size={16} />}
           </button>
           <button
             onClick={(e) => {
@@ -200,7 +187,7 @@ const EffectsDebugMobile: React.FC = () => {
               setIsVisible(false);
             }}
           >
-            <X size={15} />
+            <Icons.X size={15} />
           </button>
         </div>
       </div>
@@ -289,7 +276,6 @@ const EffectsDebugMobile: React.FC = () => {
             </label>
           </div>
 
-          {/* ДИНАМИЧЕСКИЙ РЕНДЕР ГРУПП НА ОСНОВЕ МЕТАДАННЫХ */}
           {Object.entries(activeGroups).map(([category, flagKeys]) => {
             if (!flagKeys) return null;
 
@@ -317,7 +303,7 @@ const EffectsDebugMobile: React.FC = () => {
                       label={meta.label}
                       flagKey={key}
                       flags={flags}
-                      disabled={!flags.globalPower} // Тотально блокируем при Soft Bypass
+                      disabled={!flags.globalPower}
                       onChange={handleToggle}
                     />
                   );
@@ -330,7 +316,7 @@ const EffectsDebugMobile: React.FC = () => {
                       if (!meta) return null;
 
                       const dependency = meta.dependsOn;
-                      const isDisabled = !flags.globalPower || (dependency ? !flags[dependency] : false); // Тотально блокируем при Soft Bypass
+                      const isDisabled = !flags.globalPower || (dependency ? !flags[dependency] : false);
 
                       return (
                         <ToggleRowMobile

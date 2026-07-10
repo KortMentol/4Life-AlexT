@@ -20,17 +20,17 @@
   /* Цвета */
   --primary-blue: #0066ff;
 
-  /* Light theme surface tokens */
-  --surface-card: #f8faff;
-  --surface-card-hover: #eef3ff;
-  --surface-border: rgba(59, 130, 246, 0.12);
-  --surface-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.1);
-  --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.18);
+  /* Dark theme surface tokens (перенесено из .dark) */
+  --surface-card: rgba(15, 23, 42, 0.8);
+  --surface-card-hover: rgba(30, 41, 59, 0.9);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
+  --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.6);
 
   /* Heading colors */
-  --heading-primary: #0f172a;
-  --heading-secondary: #1e293b;
-  --text-muted: #64748b;
+  --heading-primary: #f8fafc;
+  --heading-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
 
   /* Accent */
   --accent-cyan: #06b6d4;
@@ -59,18 +59,6 @@
   -webkit-text-size-adjust: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Dark theme overrides */
-.dark {
-  --surface-card: rgba(15, 23, 42, 0.8);
-  --surface-card-hover: rgba(30, 41, 59, 0.9);
-  --surface-border: rgba(255, 255, 255, 0.08);
-  --surface-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
-  --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.6);
-  --heading-primary: #f8fafc;
-  --heading-secondary: #e2e8f0;
-  --text-muted: #94a3b8;
 }
 
 /* Modern buttons - используется в Button.tsx, App.tsx */
@@ -122,19 +110,14 @@
 
 /* Cards - используется в App.tsx (404 страница) */
 .card-modern {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(31, 41, 55, 0.7);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-lg);
   transition: all var(--transition-medium);
   overflow: hidden;
-}
-
-.dark .card-modern {
-  background: rgba(31, 41, 55, 0.7);
-  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .card-modern:hover {
@@ -144,14 +127,6 @@
 
 /* Градиентные заголовки - используется в App.tsx, SectionHeading.tsx */
 .gradient-heading {
-  background: linear-gradient(135deg, #ffffff, #a5c8ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
-
-.dark .gradient-heading {
   background: linear-gradient(135deg, #ffffff, #0369a1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -184,10 +159,6 @@
   right: 0;
   bottom: 0;
   height: 100px;
-  background: linear-gradient(to bottom, transparent, var(--divider-color, #f9fafb));
-}
-
-.dark .section-divider::before {
   background: linear-gradient(to bottom, transparent, var(--divider-color-dark, #111827));
 }
 

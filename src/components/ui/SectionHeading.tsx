@@ -1,3 +1,12 @@
+/**
+ * @module components/ui/SectionHeading
+ * @description Компонент для создания стандартизированных и анимированных заголовков секций.
+ * Полностью адаптирован под темный Clinical Obsidian дизайн: удалены светлые fallback-цвета (text-primary-blue, text-gray-600) [1].
+ * Использует Slate-400 (#94a3b8) для описаний и Neon Cyan для подзаголовков [1].
+ * @author Kort
+ * @version 1.1.0
+ */
+
 import { motion } from "framer-motion";
 import React from "react";
 
@@ -15,48 +24,9 @@ export interface SectionHeadingProps {
   subtitleClassName?: string;
   descriptionClassName?: string;
   animated?: boolean;
-  centered?: boolean; // Добавляем свойство centered для обратной совместимости
+  centered?: boolean; // Для обратной совместимости
 }
 
-/**
- * @module components/ui/SectionHeading
- * @description Компонент для создания стандартизированных и анимированных заголовков секций.
- * Поддерживает основной заголовок, подзаголовок и описание с гибкими настройками выравнивания, размеров, цветов и анимаций появления.
- *
- * @author Kort
- * @version 1.0.0
- *
- * @param {string} title - Основной текст заголовка.
- * @param {string | React.ReactNode} [subtitle] - Текст или React-узел для подзаголовка (над основным заголовком).
- * @param {string} [description] - Описательный текст под основным заголовком.
- * @param {'left' | 'center' | 'right'} [align='left'] - Горизонтальное выравнивание всего блока.
- * @param {'sm' | 'md' | 'lg' | 'xl'} [size='md'] - Общий размер элементов заголовка.
- * @param {boolean} [titleGradient=false] - Применяет к основному заголовку градиентный текст.
- * @param {boolean} [withLine=true] - Отображает декоративную линию под заголовком.
- * @param {string} [lineColor='blue'] - Цвет декоративной линии.
- * @param {string} [className] - Дополнительные CSS-классы для корневого элемента.
- * @param {string} [titleClassName] - Дополнительные CSS-классы для основного заголовка.
- * @param {string} [subtitleClassName] - Дополнительные CSS-классы для подзаголовка.
- * @param {string} [descriptionClassName] - Дополнительные CSS-классы для описания.
- * @param {boolean} [animated=true] - Включает/отключает анимацию появления элементов.
- * @param {boolean} [centered=false] - Устаревшее свойство, используйте `align='center'`. Обеспечивает обратную совместимость.
- *
- * @see Section - Компонент-обертка, в котором часто используется данный заголовок.
- * @see motion - Компонент из `framer-motion` для анимаций.
- *
- * @usage
- * Используется в начале каждой контентной секции для её именования и описания.
- *
- * @example
- * <SectionHeading
- *   align="center"
- *   title="Почему выбирают нас"
- *   subtitle="Наши ключевые преимущества"
- *   description="Мы предлагаем лучшие решения на рынке..."
- *   titleGradient
- *   withLine
- * />
- */
 const SectionHeading: React.FC<SectionHeadingProps> = ({
   title,
   subtitle,
@@ -80,7 +50,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     right: "text-right ml-auto",
   };
 
-  // Если передан параметр centered, переопределяем align на 'center'
   if (centered) {
     align = "center";
   }
@@ -172,7 +141,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     >
       {subtitle && (
         <motion.p
-          className={`font-medium text-primary-blue dark:text-blue-400 mb-2 ${subtitleSizeClasses[size]} ${subtitleClassName}`}
+          className={`font-semibold text-cyan-400 mb-2 ${subtitleSizeClasses[size]} ${subtitleClassName}`}
           {...subtitleAnimation}
         >
           {subtitle}
@@ -180,7 +149,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
       )}
 
       <motion.h2
-        className={`font-bold leading-tight ${titleGradient ? "gradient-heading" : ""} ${titleSizeClasses[size]} ${titleClassName}`}
+        className={`font-bold leading-tight text-white ${titleGradient ? "gradient-heading" : ""} ${titleSizeClasses[size]} ${titleClassName}`}
         {...titleAnimation}
       >
         {title}
@@ -203,7 +172,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {description && (
         <motion.p
-          className={`mt-4 text-gray-600 dark:text-gray-300 ${descriptionSizeClasses[size]} ${align === "center" ? "mx-auto" : ""} ${descriptionClassName}`}
+          className={`mt-4 text-slate-400 ${descriptionSizeClasses[size]} ${align === "center" ? "mx-auto" : ""} ${descriptionClassName}`}
           {...descriptionAnimation}
         >
           {description}

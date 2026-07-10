@@ -6,7 +6,6 @@
  */
 
 import { FAQItem } from "@/components/ui";
-import { useTheme } from "@/hooks";
 import { motion } from "framer-motion";
 import React, { useCallback, useState } from "react";
 
@@ -49,7 +48,6 @@ const faqData = [
 ];
 
 const ProductsFAQ: React.FC = () => {
-  const { theme } = useTheme();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const handleFAQToggle = useCallback(
@@ -60,17 +58,13 @@ const ProductsFAQ: React.FC = () => {
   );
 
   return (
-    <section
-      className={`py-20 px-6 ${theme === "dark" ? "bg-gray-950" : "bg-white"}`}
-    >
+    <section className="py-20 px-6 bg-gray-950">
       <div className="max-w-4xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className={`text-4xl md:text-6xl font-bold text-center mb-12 ${
-            theme === "dark" ? "text-white" : "text-gray-900"
-          }`}
+          className="text-4xl md:text-6xl font-bold text-center mb-12 text-white"
         >
           Часто задаваемые вопросы
         </motion.h2>

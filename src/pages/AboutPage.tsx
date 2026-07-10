@@ -91,7 +91,7 @@ const AboutPage: React.FC = () => {
               filter: "brightness(0.4)",
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-white dark:to-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
         </motion.div>
 
         {/* Content */}
@@ -117,7 +117,7 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 md:py-32 bg-white dark:bg-gray-950">
+      <section className="py-20 md:py-32 bg-gray-950">
         <div className="container mx-auto px-4 max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -126,10 +126,10 @@ const AboutPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Миссия 4Life
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
               Мы верим, что каждый человек заслуживает жить полной, здоровой
               жизнью. Наша миссия — предоставлять научно обоснованные решения
               для поддержки иммунной системы, помогая людям достигать
@@ -147,16 +147,16 @@ const AboutPage: React.FC = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={tier !== "low" ? { y: -8 } : {}}
-                className="p-8 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700"
+                className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800"
               >
                 <feature.icon
-                  className="w-12 h-12 text-blue-600 dark:text-cyan-400 mb-6"
+                  className="w-12 h-12 text-cyan-400 mb-6"
                   strokeWidth={1.5}
                 />
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-xl font-bold text-white mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-gray-400 leading-relaxed">
                   {feature.description}
                 </p>
               </motion.div>
@@ -166,7 +166,7 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* History Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -175,10 +175,10 @@ const AboutPage: React.FC = () => {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                 История инноваций
               </h2>
-              <div className="space-y-6 text-gray-600 dark:text-gray-300 leading-relaxed">
+              <div className="space-y-6 text-gray-300 leading-relaxed">
                 <p>
                   В 1998 году основатели 4Life открыли революционный способ
                   извлечения Трансфер Факторов из молозива коров и яичного
@@ -220,7 +220,7 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-900 dark:to-cyan-900 text-white">
+      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-900 to-cyan-900 text-white">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -241,7 +241,7 @@ const AboutPage: React.FC = () => {
                 to="/contact"
                 variant="secondary"
                 size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-gray-900 dark:text-cyan-400 dark:hover:bg-gray-800"
+                className="bg-gray-900 text-cyan-400 hover:bg-gray-800"
                 icon={<Icons.MessageCircle className="w-5 h-5" />}
               >
                 Получить консультацию

@@ -5,16 +5,6 @@
 
 /* === ЦВЕТОВАЯ СХЕМА === */
 :root {
-  --footer-bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
-  --footer-text: #0f172a;
-  --footer-text-muted: #64748b;
-  --footer-accent: #3b82f6;
-  --footer-accent-glow: rgba(59, 130, 246, 0.15);
-  --footer-border: rgba(15, 23, 42, 0.06);
-  --footer-card-bg: rgba(255, 255, 255, 0.6);
-}
-
-.dark {
   --footer-bg: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e293b 100%);
   --footer-text: #f8fafc;
   --footer-text-muted: #94a3b8;

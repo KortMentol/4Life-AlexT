@@ -38,8 +38,14 @@ const ModelStep = memo(
     return (
       <motion.div
         ref={ref}
-        initial={tier !== "low" ? { opacity: 0, y: 50 } : { opacity: 1 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
+        initial={tier !== "low" ? { opacity: 0, y: 50 } : { opacity: 1, y: 0 }}
+        animate={
+          tier !== "low"
+            ? inView
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 50 }
+            : { opacity: 1, y: 0 } // Принудительный сброс координат на low-tier при смене на лету
+        }
         transition={{
           duration: 0.9,
           delay: index * 0.12,

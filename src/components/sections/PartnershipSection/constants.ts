@@ -10,23 +10,34 @@ export const IS_TOUCH =
     ? "ontouchstart" in window || navigator.maxTouchPoints > 0
     : false;
 
-// ─── Палитра — адаптирована под light/dark тему ───────────────────────────────
-export const getPalette = (isDark: boolean) => ({
-  bg: isDark ? "#040404" : "#f8f6f2",
-  cream: isDark ? "#F0EDE8" : "#1a1814",
+// ─── Палитра — зафиксирована под темную тему сайта ───────────────────────────
+export const getPalette = () => ({
+  bg: "#040404",
+  cream: "#F0EDE8",
   gold: "#B9974A",
   blue: "#1644F8",
-  blueDim: isDark ? "#1644F830" : "#1644F815",
-  // Белые/тёмные оверлеи с прозрачностью
-  overlay10: isDark ? "rgba(240,237,232,0.10)" : "rgba(26,24,20,0.08)",
-  overlay20: isDark ? "rgba(240,237,232,0.20)" : "rgba(26,24,20,0.15)",
-  overlay40: isDark ? "rgba(240,237,232,0.40)" : "rgba(26,24,20,0.40)",
-  overlay60: isDark ? "rgba(240,237,232,0.60)" : "rgba(26,24,20,0.60)",
+  blueDim: "rgba(22, 68, 248, 0.188)", // Эквивалент #1644F830 для экономии вычислений
+  // Оверлеи с прозрачностью
+  overlay10: "rgba(240,237,232,0.10)",
+  overlay20: "rgba(240,237,232,0.20)",
+  overlay40: "rgba(240,237,232,0.40)",
+  overlay60: "rgba(240,237,232,0.60)",
   // Dot grid
-  dotColor: isDark ? "rgba(240,237,232,0.08)" : "rgba(26,24,20,0.06)",
+  dotColor: "rgba(240,237,232,0.08)",
 });
 
-export type Palette = ReturnType<typeof getPalette>;
+export type Palette = {
+  bg: string;
+  cream: string;
+  gold: string;
+  blue: string;
+  blueDim: string;
+  overlay10: string;
+  overlay20: string;
+  overlay40: string;
+  overlay60: string;
+  dotColor: string;
+};
 
 // ─── Главы (ChapterNav) ───────────────────────────────────────────────────────
 export const CHAPTERS = ["ВХОД", "ОСНОВА", "МОДЕЛЬ", "ДОХОД", "СТАРТ"] as const;

@@ -1,15 +1,9 @@
 /**
  * @module components/ui/ParallaxSection
  * @description Параллакс секция — паттерн Olivier Larose.
- *
- * ВНЕДРЕНО (ШАГ 7):
- * - Удален жесткий хардкод `tier === "low"`.
- * - Анимации `useTransform` и `touchStrength` теперь полностью зависят от `isParallaxEnabled`.
- * - Это дает 100% контроль дебагеру в DEV-режиме, а в PROD-режиме автоматически
- *   отключает параллакс на Low-устройствах для спасения FPS.
- *
+ * Восстановлена оригинальная физика десктопного fixed-параллакса со сжатием маски.
  * @author Geminis AI & Kort
- * @version 8.0.0
+ * @version 9.0.1
  */
 
 import { useFeatureFlag, usePerformanceTier } from "@/hooks";
@@ -34,7 +28,6 @@ export interface ParallaxSectionProps {
   edgeFade?: {
     top?: number;
     bottom?: number;
-    colorLight?: string;
     colorDark?: string;
   };
 }
@@ -64,7 +57,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   const inView = useInView(containerRef, { once: true, margin: "200px" });
   const tier = usePerformanceTier();
 
-  // ИНТЕЛЛЕКТУАЛЬНЫЙ ФЛАГ: В PROD параллакс отключается на Low-тире. В DEV - управляется дебагером.
   const isParallaxEnabled = useFeatureFlag("parallaxBackground", tier !== "low");
 
   useEffect(() => {
@@ -82,9 +74,9 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     };
   }, []);
 
-  // ИСПРАВЛЕНИЕ: Сила зависит только от флага, а не от тира.
   const touchStrength = isParallaxEnabled ? 300 : 0;
 
+  // useParallaxLenis используется строго на мобильных тач-устройствах
   useParallaxLenis(parallaxBgRef, containerRef, {
     strength: IS_TOUCH ? touchStrength : 0,
     disabled: !IS_TOUCH || !isParallaxEnabled,
@@ -95,7 +87,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     offset: ["start end", "end start"],
   });
 
-  // ИСПРАВЛЕНИЕ: Точки трансформации зависят только от флага
   const desktopYFrom = isParallaxEnabled ? "-10%" : "0%";
   const desktopYTo = isParallaxEnabled ? "10%" : "0%";
 
@@ -164,7 +155,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     );
   };
 
-  // ─── TOUCH ────────────────────────────────────────────────────────────────
+  // ─── TOUCH LAYOUT (Абсолютный скролл с Lerp) ───
   if (IS_TOUCH) {
     return (
       <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
@@ -219,7 +210,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     );
   }
 
-  // ─── DESKTOP — паттерн Оливье: fixed всегда, только y меняется ───────────
+  // ─── DESKTOP LAYOUT (Olivier Larose Fixed Portal) ───
   return (
     <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
       {renderEdgeFades()}

@@ -1,7 +1,8 @@
 /**
  * @module FinalCTASection
  * @description Awwwards 2026 — Final CTA with stats, immersive parallax, tier-aware.
- * @version 2.0.0
+ * Очищен от JSDoc комментариев про светлые темы и дублирующих селекторов dark:brightness.
+ * @version 2.1.0
  */
 
 import { Button, ParallaxSection } from "@/components/ui";
@@ -31,8 +32,8 @@ const FinalCTASection: React.FC = () => {
       altText="Готовы сделать первый шаг к здоровью"
       height="auto"
       contentClasses="flex flex-col items-center justify-center text-center py-20 md:py-28"
-      imageBrightness="brightness-[.35] dark:brightness-[.25]"
-      edgeFade={{ top: 160, colorLight: "#ffffff", colorDark: "#030712" }}
+      imageBrightness="brightness-[.25]"
+      edgeFade={{ top: 160, colorDark: "#030712" }}
     >
       <div ref={ref} className="container max-w-5xl mx-auto px-6">
         {/* Stats row */}
@@ -71,8 +72,7 @@ const FinalCTASection: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="h-px w-32 mx-auto mb-12 origin-center"
           style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)",
           }}
         />
 
@@ -96,8 +96,8 @@ const FinalCTASection: React.FC = () => {
           transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg md:text-xl text-white/70 mb-10 leading-relaxed max-w-2xl mx-auto font-light"
         >
-          Получите персональную консультацию. Я помогу подобрать продукты под
-          ваши цели и объясню как они работают — без давления и обязательств.
+          Получите персональную консультацию. Я помогу подобрать продукты под ваши цели и объясню как они работают — без
+          давления и обязательств.
         </motion.p>
 
         {/* CTA buttons */}

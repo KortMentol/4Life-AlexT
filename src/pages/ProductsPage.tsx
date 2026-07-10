@@ -1,23 +1,18 @@
 /**
  * @module src/pages/ProductsPage.tsx
- * @description Immersive Garden 2026 - Apple-Level Masterpiece
+ * @description Immersive Garden 2026 - Каталог продуктов.
+ * Полностью удалены CSS-классы светлой темы (`bg-white`, `to-white` и т.д.) [1].
+ * Страница зафиксирована на глубоком Clinical Obsidian фоне (#03050a) [1] во всех контекстах.
  * @author KortMentol
  */
 
 import ProductDetailModal from "@/components/ui/ProductDetailModal";
 import { DetailedProduct, productsData } from "@/data/productsData";
-import { useTheme } from "@/hooks";
 import { lenis } from "@/lib/lenis";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { AnimatePresence, motion } from "framer-motion";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 // Секции
@@ -29,15 +24,10 @@ import ProductsHero from "@/components/sections/ProductsCatalog/ProductsHero";
 import "@/styles/pages/products-page.css";
 
 const ProductsPage: React.FC = () => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // --- STATE ---
-  // Category synced with URL ?cat=... for browser back/forward support
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    () => searchParams.get("cat") ?? null,
-  );
+  // Синхронизация категории с URL ?cat=...
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [showFloatingFilter, setShowFloatingFilter] = useState(false);
 
@@ -51,12 +41,12 @@ const ProductsPage: React.FC = () => {
   }, [selectedProductId]);
 
   const isModalOpen = !!selectedProduct;
+
   // Grid mode persisted in localStorage
   const [gridMode, setGridMode] = useState<2 | 3 | 4>(() => {
     try {
       const saved = localStorage.getItem("products-grid-mode");
-      if (saved === "2" || saved === "3" || saved === "4")
-        return Number(saved) as 2 | 3 | 4;
+      if (saved === "2" || saved === "3" || saved === "4") return Number(saved) as 2 | 3 | 4;
     } catch {}
     return 4;
   });
@@ -122,7 +112,7 @@ const ProductsPage: React.FC = () => {
           prev.set("productId", p.id);
           return prev;
         },
-        { replace: false }, // push в историю, чтобы работала кнопка "Назад"
+        { replace: false }, // push в историю для поддержки кнопки "Назад" в браузере
       );
     },
     [setSearchParams],
@@ -152,7 +142,7 @@ const ProductsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-black dark:bg-black bg-white">
+    <div className="relative min-h-screen bg-[#03050a]">
       <SEO
         title="Коллекция 4Life - Каталог здоровья"
         description="Полный каталог инновационных продуктов 4Life с Трансфер Факторами."
@@ -163,22 +153,13 @@ const ProductsPage: React.FC = () => {
       <ProductsHero />
 
       {/* 2. КАТАЛОГ */}
-      <div
-        ref={catalogRef}
-        className="relative z-10 w-full bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-black"
-      >
-        {/* Градиент-Ластик */}
-        <div className="absolute left-0 right-0 h-[300px] md:h-[400px] -top-[300px] md:-top-[400px] bg-gradient-to-b from-transparent to-white dark:to-black pointer-events-none" />
+      <div ref={catalogRef} className="relative z-10 w-full bg-gradient-to-b from-[#0f172a] to-[#03050a]">
+        {/* Мягкий градиентный стык с Hero-секцией */}
+        <div className="absolute left-0 right-0 h-[300px] md:h-[400px] -top-[300px] md:-top-[400px] bg-gradient-to-b from-transparent to-[#0f172a] pointer-events-none" />
 
         <div className="py-12 relative z-20">
-          {/* ИДЕАЛЬНЫЙ ЯКОРЬ В НОРМАЛЬНОМ ПОТОКЕ */}
-          <div
-            ref={gridAnchorRef}
-            className="w-full h-0 pointer-events-none"
-            aria-hidden="true"
-          />
+          <div ref={gridAnchorRef} className="w-full h-0 pointer-events-none" aria-hidden="true" />
 
-          {/* Заголовок с отступами */}
           <div className="max-w-[1600px] mx-auto px-4 md:px-8">
             <ProductsGrid
               products={filteredProducts}
@@ -204,19 +185,11 @@ const ProductsPage: React.FC = () => {
             exit={{ scale: 0, opacity: 0, y: 20 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setIsFiltersOpen(!isFiltersOpen)} // TOGGLE ЛОГИКА
-            className={`fixed bottom-6 left-6 z-[60] flex items-center justify-center w-14 h-14 rounded-2xl shadow-2xl floating-filter-btn ${
-              isDark
-                ? "bg-gray-800/90 text-cyan-400 border border-gray-700 hover:border-cyan-400/50"
-                : "bg-white/90 text-blue-600 border border-gray-200 hover:border-blue-400"
-            }`}
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+            className="fixed bottom-6 left-6 z-[60] flex items-center justify-center w-14 h-14 rounded-2xl shadow-2xl floating-filter-btn bg-gray-800/90 text-cyan-400 border border-gray-700 hover:border-cyan-400/50"
             aria-label="Фильтры"
           >
-            {isFiltersOpen ? (
-              <Icons.X className="w-6 h-6" />
-            ) : (
-              <Icons.Filter className="w-6 h-6" />
-            )}
+            {isFiltersOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Filter className="w-6 h-6" />}
           </motion.button>
         )}
       </AnimatePresence>
@@ -242,7 +215,7 @@ const ProductsPage: React.FC = () => {
               prev.delete("productId");
               return prev;
             },
-            { replace: true }, // replace, чтобы не засорять историю закрытиями
+            { replace: true }, // replace для сохранения истории назад/вперед без фантомных модалок
           );
 
           // Возврат скролла к последней открытой карточке

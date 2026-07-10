@@ -1,3 +1,11 @@
+/**
+ * @module VimeoModal
+ * @description Модальное окно для воспроизведения Vimeo.
+ * Иконки строго из единого пульта @/utils/icons.
+ * @version 2.1.0
+ */
+
+import { Icons } from "@/utils/icons";
 import { lenis } from "@/lib/lenis";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef } from "react";
@@ -87,23 +95,10 @@ export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, v
                 onClick={onClose}
                 className="absolute -top-14 right-0 md:-top-10 md:-right-10 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:scale-110 active:scale-95 focus:outline-none"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <Icons.X className="w-[18px] h-[18px]" strokeWidth={2.5} />
               </button>
 
               <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10">
-                {/* Embedded Vimeo Player. Unmounts completely when modal is closed */}
                 <iframe
                   src={videoUrl}
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
