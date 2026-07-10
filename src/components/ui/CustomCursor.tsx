@@ -1,14 +1,9 @@
 /**
  * @module src/components/ui/CustomCursor.tsx
- * @description Global fixed premium cursor.
- * High/Medium Tier: Smoked Obsidian Glass (no backdrop-filter).
- * Low Tier: Solid color (Performance safe).
- * Tactile feedback: spring shrink (scale 0.85) on mousedown.
+ * @description Глобальный фиксированный премиум-курсор.
  *
- * FIX (Awwwards 2026): Реализован ручной Raycasting (elementFromPoint)
- * внутри RAF-цикла для преодоления бага браузеров, которые отключают
- * события hover/mouseenter во время скролла колесом.
- * @author Kort
+ * @author Senior Staff Frontend Engineer
+ * @version 2.1.1
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
@@ -31,28 +26,27 @@ export const CustomCursor: React.FC = () => {
   const lastMousePos = useRef({ x: -100, y: -100 });
 
   useEffect(() => {
-    // На тач-устройствах курсор не нужен вообще (Hardware protection)
     if ("ontouchstart" in window || navigator.maxTouchPoints > 0) return;
+
+    let isMouseMoving = false;
+    let isPageScrolling = false;
+    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
 
     const onMove = (e: MouseEvent) => {
       lastMousePos.current = { x: e.clientX, y: e.clientY };
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
-      checkHitTarget(); // Мгновенная проверка при движении мыши
+      isMouseMoving = true;
     };
 
     const onDown = () => setIsClicked(true);
     const onUp = () => setIsClicked(false);
 
-    // Функция ручного определения цели под курсором
     const checkHitTarget = () => {
       const { x, y } = lastMousePos.current;
       if (x < 0 || y < 0) return;
 
-      // Получаем элемент, над которым сейчас находится курсор
       const el = document.elementFromPoint(x, y);
-
-      // Ищем класс-триггер вверх по дереву
       const isOverVideo = !!el?.closest(".video-cursor-target");
 
       if (activeRef.current !== isOverVideo) {
@@ -62,21 +56,29 @@ export const CustomCursor: React.FC = () => {
     };
 
     let frameCount = 0;
-    // Подписываемся на скролл, чтобы отслеживать проплывающие под курсором элементы
-    const onRaf = () => {
-      frameCount++;
-      // Троттлинг: проверяем только каждый 3-й кадр (~20 раз в секунду).
-      // Этого достаточно для идеальной плавности, но экономит 66% времени CPU,
-      // предотвращая layout thrashing во время скролла.
-      if (frameCount % 3 === 0) {
-        checkHitTarget();
+    const onTick = () => {
+      // Исполняем лучевое сканирование только при наличии физического изменения координат (0% CPU в простое)
+      if (isMouseMoving || isPageScrolling) {
+        frameCount++;
+        if (frameCount % 3 === 0) {
+          checkHitTarget();
+          isMouseMoving = false;
+          isPageScrolling = false;
+        }
       }
     };
+
+    const unsubRaf = rafLoop.subscribe((currentScrollY) => {
+      if (currentScrollY !== lastScrollY) {
+        isPageScrolling = true;
+        lastScrollY = currentScrollY;
+      }
+      onTick();
+    });
 
     window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("mousedown", onDown);
     window.addEventListener("mouseup", onUp);
-    const unsubRaf = rafLoop.subscribe(onRaf);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
@@ -106,7 +108,6 @@ export const CustomCursor: React.FC = () => {
         transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
         className={[
           "w-24 h-24 rounded-full flex items-center justify-center border shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
-          // Clean hardware-friendly Smoked Obsidian Glass (0% backdrop-filter overhead)
           tier === "low"
             ? "bg-[#0b0f19]/95 border-cyan-500/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
             : "bg-[#080d18]/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]",

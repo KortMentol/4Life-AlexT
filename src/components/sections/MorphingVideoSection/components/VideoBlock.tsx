@@ -1,16 +1,9 @@
 /**
  * @module src/components/sections/MorphingVideoSection/components/VideoBlock.tsx
  * @description Awwwards 2026 - Optimized Responsive Video Block (Dual Observer Architecture).
- * Все иконки строго импортируются из единого пульта @/utils/icons.
- *
- * ОПТИМИЗАЦИЯ И ИДЕАЛЬНЫЙ ВОСПРОИЗВЕДИТЕЛЬ (ZERO LAG):
- * 1. Dual Observer: Радар сети (1500px) предзагружает видео в кэш ДО появления на экране.
- * 2. Радар воспроизведения (150px) запускает видео строго при входе во вьюпорт.
- * 3. Promise Catching: Защита от крашей и лагов при бешеном скролле туда-сюда.
- * 4. Zero-State: Строгая пауза вне экрана (0% CPU/GPU).
- *
+ * ИСПРАВЛЕНИЕ: RAF-цикл кругового прогресс-бара полностью гасится при паузе видео, исключая холостую нагрузку на CPU.
  * @author Geminis AI & Kort
- * @version 3.1.0
+ * @version 3.2.0
  */
 
 import { usePerformanceTier } from "@/hooks";
@@ -146,6 +139,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     };
   }, [isPlaybackInView, isModalOpen, isTransitioning]);
 
+  // ИСПРАВЛЕНИЕ: Рациональное управление циклом RAF в зависимости от play/pause видео
   useEffect(() => {
     const video = videoRef.current;
     const circle = progressCircleRef.current;
@@ -156,7 +150,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     const circumference = 2 * Math.PI * radius;
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
 
-    let rafId: number;
+    let rafId: number | null = null;
     let lastTime = 0;
 
     const updateProgress = (time: number) => {
@@ -168,11 +162,43 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
           circle.style.strokeDashoffset = `${offset}`;
         }
       }
-      rafId = requestAnimationFrame(updateProgress);
+
+      // Запускаем следующий кадр только если видео все еще воспроизводится
+      if (!video.paused) {
+        rafId = requestAnimationFrame(updateProgress);
+      } else {
+        rafId = null;
+      }
     };
 
-    rafId = requestAnimationFrame(updateProgress);
-    return () => cancelAnimationFrame(rafId);
+    const handlePlay = () => {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updateProgress);
+      }
+    };
+
+    const handlePause = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+
+    // Первичный запуск если видео уже играет
+    if (!video.paused) {
+      rafId = requestAnimationFrame(updateProgress);
+    }
+
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
   }, [isPlaybackInView, isVideoLoaded, isLow]);
 
   const { scrollYProgress } = useScroll({
@@ -297,7 +323,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
                 ].join(" ")}
                 style={{ transform: "translateZ(0)" }}
               >
-                {/* Structural SVG for progress ring (Mathematical Mask) */}
                 {tier !== "low" && (
                   <svg
                     className="absolute inset-0 w-full h-full -rotate-90 overflow-visible pointer-events-none"

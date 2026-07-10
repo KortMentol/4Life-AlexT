@@ -1,19 +1,9 @@
 /**
  * @module src/components/debug/EffectsDebugPanel
  * @description Настольная панель управления эффектами (DEV).
- * Показывает активный режим в заголовке. Поддерживает восстановление "Last Preset".
- * Содержит атрибут `data-lenis-prevent` для блокировки скролла подлежащей страницы.
- *
- * ВНЕДРЕНО (ФАЗА 2 - STICKY PRESETS, ENGINE POWER, HOVER TOOLTIPS & OVERFLOW FIX):
- * - Sticky Presets Area: панель пресетов и мастер-рубильник жестко зафиксированы вверху.
- * - Engine Power (Soft Bypass): красивый выключатель для тотальной заморозки графики.
- * - Unified Hover Tooltips: восстановлены и дополнены всплывающие подсказки для абсолютно всех
- *   интерактивных элементов (пресеты, сброс, рубильник, ползунки).
- * - Overflow Fix: динамическое управление свойством overflow предотвращает клиппинг подсказок.
- * - "noUncheckedIndexedAccess" Safety: полная совместимость со строгими правилами TypeScript.
- *
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
  * @author Geminis AI & Kort
- * @version 7.2.1
+ * @version 7.3.0
  */
 
 import { useMediaQuery } from "@/hooks";
@@ -23,7 +13,7 @@ import {
   PerformanceTierOverride,
   effectsDebugStore,
 } from "@/utils/effectsDebug/effectsDebugStore";
-import { ChevronDown, ChevronUp, Info, Move, Sliders, X } from "lucide-react";
+import { Icons } from "@/utils/icons";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./EffectsDebugPanel.module.css";
@@ -330,7 +320,7 @@ const EffectsDebugPanel: React.FC = () => {
       const meta = FLAGS_METADATA[key];
       if (!meta) return;
 
-      // Оставляем флаги: Глобальные (all) или текущей страницы, И (устройства "all" или "desktop")
+      // Оставляем фланги: Глобальные (all) или текущей страницы, И (устройства "all" или "desktop")
       const routeMatch = meta.routes.includes("all") || meta.routes.includes(currentPath as any);
       const deviceMatch = meta.device === "all" || meta.device === "desktop";
 
@@ -387,7 +377,7 @@ const EffectsDebugPanel: React.FC = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-            <Info size={13} style={{ color: "#00ffff", flexShrink: 0 }} />
+            <Icons.Info size={13} style={{ color: "#00ffff", flexShrink: 0 }} />
             <span style={{ fontSize: "0.62rem", color: "#00ffff", textTransform: "uppercase", whiteSpace: "nowrap" }}>
               {hoveredLocation}
             </span>
@@ -399,8 +389,8 @@ const EffectsDebugPanel: React.FC = () => {
       {/* ── ЗОНА 1 (Фиксированная): Заголовок хедера ── */}
       <div className={styles.header} onMouseDown={handleMouseDown} onClick={toggleCompact} style={{ flexShrink: 0 }}>
         <div className={styles.headerLeft}>
-          <Move size={13} />
-          <Sliders size={13} />
+          <Icons.Move size={13} />
+          <Icons.Sliders size={13} />
           <span>Effects Debug ({flags.tierOverride})</span>
         </div>
         <div className={styles.headerActions}>
@@ -411,7 +401,7 @@ const EffectsDebugPanel: React.FC = () => {
               setIsCompact((p) => !p);
             }}
           >
-            {isCompact ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+            {isCompact ? <Icons.ChevronDown size={16} /> : <Icons.ChevronUp size={16} />}
           </button>
           <button
             className={styles.iconBtn}
@@ -420,7 +410,7 @@ const EffectsDebugPanel: React.FC = () => {
               setIsVisible(false);
             }}
           >
-            <X size={15} />
+            <Icons.X size={15} />
           </button>
         </div>
       </div>

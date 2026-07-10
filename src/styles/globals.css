@@ -8,7 +8,7 @@
  * управляется через Framer Motion и привязана к Scroll-таймлайну. 
  *
  * @author Kort
- * @version 8.2.0
+ * @version 8.3.0
  */
 
 /* Import component styles */
@@ -66,16 +66,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body,
-main,
-header,
-footer,
-section {
-  transition:
-    background-color 0.4s ease,
-    color 0.4s ease,
-    border-color 0.4s ease;
-}
+/* ИСПРАВЛЕНИЕ: Удален тяжелый холостой transition для body, main, header, footer, section */
 
 :not(.swiper, .swiper-wrapper, .swiper-slide) > [style*="--framer-will-change"],
 :not(.swiper, .swiper-wrapper, .swiper-slide) > [style*="transform:"] {
@@ -176,7 +167,7 @@ section {
   position: fixed;
   inset: -100%;
   z-index: 35;
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73eAf8D+DSDPWks8AAAAABJRU5ErkJoggling==");
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73eAf8D+DSDPWks8AAAAABJRU5ErkJoggling==");
   background-repeat: repeat;
   opacity: 0.04;
   pointer-events: none;

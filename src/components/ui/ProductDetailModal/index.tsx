@@ -2,6 +2,7 @@
  * ProductDetailModal v15 — "Snake Sheet"
  * Mobile: panel scrolls itself (overflowY auto), drag handle closes
  * Desktop: fixed modal, media left, content right
+ * Все иконки строго импортируются из единого пульта @/utils/icons.
  */
 import { DetailedProduct, GalleryItem } from "@/data/productsData";
 import { usePerformanceTier } from "@/hooks";
@@ -20,7 +21,6 @@ import { useModalBodyLock } from "./hooks";
 import { ProductDetailModalHandle, ProductDetailModalProps } from "./types";
 import { buildGallery, IS_TOUCH } from "./utils";
 
-// ─── Spring configs ───────────────────────────────────────────────────────────
 const SPRING_HIGH = {
   type: "spring" as const,
   stiffness: 380,
@@ -34,7 +34,6 @@ const SPRING_LOW = {
 };
 const FADE = { duration: 0.2, ease: [0.16, 1, 0.3, 1] as const };
 
-// ─── Sub-component prop types ─────────────────────────────────────────────────
 interface SharedProps {
   currentProduct: DetailedProduct | null;
   gallery: GalleryItem[];
@@ -49,7 +48,6 @@ interface SharedProps {
   handleAddToCart: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-// ─── Mobile layout ────────────────────────────────────────────────────────────
 const MobileLayout: React.FC<SharedProps> = ({
   currentProduct,
   gallery,
@@ -130,7 +128,8 @@ const MobileLayout: React.FC<SharedProps> = ({
             }}
             className="typography-label"
           >
-            <Icons.ShoppingCart style={{ width: 18, height: 18, flexShrink: 0 }} />
+            {/* ИСПРАВЛЕНИЕ: Иконка ShoppingCart заменена на ShoppingBag для сквозной гармонии с хедером */}
+            <Icons.ShoppingBag style={{ width: 18, height: 18, flexShrink: 0 }} />
             <span>Добавить в список</span>
           </button>
         </div>
@@ -139,7 +138,6 @@ const MobileLayout: React.FC<SharedProps> = ({
   );
 };
 
-// ─── Desktop layout ───────────────────────────────────────────────────────────
 interface DesktopLayoutProps extends SharedProps {
   closeButtonRef: React.RefObject<HTMLButtonElement>;
   handleClose: () => void;
@@ -185,12 +183,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
             style={{ position: "absolute", inset: 0 }}
           >
             {currentProduct && (
-              <MediaGallery
-                gallery={gallery}
-                activeIndex={mediaIndex}
-                onIndexChange={setMediaIndex}
-                isMobile={false}
-              />
+              <MediaGallery gallery={gallery} activeIndex={mediaIndex} onIndexChange={setMediaIndex} isMobile={false} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -215,9 +208,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
             exit={tier !== "low" ? { opacity: 0, x: -10 } : {}}
             transition={FADE}
           >
-            {currentProduct && (
-              <ContentPanel product={currentProduct} isMobile={false} onAddToCart={handleAddToCart} />
-            )}
+            {currentProduct && <ContentPanel product={currentProduct} isMobile={false} onAddToCart={handleAddToCart} />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -228,7 +219,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   </>
 );
 
-// ─── Main component ───────────────────────────────────────────────────────────
 const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailModalProps>(
   ({ product, products, isOpen, onClose }, ref) => {
     const { addToCart } = useShoppingCart();
@@ -238,7 +228,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
     const panelRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-    // Drag-to-close motion values
     const dragY = useMotionValue(0);
     const panelOpacity = useTransform(dragY, [0, 260], [1, 0.5]);
     const backdropOpacity = useTransform(dragY, [0, 260], [1, 0]);
@@ -268,7 +257,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
       }
     }, [isOpen, dragY]);
 
-    // Header sync (desktop only)
     useEffect(() => {
       if (IS_TOUCH) return;
       document.body.style.setProperty("--header-y", isOpen ? "-130%" : "0%");
@@ -366,7 +354,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
@@ -386,7 +373,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
             />
 
             {IS_TOUCH ? (
-              /* ── MOBILE PANEL ── */
               <motion.div
                 key="panel-mobile"
                 ref={panelRef}
@@ -412,7 +398,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
                   overscrollBehavior: "contain",
                 }}
               >
-                {/* Drag handle — only this element has drag */}
                 <motion.div
                   drag="y"
                   dragConstraints={{ top: 0 }}
@@ -431,7 +416,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
                   <DragHandle />
                 </motion.div>
 
-                {/* Close button */}
                 <div style={{ position: "absolute", top: 8, right: 16, zIndex: 10 }}>
                   <SciFiCloseButton ref={closeButtonRef} onClick={handleClose} />
                 </div>
@@ -439,7 +423,6 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
                 <MobileLayout {...sharedProps} />
               </motion.div>
             ) : (
-              /* ── DESKTOP PANEL ── */
               <motion.div
                 key="panel-desktop"
                 initial={{ opacity: 0, scale: 0.96, y: 16 }}

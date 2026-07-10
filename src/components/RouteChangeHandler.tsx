@@ -1,3 +1,11 @@
+/**
+ * @module src/components/RouteChangeHandler.tsx
+ * @description Умное восстановление скролла (Smart Observer + Scrollbar Sync).
+ * 
+ * @author Kort
+ * @version 1.3.0
+ */
+
 import { useNavigation } from "@/App";
 import { lenis } from "@/lib/lenis";
 import { RefObject, useEffect, useRef } from "react";
@@ -7,6 +15,7 @@ declare global {
   interface Window {
     __popTransitionInProgress?: boolean;
     __isRoutingLock?: boolean;
+    __isScrollRestorationActive?: boolean;
   }
 }
 
@@ -63,7 +72,6 @@ const getScrollPosition = (path: string): number | null => {
   return null;
 };
 
-// ИСПРАВЛЕНИЕ УТЕЧКИ И БЛОКИРОВКИ СКРОЛЛА: Контроллер сброса состояний
 class RestorationController {
   private observer: ResizeObserver | null = null;
   private timeoutId: NodeJS.Timeout | null = null;
@@ -71,7 +79,7 @@ class RestorationController {
 
   public start(y: number, maxWaitMs = 3500) {
     this.cancel();
-    this.isRestored = false; // <-- КРИТИЧЕСКИЙ ФИКС: Сбрасываем флаг для запуска нового цикла
+    this.isRestored = false;
     lenis?.stop();
     window.__isScrollRestorationActive = true;
 
@@ -91,8 +99,11 @@ class RestorationController {
           lenis.start();
           requestAnimationFrame(() => {
             if (!lenis) return;
-            lenis.scrollTo(y + 0.1, { immediate: true, force: true } as any);
+            lenis.scrollTo(y, { immediate: true, force: true } as any);
             requestAnimationFrame(() => {
+              if (window.ScrollTrigger) {
+                window.ScrollTrigger.update();
+              }
               window.__isScrollRestorationActive = false;
             });
           });
@@ -215,8 +226,13 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
       setIsPopping(true);
 
+      // ОТПРАВЛЯЕМ СИГНАЛ СТАРТА ПЕРЕХОДА (устраняет интервальный таймер в скроллбаре)
+      window.dispatchEvent(new CustomEvent("pop-transition-start"));
+
       const targetPath = event.state?.path || window.location.pathname + window.location.search;
       const targetScroll = getScrollPosition(targetPath) ?? 0;
+
+      if (cleanupTimeout) clearTimeout(cleanupTimeout);
 
       cleanupTimeout = setTimeout(() => {
         setIsPopping(false);
