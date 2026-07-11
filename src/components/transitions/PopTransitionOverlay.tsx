@@ -1,6 +1,3 @@
-// src/components/transitions/PopTransitionOverlay.tsx
-// AWWWARDS 2026 — ETHEREAL TRANSITION VEIL
-
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
@@ -9,63 +6,9 @@ interface PopTransitionOverlayProps {
   isActive: boolean;
 }
 
-/**
- * Immersive Garden 2026 inspired transition overlay
- * Features: Adaptive performance tiers, ethereal gradients, buttery smooth 120fps
- */
 const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive }) => {
-  const performanceTier = usePerformanceTier();
-
-  const getVeilConfig = () => {
-    switch (performanceTier) {
-      case "high":
-        return {
-          background: `
-            radial-gradient(ellipse 80% 50% at 50% 0%, 
-              rgba(0, 212, 255, 0.15) 0%, 
-              rgba(59, 130, 246, 0.12) 25%,
-              rgba(147, 51, 234, 0.08) 50%,
-              rgba(30, 41, 59, 0.95) 75%,
-              rgba(15, 23, 42, 0.98) 100%
-            ),
-            linear-gradient(135deg,
-              rgba(0, 212, 255, 0.05) 0%,
-              transparent 30%,
-              rgba(59, 130, 246, 0.03) 70%,
-              transparent 100%
-            )
-          `,
-          backdropFilter: "blur(12px) saturate(1.2) brightness(0.95)",
-          duration: 0.5,
-          ease: [0.25, 0.1, 0.25, 1],
-        };
-
-      case "medium":
-        return {
-          background: `
-            radial-gradient(ellipse 70% 40% at 50% 0%, 
-              rgba(59, 130, 246, 0.08) 0%,
-              rgba(30, 41, 59, 0.92) 60%,
-              rgba(15, 23, 42, 0.96) 100%
-            )
-          `,
-          backdropFilter: "blur(6px) saturate(1.1)",
-          duration: 0.4,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        };
-
-      case "low":
-      default:
-        return {
-          background: "rgba(15, 23, 42, 0.95)",
-          backdropFilter: "none",
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1],
-        };
-    }
-  };
-
-  const config = getVeilConfig();
+  const tier = usePerformanceTier();
+  const isLow = tier === "low";
 
   return (
     <AnimatePresence mode="wait">
@@ -73,22 +16,22 @@ const PopTransitionOverlay: React.FC<PopTransitionOverlayProps> = ({ isActive })
         <motion.div
           className="fixed inset-0 z-[2147483647] pointer-events-none"
           style={{
-            background: config.background,
-            backdropFilter: config.backdropFilter,
-            WebkitBackdropFilter: config.backdropFilter,
+            background: isLow ? "#03050a" : "rgba(3, 5, 10, 0.98)",
+            backdropFilter: isLow ? "none" : "blur(24px) saturate(1.2)",
+            WebkitBackdropFilter: isLow ? "none" : "blur(24px) saturate(1.2)",
             willChange: "opacity",
-            contain: "layout style paint",
             transform: "translateZ(0)",
             backfaceVisibility: "hidden",
-            isolation: "isolate",
           }}
+          // Экран мгновенно становится черным/матовым
           initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: 1, transition: { duration: 0 } }}
+          // Дорогое, плавное растворение
           exit={{
             opacity: 0,
             transition: {
-              duration: config.duration,
-              ease: config.ease,
+              duration: 0.85,
+              ease: [0.32, 0.72, 0, 1],
             },
           }}
         />

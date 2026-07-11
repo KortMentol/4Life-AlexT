@@ -1,7 +1,6 @@
 import { gsap } from "gsap";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
-// Тип для ref-объекта
 export interface TransitionHandle {
   play: (direction: "in" | "out") => Promise<void>;
 }
@@ -20,10 +19,7 @@ export const WaveTransition = forwardRef<TransitionHandle>((_, ref) => {
         return;
       }
 
-      // Создаем timeline каждый раз для чистоты
-      if (timelineRef.current) {
-        timelineRef.current.kill();
-      }
+      if (timelineRef.current) timelineRef.current.kill();
 
       const tl = gsap.timeline({
         onComplete: () => {
@@ -37,56 +33,55 @@ export const WaveTransition = forwardRef<TransitionHandle>((_, ref) => {
       gsap.set(overlay, { pointerEvents: "auto" });
 
       if (direction === "in") {
+        // Железобетонная математика: Волной снизу вверх, заливаем весь экран
         tl.set(path, { attr: { d: "M 0 100 V 100 Q 50 100 100 100 V 100 z" } })
           .to(path, {
-            duration: 0.8,
+            duration: 0.5,
             ease: "power4.in",
             attr: { d: "M 0 100 V 50 Q 50 0 100 50 V 100 z" },
           })
           .to(path, {
-            duration: 0.3,
-            ease: "power2",
+            duration: 0.4,
+            ease: "power2.out",
             attr: { d: "M 0 100 V 0 Q 50 0 100 0 V 100 z" },
           });
       } else {
-        // direction 'out'
+        // Поднимается в потолок, открывая чистую страницу
         tl.set(path, { attr: { d: "M 0 0 V 100 Q 50 100 100 100 V 0 z" } })
           .to(path, {
-            duration: 0.3,
+            duration: 0.4,
             ease: "power2.in",
             attr: { d: "M 0 0 V 50 Q 50 0 100 50 V 0 z" },
           })
           .to(path, {
-            duration: 0.8,
-            ease: "power4",
+            duration: 0.6,
+            ease: "power4.out",
             attr: { d: "M 0 0 V 0 Q 50 0 100 0 V 0 z" },
           });
       }
     });
   };
 
-  useImperativeHandle(ref, () => ({
-    play,
-  }));
+  useImperativeHandle(ref, () => ({ play }));
 
   return (
     <div
       ref={overlayRef}
-      className="theodore-menu-container"
-      style={{ pointerEvents: "none" }}
+      // Строго ниже прелоадера (2147483647), но выше всего остального сайта
+      className="fixed inset-0 w-full h-full pointer-events-none z-[2147483646]"
+      style={{ transform: "translateZ(0)", willChange: "transform" }}
     >
       <svg
-        className="overlay"
-        width="100%"
-        height="100%"
+        className="absolute top-0 left-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
       >
         <path
           ref={pathRef}
-          className="overlay__path"
           vectorEffect="non-scaling-stroke"
-          d="M 0 0 V 0 Q 50 0 100 0 V 0 z"
+          // Изначально сплющена на самом дне. Нет вызова play() при старте = нет бага с прелоадером
+          d="M 0 100 V 100 Q 50 100 100 100 V 100 z"
+          fill="#03050a" // Идеальный цвет Clinical Obsidian
         />
       </svg>
     </div>

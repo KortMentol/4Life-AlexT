@@ -1,11 +1,10 @@
 /**
  * @module VimeoModal
  * @description Модальное окно для воспроизведения Vimeo.
- * Иконки строго из единого пульта @/utils/icons.
- * @version 2.1.0
+ * @version 2.2.0
  */
 
-import { Icons } from "@/utils/icons";
+import SciFiCloseButton from "@/components/ui/SciFiCloseButton";
 import { lenis } from "@/lib/lenis";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef } from "react";
@@ -21,7 +20,6 @@ export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, v
   const modalRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Perfect Scroll Lock / Unlock
   useEffect(() => {
     if (isOpen) {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
@@ -49,7 +47,6 @@ export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, v
     };
   }, [isOpen]);
 
-  // Prevent background wheel scrolling while open
   useEffect(() => {
     const el = modalRef.current;
     if (!el || !isOpen) return;
@@ -74,7 +71,6 @@ export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, v
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Backdrop: solid color for low tier to save GPU fill-rate, blur for High/Medium */}
             <div
               className={[
                 "absolute inset-0",
@@ -91,12 +87,10 @@ export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, v
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                onClick={onClose}
-                className="absolute -top-14 right-0 md:-top-10 md:-right-10 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:scale-110 active:scale-95 focus:outline-none"
-              >
-                <Icons.X className="w-[18px] h-[18px]" strokeWidth={2.5} />
-              </button>
+              {/* ИСПРАВЛЕНИЕ: Интеграция SciFiCloseButton */}
+              <div className="absolute -top-14 right-0 md:-top-10 md:-right-10 z-50">
+                <SciFiCloseButton onClick={onClose} />
+              </div>
 
               <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10">
                 <iframe

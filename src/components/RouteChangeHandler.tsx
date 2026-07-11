@@ -1,11 +1,3 @@
-/**
- * @module src/components/RouteChangeHandler.tsx
- * @description Умное восстановление скролла (Smart Observer + Scrollbar Sync).
- * 
- * @author Kort
- * @version 1.3.0
- */
-
 import { useNavigation } from "@/App";
 import { lenis } from "@/lib/lenis";
 import { RefObject, useEffect, useRef } from "react";
@@ -217,7 +209,10 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
         return;
       }
 
-      if (isHandlingPop.current) return;
+      if (cleanupTimeout) {
+        clearTimeout(cleanupTimeout);
+      }
+      restorationController.cancel();
 
       prevPathnameRef.current = targetPathname;
       isHandlingPop.current = true;
@@ -226,13 +221,10 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
       setIsPopping(true);
 
-      // ОТПРАВЛЯЕМ СИГНАЛ СТАРТА ПЕРЕХОДА (устраняет интервальный таймер в скроллбаре)
       window.dispatchEvent(new CustomEvent("pop-transition-start"));
 
       const targetPath = event.state?.path || window.location.pathname + window.location.search;
       const targetScroll = getScrollPosition(targetPath) ?? 0;
-
-      if (cleanupTimeout) clearTimeout(cleanupTimeout);
 
       cleanupTimeout = setTimeout(() => {
         setIsPopping(false);
@@ -244,7 +236,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
           window.ScrollTrigger.refresh();
         }
         window.dispatchEvent(new CustomEvent("pop-transition-complete"));
-      }, 2500);
+      }, 600);
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -254,23 +246,8 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
             if (window.ScrollTrigger) {
               window.ScrollTrigger.refresh(true);
             }
-
             setTimeout(() => {
               restorationController.start(targetScroll);
-
-              setTimeout(() => {
-                if (cleanupTimeout) clearTimeout(cleanupTimeout);
-                setIsPopping(false);
-                lenis?.start();
-                isHandlingPop.current = false;
-                window.__popTransitionInProgress = false;
-                window.__isRoutingLock = false;
-
-                if (window.ScrollTrigger) {
-                  window.ScrollTrigger.refresh();
-                }
-                window.dispatchEvent(new CustomEvent("pop-transition-complete"));
-              }, 450);
             }, 100);
           }, 100);
         });
@@ -296,6 +273,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
   useEffect(() => {
     const currentPath = location.pathname + location.search;
+    let cleanup: (() => void) | undefined = undefined;
 
     if (isFirstLoad.current) {
       const savedY = getScrollPosition(currentPath);
@@ -311,23 +289,40 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
         }, 300);
       };
 
-      if (document.getElementById("preloader")) {
-        setTimeout(performRestore, 2500);
+      const preloader = document.getElementById("preloader");
+      if (preloader) {
+        let failSafeTimeout: ReturnType<typeof setTimeout>;
+
+        const handlePreloaderOutro = () => {
+          // 💎 АННИГИЛЯЦИЯ ТАЙМЕРА: предотвращает повторный ложный вызов и телепортацию!
+          clearTimeout(failSafeTimeout);
+          performRestore();
+          window.removeEventListener("preloader-outro-start", handlePreloaderOutro);
+        };
+        window.addEventListener("preloader-outro-start", handlePreloaderOutro);
+
+        failSafeTimeout = setTimeout(() => {
+          handlePreloaderOutro();
+        }, 4000);
+
+        cleanup = () => {
+          window.removeEventListener("preloader-outro-start", handlePreloaderOutro);
+          clearTimeout(failSafeTimeout);
+        };
       } else {
         performRestore();
       }
-      return;
     }
 
     if (navigationType === "POP" || isHandlingPop.current) {
-      return;
+      return cleanup;
     }
 
     const isPathChanged = location.pathname !== prevPathnameRef.current;
     prevPathnameRef.current = location.pathname;
 
     if (!isPathChanged) {
-      return;
+      return cleanup;
     }
 
     window.dispatchEvent(new CustomEvent("force-header-show"));
@@ -337,6 +332,8 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
     } else {
       window.scrollTo(0, 0);
     }
+
+    return cleanup;
   }, [location.pathname, location.search, navigationType]);
 
   useEffect(() => {

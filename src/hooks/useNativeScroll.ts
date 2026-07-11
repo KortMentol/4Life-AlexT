@@ -1,9 +1,9 @@
 /**
  * @module src/hooks/useNativeScroll.ts
  * @description Скрытие хедера при скролле.
- * ИСПРАВЛЕНИЕ: Хедер кэшируется в рефе при первой необходимости, избавляя RAF от querySelector на каждом кадре.
+ * ИСПРАВЛЕНИЕ: Интеграция с Awwwards Pop-Restoration (Авто-адаптация хедера при приземлении) [1].
  * @author Kort
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 import { rafLoop } from "@/lib/rafLoop";
@@ -21,7 +21,6 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const displayYRef = useRef(0);
   const prevScrollRef = useRef(0);
 
-  // ИСПРАВЛЕНИЕ: Ленивое кэширование ссылки на элемент хедера
   const getCachedHeader = (): HTMLElement | null => {
     if (!headerRef.current) {
       headerRef.current = document.querySelector(".header-premium");
@@ -41,8 +40,21 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     }
   }, []);
 
+  // 💎 КРИТИЧЕСКИЙ МЕТОД: принудительное жесткое скрытие хедера без анимации
+  const hideHeader = useCallback(() => {
+    targetYRef.current = -HEADER_HEIGHT;
+    displayYRef.current = -HEADER_HEIGHT;
+    prevScrollRef.current = window.scrollY;
+
+    const h = getCachedHeader();
+    if (h) {
+      h.style.transition = "none";
+      h.style.transform = `translateY(${-HEADER_HEIGHT}px) translateZ(0)`;
+    }
+  }, []);
+
   useEffect(() => {
-    headerRef.current = null; // Сброс при монтировании
+    headerRef.current = null;
 
     let attempts = 0;
     const maxAttempts = 10;
@@ -65,6 +77,20 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     window.addEventListener("force-header-show", showHeader);
     return () => window.removeEventListener("force-header-show", showHeader);
   }, [showHeader]);
+
+  useEffect(() => {
+    const handlePopComplete = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 200) {
+        showHeader(); // Мы около топа — меню открыто для удобства
+      } else {
+        hideHeader(); // Мы глубоко в контенте — прячем меню, освобождая экран
+      }
+    };
+
+    window.addEventListener("pop-transition-complete", handlePopComplete);
+    return () => window.removeEventListener("pop-transition-complete", handlePopComplete);
+  }, [showHeader, hideHeader]);
 
   useEffect(() => {
     if (disabled) return;
