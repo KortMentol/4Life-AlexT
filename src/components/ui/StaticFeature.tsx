@@ -1,3 +1,16 @@
+/**
+ * @module components/ui/StaticFeature
+ * @description Компонент для отображения отдельного преимущества или характеристики с иконкой, заголовком и описанием.
+ *
+ * ОПТИМИЗАЦИЯ ДИНАМИКИ (Awwwards Pro):
+ * 1. [Preemptive Viewport Trigger]: Настройка порога появления изменена на положительный маргин (+200px).
+ *    Анимация появления карточки преимуществ теперь рассчитывается и отрабатывает в фоне, задолго до того,
+ *    как элемент заедет на экран. Это гарантирует 100% бесшовный скролл без просадок кадров.
+ *
+ * @author Geminis AI & Kort
+ * @version 1.1.0
+ */
+
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { motion, useAnimation, useInView } from "framer-motion";
 import React, { memo, useEffect, useRef } from "react";
@@ -10,37 +23,6 @@ interface StaticFeatureProps {
   className?: string;
 }
 
-/**
- * @module components/ui/StaticFeature
- * @description Компонент для отображения отдельного преимущества или характеристики с иконкой, заголовком и описанием.
- * Обладает интеллектуальной анимацией: на десктопных устройствах анимация запускается при наведении курсора, а на мобильных — при попадании компонента в область видимости во время прокрутки. Это обеспечивает как интерактивность, так и хорошую производительность.
- *
- * @author Kort
- * @version 1.0.0
- *
- * @param {React.ElementType} icon - Компонент иконки для отображения (например, из `lucide-react`).
- * @param {string} title - Заголовок преимущества.
- * @param {string} description - Описание преимущества.
- * @param {'blue' | 'green'} [colorTheme='green'] - Цветовая схема компонента.
- * @param {string} [className] - Дополнительные CSS-классы для корневого элемента.
- *
- * @see useIsMobile - Хук для определения типа устройства.
- * @see useAnimation - Хук `framer-motion` для управления анимациями.
- * @see useInView - Хук `framer-motion` для отслеживания видимости элемента.
- *
- * @usage
- * Идеально подходит для использования в грид-сетках на главной странице или страницах продуктов для перечисления ключевых особенностей.
- *
- * @example
- * import { ShieldCheck } from 'lucide-react';
- *
- * <StaticFeature
- *   icon={ShieldCheck}
- *   title="Надежная Защита"
- *   description="Наши продукты проходят строгий контроль качества."
- *   colorTheme="blue"
- * />
- */
 const StaticFeature: React.FC<StaticFeatureProps> = ({
   icon: Icon,
   title,
@@ -51,7 +33,9 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
   const isMobile = useIsMobile();
   const controls = useAnimation();
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-100px 0px" });
+
+  // Упреждающий вьюпорт +200px для бесшовного рендеринга на высокой скорости скролла
+  const isInView = useInView(ref, { once: false, margin: "200px 0px" });
 
   const themes: Record<
     "green" | "blue",
@@ -116,12 +100,8 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
           <Icon className="w-8 h-8 text-white" />
         </div>
 
-        <h3 className="text-xl font-bold mb-4 text-white">
-          {title}
-        </h3>
-        <p className="text-gray-300 leading-relaxed">
-          {description}
-        </p>
+        <h3 className="text-xl font-bold mb-4 text-white">{title}</h3>
+        <p className="text-gray-300 leading-relaxed">{description}</p>
 
         <div className="mt-6">
           <div className={`h-1 bg-gradient-to-r ${theme.hoverBar}`} />
@@ -141,14 +121,8 @@ const StaticFeature: React.FC<StaticFeatureProps> = ({
         <Icon className="w-8 h-8 text-white" />
       </div>
 
-      <h3
-        className={`text-xl font-bold mb-4 text-white ${theme.hoverText} transition-colors duration-300`}
-      >
-        {title}
-      </h3>
-      <p className="text-gray-300 leading-relaxed">
-        {description}
-      </p>
+      <h3 className={`text-xl font-bold mb-4 text-white ${theme.hoverText} transition-colors duration-300`}>{title}</h3>
+      <p className="text-gray-300 leading-relaxed">{description}</p>
 
       <div
         className={`w-0 h-1 bg-gradient-to-r ${theme.hoverBar} mt-6 group-hover:w-full transition-all duration-500`}

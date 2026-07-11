@@ -1,9 +1,16 @@
 /**
  * @module src/components/sections/MorphingVideoSection/components/VideoBlock.tsx
  * @description Awwwards 2026 - Optimized Responsive Video Block (Dual Observer Architecture).
- * ИСПРАВЛЕНИЕ: RAF-цикл кругового прогресс-бара полностью гасится при паузе видео, исключая холостую нагрузку на CPU.
+ *
+ * ОПТИМИЗАЦИЯ СЕТИ И РЕНДЕРИНГА (Awwwards Pro):
+ * 1. [Strict Preload None]: Все неактивные видео заблокированы от предзагрузки трафика (preload="none").
+ *    Это убирает невидимый расход трафика и спасает пропускную способность для картинок.
+ * 2. [Prism Obsidian Poster]: Вместо случайных картинок, создававших визуальный шум и лишние HTTP-запросы,
+ *    в качестве постера используется глубокий матовый черный фон (#03050a) с мелким паттерном.
+ *    Это обеспечивает кристально плавный старт воспроизведения без "вспышек" и лишних сетевых затрат.
+ *
  * @author Geminis AI & Kort
- * @version 3.2.0
+ * @version 3.3.0
  */
 
 import { usePerformanceTier } from "@/hooks";
@@ -17,7 +24,7 @@ import { BLOCK_CONFIG } from "../config";
 interface VideoBlockProps {
   blockRef: React.RefObject<HTMLDivElement>;
   videoSrc: string;
-  posterSrc?: string;
+  posterSrc?: string; // posterSrc сохранен для обратной совместимости, но не используется для оптимизации трафика
   blockIndex: number;
   isTouchDevice: boolean;
   onClick?: () => void;
@@ -27,7 +34,6 @@ interface VideoBlockProps {
 export const VideoBlock: React.FC<VideoBlockProps> = ({
   blockRef,
   videoSrc,
-  posterSrc,
   blockIndex,
   isTouchDevice,
   onClick,
@@ -73,7 +79,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
           setIsNetworkInView(true);
         }
       },
-      { threshold: 0, rootMargin: "1500px 0px 1500px 0px" },
+      { threshold: 0, rootMargin: "1200px 0px" }, // Оптимальный упреждающий буфер скачивания видео в фоне
     );
 
     const playMargin = isTouchDevice ? "150px" : "250px";
@@ -139,7 +145,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     };
   }, [isPlaybackInView, isModalOpen, isTransitioning]);
 
-  // ИСПРАВЛЕНИЕ: Рациональное управление циклом RAF в зависимости от play/pause видео
   useEffect(() => {
     const video = videoRef.current;
     const circle = progressCircleRef.current;
@@ -163,7 +168,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
         }
       }
 
-      // Запускаем следующий кадр только если видео все еще воспроизводится
       if (!video.paused) {
         rafId = requestAnimationFrame(updateProgress);
       } else {
@@ -187,7 +191,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
 
-    // Первичный запуск если видео уже играет
     if (!video.paused) {
       rafId = requestAnimationFrame(updateProgress);
     }
@@ -275,10 +278,14 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             isolation: "isolate",
           }}
         >
+          {/* 
+            ПОСТЕР В ВИДЕ ЧИСТОГО ОБСИДИАНОВОГО ФОНА.
+            Полностью ликвидирует 3 тяжелых HTTP-запроса картинок при скролле и гарантирует мгновенный
+            бесшовный переход в видео без визуального скачка или мерцания первого кадра.
+          */}
           <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 pointer-events-none"
+            className="absolute inset-0 bg-[#03050a] bg-noise-overlay transition-opacity duration-1000 pointer-events-none"
             style={{
-              backgroundImage: `url(${posterSrc})`,
               opacity: isTransitioning || !isVideoLoaded ? 1 : 0,
               transform: "translateZ(0)",
             }}
@@ -290,6 +297,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             muted
             playsInline
             loop
+            // ОПТИМИЗАЦИЯ: Строгий запрет скачивания до входа в упреждающий вьюпорт
             preload="none"
             disablePictureInPicture
             disableRemotePlayback
@@ -298,7 +306,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
                 opacity: isTransitioning || !isVideoLoaded ? 0 : 1,
                 imageRendering: tier === "high" ? "optimizeQuality" : "auto",
                 transform: "translateZ(0)",
-              } as any
+              } as React.CSSProperties
             }
           />
 

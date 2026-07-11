@@ -1,4 +1,3 @@
-// import React from "react"; - <React.StrictMode> отключен ниже
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
@@ -18,14 +17,18 @@ import "./styles/base/modern-design.css";
 import "./styles/globals.css";
 import "./styles/image-rendering.css";
 
-// --- AWWWARDS 2026: SCROLL RESTORATION FIX ---
-// Отключаем нативное восстановление скролла браузером,
-// так как мы используем кастомную логику с двойным RAF и GSAP в RouteChangeHandler.tsx.
-// Это предотвращает скачки страницы до появления вуали перехода.
+// Импорт оригинальных картинок продуктов для их упреждающего декодирования на GPU
+import renuvoMobile from "@/assets/images/products/MobileVersions/Mobile_renuvo.webp";
+import tfPlusMobile from "@/assets/images/products/MobileVersions/Mobile_tf-plus.webp";
+import tfTrifactorMobile from "@/assets/images/products/MobileVersions/Mobile_tf-trifactor.webp";
+
+import renuvoPC from "@/assets/images/products/renuvo.webp";
+import tfPlusPC from "@/assets/images/products/tf-plus.webp";
+import tfTrifactorPC from "@/assets/images/products/tf-trifactor.webp";
+
 if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
   window.history.scrollRestoration = "manual";
 }
-// ----------------------------------------------
 
 const initApp = () => {
   const rootElement = document.getElementById("root");
@@ -57,28 +60,50 @@ const initApp = () => {
     },
   );
 
-  ReactDOM.createRoot(rootElement).render(
-    //<React.StrictMode> - временно отключен
-    <RouterProvider router={router} />,
-    //</React.StrictMode> - временно отключен
-  );
+  ReactDOM.createRoot(rootElement).render(<RouterProvider router={router} />);
 
-  // Preload lazy-loaded page chunks before signaling app is ready
-  // HomePage excluded - loaded synchronously in App.tsx for instant FCP
-  Promise.allSettled([
+  // ─── ИНТЕЛЛЕКТУАЛЬНАЯ ПРЕДЗАГРУЗКА И ДЕКОДИРОВАНИЕ РЕСУРСОВ VITE ───
+  const isMobile = window.innerWidth < 768;
+
+  // Очередь критически важных банок продуктов
+  const productImages = isMobile
+    ? [tfPlusMobile, tfTrifactorMobile, renuvoMobile]
+    : [tfPlusPC, tfTrifactorPC, renuvoPC];
+
+  const imagePreloadPromises = productImages.map((src) => {
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        if (typeof img.decode === "function") {
+          img
+            .decode()
+            .then(() => resolve())
+            .catch(() => resolve());
+        } else {
+          resolve();
+        }
+      };
+      img.onerror = () => resolve();
+    });
+  });
+
+  // Параллельно подгружаем JS чанки других страниц для бесшовного роутинга
+  const pageChunksPromise = Promise.allSettled([
     import("@/pages/ProductsPage"),
     import("@/pages/AboutPage"),
     import("@/pages/AboutMePage"),
     import("@/pages/ContactPage"),
     import("@/pages/PartnershipPage"),
     import("@/pages/HowToBuyPage"),
-  ]).then(() => {
-    // Dispatch event only when all chunks are loaded in RAM
+  ]);
+
+  // Ждем завершения декодирования картинок и ленивой загрузки чанков
+  Promise.allSettled([...imagePreloadPromises, pageChunksPromise]).then(() => {
     window.dispatchEvent(new CustomEvent("app-mounted"));
   });
 };
 
-// Initialize app when DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initApp);
 } else {

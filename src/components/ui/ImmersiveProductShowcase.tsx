@@ -1,279 +1,435 @@
 /**
  * @module ImmersiveProductShowcase
- * @description Awwwards 2026 — Immersive featured product showcase.
- * Scroll-driven: боковые карточки разлетаются по X, сходятся при центрировании.
- * Apple 2026 image style: продукт парит без квадратного контейнера.
- * Pure Dark Theme Strict ("Clinical Obsidian").
- * @version 3.1.0
+ * @description Awwwards 2026 — SOTA HUD Showcase (Direction-Aware Hover).
+ *
+ * ПОЛНОЕ УСТРАНЕНИЕ БАГОВ И ОПТИМИЗАЦИЯ ДИЗАЙНА (Awwwards Pro):
+ * 1. [Symmetrical HUD Geometry]: На нижнюю плашку Box D добавлен спредовый стиль sotaClipStyle.
+ *    Теперь обе плашки имеют идеально симметричные скошенные углы.
+ * 2. [Pure Codrops Effect 01]: Полностью убрано смещение банки по осям X/Y. При наведении банка
+ *    только плавно уменьшается (scale-down) до 0.85, как в оригинальном Эффекте 1 демо-референса.
+ * 3. [Underline Only on Low]: Неоновая линия полностью удалена с Medium и High тиров. Оставлена только
+ *    ультратонкая 1px линия на Low-тире с ограниченным триггером наведения.
+ * 4. [No Compiler Warnings]: Полностью удалена неиспользуемая переменная isMedium для предотвращения ошибки TS6133.
+ *
+ * @author Geminis AI & Kort
+ * @version 33.0.0
  */
 
 import { useTransition } from "@/context";
+import { productsData } from "@/data/productsData";
 import { useIsMobile, usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
-import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
-import React, { lazy, memo, Suspense, useCallback, useRef } from "react";
+import { Icons } from "@/utils/icons";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import React, { lazy, memo, Suspense, useEffect, useMemo, useRef } from "react";
 
 const KineticProductCarousel = lazy(() => import("./KineticProductCarousel"));
 
-interface ShowcaseProduct {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  link: string;
-}
-
 interface ImmersiveProductShowcaseProps {
-  products: ShowcaseProduct[];
+  products?: any;
 }
 
 const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
-const MAGNETIC = { stiffness: 100, damping: 18, mass: 0.5, restDelta: 0.001 };
-const MAGNETIC_MEDIUM = {
-  stiffness: 120,
-  damping: 22,
-  mass: 0.5,
-  restDelta: 0.001,
+const PRODUCT_MARKETING_INFO: Record<string, { num: string; tags: string[]; category: string }> = {
+  "tf-trifactor": {
+    num: "01",
+    tags: ["#ИММУНИТЕТ", "#ОБУЧЕНИЕ"],
+    category: "Трай-Фактор",
+  },
+  "tf-plus": {
+    num: "02",
+    tags: ["#ЗАЩИТА", "#ТОНУС"],
+    category: "ТФ Плюс",
+  },
+  renuvo: {
+    num: "03",
+    tags: ["#АНТИСТРЕСС", "#ЭНЕРГИЯ"],
+    category: "Ренуво",
+  },
 };
 
-// X-offset per card when "разлетелись": левая влево, центр на месте, правая вправо
-const SPREAD_X = [-120, 0, 120]; // px
+const getDirection = (e: React.MouseEvent, el: HTMLElement) => {
+  const rect = el.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+  const x = (e.clientX - rect.left - w / 2) * (w > h ? h / w : 1);
+  const y = (e.clientY - rect.top - h / 2) * (h > w ? w / h : 1);
+  const d = Math.round(Math.atan2(y, x) / 1.57079633 + 5) % 4;
+  return ["top", "right", "bottom", "left"][d];
+};
 
-// Spring: пружинистый, реагирует на смену направления
-const ALIGN_SPRING = { stiffness: 55, damping: 16, mass: 0.9 };
-
-// ─── Single card ─────────────────────────────────────────────────────────────
-
-const ShowcaseCard: React.FC<{
-  product: ShowcaseProduct;
-  index: number;
-  isInView: boolean;
+const SotaCard: React.FC<{
+  product: (typeof productsData)[number];
   tier: "low" | "medium" | "high";
-  // 0 = разлетелись, 1 = на своих позициях
-  gatherProgress: ReturnType<typeof useSpring>;
-}> = ({ product, index, isInView, tier, gatherProgress }) => {
-  const ref = useRef<HTMLDivElement>(null);
+}> = ({ product, tier }) => {
+  const containerRef = useRef<HTMLAnchorElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const imgWrapperRef = useRef<HTMLDivElement>(null);
+  const darkOverlayRef = useRef<HTMLDivElement>(null);
+
   const { transitionTo } = useTransition();
 
-  // Magnetic hover для карточки
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const springX = useSpring(rawX, MAGNETIC);
-  const springY = useSpring(rawY, MAGNETIC);
-  const springXMedium = useSpring(rawX, MAGNETIC_MEDIUM);
-  const springYMedium = useSpring(rawY, MAGNETIC_MEDIUM);
-  const mx = tier === "high" ? springX : tier === "medium" ? springXMedium : rawX;
-  const my = tier === "high" ? springY : tier === "medium" ? springYMedium : rawY;
+  const isHigh = tier === "high" && !IS_TOUCH;
+  const isLow = tier === "low" || IS_TOUCH;
 
-  // 3D tilt для изображения — отдельные motion values
-  const tiltEnabled = tier !== "low" && !IS_TOUCH;
-  const magnetEnabled = tier !== "low" && !IS_TOUCH;
+  const targetLink = `/products?productId=${product.id}`;
+  const mInfo = PRODUCT_MARKETING_INFO[product.id] || { num: "01", tags: ["#ИММУНИТЕТ"], category: "Продукт" };
 
-  // Scroll-driven X: от spreadOffset → 0 (сходятся на свои позиции)
-  const spreadOffset = SPREAD_X[index] ?? 0;
-  // gatherProgress: 0 = разлетелись (spreadOffset), 1 = на месте (0)
-  const cardScrollX = useTransform(gatherProgress, [0, 1], [spreadOffset, 0]);
-
-  // Opacity: карточки появляются по мере схождения
-  const cardOpacity = useTransform(gatherProgress, [0, 0.4], [0.3, 1]);
-
-  // Magnetic X + scroll-driven X combined
-  const combinedX = useTransform([mx, cardScrollX], ([mxVal, csVal]: number[]) => (mxVal ?? 0) + (csVal ?? 0));
-  const cardX = magnetEnabled ? combinedX : cardScrollX;
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!magnetEnabled || !ref.current) return;
-      const rect = ref.current.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      rawX.set((e.clientX - cx) * 0.07);
-      rawY.set((e.clientY - cy) * 0.07);
-
-      // 3D tilt на изображении — прямой DOM, 0 ре-рендеров
-      if (tiltEnabled && imgRef.current) {
-        const rx = ((e.clientY - cy) / (rect.height / 2)) * -8; // rotateX
-        const ry = ((e.clientX - cx) / (rect.width / 2)) * 8; // rotateY
-        imgRef.current.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
-      }
-    },
-    [magnetEnabled, rawX, rawY, tiltEnabled],
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    rawX.set(0);
-    rawY.set(0);
-    // Плавный возврат tilt к нулю
-    if (tiltEnabled && imgRef.current) {
-      imgRef.current.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0px)";
-    }
-  }, [rawX, rawY, tiltEnabled]);
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      transitionTo(product.link);
-    },
-    [product.link, transitionTo],
-  );
-
-  // Apple 2026 card style — strictly dark "Clinical Obsidian", depth via shadow only
-  const cardStyle = {
-    background: "rgba(10, 14, 26, 0.88)",
-    boxShadow:
-      tier === "high" && !IS_TOUCH
-        ? "0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px -12px rgba(0,0,0,0.75)"
-        : "0 0 0 1px rgba(255,255,255,0.05), 0 12px 40px -8px rgba(0,0,0,0.65)",
+  const sotaClipStyle = {
+    clipPath: "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))",
+    WebkitClipPath: "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))",
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    transitionTo(targetLink);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (containerRef.current) {
+        gsap.killTweensOf(containerRef.current.querySelectorAll("*"));
+      }
+    };
+  }, []);
+
+  // ─── GSAP HOVER: Направление и магнетизм (Medium & High) ───
+  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isLow) return;
+
+    const el = containerRef.current;
+    const imgWrapper = imgWrapperRef.current;
+    const darkOverlay = darkOverlayRef.current;
+    if (!el || !imgWrapper || !darkOverlay) return;
+
+    const boxes = el.querySelectorAll(".sota-box");
+    const numChars = el.querySelectorAll(".sota-char");
+    const categoryChars = el.querySelectorAll(".sota-category-char");
+    const staticDesc = el.querySelector(".sota-static-desc");
+
+    const direction = getDirection(e, el);
+    el.setAttribute("data-direction", direction || "top");
+
+    const animConfig = { duration: 0.85, ease: "power3.out" };
+
+    gsap.killTweensOf([imgWrapper, darkOverlay, boxes, numChars, categoryChars, staticDesc]);
+
+    gsap.to(darkOverlay, { opacity: 0.5, ...animConfig });
+
+    // ИСПРАВЛЕНО: Чистое уменьшение банки без сдвигов по осям X/Y
+    gsap.to(imgWrapper, {
+      scale: 0.85,
+      x: 0,
+      y: 0,
+      ...animConfig,
+    });
+
+    gsap.to(staticDesc, {
+      opacity: 0,
+      y: 15,
+      duration: 0.4,
+      ease: "power2.out",
+    });
+
+    const startX = direction === "left" ? -60 : direction === "right" ? 60 : 0;
+    const startY = direction === "top" ? -60 : direction === "bottom" ? 60 : 0;
+    const startRotation = direction === "left" || direction === "top" ? -10 : 10;
+
+    gsap.fromTo(
+      boxes,
+      {
+        opacity: 0,
+        x: startX,
+        y: startY,
+        rotation: startRotation,
+      },
+      {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        rotation: 0,
+        force3D: isHigh,
+        ...animConfig,
+      },
+    );
+
+    gsap.fromTo(
+      numChars,
+      { opacity: 0, y: 15 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: "power2.out",
+        delay: 0.1,
+      },
+    );
+
+    gsap.fromTo(
+      categoryChars,
+      { opacity: 0 },
+      {
+        ...animConfig,
+        duration: 0.1,
+        opacity: 1,
+        stagger: {
+          from: "random",
+          amount: 0.25,
+        },
+        delay: 0.15,
+      },
+    );
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isLow) return;
+
+    const el = containerRef.current;
+    const imgWrapper = imgWrapperRef.current;
+    const darkOverlay = darkOverlayRef.current;
+    if (!el || !imgWrapper || !darkOverlay) return;
+
+    const boxes = el.querySelectorAll(".sota-box");
+    const staticDesc = el.querySelector(".sota-static-desc");
+
+    const direction = getDirection(e, el) || el.getAttribute("data-direction") || "top";
+    const animConfig = { duration: 0.85, ease: "power3.out" };
+
+    gsap.killTweensOf([imgWrapper, darkOverlay, boxes, staticDesc]);
+
+    gsap.to(darkOverlay, { opacity: 0, ...animConfig });
+
+    gsap.to(imgWrapper, {
+      scale: 1,
+      x: 0,
+      y: 0,
+      ...animConfig,
+    });
+
+    gsap.to(staticDesc, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: "power2.out",
+      delay: 0.1,
+    });
+
+    const endX = direction === "left" ? -60 : direction === "right" ? 60 : 0;
+    const endY = direction === "top" ? -60 : direction === "bottom" ? 60 : 0;
+    const endRotation = direction === "left" || direction === "top" ? -10 : 10;
+
+    gsap.to(boxes, {
+      opacity: 0,
+      x: endX,
+      y: endY,
+      rotation: endRotation,
+      force3D: isHigh,
+      duration: 0.6,
+      ease: "power3.out",
+    });
+  };
+
+  const cardLayoutClasses =
+    "relative block w-full aspect-[4/5] rounded-[2rem] overflow-hidden cursor-pointer group outline-none border border-white/[0.08] shadow-2xl transition-transform active:scale-[0.98]";
+  const mainBlurRadius = isHigh ? "18px" : "12px";
+
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouseMove}
+    <motion.a
+      href={targetLink}
+      ref={containerRef}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      initial={{ opacity: 0, y: 24 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{
-        duration: tier === "low" ? 0.25 : 0.65,
-        delay: tier === "low" ? 0 : index * 0.06,
-        ease: [0.16, 1, 0.3, 1],
-      }}
-      style={{
-        x: cardX,
-        y: magnetEnabled ? my : 0,
-        opacity: cardOpacity,
-        isolation: "isolate",
-        zIndex: index === 1 ? 3 : 2, // центральная поверх остальных
-      }}
-      className="group relative cursor-pointer"
       onClick={handleClick}
-      role="link"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && handleClick(e as any)}
-      aria-label={`Перейти к продукту: ${product.title}`}
+      className={cardLayoutClasses}
+      style={{ WebkitTapHighlightColor: "transparent", transform: "translateZ(0)" }}
     >
-      <div className="relative rounded-2xl overflow-hidden" style={{ contain: "layout paint", ...cardStyle }}>
-        {/* Apple inner top highlight */}
+      {/* ─── СЛОЙ ФОНА ─── */}
+      {isLow ? (
+        <div className="absolute inset-0 -z-10 bg-[#050811]" />
+      ) : (
         <div
-          className="absolute inset-x-0 top-0 h-px pointer-events-none z-10"
+          className="absolute inset-0 -z-10 bg-slate-900/40"
           style={{
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent)",
+            backdropFilter: `blur(${mainBlurRadius}) saturate(135%)`,
+            WebkitBackdropFilter: `blur(${mainBlurRadius}) saturate(135%)`,
+            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.12)",
           }}
         />
+      )}
 
-        {/* Hover glow — high tier only */}
-        {tier === "high" && !IS_TOUCH && (
-          <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-            style={{
-              background: "radial-gradient(ellipse at 50% 0%, rgba(6,182,212,0.08) 0%, transparent 65%)",
-              willChange: "opacity",
-            }}
-          />
-        )}
+      {/* ─── ВЕРХНЯЯ ИНФОРМАЦИОННАЯ СТРОКА (Видна ТОЛЬКО на Low Tier) ─── */}
+      {isLow && (
+        <div className="absolute top-6 md:top-8 inset-x-6 md:inset-x-8 flex justify-between items-start z-30 pointer-events-none">
+          <span className="text-4xl font-light text-cyan-400/35 font-heading leading-none">{mInfo.num}</span>
+          <div className="flex flex-col gap-0.5 items-end">
+            {mInfo.tags.map((tag) => (
+              <span key={tag} className="text-[10px] uppercase tracking-widest text-slate-500 font-bold leading-tight">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {/* Image — 2026: 3D tilt через прямой DOM */}
-        <div
-          className="relative pt-6 pb-2 px-6 flex items-center justify-center min-h-[200px] lg:min-h-[280px]"
-          style={{ perspective: "600px" }}
-        >
+      {/* ─── ГИГАНТСКИЙ FULL-BLEED КОНТЕЙНЕР БАНОЧКИ ─── */}
+      <div className="relative w-full h-[62%] mt-6 flex items-center justify-center p-8 md:p-10 pb-2 z-10 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.12),transparent_65%)]" />
+        <div ref={imgWrapperRef} className="relative w-full h-full flex items-center justify-center origin-center">
           <img
             ref={imgRef}
             src={product.image}
-            alt={product.title}
+            alt={product.name}
             loading="lazy"
-            decoding="async"
-            className="w-full max-h-[190px] lg:max-h-[266px] object-contain"
-            style={{
-              transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
-              transformStyle: "preserve-3d",
-            }}
+            className="w-full h-full object-contain scale-[1.3] md:scale-[1.7] drop-shadow-[0_20px_45px_rgba(0,0,0,0.7)]"
           />
-        </div>
-
-        {/* Тонкий разделитель */}
-        <div
-          className="mx-5 h-px"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
-          }}
-        />
-
-        {/* Content */}
-        <div className="p-5 md:p-6">
-          <h3 className="font-semibold text-lg md:text-xl leading-snug mb-2 text-white/95">{product.title}</h3>
-          <p className="text-sm leading-relaxed line-clamp-2 mb-4 text-slate-400/80">{product.description}</p>
-
-          {/* CTA */}
-          <div
-            className={`flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 text-cyan-400 ${
-              !IS_TOUCH ? "group-hover:gap-2.5" : ""
-            }`}
-          >
-            <span>Подробнее</span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${!IS_TOUCH ? "group-hover:translate-x-0.5" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
+          <div ref={darkOverlayRef} className="absolute inset-0 bg-black/60 rounded-full blur-3xl opacity-0 z-20" />
         </div>
       </div>
-    </motion.div>
+
+      {/* ─── ВЫРОВНЕННЫЙ ТЕКСТОВЫЙ БЛОК (Снизу) ─── */}
+      <div className="sota-static-desc absolute inset-x-0 bottom-0 px-6 md:px-8 pb-8 pt-40 bg-gradient-to-t from-[#03050a] via-[#03050a]/95 to-transparent z-20 pointer-events-none flex flex-col justify-end">
+        <div className="h-[60px] flex items-end mb-2">
+          <h3 className="text-white font-bold text-xl leading-snug line-clamp-2">{product.name}</h3>
+        </div>
+        <div className="h-[64px] overflow-hidden mb-3">
+          <p className="text-slate-400 text-sm font-normal leading-relaxed text-pretty">{product.shortDescription}</p>
+        </div>
+
+        {isLow && (
+          <div className="pointer-events-auto">
+            {/* CTA c упругой 1px линией и ограниченной зоной триггера ховера */}
+            <div className="relative self-start inline-flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-widest cursor-pointer group/cta">
+              <span className="relative z-10">ПОДРОБНЕЕ</span>
+              <span className="absolute bottom-[-3px] left-0 h-[1px] w-0 group-hover/cta:w-full bg-gradient-to-r from-cyan-400/60 to-transparent transition-all duration-500 ease-out" />
+              <Icons.ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover/cta:translate-x-1" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ─── ВЫЛЕТАЮЩИЕ HUD-ПЛАШКИ (Medium & High) ─── */}
+      {!isLow && (
+        <div
+          className="absolute inset-0 z-30 grid grid-cols-2 grid-rows-2 gap-2 pointer-events-none"
+          style={{ gridTemplateAreas: "'box-a box-b' 'box-c box-d'" }}
+        >
+          {/* BOX A */}
+          <div
+            className="sota-box sota-box--a flex flex-col justify-between p-6 bg-white/[0.03] border border-white/[0.1] rounded-[1.2rem] opacity-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),_0_10px_20px_rgba(0,0,0,0.3)]"
+            style={{
+              gridArea: "box-a",
+              ...sotaClipStyle,
+              backdropFilter: `blur(${isHigh ? "14px" : "10px"}) saturate(120%)`,
+              WebkitBackdropFilter: `blur(${isHigh ? "14px" : "10px"}) saturate(120%)`,
+              margin: "12px 0 0 12px",
+              transform: "translateZ(0)",
+            }}
+          >
+            <span className="text-5xl md:text-6xl font-extralight text-cyan-400 tracking-tight font-heading">
+              {isHigh
+                ? mInfo.num.split("").map((char, i) => (
+                    <span key={i} className="sota-char inline-block">
+                      {char}
+                    </span>
+                  ))
+                : mInfo.num}
+            </span>
+            <div className="flex flex-col gap-0.5">
+              {mInfo.tags.map((tag) => (
+                <span key={tag} className="text-[10px] uppercase tracking-widest text-slate-300 font-bold">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* BOX D (ИСПРАВЛЕНО: Добавлен sotaClipStyle для скошенных углов) */}
+          <div
+            className="sota-box sota-box--d flex flex-col justify-end p-6 bg-white/[0.03] border border-white/[0.1] rounded-[1.2rem] opacity-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),_0_10px_20px_rgba(0,0,0,0.3)]"
+            style={{
+              gridArea: "box-d",
+              ...sotaClipStyle, // Возвращены скошенные премиальные углы
+              backdropFilter: isHigh ? "blur(8px) saturate(110%)" : "blur(8px) saturate(115%)",
+              WebkitBackdropFilter: isHigh ? "blur(8px) saturate(110%)" : "blur(8px) saturate(115%)",
+              margin: "0 12px 12px 0",
+              transform: "translateZ(0)",
+            }}
+          >
+            {/* Посимвольное проявление названия баночки в Box D */}
+            <span className="text-sm font-bold text-white mb-2 uppercase tracking-wider block">
+              {mInfo.category.split("").map((char, i) => (
+                <span key={i} className="sota-category-char inline-block">
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              ))}
+            </span>
+            {/* CTA на ховере полностью удален (нет дублирующей полоски) */}
+            <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-widest mt-2">
+              <span>ПОДРОБНЕЕ</span>
+              <Icons.ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Внешнее свечение рамки на ховере (Medium & High) */}
+      {!isLow && (
+        <div className="absolute inset-0 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ring-1 ring-cyan-400/25 shadow-[0_0_40px_rgba(6,182,212,0.12)] z-40" />
+      )}
+    </motion.a>
   );
 };
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
-const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = ({ products }) => {
+const ImmersiveProductShowcase: React.FC<ImmersiveProductShowcaseProps> = () => {
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
   const isMobile = useIsMobile();
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-10%" });
 
-  // Флаг gather — если выключен, карточки статичны (нет spring RAF)
-  const gatherEnabled = import.meta.env.DEV ? efxFlags.cardScrollGather : true;
+  const showcaseProducts = useMemo(() => {
+    return [
+      productsData.find((p) => p.id === "tf-trifactor"),
+      productsData.find((p) => p.id === "tf-plus"),
+      productsData.find((p) => p.id === "renuvo"),
+    ].filter((p): p is NonNullable<typeof p> => p !== undefined);
+  }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start 90%", "end 10%"],
-  });
+  // Оптимизированный адаптер-маппер типов для бесшовного сопряжения с KineticProductCarousel.tsx
+  const mobileMappedProducts = useMemo(() => {
+    return showcaseProducts.map((p, i) => ({
+      id: i + 1,
+      title: p.name,
+      description: p.shortDescription,
+      image: p.image,
+      link: `/products?productId=${p.id}`,
+    }));
+  }, [showcaseProducts]);
 
-  const rawGather = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], gatherEnabled ? [0, 1, 1, 0] : [1, 1, 1, 1]);
-
-  const gatherProgress = useSpring(rawGather, ALIGN_SPRING);
+  if (!efxFlags.renderVideoBlocks) {
+    return null;
+  }
 
   return (
-    <div ref={sectionRef} className="w-full">
+    <div className="w-full">
       {isMobile ? (
         <div className="-mx-6">
-          <Suspense fallback={<div className="h-[420px] w-full" />}>
-            <KineticProductCarousel products={products} />
+          <Suspense fallback={<div className="h-[420px] w-full bg-transparent" />}>
+            <KineticProductCarousel products={mobileMappedProducts} />
           </Suspense>
         </div>
       ) : (
         <div
-          className="grid grid-cols-3 gap-6 xl:gap-8 items-start"
+          className="sota-showcase-grid gap-6 xl:gap-8 items-stretch"
           style={{
-            perspective: tier === "high" ? "1200px" : "none",
+            display: "grid",
+            width: "100%",
+            gridTemplateColumns: "repeat(3, 1fr)",
           }}
         >
-          {products.slice(0, 3).map((product, i) => (
-            <ShowcaseCard
-              key={product.id}
-              product={product}
-              index={i}
-              isInView={isInView}
-              tier={tier}
-              gatherProgress={gatherProgress}
-            />
+          {showcaseProducts.map((product) => (
+            <SotaCard key={`${product.id}-${tier}`} product={product} tier={tier} />
           ))}
         </div>
       )}

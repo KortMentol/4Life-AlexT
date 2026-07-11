@@ -1,18 +1,10 @@
 /**
  * @module src/utils/effectsDebug/effectsDebugStore.ts
  * @description Reactive singleton store for managing visual effect flags.
- *
- * ============================================================================
- * 🤖 AI AGENT GUIDELINES FOR ADDING NEW FLAGS:
- * 1. UI Flow: Group flags top-to-bottom as they appear visually on the site.
- *    Use prefixes like "[Global]", "[Home]", "[Partnership]" for categories.
- * 2. Routing: Specify exact routes in `routes` array. Use "all" for global.
- * 3. Device: Use `device` to hide desktop-only effects (e.g. hover physics) from mobile.
- * 4. Dependencies: Use `dependsOn` if a flag requires another to be true.
- * ============================================================================
+ * Fixed page-reload tier-desync bug by restoring activeTier directly from localStorage.
  *
  * @author Geminis AI & Kort
- * @version 7.2.0
+ * @version 7.2.1
  */
 
 import {
@@ -35,15 +27,12 @@ export type RoutePath =
 
 export interface EffectsDebugFlags {
   tierOverride: PerformanceTierOverride;
-  globalPower: boolean; // Master bypass switch (DAW pattern)
-  // --- Global ---
+  globalPower: boolean;
   renderHeader: boolean;
   textShineAnimation: boolean;
   premiumTransitions: boolean;
-  // --- Home: Hero ---
   parallaxBackground: boolean;
   auroraText: boolean;
-  // --- Home: Morphing Video ---
   renderVideoBlocks: boolean;
   blockVideoTranslateZHigh: boolean;
   videoProgressOrb: boolean;
@@ -59,23 +48,20 @@ export interface EffectsDebugFlags {
   webglFluidPressureHigh: boolean;
   webglFluidSunrays: boolean;
   webglFluidShading: boolean;
-  // --- Home: Featured Products ---
   cardScrollGather: boolean;
-  // --- Partnership: Science ---
   molecularNetHighNodes: boolean;
 }
 
 export interface FlagMeta {
   label: string;
-  category: string; // Group name in the UI
-  routes: RoutePath[]; // Route paths where the toggle should be visible
-  device: TargetDevice; // Filters rendering on PC vs Touch debug panels
-  desc: string; // Hover tooltip description
+  category: string;
+  routes: RoutePath[];
+  device: TargetDevice;
+  desc: string;
   dependsOn?: keyof EffectsDebugFlags;
 }
 
 export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverride" | "globalPower">, FlagMeta> = {
-  // ─── [GLOBAL] HEADER & LAYOUT ───
   renderHeader: {
     label: "Render Header Component",
     category: "[Global] Header & Layout",
@@ -90,8 +76,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "desktop",
     desc: "Continuous shine animation on headers.",
   },
-
-  // ─── [GLOBAL] ROUTING & UI ───
   premiumTransitions: {
     label: "Premium Page Transitions",
     category: "[Global] Routing & UI",
@@ -99,8 +83,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "all",
     desc: "Pixelated/wave page transition morphs.",
   },
-
-  // ─── [HOME] 1. HERO SECTION ───
   parallaxBackground: {
     label: "Parallax Backgrounds (Sec 1, 3, 5)",
     category: "[Home] 1. Hero Section",
@@ -115,8 +97,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "all",
     desc: "Multi-stop gradient rotation on Hero titles.",
   },
-
-  // ─── [HOME] 2. MORPHING VIDEO ───
   renderVideoBlocks: {
     label: "Render 01/02/03 Video Blocks",
     category: "[Home] 2. Morphing Video",
@@ -145,8 +125,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "all",
     desc: "Circular SVG play indicator.",
   },
-
-  // ─── [HOME] 2. TYPOGRAPHY ───
   scrollTextBlur: {
     label: "Text Reveal (Blur)",
     category: "[Home] 2. Typography",
@@ -175,8 +153,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "all",
     desc: "Scroll-driven color fill of giant digits.",
   },
-
-  // ─── [HOME] 2. BACKGROUND GRIDS ───
   morphingBackground: {
     label: "Biotech Background Base",
     category: "[Home] 2. Background Grids",
@@ -198,8 +174,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "desktop",
     desc: "CSS parallax grid rotating on Z-axis.",
   },
-
-  // ─── [HOME] 2. WEBGL DYNAMICS ───
   webglFluid: {
     label: "WebGL Fluid Engine",
     category: "[Home] 2. WebGL Dynamics",
@@ -231,8 +205,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     desc: "Normal map bump-shading for glass look.",
     dependsOn: "webglFluid",
   },
-
-  // ─── [HOME] 3. FEATURED PRODUCTS ───
   cardScrollGather: {
     label: "Cards Scatter/Gather",
     category: "[Home] 3. Featured Products",
@@ -240,8 +212,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "desktop",
     desc: "Scroll-driven spatial physics for product cards.",
   },
-
-  // ─── [PARTNERSHIP] 1. SCIENCE ───
   molecularNetHighNodes: {
     label: "SVG Network (12 vs 7)",
     category: "[Partnership] 1. Science",
@@ -394,10 +364,18 @@ class EffectsDebugStore {
         tierOverride: hardwareTier as PerformanceTierOverride,
       };
 
-      // ИСПРАВЛЕНИЕ: Восстанавливаем сохраненные разработчиком оверрайды при загрузке
       const savedRaw = localStorage.getItem(STORAGE_KEY);
       if (savedRaw) {
         const saved = JSON.parse(savedRaw);
+
+        // 💎 КРИТИЧЕСКИЙ ФИКС: Принудительно синхронизируем activeTier
+        // с сохраненным оверрайдом дебаггера прямо во время загрузки конструктора!
+        if (saved.tierOverride && saved.tierOverride !== "current") {
+          this.activeTier = saved.tierOverride as PerformanceTier;
+        } else {
+          this.activeTier = hardwareTier;
+        }
+
         return { ...initialFlags, ...saved };
       }
 

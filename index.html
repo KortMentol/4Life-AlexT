@@ -32,11 +32,6 @@
         touch-action: none;
       }
 
-      /* 
-       * ⚠️ ROOT CONTAINER INTEGRITY:
-       * Kept fully opaque and default. The solid preloader curtain is 100% sufficient
-       * to mask the initial React mount phase, completely preventing any black-screen lock bugs.
-       */
       #root {
         opacity: 1;
       }
@@ -48,7 +43,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        /* Volumetric luxury dark ambient gradient to frame first-look focus */
         background:
           radial-gradient(circle at 50% 45%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
           radial-gradient(circle at 50% 50%, #050b14 0%, #03050a 100%);
@@ -56,10 +50,9 @@
         will-change: opacity;
         backface-visibility: hidden;
         perspective: 1200px;
-        pointer-events: auto; /* Blocks events during preloading, instantly set to "none" onStart of exit */
+        pointer-events: auto;
       }
 
-      /* Premium dark vignette to focus gaze strictly in the center grid */
       #preloader::before {
         content: "";
         position: absolute;
@@ -73,7 +66,7 @@
         position: absolute;
         inset: 0;
         z-index: 1;
-        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73H8e/g0gD1pLBAAAAAElFTkSuQmCC");
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73eAf8D+DSDPWks8AAAAABJRU5ErkJoggling==");
         background-repeat: repeat;
         opacity: 0.02;
         pointer-events: none;
@@ -98,13 +91,6 @@
         }
       }
 
-      /* 
-       * 💎 AWWWARDS GEOMETRY INTEGRITY HACK:
-       * Мы вынесли .preloader-logo-wrapper из-под вращающегося .progress-ring-container.
-       * Теперь вращается ТОЛЬКО кольцо и фоновое глоу. 
-       * Логотип бренда 4Life остается идеально статичным, горизонтальным и легко читаемым,
-       * что соответствует швейцарским стандартам типографики и клинического стиля.
-       */
       .progress-ring-container {
         position: absolute;
         top: 0;
@@ -113,7 +99,7 @@
         height: 140px;
         transform-style: preserve-3d;
         will-change: transform, opacity;
-        animation: orbitSpin 24s linear infinite; /* Hypnotic slow orbital spin strictly on the ring */
+        animation: orbitSpin 24s linear infinite;
         pointer-events: none;
       }
 
@@ -132,7 +118,7 @@
 
       .preloader-text-group {
         position: absolute;
-        top: 152px; /* Mathematically aligned spacing */
+        top: 152px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
@@ -144,7 +130,6 @@
         pointer-events: none;
       }
 
-      /* Ambient backing glow - optimized to pulse entirely on the GPU thread */
       .progress-ring-haze {
         position: absolute;
         inset: -25px;
@@ -194,7 +179,6 @@
         fill: none;
       }
 
-      /* High-end vector back-glow to avoid rasterization costs of CSS drop-shadow filters */
       .progress-ring__glow {
         stroke: var(--preloader-neon-color);
         stroke-width: 4.5px;
@@ -220,11 +204,6 @@
 
       .preloader-text,
       .preloader-percentage {
-        /* 
-         * 🛑 SYSTEM-UI FONT PRESTIGE (NO FOUT AT ALL):
-         * Direct stack mapping resembling premium Inter and San Francisco weights
-         * guarantees 100% layout and font weight stability before React mounts.
-         */
         font-family:
           system-ui,
           -apple-system,
@@ -252,7 +231,7 @@
 
       .preloader-percentage {
         font-size: 1.65rem;
-        font-weight: 200; /* Ultra-thin luxurious typography weight */
+        font-weight: 200;
         font-variant-numeric: tabular-nums;
         color: var(--preloader-percent-dark);
         margin: 0;
@@ -273,7 +252,6 @@
             <circle id="progress-ring-circle" class="progress-ring__progress" r="68" cx="70" cy="70" />
           </svg>
         </div>
-        <!-- Wrapper is placed independently to keep the branding centered and strictly horizontal -->
         <div class="preloader-logo-wrapper">
           <img src="/images/brand/4life-logo-light.svg" alt="4Life Logo" class="preloader-logo" />
         </div>
@@ -289,24 +267,22 @@
 
     <script>
       (function () {
-        // [WebGPU 2026] Silent precision hardware profiling
-        (function () {
-          if (navigator.gpu && typeof sessionStorage !== "undefined") {
-            navigator.gpu
-              .requestAdapter()
-              .then(function (adapter) {
-                if (adapter) {
-                  const info = adapter.info;
-                  if (info && info.device) {
-                    sessionStorage.setItem("4life_gpu", info.device);
-                  }
+        if (navigator.gpu && typeof sessionStorage !== "undefined") {
+          navigator.gpu
+            .requestAdapter()
+            .then(function (adapter) {
+              if (adapter) {
+                const info = adapter.info;
+                if (info && info.device) {
+                  sessionStorage.setItem("4life_gpu", info.device);
                 }
-              })
-              .catch(function () {});
-          }
-        })();
+              }
+            })
+            .catch(function () {});
+        }
+      })();
 
-        // DOM Elements
+      (function () {
         const preloader = document.getElementById("preloader");
         const stage = document.querySelector(".preloader-stage");
         const textGroup = document.querySelector(".preloader-text-group");
@@ -316,12 +292,10 @@
         const ring = document.getElementById("progress-ring-circle");
         const ringGlow = document.getElementById("progress-ring-glow");
         const ringContainer = document.querySelector(".progress-ring-container");
-        const rootEl = document.getElementById("root");
 
         const radius = 68;
         const circumference = 2 * Math.PI * radius;
 
-        // Perfect entrance setup
         gsap.set(stage, { opacity: 0, y: 15, scale: 0.97 });
         gsap.set(textGroup, { opacity: 0, y: 8 });
         gsap.set(logo, { scale: 0.95, opacity: 0 });
@@ -334,7 +308,6 @@
 
         let assetsReady = false;
         let canFinish = false;
-
         let displayedProgress = 0;
         let targetProgress = 0;
         let isOutroTriggered = false;
@@ -442,7 +415,6 @@
         function checkFinish() {
           if (!assetsReady || displayedProgress < 100 || !canFinish) return;
 
-          // 💎 КРИТИЧЕСКИЙ ФИКС: Оповещаем React-роутер о начале аутро ДО исчезновения прелоадера!
           window.dispatchEvent(new CustomEvent("preloader-outro-start"));
 
           const outroTl = gsap.timeline();
@@ -504,35 +476,49 @@
           }
         });
 
+        // ─── ФАЗА 1 (ОЧЕРЕДЬ ЗАГРУЗКИ И ДЕКОДИРОВАНИЯ ИЗОБРАЖЕНИЙ НА GPU) ───
         const loadAssets = () => {
           const isMobile = window.innerWidth < 768;
           const criticalAssetUrl = isMobile
             ? "/images/backgrounds/bg-hero-Mobile.webp"
             : "/images/backgrounds/bg-hero-PC.webp";
 
-          const imagePromise = new Promise((resolve) => {
+          const criticalBgPromise = new Promise((resolve) => {
             const img = new Image();
             img.src = criticalAssetUrl;
+            img.onload = () => {
+              if (typeof img.decode === "function") {
+                img.decode().then(resolve).catch(resolve);
+              } else {
+                resolve();
+              }
+            };
+            img.onerror = resolve;
+          });
 
-            if (typeof img.decode === "function") {
-              img
-                .decode()
-                .then(resolve)
-                .catch(() => {
-                  img.onload = resolve;
-                  img.onerror = resolve;
-                });
-            } else {
-              img.onload = resolve;
+          // Асинхронно предзагружаем и аппаратно декодируем 20 картинок для 3D-сетки в фоне.
+          // (Для мобильных устройств лимит равен 8 картинкам для экономии памяти).
+          const gridCount = isMobile ? 8 : 20;
+          const gridPromises = Array.from({ length: gridCount }, (_, i) => {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.src = `/images/backgrounds/HomePage/img/${i + 1}.jpg`;
+              img.onload = () => {
+                if (typeof img.decode === "function") {
+                  img.decode().then(resolve).catch(resolve);
+                } else {
+                  resolve();
+                }
+              };
               img.onerror = resolve;
-            }
+            });
           });
 
           const appMountedPromise = new Promise((resolve) => {
             window.addEventListener("app-mounted", resolve, { once: true });
           });
 
-          Promise.all([imagePromise, appMountedPromise]).then(() => {
+          Promise.allSettled([criticalBgPromise, ...gridPromises, appMountedPromise]).then(() => {
             assetsReady = true;
             checkFinish();
           });

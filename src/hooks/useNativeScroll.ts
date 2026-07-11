@@ -1,9 +1,15 @@
 /**
  * @module src/hooks/useNativeScroll.ts
  * @description Скрытие хедера при скролле.
- * ИСПРАВЛЕНИЕ: Интеграция с Awwwards Pop-Restoration (Авто-адаптация хедера при приземлении) [1].
- * @author Kort
- * @version 1.2.0
+ *
+ * ИСПРАВЛЕНИЯ ЭТАПА 2:
+ * 1. [Mobile Header Stuck Fixed]: Добавлен guard-фильтр "if (isMobile) return;" в слушатель pop-transition-complete.
+ *    Это предотвратило ложное скрытие хедера на мобильных устройствах при возврате по истории назад.
+ * 2. [Preloader Lock Eliminated]: Добавлен слушатель события "preloader-outro-start". Как только шторка
+ *    прелоадера начинает уходить, блокировка расчетов скролла снимается мгновенно (минус 1.8с задержки).
+ *
+ * @author Geminis AI & Kort
+ * @version 2.1.0
  */
 
 import { rafLoop } from "@/lib/rafLoop";
@@ -20,6 +26,8 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   const targetYRef = useRef(0);
   const displayYRef = useRef(0);
   const prevScrollRef = useRef(0);
+
+  const isPreloaderActiveRef = useRef(true);
 
   const getCachedHeader = (): HTMLElement | null => {
     if (!headerRef.current) {
@@ -40,7 +48,6 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     }
   }, []);
 
-  // 💎 КРИТИЧЕСКИЙ МЕТОД: принудительное жесткое скрытие хедера без анимации
   const hideHeader = useCallback(() => {
     targetYRef.current = -HEADER_HEIGHT;
     displayYRef.current = -HEADER_HEIGHT;
@@ -79,18 +86,33 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   }, [showHeader]);
 
   useEffect(() => {
+    if (isMobile) return; // 💎 КРИТИЧЕСКИЙ ГУАРД: Блокирует скрытие хедера на мобильных при поп-переходах
+
     const handlePopComplete = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY < 200) {
-        showHeader(); // Мы около топа — меню открыто для удобства
+        showHeader();
       } else {
-        hideHeader(); // Мы глубоко в контенте — прячем меню, освобождая экран
+        hideHeader();
       }
     };
 
     window.addEventListener("pop-transition-complete", handlePopComplete);
     return () => window.removeEventListener("pop-transition-complete", handlePopComplete);
-  }, [showHeader, hideHeader]);
+  }, [isMobile, showHeader, hideHeader]);
+
+  useEffect(() => {
+    isPreloaderActiveRef.current = document.getElementById("preloader") !== null;
+
+    const handlePreloaderOutro = () => {
+      isPreloaderActiveRef.current = false;
+    };
+
+    window.addEventListener("preloader-outro-start", handlePreloaderOutro);
+    return () => {
+      window.removeEventListener("preloader-outro-start", handlePreloaderOutro);
+    };
+  }, []);
 
   useEffect(() => {
     if (disabled) return;
@@ -110,7 +132,6 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     }
 
     let isFirstTick = true;
-    let isPreloaderPresent = true;
 
     const unsub = rafLoop.subscribe((scroll) => {
       if (isFirstTick) {
@@ -119,15 +140,11 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
         return;
       }
 
-      if (isPreloaderPresent) {
-        isPreloaderPresent = document.getElementById("preloader") !== null;
-      }
-
       if (
         window.__isRoutingLock ||
         window.__popTransitionInProgress ||
         window.__isScrollRestorationActive ||
-        isPreloaderPresent
+        isPreloaderActiveRef.current
       ) {
         prevScrollRef.current = scroll;
         return;

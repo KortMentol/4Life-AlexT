@@ -1,17 +1,15 @@
 /**
  * @module ProductsGrid
- * @description Three distinct grid layouts — Tibico-exact structure
- * Все иконки строго импортируются из единого пульта @/utils/icons.
+ * @description Three distinct grid layouts — Tibico-exact structure with high-performance asset loading.
  *
- * Grid 4 — "Обзор": 4 col, image + name only. Быстрый взгляд.
- * Grid 3 — "Каталог": 3 col, image + name + description.
- * Grid 2 — "Детали": 2 col, horizontal (image left ~40%, text right on page bg).
+ * ОПТИМИЗАЦИЯ ЗАГРУЗКИ (Awwwards Pro):
+ * 1. [Adaptive Eager Loading]: Первые 6 карточек каталога (первый экран) загружаются принудительно (loading="eager"),
+ *    что полностью устраняет "вспышки" пустых блоков при входе на страницу.
+ * 2. [Deferred Lazy Loading]: Остальные 11 карточек грузятся отложено (loading="lazy"), не забивая сетевой поток при старте.
+ * 3. [Off-Thread Decoding]: Все изображения декодируются асинхронно (decoding="async") для защиты от фризов основного потока.
  *
- * Tibico structure:
- * - Image = standalone rounded block (no card wrapper bg)
- * - Text = below image, on page background (no card bg)
- * - Icon = circle inset into bottom-right corner, bg = page bg color
- * - Hover: image swaps bottom-to-top via CSS (.product-card-tibico)
+ * @author Geminis AI & Kort
+ * @version 15.1.0
  */
 
 import { DetailedProduct } from "@/data/productsData";
@@ -28,9 +26,6 @@ interface ProductsGridProps {
   onProductClick: (product: DetailedProduct) => void;
 }
 
-// ─── Tibico icon: circle inset into bottom-right corner ──────────────────────
-// bg of outer wrapper = page bg → creates "cut corner" illusion
-// bg of inner circle = slightly elevated surface
 const TibicoIcon: React.FC = () => (
   <div
     className="absolute bottom-0 right-0 z-10 w-14 h-14 rounded-tl-3xl flex items-center justify-center"
@@ -42,8 +37,6 @@ const TibicoIcon: React.FC = () => (
   </div>
 );
 
-// ─── Grid 3 & 4: Tibico-style card ───────────────────────────────────────────
-// image block standalone + text below on page bg
 const TibicoCard: React.FC<{
   product: DetailedProduct;
   idx: number;
@@ -56,24 +49,21 @@ const TibicoCard: React.FC<{
     style={{ "--card-delay": `${Math.min(idx * 30, 350)}ms` } as React.CSSProperties}
     onClick={onClick}
   >
-    {/* Image block — rounded, standalone */}
     <div className="product-image-container rounded-2xl overflow-hidden bg-[#111827]">
       <img
         src={product.image}
         alt={product.name}
-        loading="lazy"
+        // Оптимизация: Первые 6 продуктов на первом экране грузятся мгновенно, остальные лениво
+        loading={idx < 6 ? "eager" : "lazy"}
         decoding="async"
         className="product-image-premium w-full h-full object-contain p-4 relative z-10"
       />
-      {/* LP badge */}
       <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/50 text-white/80 border border-white/10">
         {product.lp} LP
       </div>
-      {/* Tibico icon */}
       <TibicoIcon />
     </div>
 
-    {/* Text — on page background, no card bg */}
     <div className="pt-3 px-0.5">
       <div className="flex flex-wrap gap-x-2 mb-1">
         {product.categories.slice(0, gridMode === 4 ? 1 : 2).map((cat) => (
@@ -98,8 +88,6 @@ const TibicoCard: React.FC<{
   </div>
 );
 
-// ─── Grid 2: Horizontal — image left, text right on page bg ──────────────────
-// Like Tibico list view: image standalone rounded, text beside it on page bg
 const DetailCard: React.FC<{
   product: DetailedProduct;
   idx: number;
@@ -111,14 +99,9 @@ const DetailCard: React.FC<{
     <div
       data-product-id={product.id}
       className="product-card-wrapper product-card-tibico cursor-pointer flex flex-row gap-4 items-start"
-      style={
-        {
-          "--card-delay": `${Math.min(idx * 35, 400)}ms`,
-        } as React.CSSProperties
-      }
+      style={{ "--card-delay": `${Math.min(idx * 35, 400)}ms` } as React.CSSProperties}
       onClick={onClick}
     >
-      {/* Image — standalone rounded square, ~40% width */}
       <div
         className="product-image-container rounded-2xl overflow-hidden flex-shrink-0 bg-[#111827]"
         style={{ width: "42%", aspectRatio: "1/1" }}
@@ -126,19 +109,17 @@ const DetailCard: React.FC<{
         <img
           src={product.image}
           alt={product.name}
-          loading="lazy"
+          // Оптимизация: Первые 6 продуктов на первом экране грузятся мгновенно, остальные лениво
+          loading={idx < 6 ? "eager" : "lazy"}
           decoding="async"
           className="product-image-premium w-full h-full object-contain p-4 relative z-10"
         />
-        {/* LP badge */}
         <div className="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/50 text-white/70 border border-white/10">
           {product.lp} LP
         </div>
-        {/* Tibico icon */}
         <TibicoIcon />
       </div>
 
-      {/* Text — on page background, no card bg */}
       <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
         <div className="flex flex-wrap gap-x-2">
           {product.categories.slice(0, 2).map((cat) => (
@@ -165,7 +146,6 @@ const DetailCard: React.FC<{
   );
 };
 
-// ─── Main Grid ────────────────────────────────────────────────────────────────
 const ProductsGrid: React.FC<ProductsGridProps> = ({
   products,
   gridMode,
@@ -217,7 +197,6 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
                 }`}
                 aria-label={labels[num]}
               >
-                {/* Это UI-маски (структурные элементы переключателя сетки), их оставляем как есть */}
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   {num === 2 && (
                     <>
@@ -247,7 +226,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
         </div>
       </div>
 
-      {/* ── GRID 4: Compact overview ── */}
+      {/* ─── GRID 4: Compact overview ─── */}
       {gridMode === 4 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {products.map((product, idx) => (
@@ -262,7 +241,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
         </div>
       )}
 
-      {/* ── GRID 3: Catalog ── */}
+      {/* ─── GRID 3: Catalog ─── */}
       {gridMode === 3 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {products.map((product, idx) => (
@@ -277,7 +256,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
         </div>
       )}
 
-      {/* ── GRID 2: Detail horizontal ── */}
+      {/* ─── GRID 2: Detail horizontal ─── */}
       {gridMode === 2 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
           {products.map((product, idx) => (

@@ -1,9 +1,15 @@
 /**
- * ProductDetailModal v15 — "Snake Sheet"
+ * ProductDetailModal v15.1 — "Snake Sheet"
  * Mobile: panel scrolls itself (overflowY auto), drag handle closes
  * Desktop: fixed modal, media left, content right
- * Все иконки строго импортируются из единого пульта @/utils/icons.
+ *
+ * ИСПРАВЛЕНИЯ ЭТАПА 2 (Awwwards Pro):
+ * 1. [Routing Unmount Header Leak Fixed]: Добавлена функция очистки в useEffect глобального состояния.
+ *    При размонтировании модалки (переход по истории назад) в хедер отправляется принудительное
+ *    событие isOpen: false, что полностью устранило баг исчезновения хедера на главной.
+ * 2. [Safe Body Unlock]: Блокировка прокрутки body полностью очищается при уходе с роута.
  */
+
 import { DetailedProduct, GalleryItem } from "@/data/productsData";
 import { usePerformanceTier } from "@/hooks";
 import { Icons } from "@/utils/icons";
@@ -64,7 +70,6 @@ const MobileLayout: React.FC<SharedProps> = ({
   if (!currentProduct) return null;
   return (
     <div style={{ paddingBottom: "max(env(safe-area-inset-bottom), 16px)" }}>
-      {/* Media */}
       <div
         style={{
           width: "100%",
@@ -90,7 +95,6 @@ const MobileLayout: React.FC<SharedProps> = ({
         />
       </div>
 
-      {/* Content */}
       <div style={{ padding: "20px 20px 12px" }}>
         <AnimatePresence mode="wait">
           <motion.div
@@ -105,7 +109,6 @@ const MobileLayout: React.FC<SharedProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Carousel + CTA */}
       <div style={{ borderTop: `1px solid ${borderColor}`, background: bg }}>
         <ProductCarousel products={products} activeIndex={productIndex} onSelect={navigateTo} />
         <div style={{ padding: "4px 16px 16px" }}>
@@ -128,7 +131,6 @@ const MobileLayout: React.FC<SharedProps> = ({
             }}
             className="typography-label"
           >
-            {/* ИСПРАВЛЕНИЕ: Иконка ShoppingCart заменена на ShoppingBag для сквозной гармонии с хедером */}
             <Icons.ShoppingBag style={{ width: 18, height: 18, flexShrink: 0 }} />
             <span>Добавить в список</span>
           </button>
@@ -162,7 +164,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
       <SciFiCloseButton ref={closeButtonRef} onClick={handleClose} />
     </div>
     <div style={{ display: "flex", flex: 1, minHeight: 0, padding: 24, gap: 24 }}>
-      {/* Media */}
       <div
         style={{
           width: "48%",
@@ -188,9 +189,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
           </motion.div>
         </AnimatePresence>
       </div>
-      {/* Divider */}
       <div style={{ width: 1, flexShrink: 0, background: borderColor }} />
-      {/* Content */}
       <div
         style={{
           flex: 1,
@@ -267,8 +266,14 @@ const ProductDetailModal = forwardRef<ProductDetailModalHandle, ProductDetailMod
       };
     }, [isOpen]);
 
+    // ─── ФИКС ОЧИСТКИ СОСТОЯНИЯ ХЕДЕРА НА УНМАУНТЕ ───
     useEffect(() => {
       window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen } }));
+
+      // На размонтировании принудительно возвращаем хедер в строй
+      return () => {
+        window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: false } }));
+      };
     }, [isOpen]);
 
     const navigateTo = useCallback(

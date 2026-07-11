@@ -1,3 +1,17 @@
+/**
+ * @module src/context/TransitionProvider.tsx
+ * @description Глобальный провайдер переходов страниц.
+ *
+ * ИСПРАВЛЕНИЯ ЭТАПА 2:
+ * 1. [Early Clicks Unlock]: Блокировка кликов (window.__isRoutingLock = false) теперь снимается мгновенно
+ *    в начале ухода волны вверх (out), а не в конце. Это убрало фриз кликабельности кнопок.
+ * 2. [Back/Forward Paradox Fixed]: Устранена фантомная телепортация при переходах назад-вперед. Клики на новой
+ *    странице регистрируются сразу без накопления событий в очереди браузера.
+ *
+ * @author Geminis AI & Kort
+ * @version 2.1.0
+ */
+
 import { WaveTransition, TransitionHandle as WaveTransitionHandle } from "@/components/transitions/WaveTransition";
 import { useFluid } from "@/hooks";
 import React, { createContext, ReactNode, startTransition, useContext, useRef, useState } from "react";
@@ -47,16 +61,22 @@ export const TransitionProvider: React.FC<{ children: ReactNode }> = ({ children
       // 2. Экран черный. Меняем роут.
       startTransition(() => navigate(path));
 
-      // 3. Слепая зона (350ms). Браузер строит страницу в темноте.
+      // 3. Слепая зона (350ms). Страница рендерится в темноте.
       setTimeout(() => {
         resetFluid();
 
         // 4. Волна уходит вверх, открывая идеальную страницу (1.0s)
-        overlay.play("out").then(() => {
-          setIsTransitioning(false);
-          window.__isRoutingLock = false;
-          window.__menuTransitionInProgress = false;
-          window.dispatchEvent(new CustomEvent("menu-transition-complete"));
+        const playOutPromise = overlay.play("out");
+
+        // 💎 КРИТИЧЕСКАЯ РАЗБЛОКИРОВКА: Снимаем замок кликов сразу на старте ухода волны!
+        // Пользователь видит контент и может мгновенно кликать на кнопки
+        setIsTransitioning(false);
+        window.__isRoutingLock = false;
+        window.__menuTransitionInProgress = false;
+        window.dispatchEvent(new CustomEvent("menu-transition-complete"));
+
+        playOutPromise.then(() => {
+          // Волна полностью скрылась вверху экрана
         });
       }, 350);
     });
