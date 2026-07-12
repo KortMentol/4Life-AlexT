@@ -1,3 +1,15 @@
+/**
+ * @module Grid3D
+ * @description Высокопроизводительная 3D CSS сетка летящих изображений.
+ *
+ * ИСПРАВЛЕНИЯ ЛЕСЕНОК (3D Anti-Aliasing Hack):
+ * 1. [MSAA Edge Trigger]: На `.grid__item` добавлен `outline: 1px solid transparent`
+ *    и `backface-visibility: hidden`. Это заставляет видеокарту рендерить 3D-наклонные
+ *    полигоны с полноценным субпиксельным сглаживанием в Firefox и Chromium.
+ * 2. [Overlapping Anti-Fringe]: Внутреннее изображение слегка увеличено (`scale(1.015)`)
+ *    и стабилизировано через `translate3d`, что убирает белые стыки и бахрому на углах скругления.
+ */
+
 import React, { useEffect, useMemo, useRef } from "react";
 
 interface Grid3DProps {
@@ -127,10 +139,31 @@ export const Grid3D: React.FC<Grid3DProps> = ({ type, triggerRef, filterBlur = t
     >
       <div className="grid-wrap grid h-full w-full p-8" style={{ transformStyle: "preserve-3d" }}>
         {images.map((src, i) => (
-          <div key={i} className="grid__item aspect-[1.5] overflow-hidden rounded-xl">
+          <div
+            key={i}
+            className="grid__item aspect-[1.5] overflow-hidden rounded-xl"
+            style={
+              {
+                outline: "1px solid transparent",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transformStyle: "preserve-3d",
+                transform: "translate3d(0,0,0)",
+              } as React.CSSProperties
+            }
+          >
             <div
               className="h-full w-full bg-cover bg-center rounded-xl"
-              style={{ backgroundImage: `url(${src})`, imageRendering: "auto" } as React.CSSProperties}
+              style={
+                {
+                  backgroundImage: `url(${src})`,
+                  imageRendering: "auto",
+                  // Микро-скейл 1.015 убирает белую бахрому на углах скругления маски
+                  transform: "translate3d(0,0,0) scale(1.015)",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                } as React.CSSProperties
+              }
             />
           </div>
         ))}

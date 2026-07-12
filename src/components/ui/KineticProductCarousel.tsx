@@ -2,17 +2,16 @@
  * @module components/ui/KineticProductCarousel
  * @description Мобильный 3D-Куб слайдер продуктов.
  *
- * ИСПРАВЛЕНИЯ ЭТАПА 3 (Awwwards Pro):
- * 1. [Increased Girth / Proportions]: Ширина куба увеличена до w-[82vw] max-w-[310px] при сохранении aspect-[3/4].
- *    Куб больше не выглядит сжатым столбом, он обрел монументальный объем и устойчивость.
- * 2. [No More Truncation / Tailored Copy]: Полностью удален line-clamp. Описания переписаны на емкие
- *    10-словные тезисы, которые идеально и полностью помещаются на экране смартфона без троеточий.
- * 3. [Smoked Obsidian Glow]: Плоский фон заменен на переливающийся биотех-градиент с лазерной
- *    неоново-циановой рамкой (border-cyan-500/20) и внутренним свечением.
- * 4. [scale(1.35) Integrated]: Твой масштаб и аппаратное ускорение интегрированы в инлайн-стиль transform.
+ * ОПТИМИЗАЦИЯ ТАКТИЛЬНОСТИ И ПЕРЕХОДОВ (Awwwards 2026):
+ * 1. [State-Locked Active Feedback]: При тапе на карточку её состояние блокируется через
+ *    `clickedCardId`. Карточка застывает в нажатом положении (scale 0.93), лазерная полоса
+ *    и стрелка горят непрерывно вплоть до перекрытия экрана волной перехода. Это убирает флик.
+ * 2. [Cinematic Focus Dimming]: При выборе карточки остальные элементы карусели плавно
+ *    затухают (opacity 0.4) и уменьшаются, направляя всё внимание на активный продукт.
+ * 3. [Kinetic Active Feedback]: Стрелка упруго смещается вправо на 6px и фиксируется.
  *
  * @author Geminis AI & Kort
- * @version 16.0.0
+ * @version 18.0.0
  */
 
 import { useTransition } from "@/context";
@@ -43,7 +42,6 @@ const PRODUCT_ID_MAP: Record<number, string> = {
   3: "renuvo",
 };
 
-// Емкие, вдохновляющие описания строго по брошюре 4Life (без троеточий и перегруза)
 const MOBILE_PRODUCT_HUD_INFO = [
   {
     title: "Трай-Фактор Формула",
@@ -64,14 +62,23 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
   const { transitionTo } = useTransition();
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // Локальный стейт фиксации клика для предотвращения флика перед волной
+  const [clickedCardId, setClickedCardId] = useState<number | null>(null);
+
   if (!products || products.length === 0) {
     return null;
   }
 
   const handleCardClick = (id: number) => {
+    if (clickedCardId !== null) return; // Защита от двойного тапа
+
+    setClickedCardId(id);
     const productId = PRODUCT_ID_MAP[id] ?? "tf-classic";
+
     transitionTo(`/products?productId=${productId}`);
   };
+
+  const isAnyClicked = clickedCardId !== null;
 
   return (
     <div className="lg:hidden w-full py-12 relative z-10" data-lenis-prevent>
@@ -81,7 +88,9 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
             swiperRef.current = swiper;
           }}
           onSlideChange={(swiper) => {
-            setActiveIndex(swiper.realIndex);
+            if (!isAnyClicked) {
+              setActiveIndex(swiper.realIndex);
+            }
           }}
           effect={"cube"}
           grabCursor={true}
@@ -93,9 +102,9 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
             shadowOffset: 0,
             shadowScale: 0,
           }}
-          loop={true}
+          loop={!isAnyClicked} // Блокируем свайп во время перехода
+          allowTouchMove={!isAnyClicked}
           modules={[EffectCube]}
-          // Куб расширен до w-[82vw] max-w-[310px] для премиальной солидности
           className="w-[82vw] max-w-[310px] aspect-[3/4] bg-transparent"
           style={{ overflow: "visible" }}
           slidesPerView={1}
@@ -103,16 +112,29 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
         >
           {products.map((product, index) => {
             const info = MOBILE_PRODUCT_HUD_INFO[index] ?? MOBILE_PRODUCT_HUD_INFO[0]!;
+            const isClicked = clickedCardId === product.id;
+
             return (
               <SwiperSlide
                 key={product.id}
                 className="flex flex-col justify-center items-center bg-transparent overflow-visible"
                 style={{ backfaceVisibility: "hidden", transform: "translateZ(0)" }}
               >
-                {/* ── ВЫТЯНУТАЯ ОБСИДИАНОВАЯ КАПСУЛА CUBE CARD (w-full h-full убрал зазоры) ── */}
                 <div
                   onClick={() => handleCardClick(product.id)}
-                  className="w-full h-full aspect-[3/4] p-6 rounded-[2rem] border text-left relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#0c1322] to-[#03050a] border-cyan-500/20 shadow-2xl"
+                  /* 
+                    УМНЫЙ ТАЙЛИНГ КЛАССОВ (Awwwards Focus):
+                    - Если карточка нажата (isClicked): она сжимается до 0.93, загорается рамка и тень.
+                    - Если нажата ДРУГАЯ карточка (isAnyClicked): эта карточка плавно тускнеет (opacity-40) и уходит на задний план (scale-97).
+                    - Если кликов нет: работает стандартный active:scale-95.
+                  */
+                  className={`group w-full h-full aspect-[3/4] p-6 rounded-[2rem] border text-left relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#0c1322] to-[#03050a] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isClicked
+                      ? "scale-[0.93] border-cyan-400/60 shadow-[0_0_35px_rgba(6,182,212,0.35)]"
+                      : isAnyClicked
+                        ? "opacity-40 scale-[0.97] border-cyan-500/5 pointer-events-none"
+                        : "border-cyan-500/20 shadow-2xl active:scale-95"
+                  }`}
                   style={{
                     backfaceVisibility: "hidden",
                     transform: "translateZ(0)",
@@ -121,14 +143,17 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
                 >
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
 
-                  {/* Крупное парящее изображение с твоим scale(1.35) */}
+                  {/* Крупное парящее изображение */}
                   <div className="flex-1 flex items-center justify-center py-4 bg-transparent min-h-0">
                     <img
                       src={product.image}
                       alt={product.title}
                       loading="lazy"
-                      className="h-[95%] max-h-[190px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
-                      // Твой идеальный скейл и аппаратное ускорение
+                      className={`h-[95%] max-h-[190px] object-contain transition-all duration-500 ease-out ${
+                        isClicked
+                          ? "drop-shadow-[0_25px_50px_rgba(6,182,212,0.4)]"
+                          : "drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
+                      }`}
                       style={{ backfaceVisibility: "hidden", transform: "scale(1.35) translateZ(0)" }}
                     />
                   </div>
@@ -138,14 +163,29 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
                     <h3 className="font-bold text-base text-white mb-1.5 leading-snug">{info.title}</h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-4 text-pretty">{info.desc}</p>
 
-                    <div className="relative self-start inline-flex items-center gap-1.5 text-cyan-400 font-bold text-xs uppercase tracking-widest cursor-pointer group/cta">
+                    <div className="relative self-start inline-flex items-center gap-1.5 text-cyan-400 font-bold text-xs uppercase tracking-widest cursor-pointer">
                       <span className="relative z-10">ПОДРОБНЕЕ</span>
-                      {/* Утонченный лазерный шлейф */}
+
+                      {/* 
+                        Критический фикс линии:
+                        - Если карточка нажата (isClicked): линия застывает на 100% ширины и 100% непрозрачности.
+                        - Если нет: она скрыта и срабатывает только на физический тап пальца (group-active).
+                      */}
                       <span
-                        className="absolute bottom-[-3px] left-0 h-[1px] w-full bg-gradient-to-r from-cyan-400/60 to-transparent"
+                        className={`absolute bottom-[-3px] left-0 h-[1px] w-full bg-gradient-to-r from-cyan-400/80 to-transparent origin-left transition-all duration-500 ease-out pointer-events-none ${
+                          isClicked
+                            ? "scale-x-100 opacity-100"
+                            : "scale-x-0 opacity-0 group-active:scale-x-100 group-active:opacity-100"
+                        }`}
                         style={{ clipPath: "polygon(0 0, 100% 40%, 100% 60%, 0 100%)" }}
                       />
-                      <Icons.ArrowRight className="w-3.5 h-3.5" />
+
+                      {/* Стрелка упруго смещается вправо на 6px и фиксируется при клике */}
+                      <Icons.ArrowRight
+                        className={`w-3.5 h-3.5 transition-transform duration-300 ease-out ${
+                          isClicked ? "translate-x-1.5 text-cyan-300" : "group-active:translate-x-1"
+                        }`}
+                      />
                     </div>
                   </div>
                 </div>
@@ -155,7 +195,7 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
         </Swiper>
       </div>
 
-      {/* ─── СВЕРХСОВРЕМЕННЫЙ ЛИНЕЙНЫЙ ИНДИКАТОР ПРОГРЕССА (Awwwards 2026) ─── */}
+      {/* Линейный индикатор прогресса */}
       <div className="flex justify-center items-center mt-6">
         <div className="w-24 h-[2px] bg-white/10 rounded-full overflow-hidden relative">
           <div
@@ -165,11 +205,14 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
         </div>
       </div>
 
-      {/* Навигационные стрелки — Clinical Obsidian Style */}
+      {/* Навигационные стрелки */}
       <div className="flex justify-center gap-4 mt-6">
         <button
           onClick={() => swiperRef.current?.slidePrev()}
-          className="w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] border border-white/10 active:scale-90 transition-transform duration-100 focus:outline-none"
+          disabled={isAnyClicked}
+          className={`w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] border border-white/10 transition-all duration-300 focus:outline-none ${
+            isAnyClicked ? "opacity-10 scale-90 pointer-events-none" : "active:scale-90"
+          }`}
           style={{ willChange: "transform", contain: "layout style paint" }}
           aria-label="Предыдущий продукт"
         >
@@ -178,7 +221,10 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
 
         <button
           onClick={() => swiperRef.current?.slideNext()}
-          className="w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] border border-white/10 active:scale-90 transition-transform duration-100 focus:outline-none"
+          disabled={isAnyClicked}
+          className={`w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] border border-white/10 transition-all duration-300 focus:outline-none ${
+            isAnyClicked ? "opacity-10 scale-90 pointer-events-none" : "active:scale-90"
+          }`}
           style={{ willChange: "transform", contain: "layout style paint" }}
           aria-label="Следующий продукт"
         >
