@@ -3,13 +3,7 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { mainNav } from "@/site-config/site";
 import { scrollToTop } from "@/utils/navigationUtils";
 import { gsap } from "gsap";
-import React, {
-  startTransition,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./style.css";
 
@@ -38,7 +32,6 @@ interface TheodoreMenuProps {
   onClose: (isNavigatingAway?: boolean) => void;
 }
 
-// ─── Scramble hook ────────────────────────────────────────────────────────────
 function useScramble(text: string) {
   const [display, setDisplay] = useState(text);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -58,9 +51,7 @@ function useScramble(text: string) {
           .map((char, i) => {
             if (char === " ") return " ";
             if (i < revealed) return text[i];
-            return SCRAMBLE_CHARS[
-              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
-            ];
+            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
           })
           .join(""),
       );
@@ -82,7 +73,6 @@ function useScramble(text: string) {
   return { display, scramble };
 }
 
-// ─── MenuItem ─────────────────────────────────────────────────────────────────
 const MenuItem: React.FC<{
   title: string;
   href: string;
@@ -132,7 +122,6 @@ const NeonArrowButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   </button>
 );
 
-// ─── TheodoreMenu ─────────────────────────────────────────────────────────────
 const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -153,24 +142,17 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
     const isSame = location.pathname === href;
 
     if (isSame) {
-      // Закрываем меню обычным способом
       onClose();
-      // Запускаем скролл с задержкой в 1000мс.
-      // Это время позволяет анимации закрытия меню почти завершиться
-      // перед началом плавного скролла вверх
       setTimeout(() => {
         scrollToTop({ duration: 1.2 });
       }, 1000);
     } else {
-      // Если переходим на другую страницу, запоминаем куда идти
       setActiveHref(href);
       pendingHrefRef.current = href;
-      // Закрываем с флагом перехода
       onClose(true);
     }
   };
 
-  // ─── GSAP Timeline (инициализация) ─────────────────────────────────────────
   useEffect(() => {
     if (!menuWrapRef.current || !overlayPathRef.current) return;
 
@@ -178,7 +160,8 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
     const overlayPath = overlayPathRef.current;
     const menuItems = gsap.utils.toArray<HTMLElement>(".menu__item", menuWrap);
 
-    if (tier === "low") menuWrap.classList.add("low-performance");
+    const isLowTier = tier === "low";
+    if (isLowTier) menuWrap.classList.add("low-performance");
 
     gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
 
@@ -187,23 +170,19 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
       onStart: () => {
         document.body.classList.add("menu-open");
         document.documentElement.classList.add("menu-open");
-        window.dispatchEvent(
-          new CustomEvent("custom-scrollbar-update", {
-            detail: { action: "hide" },
-          }),
-        );
+        window.dispatchEvent(new CustomEvent("custom-scrollbar-update", { detail: { action: "hide" } }));
       },
       onReverseComplete: () => {
         gsap.set(menuWrap, { autoAlpha: 0, pointerEvents: "none" });
         document.body.classList.remove("menu-open");
         document.documentElement.classList.remove("menu-open");
-        window.__menuTransitionInProgress = false;
-        window.dispatchEvent(new CustomEvent("menu-transition-complete"));
-        window.dispatchEvent(
-          new CustomEvent("custom-scrollbar-update", {
-            detail: { action: "show" },
-          }),
-        );
+
+        if (!pendingHrefRef.current) {
+          window.__menuTransitionInProgress = false;
+          window.dispatchEvent(new CustomEvent("menu-transition-complete"));
+        }
+
+        window.dispatchEvent(new CustomEvent("custom-scrollbar-update", { detail: { action: "show" } }));
       },
     });
 
@@ -248,12 +227,10 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
 
     return () => {
       tl.kill();
-      if (tier === "low" && menuWrap)
-        menuWrap.classList.remove("low-performance");
+      if (menuWrap) menuWrap.classList.remove("low-performance");
     };
-  }, [tier]);
+  }, []);
 
-  // ─── Управление анимацией по isOpen ────────────────────────────────────────
   useEffect(() => {
     const tl = timelineRef.current;
     if (!tl) return;
@@ -264,16 +241,13 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Простое закрытие (стрелка, кнопка назад) — без навигации
     if (!pendingHrefRef.current) {
       tl.reverse();
       return;
     }
 
-    // Закрытие с переходом на другую страницу — пауза на fullBlack, navigate
     gsap.killTweensOf(tl);
-    const labelTime =
-      tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2;
+    const labelTime = tl.labels["fullBlack"] ?? WAVE_OPEN_DOWN_1 + WAVE_OPEN_DOWN_2;
     let lastTime = tl.time();
     const prevUpdate = tl.eventCallback("onUpdate") as gsap.Callback | null;
     const targetHref = pendingHrefRef.current;
@@ -283,15 +257,10 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
       window.__menuTransitionInProgress = true;
       window.dispatchEvent(new CustomEvent("menu-transition-start"));
 
-      // Оборачиваем навигацию в startTransition, чтобы снизить приоритет рендера
-      // и не блокировать анимации. Используем replace: true, чтобы затереть
-      // фантомную запись с открытым меню
       startTransition(() => {
         navigate(targetHref!, { replace: true });
       });
 
-      // Даем слабому железу время на сборку мусора и рендер тяжелой страницы
-      // Для мобилок (ширина < 768) даем 400мс, для ПК оставляем 150мс
       const delay = window.innerWidth < 768 ? 400 : 150;
 
       requestAnimationFrame(() => {
@@ -299,6 +268,12 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
           setTimeout(() => {
             tl.eventCallback("onUpdate", prevUpdate || null);
             tl.resume();
+
+            // ─── ХИРУРГИЧЕСКИЙ ФИКС ТАЙМИНГА ───
+            // Передаем fromMobileMenu: true, чтобы PageEntrance дал задержку
+            window.__menuTransitionInProgress = false;
+            window.dispatchEvent(new CustomEvent("menu-transition-complete", { detail: { fromMobileMenu: true } }));
+
             pendingHrefRef.current = null;
           }, delay);
         });
@@ -332,82 +307,28 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
         </div>
         <div className="tiles">
           <div className="tiles__line">
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img4})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img5})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img6})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img4})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img5})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img6})` }}
-            ></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img4})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img5})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img6})` }}></div>
           </div>
           <div className="tiles__line">
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img1})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img2})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img3})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img1})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img2})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img3})` }}
-            ></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img1})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img2})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img3})` }}></div>
           </div>
           <div className="tiles__line">
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img7})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img8})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img9})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img7})` }}
-            ></div>
-            <div
-              className="tiles__line-img tiles__line-img--large"
-              style={{ backgroundImage: `url(${img8})` }}
-            ></div>
-            <div
-              className="tiles__line-img"
-              style={{ backgroundImage: `url(${img9})` }}
-            ></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img7})` }}></div>
+            <div className="tiles__line-img tiles__line-img--large" style={{ backgroundImage: `url(${img8})` }}></div>
+            <div className="tiles__line-img" style={{ backgroundImage: `url(${img9})` }}></div>
           </div>
         </div>
         <nav className="menu">
@@ -422,17 +343,10 @@ const TheodoreMenu: React.FC<TheodoreMenuProps> = ({ isOpen, onClose }) => {
           ))}
         </nav>
         <div className="menu-footer">
-          {/* Футер очищен от переключателя тем, разметка сбалансирована */}
           <div className="h-8" />
         </div>
       </div>
-      <svg
-        className="overlay"
-        width="100%"
-        height="100%"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
+      <svg className="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path
           ref={overlayPathRef}
           className="overlay__path"

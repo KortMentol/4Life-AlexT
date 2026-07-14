@@ -1,21 +1,14 @@
 /**
  * @module src/components/sections/MorphingVideoSection/components/VideoBlock.tsx
- * @description Awwwards 2026 - Optimized Responsive Video Block (Dual Observer Architecture).
- *
- * ОПТИМИЗАЦИЯ СЕТИ И РЕНДЕРИНГА (Awwwards Pro):
- * 1. [Strict Preload None]: Все неактивные видео заблокированы от предзагрузки трафика (preload="none").
- *    Это убирает невидимый расход трафика и спасает пропускную способность для картинок.
- * 2. [Prism Obsidian Poster]: Вместо случайных картинок, создававших визуальный шум и лишние HTTP-запросы,
- *    в качестве постера используется глубокий матовый черный фон (#03050a) с мелким паттерном.
- *    Это обеспечивает кристально плавный старт воспроизведения без "вспышек" и лишних сетевых затрат.
- *
+ * @description Awwwards 2026 - Optimized Responsive Video Block.
+ * ИСПРАВЛЕНИЯ: Внедрено "Правило 2%". Видео-декодер больше не работает вхолостую
+ * за пределами экрана. Воспроизведение начинается только при 2% пересечении вьюпорта.
  * @author Geminis AI & Kort
- * @version 3.3.0
+ * @version 7.1.0
  */
 
 import { usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
-import { effectsDebugStore } from "@/utils/effectsDebug/effectsDebugStore";
 import { Icons } from "@/utils/icons";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +17,6 @@ import { BLOCK_CONFIG } from "../config";
 interface VideoBlockProps {
   blockRef: React.RefObject<HTMLDivElement>;
   videoSrc: string;
-  posterSrc?: string; // posterSrc сохранен для обратной совместимости, но не используется для оптимизации трафика
   blockIndex: number;
   isTouchDevice: boolean;
   onClick?: () => void;
@@ -43,9 +35,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   const [isPlaybackInView, setIsPlaybackInView] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
   const [isVideoLoaded, setIsVideoReady] = useState(false);
-  const [showProgressOrb, setShowProgressOrb] = useState<boolean>(
-    () => effectsDebugStore.getFlag("videoProgressOrb") as boolean,
-  );
 
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
@@ -56,13 +45,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
-    const unsub = effectsDebugStore.subscribe((flags) => {
-      setShowProgressOrb(flags.videoProgressOrb);
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
     if (!isTransitioning) return;
     const handleComplete = () => setIsTransitioning(false);
     window.addEventListener("menu-transition-complete", handleComplete, { once: true });
@@ -70,24 +52,25 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   }, [isTransitioning]);
 
   useEffect(() => {
+    if (isTouchDevice) return;
+
     const block = blockRef.current;
     if (!block) return;
 
+    // Ранняя подгрузка метаданных
     const networkObserver = new IntersectionObserver(
       ([entry]) => {
-        if (entry && entry.isIntersecting) {
-          setIsNetworkInView(true);
-        }
+        if (entry && entry.isIntersecting) setIsNetworkInView(true);
       },
-      { threshold: 0, rootMargin: "1200px 0px" }, // Оптимальный упреждающий буфер скачивания видео в фоне
+      { threshold: 0, rootMargin: "1200px 0px" },
     );
 
-    const playMargin = isTouchDevice ? "150px" : "250px";
+    // ФИКС "ПРАВИЛО 2%": Старт воспроизведения ТОЛЬКО когда видео реально появилось на экране
     const playbackObserver = new IntersectionObserver(
       ([entry]) => {
         setIsPlaybackInView(entry?.isIntersecting ?? false);
       },
-      { threshold: 0, rootMargin: `${playMargin} 0px ${playMargin} 0px` },
+      { threshold: 0.02, rootMargin: "0px" },
     );
 
     networkObserver.observe(block);
@@ -100,6 +83,8 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   }, [blockRef, isTouchDevice]);
 
   useEffect(() => {
+    if (isTouchDevice) return;
+
     const video = videoRef.current;
     if (!video || !isNetworkInView) return;
 
@@ -107,9 +92,11 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
       video.src = videoSrc;
       video.load();
     }
-  }, [isNetworkInView, videoSrc]);
+  }, [isNetworkInView, videoSrc, isTouchDevice]);
 
   useEffect(() => {
+    if (isTouchDevice) return;
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -143,13 +130,15 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     return () => {
       video.removeEventListener("loadeddata", handleLoadedData);
     };
-  }, [isPlaybackInView, isModalOpen, isTransitioning]);
+  }, [isPlaybackInView, isModalOpen, isTransitioning, isTouchDevice]);
 
   useEffect(() => {
+    if (isTouchDevice) return;
+
     const video = videoRef.current;
     const circle = progressCircleRef.current;
 
-    if (!video || !circle || !isPlaybackInView || isLow) return;
+    if (!video || !circle || !isPlaybackInView) return;
 
     const radius = circle.r.baseVal.value;
     const circumference = 2 * Math.PI * radius;
@@ -158,8 +147,8 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     let rafId: number | null = null;
     let lastTime = 0;
 
-    const updateProgress = (time: number) => {
-      if (time - lastTime >= 66) {
+    const updateProgressRAF = (time: number) => {
+      if (time - lastTime >= 33) {
         lastTime = time;
         if (!video.paused && video.duration && !isNaN(video.duration)) {
           const progress = video.currentTime / video.duration;
@@ -167,22 +156,34 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
           circle.style.strokeDashoffset = `${offset}`;
         }
       }
-
       if (!video.paused) {
-        rafId = requestAnimationFrame(updateProgress);
+        rafId = requestAnimationFrame(updateProgressRAF);
       } else {
         rafId = null;
       }
     };
 
+    const updateProgressLow = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        const progress = video.currentTime / video.duration;
+        const offset = circumference - progress * circumference;
+        circle.style.transition = "stroke-dashoffset 0.25s linear";
+        circle.style.strokeDashoffset = `${offset}`;
+      }
+    };
+
     const handlePlay = () => {
-      if (rafId === null) {
-        rafId = requestAnimationFrame(updateProgress);
+      if (isLow) {
+        video.addEventListener("timeupdate", updateProgressLow);
+      } else if (rafId === null) {
+        rafId = requestAnimationFrame(updateProgressRAF);
       }
     };
 
     const handlePause = () => {
-      if (rafId !== null) {
+      if (isLow) {
+        video.removeEventListener("timeupdate", updateProgressLow);
+      } else if (rafId !== null) {
         cancelAnimationFrame(rafId);
         rafId = null;
       }
@@ -192,47 +193,43 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     video.addEventListener("pause", handlePause);
 
     if (!video.paused) {
-      rafId = requestAnimationFrame(updateProgress);
+      if (isLow) {
+        video.addEventListener("timeupdate", updateProgressLow);
+      } else {
+        rafId = requestAnimationFrame(updateProgressRAF);
+      }
     }
 
     return () => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
+      if (rafId !== null) cancelAnimationFrame(rafId);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
+      video.removeEventListener("timeupdate", updateProgressLow);
     };
-  }, [isPlaybackInView, isVideoLoaded, isLow]);
+  }, [isPlaybackInView, isVideoLoaded, isLow, isTouchDevice]);
 
   const { scrollYProgress } = useScroll({
     target: blockRef,
-    offset: isTouchDevice ? ["start 100%", "end 0%"] : ["start 90%", "end 10%"],
+    offset: ["start 90%", "end 10%"],
   });
 
   const timings = useMemo(() => {
     const blockKey = `block${blockIndex + 1}` as keyof typeof BLOCK_CONFIG.desktopTimings;
-    return isTouchDevice ? BLOCK_CONFIG.touchTimings[blockKey] : BLOCK_CONFIG.desktopTimings[blockKey];
-  }, [blockIndex, isTouchDevice]);
+    return BLOCK_CONFIG.desktopTimings[blockKey];
+  }, [blockIndex]);
 
-  const t = timings ?? BLOCK_CONFIG.touchTimings.block1;
+  const t = timings ?? BLOCK_CONFIG.desktopTimings.block1;
 
   const desktopRawY = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     ["100vh", "0vh", "0vh", "0vh", "0vh", "-100vh"],
   );
-  const y = isTouchDevice ? 0 : desktopRawY;
 
   const opacity = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     [0, 1, 1, 1, 1, 0],
-  );
-
-  const scale = useTransform(
-    scrollYProgress,
-    [t.fadeInStart, t.fadeInEnd, t.fadeOutStart, t.fadeOutEnd],
-    isTouchDevice ? [0.96, 1, 1, 0.96] : [1, 1, 1, 1],
   );
 
   const tzHigh = import.meta.env.DEV ? efxFlags.blockVideoTranslateZHigh : true;
@@ -242,29 +239,30 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
     [tzVal, 0, 0, 0, 0, tzVal],
   );
-  const translateZ = isTouchDevice ? 0 : desktopTranslateZ;
+
   const pointerEvents = useTransform(opacity, (o: number) => (o > 0.15 ? "auto" : "none"));
 
-  if (!efxFlags.renderVideoBlocks) {
+  if (isTouchDevice || !efxFlags.renderVideoBlocks) {
     return null;
   }
+
+  const shouldBlurOrb = efxFlags.playButtonBlur;
 
   return (
     <div
       className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
-      style={{ perspective: "1200px", height: isTouchDevice ? "100svh" : "100vh" }}
+      style={{ perspective: "1200px", height: "100vh" }}
     >
       <motion.div
         style={{
-          y,
+          y: desktopRawY,
           opacity,
-          scale,
-          translateZ,
+          translateZ: desktopTranslateZ,
           pointerEvents,
           backfaceVisibility: "hidden",
-          willChange: isTouchDevice || isLow ? "auto" : "transform, opacity",
+          willChange: isLow ? "auto" : "transform, opacity",
         }}
-        className={`w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto ${!isTouchDevice ? "anti-pixel-snap" : ""}`}
+        className="w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto anti-pixel-snap"
       >
         <motion.div
           initial={false}
@@ -278,11 +276,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             isolation: "isolate",
           }}
         >
-          {/* 
-            ПОСТЕР В ВИДЕ ЧИСТОГО ОБСИДИАНОВОГО ФОНА.
-            Полностью ликвидирует 3 тяжелых HTTP-запроса картинок при скролле и гарантирует мгновенный
-            бесшовный переход в видео без визуального скачка или мерцания первого кадра.
-          */}
           <div
             className="absolute inset-0 bg-[#03050a] bg-noise-overlay transition-opacity duration-1000 pointer-events-none"
             style={{
@@ -297,7 +290,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             muted
             playsInline
             loop
-            // ОПТИМИЗАЦИЯ: Строгий запрет скачивания до входа в упреждающий вьюпорт
             preload="none"
             disablePictureInPicture
             disableRemotePlayback
@@ -310,7 +302,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             }
           />
 
-          {tier === "high" && !isTouchDevice && (
+          {tier === "high" && (
             <>
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 mix-blend-overlay pointer-events-none" />
               <div
@@ -320,49 +312,46 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             </>
           )}
 
-          {showProgressOrb && (
+          {efxFlags.videoProgressOrb && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
               <div
                 className={[
                   "w-16 md:w-20 lg:w-24 h-16 md:h-20 lg:h-24 rounded-full flex items-center justify-center transition-all duration-300 relative overflow-visible",
-                  tier === "low"
-                    ? "bg-[#0f172a]/85 border border-white/10 shadow-lg"
-                    : "bg-[#03050a]/40 backdrop-blur-md border border-white/10 shadow-2xl",
+                  shouldBlurOrb
+                    ? "bg-[#03050a]/40 backdrop-blur-md border border-white/10 shadow-2xl"
+                    : "bg-[#0f172a]/85 border border-white/10 shadow-lg",
                 ].join(" ")}
                 style={{ transform: "translateZ(0)" }}
               >
-                {tier !== "low" && (
-                  <svg
-                    className="absolute inset-0 w-full h-full -rotate-90 overflow-visible pointer-events-none"
-                    viewBox="0 0 100 100"
-                    style={{
-                      willChange: "stroke-dashoffset",
-                      transition: "stroke-dashoffset 0.1s linear",
-                    }}
-                  >
-                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="46"
-                      fill="none"
-                      stroke="#06b6d4"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      className="opacity-20"
-                    />
-                    <circle
-                      ref={progressCircleRef}
-                      cx="50"
-                      cy="50"
-                      r="46"
-                      fill="none"
-                      stroke="#06b6d4"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                )}
+                <svg
+                  className="absolute inset-0 w-full h-full -rotate-90 overflow-visible pointer-events-none"
+                  viewBox="0 0 100 100"
+                  style={{
+                    willChange: "stroke-dashoffset",
+                  }}
+                >
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="46"
+                    fill="none"
+                    stroke="#06b6d4"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    className="opacity-20"
+                  />
+                  <circle
+                    ref={progressCircleRef}
+                    cx="50"
+                    cy="50"
+                    r="46"
+                    fill="none"
+                    stroke="#06b6d4"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
 
                 <div className="relative flex items-center justify-center translate-x-[2px] md:translate-x-[3px]">
                   <Icons.Play

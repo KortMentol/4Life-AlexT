@@ -1,10 +1,10 @@
+// src/utils/effectsDebug/effectsDebugStore.ts
 /**
  * @module src/utils/effectsDebug/effectsDebugStore.ts
- * @description Reactive singleton store for managing visual effect flags.
- * Fixed page-reload tier-desync bug by restoring activeTier directly from localStorage.
- *
- * @author Geminis AI & Kort
- * @version 7.2.1
+ * @description Реактивный синглтон-стор для управления флагами эффектов.
+ * ИСПРАВЛЕНИЕ: Вычищены флаги удаленной MolecularNet для чистоты стора.
+ * @author Kort & AI
+ * @version 8.0.0
  */
 
 import {
@@ -31,25 +31,39 @@ export interface EffectsDebugFlags {
   renderHeader: boolean;
   textShineAnimation: boolean;
   premiumTransitions: boolean;
+
+  // Hero Section
   parallaxBackground: boolean;
   auroraText: boolean;
+  heroScrollAnimation: boolean;
+
+  // Morphing Video
   renderVideoBlocks: boolean;
+  renderCardsBackground: boolean;
+  cardsBackdropBlur: boolean;
   blockVideoTranslateZHigh: boolean;
   videoProgressOrb: boolean;
-  renderCardsBackground: boolean;
+  playButtonBlur: boolean;
+
+  // Typography
   scrollTextBlur: boolean;
   scrollTextOpacity: boolean;
   scrollTextBlockOpacity: boolean;
   scrollNumberAnimation: boolean;
+
+  // Background Grids
   morphingBackground: boolean;
   bgGlowLights: boolean;
   grid3d: boolean;
+
+  // WebGL Dynamics
   webglFluid: boolean;
   webglFluidPressureHigh: boolean;
   webglFluidSunrays: boolean;
   webglFluidShading: boolean;
+
+  // Featured Products
   cardScrollGather: boolean;
-  molecularNetHighNodes: boolean;
 }
 
 export interface FlagMeta {
@@ -84,11 +98,11 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     desc: "Pixelated/wave page transition morphs.",
   },
   parallaxBackground: {
-    label: "Parallax Backgrounds (Sec 1, 3, 5)",
+    label: "Parallax Backgrounds",
     category: "[Home] 1. Hero Section",
     routes: ["/"],
     device: "all",
-    desc: "Fixed viewport layer parallax on background textures in sections 1, 3 and 5.",
+    desc: "Fixed viewport layer parallax on background textures.",
   },
   auroraText: {
     label: "Aurora Text Gradient",
@@ -96,6 +110,13 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     routes: ["/"],
     device: "all",
     desc: "Multi-stop gradient rotation on Hero titles.",
+  },
+  heroScrollAnimation: {
+    label: "Hero Scroll Reveal",
+    category: "[Home] 1. Hero Section",
+    routes: ["/"],
+    device: "desktop",
+    desc: "Smoothly shifts hero content down on scroll.",
   },
   renderVideoBlocks: {
     label: "Render 01/02/03 Video Blocks",
@@ -109,7 +130,15 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     category: "[Home] 2. Morphing Video",
     routes: ["/"],
     device: "all",
-    desc: "Toggles heavy CSS glass shadows/borders.",
+    desc: "Renders the glass background borders and shadows.",
+  },
+  cardsBackdropBlur: {
+    label: "Cards Backdrop Blur",
+    category: "[Home] 2. Morphing Video",
+    routes: ["/"],
+    device: "all",
+    desc: "Applies expensive backdrop-filter to glass cards.",
+    dependsOn: "renderCardsBackground",
   },
   blockVideoTranslateZHigh: {
     label: "TranslateZ ±400px",
@@ -124,6 +153,14 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     routes: ["/"],
     device: "all",
     desc: "Circular SVG play indicator.",
+  },
+  playButtonBlur: {
+    label: "Play Button Blur",
+    category: "[Home] 2. Morphing Video",
+    routes: ["/"],
+    device: "all",
+    desc: "Applies backdrop-filter to central play orb.",
+    dependsOn: "videoProgressOrb",
   },
   scrollTextBlur: {
     label: "Text Reveal (Blur)",
@@ -212,13 +249,6 @@ export const FLAGS_METADATA: Record<Exclude<keyof EffectsDebugFlags, "tierOverri
     device: "desktop",
     desc: "Scroll-driven spatial physics for product cards.",
   },
-  molecularNetHighNodes: {
-    label: "SVG Network (12 vs 7)",
-    category: "[Partnership] 1. Science",
-    routes: ["/partnership"],
-    device: "all",
-    desc: "Dynamic SVG vertices with orbital drift physics.",
-  },
 };
 
 const STORAGE_KEY = "4life_effects_debug";
@@ -232,10 +262,13 @@ const DEFAULTS: EffectsDebugFlags = {
   premiumTransitions: true,
   parallaxBackground: true,
   auroraText: true,
+  heroScrollAnimation: true,
   renderVideoBlocks: true,
+  renderCardsBackground: true,
+  cardsBackdropBlur: true,
   blockVideoTranslateZHigh: true,
   videoProgressOrb: true,
-  renderCardsBackground: true,
+  playButtonBlur: true,
   scrollTextBlur: true,
   scrollTextOpacity: false,
   scrollTextBlockOpacity: true,
@@ -248,7 +281,6 @@ const DEFAULTS: EffectsDebugFlags = {
   webglFluidSunrays: true,
   webglFluidShading: true,
   cardScrollGather: true,
-  molecularNetHighNodes: true,
 };
 
 export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<EffectsDebugFlags> => {
@@ -265,10 +297,11 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       scrollTextBlockOpacity: false,
       scrollNumberAnimation: false,
       videoProgressOrb: true,
+      playButtonBlur: false,
       blockVideoTranslateZHigh: false,
-      molecularNetHighNodes: false,
       cardScrollGather: false,
       parallaxBackground: false,
+      heroScrollAnimation: false,
       morphingBackground: true,
       premiumTransitions: false,
       auroraText: false,
@@ -276,6 +309,7 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       textShineAnimation: false,
       bgGlowLights: true,
       renderCardsBackground: true,
+      cardsBackdropBlur: false,
       renderHeader: true,
     };
   }
@@ -293,10 +327,11 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       scrollTextBlockOpacity: true,
       scrollNumberAnimation: true,
       videoProgressOrb: true,
+      playButtonBlur: true,
       blockVideoTranslateZHigh: false,
-      molecularNetHighNodes: false,
       cardScrollGather: true,
       parallaxBackground: true,
+      heroScrollAnimation: true,
       morphingBackground: true,
       premiumTransitions: true,
       auroraText: true,
@@ -304,39 +339,15 @@ export const getPresetForTier = (tier: "low" | "medium" | "high"): Partial<Effec
       textShineAnimation: false,
       bgGlowLights: true,
       renderCardsBackground: true,
+      cardsBackdropBlur: true,
       renderHeader: true,
     };
   }
 
-  if (tier === "high") {
-    return {
-      globalPower: true,
-      webglFluid: true,
-      webglFluidPressureHigh: true,
-      webglFluidSunrays: true,
-      webglFluidShading: true,
-      grid3d: true,
-      scrollTextBlur: true,
-      scrollTextOpacity: false,
-      scrollTextBlockOpacity: true,
-      scrollNumberAnimation: true,
-      videoProgressOrb: true,
-      blockVideoTranslateZHigh: true,
-      molecularNetHighNodes: true,
-      cardScrollGather: true,
-      parallaxBackground: true,
-      morphingBackground: true,
-      premiumTransitions: true,
-      auroraText: true,
-      renderVideoBlocks: true,
-      textShineAnimation: true,
-      bgGlowLights: true,
-      renderCardsBackground: true,
-      renderHeader: true,
-    };
-  }
-
-  return {};
+  return {
+    ...DEFAULTS,
+    tierOverride: "high",
+  };
 };
 
 type Listener = (flags: EffectsDebugFlags) => void;
@@ -368,8 +379,6 @@ class EffectsDebugStore {
       if (savedRaw) {
         const saved = JSON.parse(savedRaw);
 
-        // 💎 КРИТИЧЕСКИЙ ФИКС: Принудительно синхронизируем activeTier
-        // с сохраненным оверрайдом дебаггера прямо во время загрузки конструктора!
         if (saved.tierOverride && saved.tierOverride !== "current") {
           this.activeTier = saved.tierOverride as PerformanceTier;
         } else {

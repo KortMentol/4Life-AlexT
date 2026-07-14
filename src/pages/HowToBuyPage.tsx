@@ -1,17 +1,18 @@
 /**
  * @module src/pages/HowToBuyPage.tsx
- * @description Immersive Garden 2026 - Как приобрести продукцию 4Life
- * Профессиональная страница с пошаговой инструкцией и FAQ
- * @author Kort
- * @version 2.0.0
+ * @description Страница "Как приобрести продукцию 4Life" в стиле Immersive Garden.
+ * Интегрирован единый оркестратор входа PageEntrance для бесшовной анимации переходов.
+ * @author Kort & AI
+ * @version 2.1.0
  */
 
+import { PageEntrance } from "@/components/transitions/PageEntrance";
+import { Button, FAQItem } from "@/components/ui";
+import { usePerformanceTier } from "@/hooks";
 import { SEO } from "@/seo/SEO";
+import { Icons } from "@/utils/icons";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
-import { usePerformanceTier } from "@/hooks";
-import { Button, FAQItem } from "@/components/ui";
-import { Icons } from "@/utils/icons";
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -31,20 +32,17 @@ const HowToBuyPage: React.FC = () => {
     {
       icon: Icons.BadgePercent,
       title: "Скидка 25%",
-      description:
-        "Покупайте напрямую у 4Life по привилегированной цене Приоритетного Клиента",
+      description: "Покупайте напрямую у 4Life по привилегированной цене Приоритетного Клиента",
     },
     {
       icon: Icons.Gift,
       title: "Бонусы и акции",
-      description:
-        "Участвуйте в ежемесячных акциях и получайте подарки от компании",
+      description: "Участвуйте в ежемесячных акциях и получайте подарки от компании",
     },
     {
       icon: Icons.Truck,
       title: "Доставка по России",
-      description:
-        "Быстрая и надёжная доставка в любой регион через офис в Москве",
+      description: "Быстрая и надёжная доставка в любой регион через офис в Москве",
     },
   ];
 
@@ -108,12 +106,7 @@ const HowToBuyPage: React.FC = () => {
   ];
 
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-    >
+    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <SEO
         title="Как приобрести продукцию 4Life - Александр Тощев"
         description="Узнайте, как легко приобрести продукцию 4Life в статусе Приоритетного Клиента и получить доступ к скидкам 25%. Пошаговая инструкция."
@@ -121,37 +114,38 @@ const HowToBuyPage: React.FC = () => {
         type="website"
       />
 
-      {/* Hero Section */}
+      {/* Hero Section с оркестрированным PageEntrance */}
       <section className="relative py-24 md:py-32 bg-gradient-to-br from-gray-950 to-gray-900 overflow-hidden">
         <div className="absolute inset-0 opacity-30">
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage:
-                "radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.3) 1px, transparent 0)",
+              backgroundImage: "radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.3) 1px, transparent 0)",
               backgroundSize: "32px 32px",
             }}
           />
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-              Как приобрести
-              <br />
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                продукты 4Life
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Получите лучшие условия и экспертную поддержку, следуя простым
-              шагам
-            </p>
-          </motion.div>
+          <PageEntrance className="flex flex-col items-center justify-center">
+            {/* Title */}
+            <div data-entrance="title" className="mb-6">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+                Как приобрести
+                <br />
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  продукты 4Life
+                </span>
+              </h1>
+            </div>
+
+            {/* Lead Description */}
+            <div data-entrance="lead" className="max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl text-gray-300 leading-relaxed text-pretty">
+                Получите лучшие условия и экспертную поддержку, следуя простым шагам
+              </p>
+            </div>
+          </PageEntrance>
         </div>
       </section>
 
@@ -165,9 +159,7 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Преимущества Приоритетного Клиента
-            </h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Преимущества Приоритетного Клиента</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Зарегистрируйтесь один раз и получайте выгоду от каждой покупки
             </p>
@@ -185,17 +177,10 @@ const HowToBuyPage: React.FC = () => {
                 className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800"
               >
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-900/30 mb-6">
-                  <benefit.icon
-                    className="w-8 h-8 text-cyan-400"
-                    strokeWidth={1.5}
-                  />
+                  <benefit.icon className="w-8 h-8 text-cyan-400" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-400 leading-relaxed">
-                  {benefit.description}
-                </p>
+                <h3 className="text-xl font-bold text-white mb-3">{benefit.title}</h3>
+                <p className="text-gray-400 leading-relaxed">{benefit.description}</p>
               </motion.div>
             ))}
           </div>
@@ -212,12 +197,8 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Три простых шага
-            </h2>
-            <p className="text-xl text-gray-300">
-              От регистрации до получения продукции
-            </p>
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Три простых шага</h2>
+            <p className="text-xl text-gray-300">От регистрации до получения продукции</p>
           </motion.div>
 
           <div className="space-y-12">
@@ -234,20 +215,14 @@ const HowToBuyPage: React.FC = () => {
                   {/* Number */}
                   <div className="flex-shrink-0">
                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-white">
-                        {step.number}
-                      </span>
+                      <span className="text-3xl font-bold text-white">{step.number}</span>
                     </div>
                   </div>
 
                   {/* Content */}
                   <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                      {step.title}
-                    </h3>
-                    <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-                      {step.description}
-                    </p>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">{step.title}</h3>
+                    <p className="text-lg text-gray-300 mb-6 leading-relaxed">{step.description}</p>
                     <Button
                       to={step.action.link}
                       variant="primary"
@@ -257,11 +232,7 @@ const HowToBuyPage: React.FC = () => {
                       {...(step.action.external && {
                         onClick: (e: React.MouseEvent) => {
                           e.preventDefault();
-                          window.open(
-                            step.action.link,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
+                          window.open(step.action.link, "_blank", "noopener,noreferrer");
                         },
                       })}
                     >
@@ -290,9 +261,7 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Часто задаваемые вопросы
-            </h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Часто задаваемые вопросы</h2>
           </motion.div>
 
           <div className="space-y-4">
@@ -320,9 +289,7 @@ const HowToBuyPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              Остались вопросы?
-            </h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">Остались вопросы?</h2>
             <p className="text-xl text-white/90 mb-10 leading-relaxed">
               Свяжитесь со мной, и я помогу разобраться со всеми деталями
             </p>

@@ -1,26 +1,18 @@
 /**
- * @module src/styles/modern-design.css
- * @description Современная дизайн-система через CSS-переменные
- * @author Kort
- * @version 2.0.0 - Cleaned (2026)
- * @usage Button.tsx, App.tsx (404), SectionHeading.tsx - кнопки, карточки, градиентные заголовки
- * @classes .btn-modern, .btn-primary-modern, .btn-secondary-modern, .card-modern, .gradient-heading
+ * @module src/styles/base/modern-design.css
+ * @description Современная дизайн-система через CSS-переменные (Awwwards 2026)
+ * @author Kort & AI
+ * @version 4.8.0 - Добавлен динамический реактивный блёр подложек секции 2.
  */
 
-/* CSS Переменные - только используемые */
 :root {
-  /* 2026 Fluid Spacing Scale (Viewport: 320px -> 1440px) */
-  --space-xs: clamp(0.5rem, 0.428rem + 0.357vw, 0.75rem); /* 8px -> 12px */
-  --space-sm: clamp(0.75rem, 0.607rem + 0.714vw, 1.25rem); /* 12px -> 20px */
-  --space-md: clamp(1.25rem, 1.035rem + 1.071vw, 2rem); /* 20px -> 32px */
-  --space-lg: clamp(2rem, 1.428rem + 2.857vw, 4rem); /* 32px -> 64px */
-  --space-xl: clamp(4rem, 2.857rem + 5.714vw, 8rem); /* 64px -> 128px */
-  --space-2xl: clamp(6rem, 4.285rem + 8.571vw, 12rem); /* 96px -> 192px */
+  /* Fluid Spacing Scale */
+  --space-xs: clamp(0.5rem, 0.428rem + 0.357vw, 0.75rem);
+  --space-sm: clamp(0.75rem, 0.607rem + 0.714vw, 1.25rem);
+  --space-md: clamp(1.25rem, 1.035rem + 1.071vw, 2rem);
+  --space-lg: clamp(2rem, 1.428rem + 2.857vw, 4rem);
 
-  /* Цвета */
-  --primary-blue: #0066ff;
-
-  /* Dark theme surface tokens (перенесено из .dark) */
+  /* Dark theme surface tokens */
   --surface-card: rgba(15, 23, 42, 0.8);
   --surface-card-hover: rgba(30, 41, 59, 0.9);
   --surface-border: rgba(255, 255, 255, 0.08);
@@ -28,104 +20,153 @@
   --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.6);
 
   /* Heading colors */
-  --heading-primary: #f8fafc;
+  --heading-primary: #ffffff;
   --heading-secondary: #e2e8f0;
   --text-muted: #94a3b8;
 
-  /* Accent */
-  --accent-cyan: #06b6d4;
-  --accent-blue: #3b82f6;
-  --accent-gradient: linear-gradient(135deg, #06b6d4, #3b82f6);
-
-  /* Эффекты */
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --glass-blur: 12px;
-
-  /* Анимации */
-  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-fast: 0.15s var(--ease-out);
-  --transition-medium: 0.3s var(--ease-out);
-  --transition-slow: 0.5s var(--ease-spring);
-
-  /* Радиусы */
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
-
-  /* Совместимость с браузерами */
   -webkit-text-size-adjust: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Modern buttons - используется в Button.tsx, App.tsx */
-.btn-modern {
+/* ─── BUTTON ARCHITECTURE (Awwwards 2026: Masterpiece) ─── */
+
+/* 1. Base Class: Zero Artifacts & Anti-Aliasing Hack */
+.btn-base {
   position: relative;
-  overflow: hidden;
-  transition: all var(--transition-medium);
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: 9999px;
+  outline: 1px solid transparent; /* ФИКС МЕРЦАНИЯ */
+  text-decoration: none;
+  flex-shrink: 0;
+  border: none;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.btn-modern::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: var(--transition-slow);
+/* Touch Response */
+.btn-base:active {
+  transform: scale(0.96) translate3d(0, 0, 0) !important;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-modern:hover::before {
-  left: 100%;
+/* 2. Variant: Primary (Milled Steel Obsidian - Повышенный контраст) */
+.btn-primary-obsidian {
+  background-color: #050811;
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px rgba(6, 182, 212, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.5),
+    0 10px 25px -5px rgba(0, 0, 0, 0.6);
 }
 
-.btn-primary-modern {
-  background: linear-gradient(135deg, var(--primary-blue), #3385ff);
-  color: white;
-  box-shadow: 0 4px 14px rgba(0, 102, 255, 0.25);
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary-obsidian::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 120%, rgba(6, 182, 212, 0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .btn-primary-obsidian:hover::before {
+    opacity: 1;
+  }
+  .btn-primary-obsidian:hover {
+    box-shadow:
+      inset 0 0 0 1px rgba(6, 182, 212, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.3),
+      0 0 15px rgba(6, 182, 212, 0.15);
+  }
 }
 
-.btn-primary-modern:hover {
-  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.35);
-  /* transform убран — вызывает layout shift при hover во время скролла */
+.btn-primary-obsidian > span,
+.btn-primary-obsidian > svg {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-.btn-secondary-modern {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  color: inherit;
+/* 3. Variant: Secondary (Real Frosted Glass - Тонкое изящное стекло) */
+.btn-secondary-ghost {
+  color: #f1f5f9;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 -1px 1.5px rgba(0, 0, 0, 0.3),
+    0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-.btn-secondary-modern:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
+.tier-high.btn-secondary-ghost,
+.tier-medium.btn-secondary-ghost {
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
-/* Cards - используется в App.tsx (404 страница) */
+.tier-low.btn-secondary-ghost {
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary-ghost:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+      inset 0 1px 1px rgba(255, 255, 255, 0.35),
+      0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* 4. Variant: Icon Action */
+.btn-icon-action {
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── РЕШЕНИЕ 4: РЕАКТИВНЫЙ БЛЮР ПОДЛОЖЕК СЕКЦИИ 2 ─── */
+.glass-backdrop-blur::before {
+  /* Мы заменяем жестко зашитые 16px на контролируемую из JS CSS-переменную */
+  backdrop-filter: blur(var(--card-blur-value, 16px)) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(var(--card-blur-value, 16px)) saturate(135%) !important;
+}
+
+/* ─── LEGACY TOKENS (Preserved) ─── */
 .card-modern {
   background: rgba(31, 41, 55, 0.7);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: var(--glass-shadow);
-  border-radius: var(--radius-lg);
-  transition: all var(--transition-medium);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
   overflow: hidden;
 }
-
 .card-modern:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
-
-/* Градиентные заголовки - используется в App.tsx, SectionHeading.tsx */
 .gradient-heading {
   background: linear-gradient(135deg, #ffffff, #0369a1);
   -webkit-background-clip: text;
@@ -133,8 +174,6 @@
   background-clip: text;
   color: transparent;
 }
-
-/* ─── Section accent line — shared motif across all sections ─────────────────── */
 .section-accent-line {
   display: block;
   width: 80px;
@@ -143,72 +182,6 @@
   background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
   margin: 0 auto 1.5rem;
 }
-
-/* ─── Section divider — gradient bridge between sections ─────────────────────── */
-.section-divider {
-  position: relative;
-  height: 0;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.section-divider::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 100px;
-  background: linear-gradient(to bottom, transparent, var(--divider-color-dark, #111827));
-}
-
-/* ─── Light theme card surface ───────────────────────────────────────────────── */
-.card-surface {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  box-shadow: var(--surface-shadow);
-  transition:
-    box-shadow var(--transition-medium),
-    transform var(--transition-medium);
-}
-
-.card-surface:hover {
-  box-shadow: var(--surface-shadow-hover);
-}
-
-/* ─── Heading tokens ─────────────────────────────────────────────────────────── */
-.heading-primary {
-  color: var(--heading-primary);
-}
-
-.heading-secondary {
-  color: var(--heading-secondary);
-}
-
-.text-muted-token {
-  color: var(--text-muted);
-}
-
-/* ─── Focus ring — WCAG 2.1 AA ───────────────────────────────────────────────── */
-.focus-ring:focus-visible {
-  outline: 2px solid #06b6d4;
-  outline-offset: 2px;
-}
-
-/* ─── Tap feedback for touch ─────────────────────────────────────────────────── */
-.tap-feedback {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.tap-feedback:active {
-  opacity: 0.75;
-  transform: scale(0.97);
-  transition:
-    transform 0.1s ease,
-    opacity 0.1s ease;
-}
-
-/* ─── Safe area bottom padding ───────────────────────────────────────────────── */
 .pb-safe-area {
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }

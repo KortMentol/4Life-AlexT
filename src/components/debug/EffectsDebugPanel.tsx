@@ -1,9 +1,9 @@
 /**
  * @module src/components/debug/EffectsDebugPanel
  * @description Настольная панель управления эффектами (DEV).
- * Все иконки строго импортируются из единого пульта @/utils/icons.
+ * Полностью исправлен рендер древовидных зависимостей (sub-flags рендерятся строго под своими родителями).
  * @author Geminis AI & Kort
- * @version 7.3.0
+ * @version 7.4.0
  */
 
 import { useMediaQuery } from "@/hooks";
@@ -18,7 +18,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom";
 import styles from "./EffectsDebugPanel.module.css";
 
-// Локальный словарь подсказок для элементов управления фиксированной зоны (не перегружает стор)
 const CUSTOM_HELP: Record<string, { desc: string; loc: string }> = {
   "preset-current": {
     desc: "Custom configuration. Reflects your manually modified effect overrides.",
@@ -95,7 +94,6 @@ const EffectsDebugPanel: React.FC = () => {
 
   const [isLastPresetDisabled, setIsLastPresetDisabled] = useState(() => effectsDebugStore.isLastPresetDisabled());
 
-  // Подписка на стор
   useEffect(() => {
     const unsub = effectsDebugStore.subscribe((newFlags) => {
       setFlags(newFlags);
@@ -104,7 +102,6 @@ const EffectsDebugPanel: React.FC = () => {
     return unsub;
   }, []);
 
-  // Stealth Mode: плавное скрытие на время переходов
   useEffect(() => {
     const handleStart = () => setIsTransitioning(true);
     const handleEnd = () => setIsTransitioning(false);
@@ -263,16 +260,13 @@ const EffectsDebugPanel: React.FC = () => {
       return;
     }
 
-    // [ИСПРАВЛЕНИЕ ХОВЕРОВ]: Сначала проверяем локальный словарь пресетов и рубильника
     if (typeof key === "string" && key in CUSTOM_HELP) {
       const item = CUSTOM_HELP[key];
       if (item) {
         setHoveredDescription(item.desc);
         setHoveredLocation(item.loc);
       }
-    }
-    // Если это стандартный ключ стора — вытаскиваем из FLAGS_METADATA
-    else if (FLAGS_METADATA[key as keyof typeof FLAGS_METADATA]) {
+    } else if (FLAGS_METADATA[key as keyof typeof FLAGS_METADATA]) {
       const meta = FLAGS_METADATA[key as keyof typeof FLAGS_METADATA];
       if (meta) {
         setHoveredDescription(meta.desc);
@@ -309,8 +303,6 @@ const EffectsDebugPanel: React.FC = () => {
   }, []);
 
   const isMobileScreen = useMediaQuery("(max-width: 767px)");
-
-  // --- УМНАЯ ФИЛЬТРАЦИЯ И ГРУППИРОВКА ---
   const currentPath = location.pathname;
 
   const activeGroups = useMemo(() => {
@@ -320,7 +312,6 @@ const EffectsDebugPanel: React.FC = () => {
       const meta = FLAGS_METADATA[key];
       if (!meta) return;
 
-      // Оставляем фланги: Глобальные (all) или текущей страницы, И (устройства "all" или "desktop")
       const routeMatch = meta.routes.includes("all") || meta.routes.includes(currentPath as any);
       const deviceMatch = meta.device === "all" || meta.device === "desktop";
 
@@ -329,7 +320,6 @@ const EffectsDebugPanel: React.FC = () => {
           groups[meta.category] = [];
         }
 
-        // Надежное добавление элемента без undefined-конфликтов
         const groupArray = groups[meta.category];
         if (groupArray) {
           groupArray.push(key);
@@ -356,15 +346,13 @@ const EffectsDebugPanel: React.FC = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        maxHeight: isCompact ? "36px" : "85vh", // Ограничиваем высоту в развернутом виде для скролла
+        maxHeight: isCompact ? "36px" : "85vh",
         opacity: isTransitioning ? 0 : 1,
         pointerEvents: isTransitioning ? "none" : "auto",
         transition: "opacity 0.4s ease, transform 0.3s ease, max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-        // [РЕШЕНИЕ КЛИППИНГА]: Разрешаем выход за границы только в развернутом виде, чтобы подсказки не обрезались!
         overflow: isCompact ? "hidden" : "visible",
       }}
     >
-      {/* Tooltip Overlay */}
       {hoveredDescription && !isCompact && (
         <div
           className={styles.floatingHelper}
@@ -386,7 +374,7 @@ const EffectsDebugPanel: React.FC = () => {
         </div>
       )}
 
-      {/* ── ЗОНА 1 (Фиксированная): Заголовок хедера ── */}
+      {/* Header */}
       <div className={styles.header} onMouseDown={handleMouseDown} onClick={toggleCompact} style={{ flexShrink: 0 }}>
         <div className={styles.headerLeft}>
           <Icons.Move size={13} />
@@ -415,7 +403,7 @@ const EffectsDebugPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* ── ЗОНА 2 (Фиксированная): Пресеты и Мастер-рубильник ── */}
+      {/* Presets and Master Power */}
       {!isCompact && (
         <div
           style={{
@@ -459,7 +447,6 @@ const EffectsDebugPanel: React.FC = () => {
             {isLastPresetDisabled ? "Last Preset (Empty)" : "↺ Restore Last Preset"}
           </button>
 
-          {/* Высокотехнологичный мастер-рубильник Engine Power (Soft Bypass) с ховером */}
           <div
             style={{
               display: "flex",
@@ -515,7 +502,7 @@ const EffectsDebugPanel: React.FC = () => {
         </div>
       )}
 
-      {/* ── ЗОНА 3 (Скроллируемая): Динамический список ползунков секций ── */}
+      {/* Dynamic Sliders List */}
       {!isCompact && (
         <div
           className={styles.body}
@@ -536,11 +523,6 @@ const EffectsDebugPanel: React.FC = () => {
               return meta && !meta.dependsOn;
             });
 
-            const subFlags = flagKeys.filter((k) => {
-              const meta = FLAGS_METADATA[k];
-              return meta && meta.dependsOn;
-            });
-
             return (
               <React.Fragment key={category}>
                 <div className={styles.divider} />
@@ -549,42 +531,48 @@ const EffectsDebugPanel: React.FC = () => {
                 {mainFlags.map((key) => {
                   const meta = FLAGS_METADATA[key];
                   if (!meta) return null;
+
+                  // ─── РЕШЕНИЕ: Ищем зависимые суб-ползунки строго под их родителем ───
+                  const childFlags = flagKeys.filter((k) => {
+                    const m = FLAGS_METADATA[k];
+                    return m && m.dependsOn === key;
+                  });
+
                   return (
-                    <ToggleRow
-                      key={key}
-                      label={meta.label}
-                      flagKey={key}
-                      flags={flags}
-                      disabled={!flags.globalPower} // Тотально блокируем при Soft Bypass
-                      onChange={handleToggle}
-                      onHover={handleHover}
-                    />
+                    <React.Fragment key={key}>
+                      <ToggleRow
+                        label={meta.label}
+                        flagKey={key}
+                        flags={flags}
+                        disabled={!flags.globalPower}
+                        onChange={handleToggle}
+                        onHover={handleHover}
+                      />
+
+                      {childFlags.length > 0 && (
+                        <div className={styles.subGroup}>
+                          {childFlags.map((childKey) => {
+                            const childMeta = FLAGS_METADATA[childKey];
+                            if (!childMeta) return null;
+                            const isDisabled = !flags.globalPower || !flags[key];
+
+                            return (
+                              <ToggleRow
+                                key={childKey}
+                                label={childMeta.label}
+                                flagKey={childKey}
+                                flags={flags}
+                                disabled={isDisabled}
+                                onChange={handleToggle}
+                                onHover={handleHover}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </React.Fragment>
                   );
                 })}
-
-                {subFlags.length > 0 && (
-                  <div className={styles.subGroup}>
-                    {subFlags.map((key) => {
-                      const meta = FLAGS_METADATA[key];
-                      if (!meta) return null;
-
-                      const dependency = meta.dependsOn;
-                      const isDisabled = !flags.globalPower || (dependency ? !flags[dependency] : false); // Тотально блокируем при Soft Bypass
-
-                      return (
-                        <ToggleRow
-                          key={key}
-                          label={meta.label}
-                          flagKey={key}
-                          flags={flags}
-                          disabled={isDisabled}
-                          onChange={handleToggle}
-                          onHover={handleHover}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
               </React.Fragment>
             );
           })}

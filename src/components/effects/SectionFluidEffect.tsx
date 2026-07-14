@@ -1,14 +1,9 @@
 /**
  * @module SectionFluidEffect
  * @description Оптимизированный WebGL fluid эффект с мягким засыпанием.
- *
- * ИСПРАВЛЕНИЕ ДЖАНКОВ ПРИ СКРОЛЛЕ (Zero-Jank Sleep Architecture):
- * 1. Мы полностью убрали метод resetFluid() из таймера бездействия. Теперь при засыпании
- *    эффекта (через 4.5 сек) расчеты физики просто останавливаются через simulation.stop().
- *    Это мгновенная операция (0 мс процессора), которая полностью устранила микро-фризы
- *    страницы во время скролла.
- * 2. Очистка контекста (resetFluid) сохранена строго на событии возвращения на вкладку
- *    после долгого отсутствия (>4.5с), когда пользователь не совершает активных действий скролла.
+ * Внедрен принудительный однокадровый прогрев (Pre-compile & Link) шейдеров под прелоадером.
+ * @author Geminis AI & Kort
+ * @version 9.1.0
  */
 
 import { FluidInstance } from "@/context/FluidContext.types";
@@ -23,7 +18,7 @@ import { createPortal } from "react-dom";
 const TRANSITION_START = "menu-transition-start";
 
 interface SectionFluidEffectProps {
-  sectionRef: React.RefObject<HTMLElement>;
+  sectionRef: React.RefObject<HTMLElement | null>;
 }
 
 const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) => {
@@ -80,13 +75,11 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
           simulationRef.current.stop(); // Останавливаем расчеты физики (0% GPU)
           isRunningRef.current = false;
         }
-        // 🛑 resetFluid() УБРАН ИЗ ТАЙМЕРА СНА.
-        // Это предотвращает тяжелую компиляцию шейдеров во время активного скролла страницы!
       }, 500);
     }, 4500);
-  }, []); // Пустой массив зависимостей гарантирует стабильную ссылку на колбэк
+  }, []);
 
-  // ИНИЦИАЛИЗАЦИЯ И НАСТРОЙКА WEBGL
+  // ИНИЦИАЛИЗАЦИЯ И ОДНОКАДРОВЫЙ ПРОГРЕВ WEBGL ШЕЙДЕРОВ ПОД ЗАНАВЕСОМ
   useEffect(() => {
     if (isTouchDevice || !isFluidEnabled || !container) {
       setFluidInstance(null);
@@ -125,6 +118,18 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       };
 
       simulationRef.current.setConfig({ ...fluidConfig, ...commonConfig });
+
+      // ─── РЕШЕНИЕ: Однокадровый принудительный прогрев (Warm-up) ───
+      // Запускаем симуляцию на 1 кадр для мгновенной линковки шейдеров в VRAM,
+      // пока прелоадер еще закрывает экран. Это убирает просадку FPS при первом скролле.
+      simulationRef.current.start();
+      requestAnimationFrame(() => {
+        if (simulationRef.current) {
+          simulationRef.current.stop(); // Мягко гасим расчеты, сохраняя скомпилированный контекст
+          isRunningRef.current = false;
+        }
+      });
+
       setFluidInstance(simulationRef.current as unknown as FluidInstance);
     } catch (error) {
       console.error("[SectionFluidEffect] WebGL Init Error:", error);
@@ -274,14 +279,13 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     };
   }, []);
 
-  // 🛑 ИНТЕЛЛЕКТУАЛЬНЫЙ КОНТРОЛЬ СВЕРТЫВАНИЯ ВКЛАДКИ (VISIBILITY API)
+  // ИНТЕЛЛЕКТУАЛЬНЫЙ КОНТРОЛЬ СВЕРТЫВАНИЯ ВКЛАДКИ (VISIBILITY API)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         tabHiddenTimeRef.current = Date.now();
         wasRunningBeforeHideRef.current = isRunningRef.current;
 
-        // ОСТАНАВЛИВАЕМ таймер сна при уходе, чтобы он не ушел вперед физики WebGL!
         if (stopTimerRef.current) {
           clearTimeout(stopTimerRef.current);
           stopTimerRef.current = null;
@@ -290,15 +294,11 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
         const timeAway = (Date.now() - tabHiddenTimeRef.current) / 1000;
 
         if (timeAway > 4.5 && wasRunningBeforeHideRef.current) {
-          // Долгое отсутствие: краска уже полностью растворилась.
           if (simulationRef.current && isRunningRef.current) {
             simulationRef.current.stop();
             isRunningRef.current = false;
           }
 
-          // 💎 МГНОВЕННЫЙ СИНХРОННЫЙ СБРОС ВИДИМОСТИ (Bypassing React state delay):
-          // Напрямую на уровне DOM сбрасываем стили, чтобы старый замороженный WebGL-буфер
-          // не успел отобразиться на экране за те 16мс, пока React планирует перерисовку!
           if (outerWrapperRef.current) {
             outerWrapperRef.current.style.transition = "none";
             outerWrapperRef.current.style.opacity = "0";
@@ -307,7 +307,6 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
           setIsVisible(false);
           resetFluid();
         } else if (wasRunningBeforeHideRef.current) {
-          // Короткое отсутствие: Размораживаем WebGL и перезапускаем таймер бездействия на полные 4.5 сек
           if (simulationRef.current && !isRunningRef.current) {
             simulationRef.current.start();
             isRunningRef.current = true;

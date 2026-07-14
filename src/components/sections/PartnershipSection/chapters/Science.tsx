@@ -1,115 +1,18 @@
+// src/components/sections/PartnershipSection/chapters/Science.tsx
 /**
  * @module PartnershipSection/chapters/Science.tsx
  * Глава 1 — партнёрство: тезисы и философия.
- *
- * ВНЕДРЕНО (ШАГ 6):
- * - Убран жесткий хардкод `if (tier === "low") return null`.
- * - Теперь, если дебагер форсирует включение узлов (isHighNodes = true),
- *   сетка отрисуется ДАЖЕ на самом слабом устройстве, давая полный контроль разработчику.
+ * ИСПРАВЛЕНИЕ: Полностью вырезана молекулярная сетка (MolecularNet) из DOM и логики.
+ * @author Geminis AI & Kort
+ * @version 3.0.0
  */
 
-import { useFeatureFlag } from "@/hooks/useEffectsDebug";
 import type { PerformanceTier } from "@/hooks/usePerformanceTier";
 import { motion, useInView } from "framer-motion";
-import { forwardRef, memo, useEffect, useMemo, useRef } from "react";
+import React, { forwardRef, memo, useEffect, useRef } from "react";
 import type { Palette } from "../constants";
 import ClipLine from "../ui/ClipLine";
 
-const MolecularNet = memo(({ tier, palette }: { tier: PerformanceTier; palette: Palette }) => {
-  // Истинный переключатель: работает на любом тире, если дернули ползунок
-  const isHighNodes = useFeatureFlag("molecularNetHighNodes", tier === "high");
-
-  // ИСПРАВЛЕНИЕ: Даем дебагеру право "перебить" запрет Low-тира
-  const shouldRender = tier !== "low" || isHighNodes;
-
-  const count = isHighNodes ? 12 : 7;
-
-  const nodes = useMemo(
-    () =>
-      Array.from({ length: count }, (_, i) => ({
-        id: i,
-        x: 10 + Math.random() * 80,
-        y: 10 + Math.random() * 80,
-        r: 2 + Math.random() * 3,
-        dur: 8 + Math.random() * 10,
-        dx: (Math.random() - 0.5) * 12,
-        dy: (Math.random() - 0.5) * 12,
-      })),
-    [count],
-  );
-
-  const edges = useMemo(() => {
-    const pairs: [number, number][] = [];
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const ni = nodes[i]!;
-        const nj = nodes[j]!;
-        const dx = ni.x - nj.x;
-        const dy = ni.y - nj.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 35) pairs.push([i, j]);
-      }
-    }
-    return pairs;
-  }, [nodes]);
-
-  if (!shouldRender) return null;
-
-  return (
-    <svg
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-    >
-      <defs>
-        <style>{`
-          @keyframes molOrbit {
-            0%, 100% { transform: translate(0, 0); }
-            33%  { transform: translate(var(--dx), var(--dy)); }
-            66%  { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * 1.2)); }
-          }
-        `}</style>
-      </defs>
-      {edges.map(([a, b], i) => {
-        const na = nodes[a as number];
-        const nb = nodes[b as number];
-        if (!na || !nb) return null;
-        return (
-          <line
-            key={i}
-            x1={`${na.x}%`}
-            y1={`${na.y}%`}
-            x2={`${nb.x}%`}
-            y2={`${nb.y}%`}
-            stroke={palette.gold}
-            strokeWidth="0.15"
-            opacity="0.15"
-          />
-        );
-      })}
-      {nodes.map((n) => (
-        <circle
-          key={n.id}
-          cx={`${n.x}%`}
-          cy={`${n.y}%`}
-          r={n.r * 0.3}
-          fill={palette.gold}
-          opacity="0.4"
-          style={
-            {
-              "--dx": `${n.dx}%`,
-              "--dy": `${n.dy}%`,
-              animation: `molOrbit ${n.dur}s ease-in-out infinite`,
-            } as React.CSSProperties
-          }
-        />
-      ))}
-    </svg>
-  );
-});
-MolecularNet.displayName = "MolecularNet";
-
-// ─── Science ──────────────────────────────────────────────────────────────────
 interface ScienceProps {
   tier: PerformanceTier;
   palette: Palette;
@@ -131,7 +34,7 @@ const PILLARS = [
   },
 ] as const;
 
-const Science = memo(
+export const Science = memo(
   forwardRef<HTMLElement, ScienceProps>(({ tier, palette, onChapter }, forwardedRef) => {
     const ref = useRef<HTMLElement>(null);
     const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
@@ -147,8 +50,6 @@ const Science = memo(
         className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40 overflow-hidden"
         style={{ background: palette.bg }}
       >
-        <MolecularNet tier={tier} palette={palette} />
-
         <div className="relative z-10 max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -159,11 +60,10 @@ const Science = memo(
           >
             <span className="text-[9px] uppercase tracking-[0.5em]" style={{ color: palette.gold }}>
               01 — Основа
-            </span>{" "}
+            </span>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-start">
-            {/* Left */}
             <div>
               <ClipLine tier={tier} delay={0} className="mb-6">
                 <p
@@ -207,7 +107,7 @@ const Science = memo(
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-15%" }}
                 transition={{ duration: 0.8, delay: 0.45 }}
-                className="mt-10 font-light leading-relaxed max-w-xs"
+                className="mt-10 font-light leading-relaxed max-w-xs text-pretty"
                 style={{
                   fontSize: "clamp(0.88rem, 1.2vw, 1rem)",
                   color: palette.overlay40,
@@ -218,7 +118,6 @@ const Science = memo(
               </motion.p>
             </div>
 
-            {/* Right: три тезиса */}
             <div className="flex flex-col gap-0 pt-4">
               {PILLARS.map((item, i) => (
                 <motion.div
@@ -240,7 +139,7 @@ const Science = memo(
                     {item.title}
                   </span>
                   <span
-                    className="font-light leading-relaxed"
+                    className="font-light leading-relaxed text-pretty"
                     style={{
                       fontSize: "clamp(0.82rem, 1vw, 0.92rem)",
                       color: palette.overlay40,
@@ -259,5 +158,5 @@ const Science = memo(
 );
 
 Science.displayName = "Science";
-
 export default Science;
+  

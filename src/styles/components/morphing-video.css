@@ -10,7 +10,7 @@
  *    нативно через border-radius: inherit, гарантируя отсутствие острых краев.
  *
  * @author Geminis AI & Kort
- * @version 3.0.0
+ * @version 4.1.0
  */
 
 .glass-smoked-acrylic {
@@ -52,4 +52,25 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   will-change: transform, backdrop-filter;
+}
+
+/* ─── Mobile Scroll-Driven Entrance (Awwwards 2026 Mobile Gesture Law) ─── */
+.video-mobile-scroll-reveal {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* 
+   * Сверхплавный квадратичный расчет прозрачности (пик на значении 0.5 — ровно в центре экрана).
+   * Исключает использование abs() для максимальной совместимости со старыми мобильными движками.
+   */
+  opacity: clamp(0, calc(1 - (0.5 - var(--scroll-progress, 0)) * (0.5 - var(--scroll-progress, 0)) * 8), 1) !important;
+
+  /* 
+   * Видео начинает движение далеко за границей вьюпорта (100vh снизу),
+   * плавно летит вверх, пересекает нижнюю рамку экрана, прилипает на значении 0.5,
+   * а затем плавно ускользает за верхнюю границу экрана.
+   */
+  transform: translate3d(0, clamp(-100vh, calc((0.5 - var(--scroll-progress, 0)) * 200vh), 100vh), 0)
+    scale(clamp(0.9, calc(0.9 + (0.5 - abs(0.5 - var(--scroll-progress, 0))) * 0.2), 1)) !important;
 }

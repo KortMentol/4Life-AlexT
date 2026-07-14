@@ -1,10 +1,9 @@
 /**
  * @module components/debug/EffectsDebugMobile
  * @description Сенсорная панель управления эффектами на мобильных (DEV).
- * Все иконки строго импортируются из единого пульта @/utils/icons.
- *
+ * Полностью исправлен рендер древовидных зависимостей под тач-интерфейсы.
  * @author Geminis AI & Kort
- * @version 7.2.0
+ * @version 7.3.0
  */
 
 import {
@@ -225,7 +224,7 @@ const EffectsDebugMobile: React.FC = () => {
             {isLastPresetDisabled ? "Last Preset (Empty)" : "↺ Restore Last Preset"}
           </button>
 
-          {/* Высокотехнологичный мастер-рубильник Engine Power (Soft Bypass) */}
+          {/* Master Power */}
           <div
             style={{
               display: "flex",
@@ -284,11 +283,6 @@ const EffectsDebugMobile: React.FC = () => {
               return meta && !meta.dependsOn;
             });
 
-            const subFlags = flagKeys.filter((k) => {
-              const meta = FLAGS_METADATA[k];
-              return meta && meta.dependsOn;
-            });
-
             return (
               <React.Fragment key={category}>
                 <div className={styles.divider} />
@@ -297,40 +291,46 @@ const EffectsDebugMobile: React.FC = () => {
                 {mainFlags.map((key) => {
                   const meta = FLAGS_METADATA[key];
                   if (!meta) return null;
+
+                  // ─── РЕШЕНИЕ: Ищем зависимые ползунки строго под их родителем ───
+                  const childFlags = flagKeys.filter((k) => {
+                    const m = FLAGS_METADATA[k];
+                    return m && m.dependsOn === key;
+                  });
+
                   return (
-                    <ToggleRowMobile
-                      key={key}
-                      label={meta.label}
-                      flagKey={key}
-                      flags={flags}
-                      disabled={!flags.globalPower}
-                      onChange={handleToggle}
-                    />
+                    <React.Fragment key={key}>
+                      <ToggleRowMobile
+                        label={meta.label}
+                        flagKey={key}
+                        flags={flags}
+                        disabled={!flags.globalPower}
+                        onChange={handleToggle}
+                      />
+
+                      {childFlags.length > 0 && (
+                        <div className={styles.subGroup}>
+                          {childFlags.map((childKey) => {
+                            const childMeta = FLAGS_METADATA[childKey];
+                            if (!childMeta) return null;
+                            const isDisabled = !flags.globalPower || !flags[key];
+
+                            return (
+                              <ToggleRowMobile
+                                key={childKey}
+                                label={childMeta.label}
+                                flagKey={childKey}
+                                flags={flags}
+                                disabled={isDisabled}
+                                onChange={handleToggle}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </React.Fragment>
                   );
                 })}
-
-                {subFlags.length > 0 && (
-                  <div className={styles.subGroup}>
-                    {subFlags.map((key) => {
-                      const meta = FLAGS_METADATA[key];
-                      if (!meta) return null;
-
-                      const dependency = meta.dependsOn;
-                      const isDisabled = !flags.globalPower || (dependency ? !flags[dependency] : false);
-
-                      return (
-                        <ToggleRowMobile
-                          key={key}
-                          label={meta.label}
-                          flagKey={key}
-                          flags={flags}
-                          disabled={isDisabled}
-                          onChange={handleToggle}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
               </React.Fragment>
             );
           })}

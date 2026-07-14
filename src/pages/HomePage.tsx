@@ -1,11 +1,24 @@
+/**
+ * @module src/pages/HomePage.tsx
+ * @description Главная страница в стиле "Clinical Obsidian" с оркестровкой входа 2026.
+ * ИСПРАВЛЕНИЯ:
+ * 1. Полностью разведены слои анимации входа (GSAP на внешних div) и затухания скролла
+ *    (Framer Motion на внутренних элементах). Это полностью восстановило
+ *    работу анимации PageEntrance на тачах и ПК без конфликта стилей.
+ * 2. Добавлена динамическая деградация блюра бэджа для low-тира на мобильных устройствах.
+ * @author Kort & AI
+ * @version 4.8.0
+ */
+
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { FinalCTASection, MorphingVideoSection, PartnershipSection } from "@/components/sections";
+import { PageEntrance } from "@/components/transitions/PageEntrance";
 import { Button, ParallaxSection } from "@/components/ui";
-import { usePerformanceTier } from "@/hooks";
+import { useEffectsDebug } from "@/hooks";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import React, { lazy, Suspense, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 // Media imports
 import bg2Img from "@/assets/images/backgrounds/HomePage/2.webp";
@@ -16,57 +29,43 @@ import tfTrifactorImg from "@/assets/images/products/MobileVersions/Mobile_tf-tr
 import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.webp";
 import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
 
-// Тяжёлое видео обслуживается как статический ассет из public/ — не пакуется в JS-бандл
 const heroVideoWebm = "/videos/why-4life-transfer-factor.webm";
 
 // --- LAZY LOADED COMPONENTS ---
 const ImmersiveProductShowcase = lazy(() => import("@/components/ui/ImmersiveProductShowcase"));
 
-// Определяем тач один раз
-const IS_TOUCH = typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
-
-// Варианты анимации для страницы
 const pageVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
   exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
 };
 
-// Stagger-анимация для Hero элементов при входе
-const heroItemVariants = {
-  hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.9,
-      delay: 0.1 + i * 0.12,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  }),
-};
-
-// Определяем компонент HomePage
 const HomePage: React.FC = () => {
-  const tier = usePerformanceTier();
+  const efxFlags = useEffectsDebug();
+  const [vh, setVh] = useState(800);
+  const [tier, setTier] = useState<string>("medium");
+
   const heroRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLDivElement>(null);
 
-  // Scroll-driven: Hero контент уплывает вверх при скролле
-  // Только на desktop high/medium — на touch и low статика
-  const { scrollYProgress: heroScroll } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
+  const currentTier = usePerformanceTier();
+
+  useEffect(() => {
+    setVh(window.innerHeight);
+    setTier(currentTier);
+  }, [currentTier]);
+
+  const { scrollY } = useScroll();
+
+  const shouldAnimateHero = efxFlags.heroScrollAnimation;
+
+  const rawY = useTransform(scrollY, [0, vh], [0, vh * 0.2]);
+  const heroContentY = useTransform(rawY, (latest) => {
+    if (!shouldAnimateHero) return "0px";
+    return `${latest}px`;
   });
 
-  // Когда Hero уходит за экран — MotionValues замораживаются, RAF освобождается
-  const heroInView = useInView(heroSectionRef, { once: false, margin: "0px" });
-
-  const shouldAnimate = !IS_TOUCH && tier !== "low";
-  // Если Hero не виден — передаём статичные значения чтобы Framer Motion не тикал
-  const heroContentY = useTransform(heroScroll, [0, 1], shouldAnimate && heroInView ? ["0%", "18%"] : ["0%", "0%"]);
-  const heroContentOpacity = useTransform(heroScroll, [0, 0.65], shouldAnimate && heroInView ? [1, 0] : [1, 1]);
+  const heroContentOpacity = useTransform(scrollY, [0, vh * 0.65], [1, 0]);
 
   const popularProducts = [
     {
@@ -99,7 +98,7 @@ const HomePage: React.FC = () => {
     <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
       <SEO
         title="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес"
-        description="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства для финансовой свободы."
+        description="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства."
         path="/"
         type="website"
         includeOrganizationAndPerson
@@ -116,86 +115,75 @@ const HomePage: React.FC = () => {
           contentClasses="flex flex-col items-center justify-center text-center py-8 pt-24"
           skipPreload={true}
         >
-          {/* Smart gradient: dark at top/bottom only, center is crystal clear */}
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/80 via-transparent to-black/80 z-0" />
 
-          {/* Scroll-driven wrapper: весь контент уплывает вверх при скролле */}
-          <motion.div
-            ref={heroRef}
-            className="relative z-10 w-full max-w-5xl mx-auto px-4 md:px-6 flex flex-col justify-center items-center h-full"
-            style={{
-              y: heroContentY,
-              opacity: heroContentOpacity,
-              paddingTop: "clamp(40px, 8vh, 120px)",
-              paddingBottom: "clamp(20px, 4vh, 60px)",
-            }}
-          >
-            {/* Badge — появляется первым */}
+          <PageEntrance className="relative z-10 w-full max-w-5xl mx-auto px-4 md:px-6 flex flex-col justify-center items-center h-full">
             <motion.div
-              style={{ marginBottom: "var(--space-md)" }}
-              variants={heroItemVariants}
-              initial="hidden"
-              animate="visible"
-              custom={0}
+              ref={heroRef}
+              className="flex flex-col justify-center items-center w-full"
+              style={{
+                y: heroContentY,
+                willChange: "transform",
+              }}
             >
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-[10px] md:text-xs font-bold tracking-[0.2em] text-white uppercase shadow-xl">
-                Обучение вашего иммунитета
-              </span>
-            </motion.div>
+              {/* Badge: Внешний div для GSAP, внутренний motion.span для скролла */}
+              <div data-entrance="badge" className="mb-8 md:mb-10">
+                <motion.span
+                  className={`inline-flex items-center px-5 py-2 rounded-full border border-white/15 bg-white/5 text-[10px] md:text-xs font-bold tracking-[0.2em] text-white uppercase shadow-xl ${tier !== "low" ? "backdrop-blur-md" : ""}`}
+                  style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
+                >
+                  Обучение вашего иммунитета
+                </motion.span>
+              </div>
 
-            {/* H1 — появляется вторым */}
-            <motion.h1
-              className="typography-display text-center w-full"
-              style={{ marginBottom: "var(--space-md)" }}
-              variants={heroItemVariants}
-              initial="hidden"
-              animate="visible"
-              custom={1}
-            >
-              Раскройте потенциал своего здоровья{" "}
-              <AuroraText colors={["#00ffff", "#3b82f6", "#ffffff", "#8b5cf6"]} speed={1.5}>
-                с научным подходом 4Life
-              </AuroraText>
-            </motion.h1>
+              {/* Title: Внешний div для GSAP, внутренний motion.h1 для скролла */}
+              <div data-entrance="title" className="w-full mb-10 md:mb-14">
+                <motion.h1
+                  className="typography-display text-center w-full"
+                  style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
+                >
+                  Раскройте потенциал своего здоровья{" "}
+                  <AuroraText colors={["#00ffff", "#3b82f6", "#ffffff", "#8b5cf6"]} speed={1.5}>
+                    с научным подходом 4Life
+                  </AuroraText>
+                </motion.h1>
+              </div>
 
-            {/* Кнопки — третьими */}
-            <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto"
-              style={{ marginTop: "var(--space-sm)" }}
-              variants={heroItemVariants}
-              initial="hidden"
-              animate="visible"
-              custom={2}
-            >
-              <Button
-                to="/products"
-                variant="primary"
-                size="lg"
-                className="group w-full sm:w-auto rounded-full font-sans text-sm tracking-wide bg-blue-600 hover:bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
-                icon={
-                  <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                }
+              {/* Buttons: Внешний div для GSAP, внутренний motion.div для скролла */}
+              <div
+                data-entrance="buttons"
+                className="flex flex-col sm:flex-row gap-4 md:gap-5 justify-center items-center w-full mt-4"
               >
-                Каталог здоровья
-              </Button>
+                <motion.div
+                  className="flex flex-col sm:flex-row gap-4 md:gap-5 justify-center items-center w-full"
+                  style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
+                >
+                  <Button
+                    to="/products"
+                    variant="primary"
+                    size="lg"
+                    className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none"
+                    icon={<Icons.ArrowRight className="w-5 h-5 transition-transform duration-300" />}
+                  >
+                    Каталог здоровья
+                  </Button>
 
-              <Button
-                to="/how-to-buy"
-                variant="ghost"
-                size="lg"
-                className="group w-full sm:w-auto rounded-full font-sans text-sm tracking-wide text-white border border-white/25 hover:bg-white/10"
-                icon={
-                  <Icons.ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:rotate-12" />
-                }
-              >
-                Как приобрести
-              </Button>
+                  <Button
+                    to="/how-to-buy"
+                    variant="secondary"
+                    size="lg"
+                    className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none"
+                    icon={<Icons.Info className="w-5 h-5 transition-transform duration-300" />}
+                  >
+                    Как приобрести
+                  </Button>
+                </motion.div>
+              </div>
             </motion.div>
-          </motion.div>
+          </PageEntrance>
         </ParallaxSection>
       </div>
 
-      {/* MorphingVideoSection */}
       <div className="relative">
         <MorphingVideoSection />
       </div>
@@ -206,15 +194,10 @@ const HomePage: React.FC = () => {
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
-          edgeFade={{
-            top: 160,
-            bottom: 150,
-            colorDark: "#030712",
-          }}
+          edgeFade={{ top: 160, bottom: 150, colorDark: "#030712" }}
         >
           <div className="py-16 sm:py-20">
             <div className="container max-w-7xl mx-auto px-6">
-              {/* Section header */}
               <div className="text-center mb-14">
                 <span className="section-accent-line" />
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/60 mb-4">
@@ -234,7 +217,6 @@ const HomePage: React.FC = () => {
 
             <div className="container max-w-7xl mx-auto">
               <Suspense fallback={<div className="h-[480px] w-full" />}>
-                {/* px-20 даёт место для разлёта боковых карточек */}
                 <div className="px-20">
                   <ImmersiveProductShowcase products={popularProducts} />
                 </div>
@@ -245,7 +227,7 @@ const HomePage: React.FC = () => {
                   to="/products"
                   variant="secondary"
                   size="lg"
-                  className="group bg-white/15 border-white/25 backdrop-blur-sm hover:bg-white/25 rounded-full"
+                  className="group"
                   icon={
                     <Icons.ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
                   }
@@ -259,10 +241,10 @@ const HomePage: React.FC = () => {
       </section>
 
       <PartnershipSection />
-
       <FinalCTASection />
     </motion.div>
   );
 };
 
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 export default React.memo(HomePage);

@@ -1,7 +1,9 @@
 /**
  * @module src/pages/PartnershipPage.tsx
- * Страница партнёрства — тонкая обёртка над PartnershipSection.
- * Вся логика и анимации живут в секции.
+ * @description Страница "Партнерство" в стиле Clinical Obsidian.
+ * Тонкая обертка над полноценным секционным компонентом.
+ * @author Kort & AI
+ * @version 2.1.0
  */
 
 import PartnershipSection from "@/components/sections/PartnershipSection";
@@ -16,12 +18,7 @@ const pageVariants = {
 };
 
 const PartnershipPage: React.FC = () => (
-  <motion.div
-    initial="initial"
-    animate="animate"
-    exit="exit"
-    variants={pageVariants}
-  >
+  <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
     <SEO
       title="Партнерство 4Life — Александр Тощев"
       description="Узнайте о возможностях партнерства с 4Life. Стабильный доход, прозрачная модель и поддержка опытного лидера."

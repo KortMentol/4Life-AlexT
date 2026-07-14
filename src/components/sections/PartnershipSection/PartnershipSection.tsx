@@ -1,17 +1,11 @@
+// src/components/sections/PartnershipSection/PartnershipSection.tsx
 /**
  * @module PartnershipSection/PartnershipSection.tsx
  * Root-компонент секции "Партнёрство".
- *
- * Архитектура:
- *  - usePerformanceTier() → tier (high/medium/low)
- *  - useTheme()           → isDark → палитра
- *  - ChapterNav           → фиксированная навигация (desktop, non-touch)
- *  - 5 глав               → Portal → Ticker → Science → Model → Economics → Invitation
- *
- * Tier behaviour:
- *  high   → scramble text, cursor follower, SVG network (12 nodes), animated counters
- *  medium → clip reveals, animated counters, SVG network (7 nodes)
- *  low    → static fade-in only, no springs, no SVG
+ * ИСПРАВЛЕНИЕ: Бегущая строка (Ticker) возвращена на тач-устройства, так как
+ * она аппаратно ускорена и идеально оптимизирована под мобильный скейл.
+ * @author Geminis AI & Kort
+ * @version 13.1.0
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
@@ -32,18 +26,14 @@ const PartnershipSection = memo(() => {
   const palette = getPalette();
   const location = useLocation();
 
-  // ChapterNav показывается только на /partnership странице
-  // На HomePage он конфликтует с PageNav
   const isPartnershipPage = location.pathname === "/partnership";
 
   const [chapter, setChapter] = useState(0);
   const handleChapter = useCallback((n: number) => setChapter(n), []);
 
-  // Отслеживаем видимость секции для ChapterNav
   const sectionRef = useRef<HTMLDivElement>(null);
   const sectionInView = useInView(sectionRef, { margin: "0px" });
 
-  // Refs к главам для кликабельного ChapterNav на /partnership
   const portalRef = useRef<HTMLDivElement>(null);
   const scienceRef = useRef<HTMLElement>(null);
   const modelRef = useRef<HTMLElement>(null);
@@ -63,7 +53,7 @@ const PartnershipSection = memo(() => {
         transition: "background-color 0.4s ease",
       }}
     >
-      {/* ChapterNav — только на /partnership, скрыт когда секция не в viewport */}
+      {/* ChapterNav — только на /partnership, скрыт когда секция не во вьюпорте */}
       {isPartnershipPage && (
         <ChapterNav
           active={chapter}
@@ -77,7 +67,7 @@ const PartnershipSection = memo(() => {
       {/* Глава 0 — входной экран */}
       <Portal ref={portalRef} tier={tier} palette={palette} onChapter={handleChapter} />
 
-      {/* Бегущая строка */}
+      {/* Бегущая строка работает на всех тирах и устройствах */}
       <Ticker tier={tier} palette={palette} />
 
       {/* Глава 1 — наука */}
@@ -106,5 +96,4 @@ const PartnershipSection = memo(() => {
 });
 
 PartnershipSection.displayName = "PartnershipSection";
-
 export default PartnershipSection;

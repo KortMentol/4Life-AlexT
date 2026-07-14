@@ -1,6 +1,7 @@
 /**
  * @module Grid3D
  * @description Высокопроизводительная 3D CSS сетка летящих изображений.
+ * Полностью вырезан неиспользуемый и тяжелый оверхед-фильтр размытия (filterBlur).
  *
  * ИСПРАВЛЕНИЯ ЛЕСЕНОК (3D Anti-Aliasing Hack):
  * 1. [MSAA Edge Trigger]: На `.grid__item` добавлен `outline: 1px solid transparent`
@@ -14,11 +15,10 @@ import React, { useEffect, useMemo, useRef } from "react";
 
 interface Grid3DProps {
   type: 1 | 2 | 3;
-  triggerRef: React.RefObject<HTMLElement>;
-  filterBlur?: boolean;
+  triggerRef: React.RefObject<HTMLElement | null>;
 }
 
-export const Grid3D: React.FC<Grid3DProps> = ({ type, triggerRef, filterBlur = true }) => {
+export const Grid3D: React.FC<Grid3DProps> = ({ type, triggerRef }) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,11 +37,11 @@ export const Grid3D: React.FC<Grid3DProps> = ({ type, triggerRef, filterBlur = t
     const gridItems = grid.querySelectorAll(".grid__item");
     if (!gridWrap || !gridItems.length) return;
 
-    let timeline: any;
+    let timeline: gsap.core.Timeline | null = null;
 
     const initGSAP = () => {
       const scrollTriggerConfig = {
-        trigger: triggerRef.current,
+        trigger: triggerRef.current ?? undefined,
         start: "top bottom",
         end: "bottom top",
         scrub: 1,
@@ -131,12 +131,7 @@ export const Grid3D: React.FC<Grid3DProps> = ({ type, triggerRef, filterBlur = t
   );
 
   return (
-    <div
-      ref={gridRef}
-      className="absolute inset-0 z-10 hidden lg:block"
-      style={{ perspective: "var(--perspective)" }}
-      data-filter={String(filterBlur)}
-    >
+    <div ref={gridRef} className="absolute inset-0 z-10 hidden lg:block" style={{ perspective: "var(--perspective)" }}>
       <div className="grid-wrap grid h-full w-full p-8" style={{ transformStyle: "preserve-3d" }}>
         {images.map((src, i) => (
           <div

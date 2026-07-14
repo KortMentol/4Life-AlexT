@@ -1,9 +1,19 @@
+/**
+ * @module src/components/sections/ProductsCatalog/ProductsHero.tsx
+ * @description Секция Hero для каталога продуктов.
+ * Переведена на единую высокопроизводительную оркестровку PageEntrance.
+ * Интегрирован унифицированный компонент Button.
+ * @author Geminis AI & Kort
+ * @version 13.0.0
+ */
+
+import { PageEntrance } from "@/components/transitions/PageEntrance";
+import { Button } from "@/components/ui";
 import { usePerformanceTier } from "@/hooks";
 import { lenis } from "@/lib/lenis";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { useEffect, useRef } from "react";
 
-// Видео обслуживается как статический ассет из public/ — не пакуется в JS-бандл
 const productsHeroVideo = "/videos/bg-video-products-page.mp4";
 
 const ProductsHero: React.FC = () => {
@@ -24,11 +34,8 @@ const ProductsHero: React.FC = () => {
   const opacity = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 0.3 : 0.1]);
   const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0, isHighTier ? 1 : 0]);
 
-  // willChange только пока элемент активно анимируется (opacity > 0.01)
-  // Когда hero полностью ушёл — снимаем GPU слой
   const dynamicWillChange = useTransform(opacity, (val) => (val > 0.02 ? "transform, opacity" : "auto"));
 
-  // Auto-pause video when out of viewport
   useEffect(() => {
     if (!videoRef.current) return;
     if (isHeroVisible) {
@@ -37,6 +44,17 @@ const ProductsHero: React.FC = () => {
       videoRef.current.pause();
     }
   }, [isHeroVisible]);
+
+  const handleExploreScroll = () => {
+    if (lenis) {
+      lenis.scrollTo(window.innerHeight, { duration: 1.2 });
+    } else {
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: "smooth",
+      });
+    }
+  };
 
   return (
     <>
@@ -63,7 +81,6 @@ const ProductsHero: React.FC = () => {
           >
             <source src={productsHeroVideo} type="video/mp4" />
           </video>
-          {/* Blur через backdrop-filter overlay — системный композитор, в 10 раз быстрее */}
           {isHighTier && (
             <motion.div
               className="absolute inset-0 backdrop-blur-2xl bg-black/10 pointer-events-none"
@@ -74,45 +91,38 @@ const ProductsHero: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Приклеенный текст поверх видео */}
+      {/* Приклеенный контент поверх видео c оркестровкой PageEntrance */}
       <div className="fixed inset-0 w-full h-screen z-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          style={{
-            opacity,
-            scale,
-            transform: "translateZ(0)",
-            willChange: dynamicWillChange,
-          }}
-          className="text-center px-6 max-w-5xl mx-auto text-white"
-        >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight drop-shadow-2xl">
-            Каталог здоровья
-          </h1>
-          <p className="text-lg md:text-2xl text-white/90 max-w-2xl mx-auto font-medium drop-shadow-lg mb-10 leading-relaxed">
-            Откройте для себя инновации 4Life
-            <br />
-            с Трансфер Факторами
-          </p>
-          <button
-            style={{ pointerEvents: "auto" }}
-            onClick={() => {
-              if (lenis) {
-                lenis.scrollTo(window.innerHeight, { duration: 1.2 });
-              } else {
-                window.scrollTo({
-                  top: window.innerHeight,
-                  behavior: "smooth",
-                });
-              }
-            }}
-            className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-lg font-semibold shadow-2xl active:scale-95 transition-transform"
-          >
-            Исследовать
-          </button>
-        </motion.div>
+        <PageEntrance className="text-center px-6 max-w-5xl mx-auto text-white">
+          {/* Title */}
+          <div data-entrance="title" className="mb-6">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight drop-shadow-2xl">
+              Каталог здоровья
+            </h1>
+          </div>
+
+          {/* Lead Description */}
+          <div data-entrance="lead" className="mb-10">
+            <p className="text-lg md:text-2xl text-white/90 max-w-2xl mx-auto font-medium drop-shadow-lg leading-relaxed text-pretty">
+              Откройте для себя инновации 4Life
+              <br />с Трансфер Факторами
+            </p>
+          </div>
+
+          {/* Action Button Container */}
+          <div data-entrance="buttons" className="flex justify-center items-center pointer-events-auto">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleExploreScroll}
+              className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none"
+            >
+              Исследовать
+            </Button>
+          </div>
+        </PageEntrance>
       </div>
 
-      {/* Невидимый блок, который создает физическое место для скролла */}
       <div ref={spacerRef} className="h-[100vh] w-full" />
     </>
   );

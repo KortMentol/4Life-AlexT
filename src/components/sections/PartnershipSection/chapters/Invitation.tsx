@@ -1,14 +1,18 @@
 /**
  * @module PartnershipSection/chapters/Invitation.tsx
  * Глава 4 — приглашение и CTA.
+ * ИСПРАВЛЕНИЕ: Интеграция класса .btn-special-fill для эксклюзивной заливки,
+ * изолированной от глобального минималистичного дизайна кнопок.
+ * @author Geminis AI & Kort
+ * @version 15.0.0
  */
 
+import { Button } from "@/components/ui";
 import type { PerformanceTier } from "@/hooks/usePerformanceTier";
+import { Icons } from "@/utils/icons";
 import { motion, useInView } from "framer-motion";
-import { forwardRef, memo, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { forwardRef, memo, useEffect, useRef } from "react";
 import type { Palette } from "../constants";
-import { IS_TOUCH } from "../constants";
 import ClipLine from "../ui/ClipLine";
 
 interface InvitationProps {
@@ -21,7 +25,8 @@ const LINES = [
   { text: "Страница партнёрства —", delay: 0, isAccent: false },
   { text: "с деталями.", delay: 0.1, isAccent: true },
 ] as const;
-const Invitation = memo(
+
+export const Invitation = memo(
   forwardRef<HTMLElement, InvitationProps>(({ tier, palette, onChapter }, forwardedRef) => {
     const ref = useRef<HTMLElement>(null);
     const activeRef = (forwardedRef as React.RefObject<HTMLElement>) ?? ref;
@@ -30,11 +35,12 @@ const Invitation = memo(
       once: true,
       margin: "-15%",
     });
-    const [hovering, setHovering] = useState(false);
 
     useEffect(() => {
       if (inView) onChapter(4);
     }, [inView, onChapter]);
+
+    const isHigh = tier === "high";
 
     return (
       <section
@@ -42,7 +48,6 @@ const Invitation = memo(
         className="relative px-6 md:px-16 lg:px-24 py-28 md:py-48 overflow-hidden flex flex-col items-center justify-center"
         style={{ background: palette.bg, minHeight: "90vh" }}
       >
-        {/* Ambient pulse — только medium/high */}
         {tier !== "low" && (
           <motion.div
             className="absolute inset-0 pointer-events-none"
@@ -59,7 +64,6 @@ const Invitation = memo(
         )}
 
         <div className="relative z-10 max-w-4xl mx-auto w-full">
-          {/* Chapter label */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={contentInView ? { opacity: 1 } : {}}
@@ -71,7 +75,6 @@ const Invitation = memo(
             </span>
           </motion.div>
 
-          {/* Big lines */}
           <div className="mb-16">
             {LINES.map((line) => (
               <ClipLine key={line.text} tier={tier} delay={line.delay}>
@@ -89,7 +92,6 @@ const Invitation = memo(
             ))}
           </div>
 
-          {/* Description */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={contentInView ? { opacity: 1, y: 0 } : {}}
@@ -103,70 +105,39 @@ const Invitation = memo(
             Партнёрство 4Life — это понятная модель, реальный доход и комфортная среда для роста.
           </motion.p>
 
-          {/* CTA button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={contentInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.65 }}
-            className="inline-block relative"
-            onMouseEnter={() => !IS_TOUCH && setHovering(true)}
-            onMouseLeave={() => setHovering(false)}
+            className="inline-block relative group"
           >
-            {/* Glow */}
-            {tier !== "low" && (
-              <motion.div
-                className="absolute -inset-6 rounded-full pointer-events-none"
-                animate={{ opacity: hovering ? 0.4 : 0 }}
-                transition={{ duration: 0.5 }}
+            {isHigh && (
+              <div
+                className="absolute -inset-6 rounded-full pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                 style={{
-                  background: `radial-gradient(ellipse, ${palette.gold}80, transparent 70%)`,
+                  background: `radial-gradient(ellipse, ${palette.gold}40, transparent 70%)`,
                   filter: "blur(16px)",
                 }}
               />
             )}
 
-            <Link
+            <Button
               to="/partnership"
-              className="relative inline-flex items-center gap-4 group"
-              aria-label="Узнать о партнёрстве подробнее"
+              variant="primary"
+              size="lg"
+              className="rounded-full shadow-2xl btn-special-fill"
+              style={
+                {
+                  "--btn-fill-1": palette.gold,
+                  "--btn-fill-2": palette.blue,
+                } as React.CSSProperties
+              }
+              icon={<Icons.ArrowRight className="w-5 h-5 transition-transform duration-300" />}
             >
-              <div
-                className="relative px-10 py-5 rounded-full overflow-hidden"
-                style={{ border: `1px solid ${palette.overlay20}` }}
-              >
-                {tier !== "low" && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    initial={{ x: "-110%" }}
-                    animate={hovering ? { x: "0%" } : { x: "-110%" }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    style={{
-                      background: `linear-gradient(135deg, ${palette.gold}, ${palette.blue})`,
-                    }}
-                  />
-                )}
-                <span
-                  className="relative font-medium text-sm uppercase tracking-[0.2em] transition-colors duration-300"
-                  style={{ color: palette.cream }}
-                >
-                  Узнать подробнее
-                </span>
-              </div>
-
-              <motion.div
-                animate={{ x: hovering && !IS_TOUCH ? 6 : 0 }}
-                transition={{ duration: 0.3 }}
-                style={{ color: palette.gold }}
-                aria-hidden="true"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M3 10h14M11 4l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </motion.div>
-            </Link>
+              Узнать подробнее
+            </Button>
           </motion.div>
 
-          {/* Disclaimer */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={contentInView ? { opacity: 1 } : {}}
@@ -183,5 +154,4 @@ const Invitation = memo(
 );
 
 Invitation.displayName = "Invitation";
-
 export default Invitation;

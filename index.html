@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!doctype html>
 <html class="dark" lang="ru" style="background-color: #03050a">
   <head>
@@ -16,7 +17,7 @@
     <style>
       :root {
         --preloader-bg-dark: #03050a;
-        --preloader-text-dark: #475569; /* Premium Matte Slate-500 */
+        --preloader-text-dark: #475569;
         --preloader-percent-dark: #ffffff;
         --preloader-neon-color: #06b6d4;
         --preloader-track-color-dark: rgba(255, 255, 255, 0.02);
@@ -27,7 +28,8 @@
         background-color: var(--preloader-bg-dark);
       }
 
-      body:has(#preloader) {
+      /* МГНОВЕННЫЙ АНЛОК: Используем класс вместо :has(), чтобы управлять блокировкой из JS */
+      body.preloader-locked {
         overflow: hidden !important;
         touch-action: none;
       }
@@ -66,7 +68,7 @@
         position: absolute;
         inset: 0;
         z-index: 1;
-        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73eAf8D+DSDPWks8AAAAABJRU5ErkJoggling==");
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73eAf8D+DSDPWks8AAAAABJRU5ErkJoggling==");
         background-repeat: repeat;
         opacity: 0.02;
         pointer-events: none;
@@ -240,7 +242,8 @@
       }
     </style>
   </head>
-  <body>
+  <!-- Добавлен класс блокировки -->
+  <body class="preloader-locked">
     <div id="preloader">
       <div class="preloader-noise"></div>
       <div class="preloader-stage">
@@ -417,6 +420,9 @@
 
           window.dispatchEvent(new CustomEvent("preloader-outro-start"));
 
+          // 💎 МГНОВЕННЫЙ АНЛОК СКРОЛЛА: Пользователь может скроллить, пока визуал еще тает
+          document.body.classList.remove("preloader-locked");
+
           const outroTl = gsap.timeline();
 
           outroTl.to(stage, {
@@ -476,7 +482,6 @@
           }
         });
 
-        // ─── ФАЗА 1 (ОЧЕРЕДЬ ЗАГРУЗКИ И ДЕКОДИРОВАНИЯ ИЗОБРАЖЕНИЙ НА GPU) ───
         const loadAssets = () => {
           const isMobile = window.innerWidth < 768;
           const criticalAssetUrl = isMobile
@@ -496,8 +501,6 @@
             img.onerror = resolve;
           });
 
-          // Асинхронно предзагружаем и аппаратно декодируем 20 картинок для 3D-сетки в фоне.
-          // (Для мобильных устройств лимит равен 8 картинкам для экономии памяти).
           const gridCount = isMobile ? 8 : 20;
           const gridPromises = Array.from({ length: gridCount }, (_, i) => {
             return new Promise((resolve) => {
@@ -514,11 +517,22 @@
             });
           });
 
+          const videoUrls = ["/videos/why-4life-transfer-factor.webm", "/videos/bg-video-products-page.mp4"];
+          const videoPromises = videoUrls.map((url) => {
+            return new Promise((resolve) => {
+              const video = document.createElement("video");
+              video.preload = "metadata";
+              video.src = url;
+              video.onloadedmetadata = () => resolve();
+              video.onerror = () => resolve();
+            });
+          });
+
           const appMountedPromise = new Promise((resolve) => {
             window.addEventListener("app-mounted", resolve, { once: true });
           });
 
-          Promise.allSettled([criticalBgPromise, ...gridPromises, appMountedPromise]).then(() => {
+          Promise.allSettled([criticalBgPromise, ...gridPromises, ...videoPromises, appMountedPromise]).then(() => {
             assetsReady = true;
             checkFinish();
           });
