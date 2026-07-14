@@ -8,13 +8,15 @@
  *    и стрелка горят непрерывно вплоть до перекрытия экрана волной перехода. Это убирает флик.
  * 2. [Cinematic Focus Dimming]: При выборе карточки остальные элементы карусели плавно
  *    затухают (opacity 0.4) и уменьшаются, направляя всё внимание на активный продукт.
- * 3. [Kinetic Active Feedback]: Стрелка упруго смещается вправо на 6px и фиксируется.
+ * 3. [Performance Degradation]: На low-tier устройствах полностью отключаются тяжелые
+ *    многослойные тени внутри 3D-куба, что спасает FPS при свайпе.
  *
  * @author Geminis AI & Kort
- * @version 18.0.0
+ * @version 18.1.0
  */
 
 import { useTransition } from "@/context";
+import { usePerformanceTier } from "@/hooks";
 import { Icons } from "@/utils/icons";
 import React, { useRef, useState } from "react";
 import type { Swiper as SwiperType } from "swiper";
@@ -61,6 +63,10 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
   const swiperRef = useRef<SwiperType | null>(null);
   const { transitionTo } = useTransition();
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // ФИКС ТИРОВ ДЛЯ КУБА: На low устройствах отключаем дроп-шадоу внутри 3D-трансформации
+  const tier = usePerformanceTier();
+  const isLowTier = tier === "low";
 
   // Локальный стейт фиксации клика для предотвращения флика перед волной
   const [clickedCardId, setClickedCardId] = useState<number | null>(null);
@@ -122,18 +128,12 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
               >
                 <div
                   onClick={() => handleCardClick(product.id)}
-                  /* 
-                    УМНЫЙ ТАЙЛИНГ КЛАССОВ (Awwwards Focus):
-                    - Если карточка нажата (isClicked): она сжимается до 0.93, загорается рамка и тень.
-                    - Если нажата ДРУГАЯ карточка (isAnyClicked): эта карточка плавно тускнеет (opacity-40) и уходит на задний план (scale-97).
-                    - Если кликов нет: работает стандартный active:scale-95.
-                  */
-                  className={`group w-full h-full aspect-[3/4] p-6 rounded-[2rem] border text-left relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#0c1322] to-[#03050a] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  className={`group w-full h-full aspect-[3/4] p-6 rounded-[2rem] border text-left relative overflow-hidden flex flex-col justify-between transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     isClicked
-                      ? "scale-[0.93] border-cyan-400/60 shadow-[0_0_35px_rgba(6,182,212,0.35)]"
+                      ? `scale-[0.93] border-cyan-400/60 ${isLowTier ? "bg-[#050811]" : "shadow-[0_0_35px_rgba(6,182,212,0.35)] bg-gradient-to-br from-[#0c1322] to-[#03050a]"}`
                       : isAnyClicked
-                        ? "opacity-40 scale-[0.97] border-cyan-500/5 pointer-events-none"
-                        : "border-cyan-500/20 shadow-2xl active:scale-95"
+                        ? `opacity-40 scale-[0.97] border-cyan-500/5 pointer-events-none ${isLowTier ? "bg-[#050811]" : "bg-gradient-to-br from-[#0c1322] to-[#03050a]"}`
+                        : `border-cyan-500/20 active:scale-95 ${isLowTier ? "bg-[#050811]" : "shadow-2xl bg-gradient-to-br from-[#0c1322] to-[#03050a]"}`
                   }`}
                   style={{
                     backfaceVisibility: "hidden",
@@ -149,10 +149,13 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
                       src={product.image}
                       alt={product.title}
                       loading="lazy"
+                      decoding="async"
                       className={`h-[95%] max-h-[190px] object-contain transition-all duration-500 ease-out ${
-                        isClicked
-                          ? "drop-shadow-[0_25px_50px_rgba(6,182,212,0.4)]"
-                          : "drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
+                        isLowTier
+                          ? "" // Отключаем drop-shadow на слабом железе
+                          : isClicked
+                            ? "drop-shadow-[0_25px_50px_rgba(6,182,212,0.4)]"
+                            : "drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
                       }`}
                       style={{ backfaceVisibility: "hidden", transform: "scale(1.35) translateZ(0)" }}
                     />
@@ -166,11 +169,6 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
                     <div className="relative self-start inline-flex items-center gap-1.5 text-cyan-400 font-bold text-xs uppercase tracking-widest cursor-pointer">
                       <span className="relative z-10">ПОДРОБНЕЕ</span>
 
-                      {/* 
-                        Критический фикс линии:
-                        - Если карточка нажата (isClicked): линия застывает на 100% ширины и 100% непрозрачности.
-                        - Если нет: она скрыта и срабатывает только на физический тап пальца (group-active).
-                      */}
                       <span
                         className={`absolute bottom-[-3px] left-0 h-[1px] w-full bg-gradient-to-r from-cyan-400/80 to-transparent origin-left transition-all duration-500 ease-out pointer-events-none ${
                           isClicked
@@ -180,7 +178,6 @@ const KineticProductCarousel: React.FC<KineticCarouselProps> = ({ products }) =>
                         style={{ clipPath: "polygon(0 0, 100% 40%, 100% 60%, 0 100%)" }}
                       />
 
-                      {/* Стрелка упруго смещается вправо на 6px и фиксируется при клике */}
                       <Icons.ArrowRight
                         className={`w-3.5 h-3.5 transition-transform duration-300 ease-out ${
                           isClicked ? "translate-x-1.5 text-cyan-300" : "group-active:translate-x-1"

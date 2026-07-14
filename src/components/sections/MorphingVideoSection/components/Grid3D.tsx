@@ -9,6 +9,8 @@
  *    полигоны с полноценным субпиксельным сглаживанием в Firefox и Chromium.
  * 2. [Overlapping Anti-Fringe]: Внутреннее изображение слегка увеличено (`scale(1.015)`)
  *    и стабилизировано через `translate3d`, что убирает белые стыки и бахрому на углах скругления.
+ * 3. [Scroll Jank Fix]: background-image заменен на <img> с decoding="async",
+ *    что предотвращает блокировку Главного Потока при скролле.
  */
 
 import React, { useEffect, useMemo, useRef } from "react";
@@ -147,13 +149,15 @@ export const Grid3D: React.FC<Grid3DProps> = ({ type, triggerRef }) => {
               } as React.CSSProperties
             }
           >
-            <div
-              className="h-full w-full bg-cover bg-center rounded-xl"
+            {/* ФИКС С ДЕКОДЕРОМ: Замена background-image на <img> */}
+            <img
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover rounded-xl"
               style={
                 {
-                  backgroundImage: `url(${src})`,
-                  imageRendering: "auto",
-                  // Микро-скейл 1.015 убирает белую бахрому на углах скругления маски
                   transform: "translate3d(0,0,0) scale(1.015)",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",

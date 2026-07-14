@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-const STORAGE_KEY = "scroll_positions_v_final";
+const STORAGE_KEY = "scroll_positions_v3_keys";
 
 let memoryScrollCache: Record<string, number> | null = null;
 let diskFlushTimeout: NodeJS.Timeout | null = null;
@@ -19,7 +19,7 @@ let diskFlushTimeout: NodeJS.Timeout | null = null;
 const initScrollCache = () => {
   if (memoryScrollCache) return;
   try {
-    memoryScrollCache = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    memoryScrollCache = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
   } catch {
     memoryScrollCache = {};
   }
@@ -28,12 +28,7 @@ const initScrollCache = () => {
 const flushToDisk = () => {
   if (!memoryScrollCache) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryScrollCache));
-    const state = window.history.state || {};
-    window.history.replaceState(
-      { ...state, _scroll: memoryScrollCache[window.location.pathname + window.location.search] || 0 },
-      "",
-    );
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(memoryScrollCache));
   } catch {}
 };
 
@@ -41,26 +36,30 @@ if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", flushToDisk);
 }
 
-const saveScrollPosition = (path: string, position: number) => {
+const saveScrollPosition = (key: string, path: string, position: number) => {
   initScrollCache();
   const rounded = Math.round(position);
 
   if (memoryScrollCache) {
-    memoryScrollCache[path] = rounded;
+    memoryScrollCache[key] = rounded;
+    memoryScrollCache[`fallback_${path}`] = rounded;
   }
 
   if (diskFlushTimeout) clearTimeout(diskFlushTimeout);
   diskFlushTimeout = setTimeout(flushToDisk, 250);
 };
 
-const getScrollPosition = (path: string): number | null => {
+const getScrollPosition = (key: string, path: string): number | null => {
   initScrollCache();
-  if (memoryScrollCache && memoryScrollCache[path] != null) {
-    return memoryScrollCache[path];
-  }
-  try {
-    if (window.history.state?._scroll != null) return window.history.state._scroll;
-  } catch {}
+  if (!memoryScrollCache) return null;
+
+  // Безопасное извлечение значений для noUncheckedIndexedAccess
+  const exactPos = memoryScrollCache[key];
+  if (exactPos !== undefined) return exactPos;
+
+  const fallbackPos = memoryScrollCache[`fallback_${path}`];
+  if (fallbackPos !== undefined) return fallbackPos;
+
   return null;
 };
 
@@ -163,6 +162,12 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
   const isHandlingPop = useRef(false);
   const prevPathnameRef = useRef(location.pathname);
 
+  const locationKeyRef = useRef(location.key);
+
+  useEffect(() => {
+    locationKeyRef.current = location.key;
+  }, [location.key]);
+
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -171,14 +176,14 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
       ticking = true;
       requestAnimationFrame(() => {
         const currentPath = location.pathname + location.search;
-        saveScrollPosition(currentPath, window.scrollY);
+        saveScrollPosition(locationKeyRef.current, currentPath, window.scrollY);
         ticking = false;
       });
     };
 
     const emergencySave = () => {
       if (isHandlingPop.current || isFirstLoad.current) return;
-      saveScrollPosition(location.pathname + location.search, window.scrollY);
+      saveScrollPosition(locationKeyRef.current, location.pathname + location.search, window.scrollY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -223,8 +228,10 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
       window.dispatchEvent(new CustomEvent("pop-transition-start"));
 
+      const targetKey = event.state?.key || "default";
       const targetPath = event.state?.path || window.location.pathname + window.location.search;
-      const targetScroll = getScrollPosition(targetPath) ?? 0;
+
+      const targetScroll = getScrollPosition(targetKey, targetPath) ?? 0;
 
       cleanupTimeout = setTimeout(() => {
         setIsPopping(false);
@@ -276,7 +283,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
     let cleanup: (() => void) | undefined = undefined;
 
     if (isFirstLoad.current) {
-      const savedY = getScrollPosition(currentPath);
+      const savedY = getScrollPosition(location.key, currentPath);
 
       const performRestore = () => {
         if (savedY !== null && savedY > 0) {
@@ -294,7 +301,6 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
         let failSafeTimeout: ReturnType<typeof setTimeout>;
 
         const handlePreloaderOutro = () => {
-          // 💎 АННИГИЛЯЦИЯ ТАЙМЕРА: предотвращает повторный ложный вызов и телепортацию!
           clearTimeout(failSafeTimeout);
           performRestore();
           window.removeEventListener("preloader-outro-start", handlePreloaderOutro);
@@ -325,6 +331,8 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
       return cleanup;
     }
 
+    saveScrollPosition(location.key, currentPath, 0);
+
     window.dispatchEvent(new CustomEvent("force-header-show"));
     if (lenis) {
       lenis.scrollTo(0, { immediate: true } as any);
@@ -334,14 +342,14 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
     }
 
     return cleanup;
-  }, [location.pathname, location.search, navigationType]);
+  }, [location.pathname, location.search, navigationType, location.key]);
 
   useEffect(() => {
     const currentPath = location.pathname + location.search;
-    if (window.history.state?.path !== currentPath) {
-      window.history.replaceState({ ...window.history.state, path: currentPath }, "", currentPath);
+    if (window.history.state?.path !== currentPath || window.history.state?.key !== location.key) {
+      window.history.replaceState({ ...window.history.state, path: currentPath, key: location.key }, "", currentPath);
     }
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, location.key]);
 
   return null;
 };

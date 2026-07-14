@@ -1,16 +1,18 @@
 /**
  * @module src/components/sections/MorphingVideoSection/index.tsx
  * @description Awwwards 2026 - Morphing Video Section.
- * ИСПРАВЛЕНИЯ: Внедрен React Conditional Rendering. На мобильных устройствах
- * десктопная разметка физически не рендерится в DOM, что освобождает ОЗУ телефона.
+ * ИСПРАВЛЕНИЯ:
+ * 1. Синхронизировано затухание всего контента (цифры, GSAP 3D-сетки, тексты)
+ * строго в один такт с открытием модалки Vimeo для безупречного UX без скачков блюра.
  * @author Geminis AI & Kort
- * @version 13.3.0
+ * @version 14.3.0
  */
 
 import { Button } from "@/components/ui";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
+import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BiotechBackground from "@/components/effects/BiotechBackground";
@@ -144,9 +146,15 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </div>
 
-      {/* ФИКС: Рендерим десктоп ТОЛЬКО на не-тач устройствах */}
+      {/* ФИКС ОРКЕСТРАЦИИ: Обернуто в motion.div для плавного затухания всего контента при открытии видео */}
       {!isTouchDevice ? (
-        <div className="relative z-30" style={{ pointerEvents: vimeoOpen ? "none" : "auto" }}>
+        <motion.div
+          className="relative z-30"
+          style={{ pointerEvents: vimeoOpen ? "none" : "auto", willChange: "opacity" }}
+          initial={false}
+          animate={{ opacity: vimeoOpen ? 0 : 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div className="px-4 pt-24 md:pt-32 pb-12 text-center">
             <div className="mx-auto max-w-4xl relative">
               <h2
@@ -306,10 +314,16 @@ const MorphingVideoSection: React.FC = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : (
-        /* ─── ФИКС: Рендерим мобайл ТОЛЬКО на тач устройствах ─── */
-        <div className="relative z-30 px-5 pt-16 pb-20 max-w-xl mx-auto">
+        /* ─── ФИКС ОРКЕСТРАЦИИ ТАЧА: Обернуто в motion.div для плавного затухания всего контента при открытии видео ─── */
+        <motion.div
+          className="relative z-30 px-5 pt-16 pb-20 max-w-xl mx-auto"
+          style={{ pointerEvents: vimeoOpen ? "none" : "auto", willChange: "opacity" }}
+          initial={false}
+          animate={{ opacity: vimeoOpen ? 0 : 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div className="text-center mb-14">
             <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400 mb-3 drop-shadow-md">
               Наука • Качество • Доверие
@@ -426,7 +440,7 @@ const MorphingVideoSection: React.FC = () => {
               Узнать больше о компании
             </Button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* ─── DESKTOP VIDEO OVERLAYS ─── */}

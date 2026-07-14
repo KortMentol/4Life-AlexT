@@ -1,9 +1,12 @@
 /**
  * @module src/components/ui/CustomCursor.tsx
  * @description Глобальный фиксированный премиум-курсор.
+ * ИСПРАВЛЕНИЕ: Интегрирована подписка на modal-state-change. Курсор
+ * теперь гарантированно растворяется при открытии модалки (Vimeo),
+ * даже если пользователь не двигает мышь после клика.
  *
  * @author Senior Staff Frontend Engineer
- * @version 2.1.1
+ * @version 2.3.0 - Awwwards 2026 Glassmorphism & Neon Glow Edition
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
@@ -14,6 +17,7 @@ import React, { useEffect, useRef, useState } from "react";
 export const CustomCursor: React.FC = () => {
   const [active, setActive] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const tier = usePerformanceTier();
 
   const mouseX = useMotionValue(-100);
@@ -24,6 +28,17 @@ export const CustomCursor: React.FC = () => {
 
   const activeRef = useRef(false);
   const lastMousePos = useRef({ x: -100, y: -100 });
+
+  // Слушатель состояния модальных окон
+  useEffect(() => {
+    const handleModalState = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setIsModalOpen(customEvent.detail.isOpen);
+    };
+
+    window.addEventListener("modal-state-change", handleModalState);
+    return () => window.removeEventListener("modal-state-change", handleModalState);
+  }, []);
 
   useEffect(() => {
     if ("ontouchstart" in window || navigator.maxTouchPoints > 0) return;
@@ -57,7 +72,6 @@ export const CustomCursor: React.FC = () => {
 
     let frameCount = 0;
     const onTick = () => {
-      // Исполняем лучевое сканирование только при наличии физического изменения координат (0% CPU в простое)
       if (isMouseMoving || isPageScrolling) {
         frameCount++;
         if (frameCount % 3 === 0) {
@@ -88,7 +102,9 @@ export const CustomCursor: React.FC = () => {
     };
   }, [mouseX, mouseY]);
 
-  const cursorScale = active ? (isClicked ? 0.85 : 1) : 0;
+  // Если модалка открыта — принудительно скрываем курсор
+  const cursorScale = active && !isModalOpen ? (isClicked ? 0.85 : 1) : 0;
+  const cursorOpacity = active && !isModalOpen ? 1 : 0;
 
   return (
     <motion.div
@@ -99,18 +115,18 @@ export const CustomCursor: React.FC = () => {
         y: springY,
         translateX: "-50%",
         translateY: "-50%",
-        willChange: active ? "transform" : "auto",
+        willChange: active && !isModalOpen ? "transform" : "auto",
       }}
     >
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: cursorScale, opacity: active ? 1 : 0 }}
+        animate={{ scale: cursorScale, opacity: cursorOpacity }}
         transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
         className={[
-          "w-24 h-24 rounded-full flex items-center justify-center border shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+          "w-24 h-24 rounded-full flex items-center justify-center border transition-colors duration-300",
           tier === "low"
-            ? "bg-[#0b0f19]/95 border-cyan-500/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
-            : "bg-[#080d18]/90 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]",
+            ? "bg-[#0b0f19]/95 border-cyan-500/80 shadow-[0_8px_32px_rgba(0,0,0,0.6),_inset_0_1px_1px_rgba(255,255,255,0.1)]"
+            : "bg-[#03050a]/30 backdrop-blur-md border-cyan-400/30 shadow-[0_8px_32px_rgba(0,0,0,0.4),_0_0_24px_rgba(6,182,212,0.2),_inset_0_1px_1px_rgba(255,255,255,0.2)]",
         ].join(" ")}
       >
         <span
