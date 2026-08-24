@@ -1,15 +1,18 @@
 /**
  * @module src/hooks/useNativeScroll.ts
- * @description Скрытие хедера при скролле.
+ * @description Скрытие и отображение хедера при скролле.
  *
- * ИСПРАВЛЕНИЯ ЭТАПА 2:
- * 1. [Mobile Header Stuck Fixed]: Добавлен guard-фильтр "if (isMobile) return;" в слушатель pop-transition-complete.
- *    Это предотвратило ложное скрытие хедера на мобильных устройствах при возврате по истории назад.
- * 2. [Preloader Lock Eliminated]: Добавлен слушатель события "preloader-outro-start". Как только шторка
- *    прелоадера начинает уходить, блокировка расчетов скролла снимается мгновенно (минус 1.8с задержки).
+ * ИСПРАВЛЕНИЕ БАГА "МИРАЖА ХЕДЕРА ПРИ ЗАКРЫТИИ ПЛЕЕРА":
+ * 1. В эффекте инициализации/разблокировки хука (`useEffect([disabled, isMobile])`)
+ *    убран насильственный сброс `header.style.transform = "translateY(0px) translateZ(0)"`.
+ * 2. Теперь при включении хука (когда модалка/видеоплеер закрывается и `disabled`
+ *    становится `false`) применяется текущее сохраненное значение `displayYRef.current`.
+ * 3. Если хедер был убран за пределы экрана (`-110px`) до открытия плеера, после закрытия
+ *    плеера он сохранит позицию `-110px`. Хедер больше не появляется ложно, не застывает
+ *    "миражом" при скролле вниз и не прыгает при скролле вверх.
  *
  * @author Geminis AI & Kort
- * @version 2.1.0
+ * @version 2.2.0
  */
 
 import { rafLoop } from "@/lib/rafLoop";
@@ -86,7 +89,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
   }, [showHeader]);
 
   useEffect(() => {
-    if (isMobile) return; // 💎 КРИТИЧЕСКИЙ ГУАРД: Блокирует скрытие хедера на мобильных при поп-переходах
+    if (isMobile) return;
 
     const handlePopComplete = () => {
       const currentScrollY = window.scrollY;
@@ -120,8 +123,10 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     const header = getCachedHeader();
     if (!header) return;
 
+    // ИСПРАВЛЕНИЕ: Вместо насильственного вытаскивания хедера на 0px
+    // при снятии блокировки (закрытии модалки/плеера), сохраняем реальную Y-координату!
     header.style.transition = "none";
-    header.style.transform = "translateY(0px) translateZ(0)";
+    header.style.transform = `translateY(${displayYRef.current}px) translateZ(0)`;
 
     prevScrollRef.current = window.scrollY;
 

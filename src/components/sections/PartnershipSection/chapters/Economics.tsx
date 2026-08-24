@@ -1,47 +1,53 @@
 /**
  * @module PartnershipSection/chapters/Economics.tsx
  * Глава 3 — экономика партнёрства.
- * ArcCounter (inline) — анимированная дуга 64%.
+ *
+ * ИСПРАВЛЕНИЕ (Firefox Flicker):
+ * Полностью удален React State (useState) из анимации дуги.
+ * Изменение state 60 раз в секунду вызывало "Layout Thrashing" и ломало рендеринг SVG
+ * в движке Gecko (Firefox). Теперь используется нативное свойство `pathLength` от
+ * framer-motion для обводки и прямой доступ к DOM (ref.current.textContent) для цифр.
  */
 
 import type { PerformanceTier } from "@/hooks/usePerformanceTier";
 import { animate, motion, useInView } from "framer-motion";
-import { forwardRef, memo, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useEffect, useRef } from "react";
 import type { Palette } from "../constants";
 import ClipLine from "../ui/ClipLine";
 
-// ─── ArcCounter (inline — используется только здесь) ─────────────────────────
+// ─── ArcCounter ─────────────────────────────────────────────────────────
 const ArcCounter = memo(({ tier, palette }: { tier: PerformanceTier; palette: Palette }) => {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-15%" });
-  const [value, setValue] = useState(0);
+  const countRef = useRef<HTMLSpanElement>(null);
 
   const R = 120;
   const circ = 2 * Math.PI * R;
-  // Полная окружность: 64% от circ = ровно 64% дуги
-  const offset = circ - (value / 100) * circ;
 
   useEffect(() => {
     if (!inView) return;
     if (tier === "low") {
-      setValue(64);
+      if (countRef.current) countRef.current.textContent = "64";
       return;
     }
+
+    // Прямая мутация DOM-узла без React Re-renders (0 Layout Thrashing)
     const ctrl = animate(0, 64, {
       duration: 2.2,
       ease: "easeOut",
-      onUpdate: (v) => setValue(Math.round(v)),
+      onUpdate: (v) => {
+        if (countRef.current) countRef.current.textContent = Math.round(v).toString();
+      },
     });
+
     return ctrl.stop;
   }, [inView, tier]);
 
   return (
     <div ref={ref} className="relative flex items-center justify-center" style={{ width: 280, height: 280 }}>
-      {/* Поворот -90° — дуга начинается сверху, заполняется по часовой */}
       <svg width="280" height="280" viewBox="0 0 280 280" className="-rotate-90" aria-hidden="true">
-        {/* Фоновая окружность */}
         <circle cx="140" cy="140" r={R} fill="none" stroke={palette.overlay10} strokeWidth="1.5" />
-        {/* Заполненная дуга */}
+        {/* Аппаратная анимация обводки через pathLength */}
         <motion.circle
           cx="140"
           cy="140"
@@ -51,19 +57,21 @@ const ArcCounter = memo(({ tier, palette }: { tier: PerformanceTier; palette: Pa
           strokeWidth="2"
           strokeLinecap="round"
           strokeDasharray={circ}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.05s linear" }}
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: inView ? (tier === "low" ? 0.64 : 0.64) : 0 }}
+          transition={{ duration: 2.2, ease: "easeOut" }}
+          style={{ willChange: "stroke-dashoffset" }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className="typography-h1 tabular-nums"
+          className="typography-h1 tabular-nums flex items-baseline"
           style={{
             fontSize: "clamp(4rem, 8vw, 6rem)",
             color: palette.cream,
           }}
         >
-          {value}%
+          <span ref={countRef}>0</span>%
         </span>
         <span className="mt-2 text-xs font-light" style={{ color: palette.gold }}>
           ваш доход с продажи
@@ -106,7 +114,6 @@ const Economics = memo(
           background: `linear-gradient(160deg, ${palette.bg}, ${palette.bg}f0, ${palette.bg})`,
         }}
       >
-        {/* Ambient */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -128,12 +135,10 @@ const Economics = memo(
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-center">
-            {/* Arc */}
             <div className="flex justify-center md:justify-start">
               <ArcCounter tier={tier} palette={palette} />
             </div>
 
-            {/* Text */}
             <div>
               <ClipLine tier={tier} delay={0}>
                 <h2
