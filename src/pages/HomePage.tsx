@@ -2,19 +2,20 @@
  * @module src/pages/HomePage.tsx
  * @description Главная страница в стиле "Clinical Obsidian" с оркестровкой входа 2026.
  * ИСПРАВЛЕНИЯ:
- * 1. Полностью разведены слои анимации входа (GSAP на внешних div) и затухания скролла
- *    (Framer Motion на внутренних элементах). Это полностью восстановило
- *    работу анимации PageEntrance на тачах и ПК без конфликта стилей.
- * 2. Добавлена динамическая деградация блюра бэджа для low-тира на мобильных устройствах.
+ * 1. [Hero CTA Contrast]: Нижний edgeFade скорректирован с 250px до 120px, а центральный
+ *    оверлей видео ослаблен до via-black/20. Кнопки больше не тонут в темноте и считываются
+ *    на 100% четко с первого взгляда.
+ * 2. [Seamless Transition Intact]: Переход между Hero и MorphingVideo остается абсолютно бесшовным
+ *    за счет встречного верхнего 250px фейда в MorphingVideoSection.
  * @author Kort & AI
- * @version 4.8.0
+ * @version 5.2.0
  */
 
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { FinalCTASection, MorphingVideoSection, PartnershipSection } from "@/components/sections";
 import { PageEntrance } from "@/components/transitions/PageEntrance";
 import { Button, ParallaxSection } from "@/components/ui";
-import { useEffectsDebug } from "@/hooks";
+import { useEffectsDebug, usePerformanceTier } from "@/hooks";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -31,7 +32,6 @@ import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
 
 const heroVideoWebm = "/videos/why-4life-transfer-factor.webm";
 
-// --- LAZY LOADED COMPONENTS ---
 const ImmersiveProductShowcase = lazy(() => import("@/components/ui/ImmersiveProductShowcase"));
 
 const pageVariants = {
@@ -43,12 +43,11 @@ const pageVariants = {
 const HomePage: React.FC = () => {
   const efxFlags = useEffectsDebug();
   const [vh, setVh] = useState(800);
+  const currentTier = usePerformanceTier();
   const [tier, setTier] = useState<string>("medium");
 
   const heroRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLDivElement>(null);
-
-  const currentTier = usePerformanceTier();
 
   useEffect(() => {
     setVh(window.innerHeight);
@@ -114,8 +113,10 @@ const HomePage: React.FC = () => {
           height="h-screen"
           contentClasses="flex flex-col items-center justify-center text-center py-8 pt-24"
           skipPreload={true}
+          edgeFade={{ bottom: 120, colorDark: "#03050a" }} // 120px не достает до кнопок, но мягко гасит видео
         >
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/80 via-transparent to-black/80 z-0" />
+          {/* Сбалансированный оверлей: чистый верх/низ и прозрачный центр для кнопок */}
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/80 via-black/20 to-black/70 z-0" />
 
           <PageEntrance className="relative z-10 w-full max-w-5xl mx-auto px-4 md:px-6 flex flex-col justify-center items-center h-full">
             <motion.div
@@ -126,20 +127,18 @@ const HomePage: React.FC = () => {
                 willChange: "transform",
               }}
             >
-              {/* Badge: Внешний div для GSAP, внутренний motion.span для скролла */}
               <div data-entrance="badge" className="mb-8 md:mb-10">
                 <motion.span
-                  className={`inline-flex items-center px-5 py-2 rounded-full border border-white/15 bg-white/5 text-[10px] md:text-xs font-bold tracking-[0.2em] text-white uppercase shadow-xl ${tier !== "low" ? "backdrop-blur-md" : ""}`}
+                  className={`inline-flex items-center px-5 py-2 rounded-full border border-white/15 bg-white/5 text-[10px] md:text-xs font-bold tracking-[0.2em] text-white uppercase shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${tier !== "low" ? "backdrop-blur-md" : ""}`}
                   style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
                 >
                   Обучение вашего иммунитета
                 </motion.span>
               </div>
 
-              {/* Title: Внешний div для GSAP, внутренний motion.h1 для скролла */}
               <div data-entrance="title" className="w-full mb-10 md:mb-14">
                 <motion.h1
-                  className="typography-display text-center w-full"
+                  className="typography-display text-center w-full drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]"
                   style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
                 >
                   Раскройте потенциал своего здоровья{" "}
@@ -149,7 +148,6 @@ const HomePage: React.FC = () => {
                 </motion.h1>
               </div>
 
-              {/* Buttons: Внешний div для GSAP, внутренний motion.div для скролла */}
               <div
                 data-entrance="buttons"
                 className="flex flex-col sm:flex-row gap-4 md:gap-5 justify-center items-center w-full mt-4"
@@ -162,7 +160,7 @@ const HomePage: React.FC = () => {
                     to="/products"
                     variant="primary"
                     size="lg"
-                    className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none"
+                    className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none shadow-[0_10px_30px_rgba(0,212,255,0.15)]"
                     icon={<Icons.ArrowRight className="w-5 h-5 transition-transform duration-300" />}
                   >
                     Каталог здоровья
@@ -172,7 +170,7 @@ const HomePage: React.FC = () => {
                     to="/how-to-buy"
                     variant="secondary"
                     size="lg"
-                    className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none"
+                    className="w-[85vw] max-w-[280px] sm:w-auto sm:max-w-none shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
                     icon={<Icons.Info className="w-5 h-5 transition-transform duration-300" />}
                   >
                     Как приобрести
@@ -194,17 +192,16 @@ const HomePage: React.FC = () => {
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
-          edgeFade={{ top: 160, bottom: 150, colorDark: "#030712" }}
+          edgeFade={{ top: 250, bottom: 250, colorDark: "#03050a" }}
         >
-          <div className="py-16 sm:py-20">
+          <div className="py-24 sm:py-32">
             <div className="container max-w-7xl mx-auto px-6">
-              <div className="text-center mb-14">
-                <span className="section-accent-line" />
+              <div className="text-center mb-20">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/60 mb-4">
                   Научный подход к здоровью
                 </p>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                  <span className="bg-gradient-to-r from-cyan-400 via-blue-300 to-blue-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-cyan-400 via-blue-300 to-blue-400 bg-clip-text text-transparent drop-shadow-md">
                     Инновационные продукты
                   </span>
                   <span className="block text-white/90">для иммунитета</span>
@@ -222,7 +219,7 @@ const HomePage: React.FC = () => {
                 </div>
               </Suspense>
 
-              <div className="mt-14 mb-8 text-center px-6">
+              <div className="mt-20 mb-8 text-center px-6">
                 <Button
                   to="/products"
                   variant="secondary"
@@ -246,5 +243,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 export default React.memo(HomePage);

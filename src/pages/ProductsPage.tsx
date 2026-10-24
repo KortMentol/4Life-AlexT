@@ -1,9 +1,10 @@
 /**
  * @module src/pages/ProductsPage.tsx
  * @description Immersive Garden 2026 - Каталог продуктов.
- * Полностью удалены CSS-классы светлой темы (`bg-white`, `to-white` и т.д.) [1].
- * Страница зафиксирована на глубоком Clinical Obsidian фоне (#03050a) [1] во всех контекстах.
+ * ИСПРАВЛЕНИЯ: Внедрен паттерн Section Stacking (Острый наезд Одеяла)
+ * между Hero секцией и каталогом для идеальной чистоты границ.
  * @author KortMentol
+ * @version 9.0.0
  */
 
 import ProductDetailModal from "@/components/ui/ProductDetailModal";
@@ -26,15 +27,12 @@ import "@/styles/pages/products-page.css";
 const ProductsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Синхронизация категории с URL ?cat=...
   const [selectedCategory, setSelectedCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [showFloatingFilter, setShowFloatingFilter] = useState(false);
 
-  // Получаем productId из URL параметров для управления модалкой
   const selectedProductId = searchParams.get("productId");
 
-  // Ищем активный продукт по ID из URL
   const selectedProduct = useMemo(() => {
     if (!selectedProductId) return null;
     return productsData.find((p) => p.id === selectedProductId) ?? null;
@@ -42,7 +40,6 @@ const ProductsPage: React.FC = () => {
 
   const isModalOpen = !!selectedProduct;
 
-  // Grid mode persisted in localStorage
   const [gridMode, setGridMode] = useState<2 | 3 | 4>(() => {
     try {
       const saved = localStorage.getItem("products-grid-mode");
@@ -51,12 +48,10 @@ const ProductsPage: React.FC = () => {
     return 4;
   });
 
-  // --- REFS ---
   const catalogRef = useRef<HTMLDivElement>(null);
   const gridAnchorRef = useRef<HTMLDivElement>(null);
   const lastClickedCardRef = useRef<string | null>(null);
 
-  // --- DATA ---
   const categories = useMemo(() => {
     const cats = new Set<string>();
     productsData.forEach((p) => p.categories.forEach((c) => cats.add(c)));
@@ -68,7 +63,6 @@ const ProductsPage: React.FC = () => {
     return productsData.filter((p) => p.categories.includes(selectedCategory));
   }, [selectedCategory]);
 
-  // --- HANDLERS ---
   const handleCategoryChange = useCallback(
     (category: string | null) => {
       if (gridAnchorRef.current) {
@@ -112,7 +106,7 @@ const ProductsPage: React.FC = () => {
           prev.set("productId", p.id);
           return prev;
         },
-        { replace: false }, // push в историю для поддержки кнопки "Назад" в браузере
+        { replace: false },
       );
     },
     [setSearchParams],
@@ -149,15 +143,14 @@ const ProductsPage: React.FC = () => {
         path="/products"
       />
 
-      {/* 1. HERO СЕКЦИЯ */}
       <ProductsHero />
 
-      {/* 2. КАТАЛОГ */}
-      <div ref={catalogRef} className="relative z-10 w-full bg-gradient-to-b from-[#0f172a] to-[#03050a]">
-        {/* Мягкий градиентный стык с Hero-секцией */}
-        <div className="absolute left-0 right-0 h-[300px] md:h-[400px] -top-[300px] md:-top-[400px] bg-gradient-to-b from-transparent to-[#0f172a] pointer-events-none" />
-
-        <div className="py-12 relative z-20">
+      {/* ОСТРЫЙ НОЖ (ОДЕЯЛО) НАД ВИДЕО HERO */}
+      <div
+        ref={catalogRef}
+        className="relative z-10 w-full bg-[#03050a] border-t border-white/[0.04] shadow-[0_-30px_60px_rgba(0,0,0,0.8)]"
+      >
+        <div className="py-24 relative z-20">
           <div ref={gridAnchorRef} className="w-full h-0 pointer-events-none" aria-hidden="true" />
 
           <div className="max-w-[1600px] mx-auto px-4 md:px-8">
@@ -172,11 +165,9 @@ const ProductsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. СЕКЦИЯ FAQ */}
         <ProductsFAQ />
       </div>
 
-      {/* 4. ПЛАВАЮЩАЯ КНОПКА ФИЛЬТРА */}
       <AnimatePresence>
         {showFloatingFilter && (
           <motion.button
@@ -194,7 +185,6 @@ const ProductsPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 5. КАПСУЛА ФИЛЬТРОВ */}
       <ProductsFilters
         isOpen={isFiltersOpen}
         onClose={handleCloseFilters}
@@ -204,7 +194,6 @@ const ProductsPage: React.FC = () => {
         productCount={filteredProducts.length}
       />
 
-      {/* 6. МОДАЛКА ПРОДУКТА */}
       <ProductDetailModal
         product={selectedProduct}
         products={filteredProducts}
@@ -215,10 +204,9 @@ const ProductsPage: React.FC = () => {
               prev.delete("productId");
               return prev;
             },
-            { replace: true }, // replace для сохранения истории назад/вперед без фантомных модалок
+            { replace: true },
           );
 
-          // Возврат скролла к последней открытой карточке
           if (lastClickedCardRef.current) {
             const cardEl = document.querySelector(
               `[data-product-id="${lastClickedCardRef.current}"]`,

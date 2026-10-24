@@ -1,22 +1,21 @@
 /**
  * @module PartnershipSection/constants.ts
  * Палитра, данные контента, конфиги анимаций.
- * Всё в одном месте — легко менять без касания JSX.
+ * ИСПРАВЛЕНИЯ: Базовый цвет (bg) заменен с #040404 на Clinical Obsidian (#03050a)
+ * для идеального бесшовного стыка с параллаксом.
  */
 
 // ─── Touch detection (вычисляется один раз при загрузке модуля) ───────────────
 export const IS_TOUCH =
-  typeof window !== "undefined"
-    ? "ontouchstart" in window || navigator.maxTouchPoints > 0
-    : false;
+  typeof window !== "undefined" ? "ontouchstart" in window || navigator.maxTouchPoints > 0 : false;
 
 // ─── Палитра — зафиксирована под темную тему сайта ───────────────────────────
 export const getPalette = () => ({
-  bg: "#040404",
+  bg: "#03050a", // ИСПРАВЛЕНО: Clinical Obsidian
   cream: "#F0EDE8",
   gold: "#B9974A",
   blue: "#1644F8",
-  blueDim: "rgba(22, 68, 248, 0.188)", // Эквивалент #1644F830 для экономии вычислений
+  blueDim: "rgba(22, 68, 248, 0.188)",
   // Оверлеи с прозрачностью
   overlay10: "rgba(240,237,232,0.10)",
   overlay20: "rgba(240,237,232,0.20)",

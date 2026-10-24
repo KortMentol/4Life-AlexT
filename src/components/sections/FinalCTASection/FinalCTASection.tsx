@@ -1,8 +1,9 @@
 /**
  * @module FinalCTASection
  * @description Awwwards 2026 — Final CTA with stats, immersive parallax, tier-aware.
- * Очищен от JSDoc комментариев про светлые темы и дублирующих селекторов dark:brightness.
- * @version 2.1.0
+ * ИСПРАВЛЕНИЯ: Интегрирован идеальный Fade to Void сверху.
+ * Удалены жесткие линии (мосты).
+ * @version 3.0.0
  */
 
 import { Button, ParallaxSection } from "@/components/ui";
@@ -31,9 +32,9 @@ const FinalCTASection: React.FC = () => {
       backgroundImage={bg5Img}
       altText="Готовы сделать первый шаг к здоровью"
       height="auto"
-      contentClasses="flex flex-col items-center justify-center text-center py-20 md:py-28"
+      contentClasses="flex flex-col items-center justify-center text-center py-32 md:py-48"
       imageBrightness="brightness-[.25]"
-      edgeFade={{ top: 160, colorDark: "#030712" }}
+      edgeFade={{ top: 250, colorDark: "#03050a" }}
     >
       <div ref={ref} className="container max-w-5xl mx-auto px-6">
         {/* Stats row */}
@@ -41,7 +42,7 @@ const FinalCTASection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="flex justify-center gap-8 md:gap-16 mb-12"
+          className="flex justify-center gap-8 md:gap-16 mb-20"
         >
           {stats.map((stat, i) => (
             <motion.div
@@ -64,17 +65,6 @@ const FinalCTASection: React.FC = () => {
             </motion.div>
           ))}
         </motion.div>
-
-        {/* Divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={isInView ? { scaleX: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="h-px w-32 mx-auto mb-12 origin-center"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.6), transparent)",
-          }}
-        />
 
         {/* Heading */}
         <motion.h2

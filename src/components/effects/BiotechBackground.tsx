@@ -1,19 +1,9 @@
 /**
  * @module components/effects/BiotechBackground
  * @description Премиальный адаптивный фон "Жидкий Металл" (Liquid Metal).
- *
- * АРХИТЕКТУРА ZERO-OVERHEAD (AWWWARDS 2026):
- * 1. Полностью удален Framer Motion, JS-вычисления и CSS-анимации.
- * 2. Фон представляет собой гигантский, математически точно рассчитанный
- *    статичный холст.
- * 3. Эффект "жизни" и глубины создается ИСКЛЮЧИТЕЛЬНО за счет скролла камеры
- *    (viewport) поверх этого холста. Карточки проплывают над запеченными
- *    световыми пятнами, создавая параллакс-иллюзию.
- * 4. Нагрузка на GPU от этого компонента при скролле = 0% (остается только
- *    базовый композитинг браузера ~9-10%).
- *
+ * Чистый фоновый слой без дублирующих масок.
  * @author Geminis AI & Kort
- * @version 9.0.0
+ * @version 10.1.0
  */
 
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
@@ -39,7 +29,7 @@ const BiotechBackground: React.FC = () => {
         className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0"
         style={{ backgroundColor: "#03050a" }}
       >
-        {/* Базовый градиент жидкого металла (Запеченный слой) */}
+        {/* Базовый градиент жидкого металла */}
         <div
           className="absolute inset-0"
           style={{
@@ -47,7 +37,7 @@ const BiotechBackground: React.FC = () => {
           }}
         />
 
-        {/* Локальные статические ноды свечения (0% нагрузки, 0ms Fill-Rate) */}
+        {/* Локальные статические ноды свечения */}
         {showGlow && (
           <div className="absolute inset-0">
             <div
@@ -73,7 +63,7 @@ const BiotechBackground: React.FC = () => {
           </div>
         )}
 
-        {/* HIGH TIER ONLY: Дополнительные акцентные блики для глубины (Статичные) */}
+        {/* HIGH TIER ONLY: Акцентные блики */}
         {isHigh && showGlow && (
           <div className="absolute inset-0">
             <div
@@ -93,7 +83,7 @@ const BiotechBackground: React.FC = () => {
           </div>
         )}
 
-        {/* Кэшированный GPU-шум в формате Base64 (Включен только на ПК) */}
+        {/* Шум */}
         {isHigh && !isTouchDevice && <div className="absolute inset-0 bg-noise-overlay" />}
 
         {/* Виньетка глубины */}
@@ -105,7 +95,7 @@ const BiotechBackground: React.FC = () => {
         />
       </div>
     );
-  }, [tier, showBackground, showGlow, isTouchDevice, isHigh]);
+  }, [showBackground, showGlow, isTouchDevice, isHigh]);
 
   return renderedContent;
 };

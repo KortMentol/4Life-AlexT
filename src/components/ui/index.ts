@@ -12,7 +12,6 @@ export { default as ProductListIcon } from "./ProductListIcon";
 export { default as SciFiCloseButton } from "./SciFiCloseButton";
 export { default as ScrollNumber } from "./ScrollNumber";
 export { default as ScrollToTopButton } from "./ScrollToTopButton";
-export { default as SectionDivider } from "./SectionDivider";
 export { default as SectionHeading } from "./SectionHeading";
 export { default as ShoppingCartAnimation, useShoppingCart } from "./ShoppingCartAnimation";
 export { default as StaticFeature } from "./StaticFeature";

@@ -1,9 +1,11 @@
 /**
  * @module components/ui/ParallaxSection
  * @description Параллакс секция — паттерн Olivier Larose.
- * Восстановлена оригинальная физика десктопного fixed-параллакса со сжатием маски.
+ * ИСПРАВЛЕНИЯ AWWWARDS PRO:
+ * Внедрен идеальный "Fade to Void" (кубическая маска градиента) для мягкого растворения
+ * фотографий в цвете Clinical Obsidian (#03050a) без ступенек и жестких срезов.
  * @author Geminis AI & Kort
- * @version 9.0.1
+ * @version 10.1.0
  */
 
 import { useFeatureFlag, usePerformanceTier } from "@/hooks";
@@ -28,7 +30,7 @@ export interface ParallaxSectionProps {
   edgeFade?: {
     top?: number;
     bottom?: number;
-    colorDark?: string;
+    colorDark?: string; // Оставляем в интерфейсе для обратной совместимости пропсов, но маска теперь хардкодится под Obsidian
   };
 }
 
@@ -76,7 +78,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
 
   const touchStrength = isParallaxEnabled ? 300 : 0;
 
-  // useParallaxLenis используется строго на мобильных тач-устройствах
   useParallaxLenis(parallaxBgRef, containerRef, {
     strength: IS_TOUCH ? touchStrength : 0,
     disabled: !IS_TOUCH || !isParallaxEnabled,
@@ -127,7 +128,17 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     WebkitClipPath: clipPath,
   };
 
-  const fadeColorDark = edgeFade?.colorDark ?? "#000000";
+  // Плавный easing-градиент для бесшовного "Fade to Void"
+  // Цвета идеально подобраны под Clinical Obsidian (#03050a)
+  const easingGradientStr = `
+    rgba(3, 5, 10, 1) 0%,
+    rgba(3, 5, 10, 0.98) 10%,
+    rgba(3, 5, 10, 0.9) 25%,
+    rgba(3, 5, 10, 0.7) 45%,
+    rgba(3, 5, 10, 0.4) 65%,
+    rgba(3, 5, 10, 0.1) 85%,
+    rgba(3, 5, 10, 0) 100%
+  `;
 
   const renderEdgeFades = () => {
     if (!edgeFade) return null;
@@ -138,7 +149,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
             className="absolute top-0 left-0 w-full pointer-events-none z-20"
             style={{
               height: `${edgeFade.top}px`,
-              background: `linear-gradient(to bottom, ${fadeColorDark}, transparent)`,
+              background: `linear-gradient(to bottom, ${easingGradientStr})`,
             }}
           />
         )}
@@ -147,7 +158,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
             className="absolute bottom-0 left-0 w-full pointer-events-none z-20"
             style={{
               height: `${edgeFade.bottom}px`,
-              background: `linear-gradient(to top, ${fadeColorDark}, transparent)`,
+              background: `linear-gradient(to top, ${easingGradientStr})`,
             }}
           />
         )}
@@ -155,7 +166,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     );
   };
 
-  // ─── TOUCH LAYOUT (Абсолютный скролл с Lerp) ───
   if (IS_TOUCH) {
     return (
       <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
@@ -210,7 +220,6 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     );
   }
 
-  // ─── DESKTOP LAYOUT (Olivier Larose Fixed Portal) ───
   return (
     <section ref={containerRef} className={`relative overflow-hidden ${height} ${blendMode}`} style={sectionStyle}>
       {renderEdgeFades()}

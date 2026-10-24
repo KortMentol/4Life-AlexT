@@ -6,13 +6,7 @@ import { Programs } from "./programs";
 import { Screenshot } from "./screenshot";
 import { Shaders } from "./shaders";
 import { Texture } from "./texture";
-import type {
-  DoubleFBO,
-  ExtraContext,
-  FBO,
-  RGBColor,
-  TextureInfo,
-} from "./types";
+import type { DoubleFBO, ExtraContext, FBO, RGBColor, TextureInfo } from "./types";
 
 class Simulation {
   public hasStarted = false;
@@ -46,11 +40,7 @@ class Simulation {
   public paused = false;
   public drawWhilePaused = false;
   private _inverted = false;
-  // Scissor rect: [x, y, width, height] в пикселях canvas (devicePixelRatio учтён)
-  // null = рендерить весь canvas (по умолчанию)
   public scissorRect: [number, number, number, number] | null = null;
-  // Bounds: [left, bottom, right, top] в UV (0–1). По умолчанию = весь canvas.
-  // Используется в advectionShader для зануления velocity/dye за пределами секции.
   public bounds: [number, number, number, number] = [0.0, 0.0, 1.0, 1.0];
   public canvas: HTMLCanvasElement;
   private gl: WebGL2RenderingContext;
@@ -108,42 +98,45 @@ class Simulation {
 
     this.programs = new Programs(this.gl, shaders);
 
-    this.displayMaterial = new Material(
-      shaders.baseVertexShader,
-      shaders.displayShaderSource,
-      this.gl,
-    );
+    this.displayMaterial = new Material(shaders.baseVertexShader, shaders.displayShaderSource, this.gl);
 
     this.update = this.update.bind(this);
   }
 
   public start() {
-    this.pointers.push(new Pointer(this.colorPalette, this.brightness));
+    if (this.pointers.length === 0) {
+      this.pointers.push(new Pointer(this.colorPalette, this.brightness));
+    }
 
     this.updateKeywords();
-    this.initFramebuffers();
 
-    this.update();
+    // ─── ОПТИМИЗАЦИЯ GPU: Выделяем FBO только если они еще не созданы ───
+    // Это предотвращает повторную синхронную аллокацию 10+ текстур при выходе из сна
+    if (!this._dye) {
+      this.initFramebuffers();
+    }
 
-    this.canvas.addEventListener("mousedown", this.handleMouseDown);
-    this.canvas.addEventListener("mousemove", this.handleMouseMove);
-    window.addEventListener("mouseup", this.handleMouseUp);
-    this.canvas.addEventListener("touchstart", this.handleTouchStart, {
-      passive: false,
-      capture: true,
-    });
-    this.canvas.addEventListener("touchmove", this.handleTouchMove, {
-      passive: false,
-      capture: true,
-    });
-    window.addEventListener("touchend", this.handleTouchEnd);
+    if (!this.hasStarted) {
+      this.update();
 
-    this.hasStarted = true;
+      this.canvas.addEventListener("mousedown", this.handleMouseDown);
+      this.canvas.addEventListener("mousemove", this.handleMouseMove);
+      window.addEventListener("mouseup", this.handleMouseUp);
+      this.canvas.addEventListener("touchstart", this.handleTouchStart, {
+        passive: false,
+        capture: true,
+      });
+      this.canvas.addEventListener("touchmove", this.handleTouchMove, {
+        passive: false,
+        capture: true,
+      });
+      window.addEventListener("touchend", this.handleTouchEnd);
+
+      this.hasStarted = true;
+    }
   }
 
   public stop() {
-    this.pointers = [];
-
     cancelAnimationFrame(this.animationFrameId);
 
     this.canvas.removeEventListener("mousedown", this.handleMouseDown);
@@ -158,16 +151,25 @@ class Simulation {
 
   public destroy() {
     this.stop();
+    this.pointers = [];
 
-    // Безопасное удаление текстур и буферов из видеокарты
-    const deleteFBO = (fbo: any) => {
+    const deleteFBO = (fbo: FBO | null | undefined) => {
       if (fbo && fbo.texture && this.gl) this.gl.deleteTexture(fbo.texture);
       if (fbo && fbo.fbo && this.gl) this.gl.deleteFramebuffer(fbo.fbo);
     };
 
-    if (this._dye) { deleteFBO(this._dye.read); deleteFBO(this._dye.write); }
-    if (this._velocity) { deleteFBO(this._velocity.read); deleteFBO(this._velocity.write); }
-    if (this._pressure) { deleteFBO(this._pressure.read); deleteFBO(this._pressure.write); }
+    if (this._dye) {
+      deleteFBO(this._dye.read);
+      deleteFBO(this._dye.write);
+    }
+    if (this._velocity) {
+      deleteFBO(this._velocity.read);
+      deleteFBO(this._velocity.write);
+    }
+    if (this._pressure) {
+      deleteFBO(this._pressure.read);
+      deleteFBO(this._pressure.write);
+    }
 
     deleteFBO(this._divergence);
     deleteFBO(this._curl);
@@ -176,9 +178,8 @@ class Simulation {
     deleteFBO(this._sunraysTemp);
     this.bloomFramebuffers.forEach(deleteFBO);
 
-    // Принудительно отключаем контекст WebGL
     if (this.gl) {
-      const extension = this.gl.getExtension('WEBGL_lose_context');
+      const extension = this.gl.getExtension("WEBGL_lose_context");
       if (extension) extension.loseContext();
     }
   }
@@ -190,14 +191,7 @@ class Simulation {
     if (!pointer) {
       pointer = new Pointer(this.colorPalette, this.brightness);
     }
-    pointer.updatePointerDownData(
-      -1,
-      posX,
-      posY,
-      this.canvas,
-      this.colorPalette,
-      this.brightness,
-    );
+    pointer.updatePointerDownData(-1, posX, posY, this.canvas, this.colorPalette, this.brightness);
   };
 
   private handleMouseMove = (event: MouseEvent) => {
@@ -212,44 +206,47 @@ class Simulation {
 
   private handleMouseUp = () => {
     if (!this.hover) {
-      this.pointers[0]!.updatePointerUpData();
+      const p = this.pointers[0];
+      if (p) p.updatePointerUpData();
     }
   };
 
   private handleTouchStart = (event: TouchEvent) => {
     const touches = event.targetTouches;
-    while (touches.length >= this.pointers.length)
+    while (touches.length >= this.pointers.length) {
       this.pointers.push(new Pointer(this.colorPalette, this.brightness));
+    }
     for (let i = 0; i < touches.length; i++) {
-      const posX = this.scaleByPixelRatio(touches[i]!.pageX);
-      const posY = this.scaleByPixelRatio(touches[i]!.pageY);
-      this.pointers[i + 1]!.updatePointerDownData(
-        touches[i]!.identifier,
-        posX,
-        posY,
-        this.canvas,
-        this.colorPalette,
-        this.brightness,
-      );
+      const touch = touches[i];
+      if (!touch) continue;
+      const posX = this.scaleByPixelRatio(touch.pageX);
+      const posY = this.scaleByPixelRatio(touch.pageY);
+      const p = this.pointers[i + 1];
+      if (p) {
+        p.updatePointerDownData(touch.identifier, posX, posY, this.canvas, this.colorPalette, this.brightness);
+      }
     }
   };
 
   private handleTouchMove = (event: TouchEvent) => {
     const touches = event.targetTouches;
     for (let i = 0; i < touches.length; i++) {
-      const pointer = this.pointers[i + 1]!;
-      const posX = this.scaleByPixelRatio(touches[i]!.pageX);
-      const posY = this.scaleByPixelRatio(touches[i]!.pageY);
+      const touch = touches[i];
+      if (!touch) continue;
+      const pointer = this.pointers[i + 1];
+      if (!pointer) continue;
+      const posX = this.scaleByPixelRatio(touch.pageX);
+      const posY = this.scaleByPixelRatio(touch.pageY);
       pointer.updatePointerMoveData(posX, posY, this.canvas, this.hover);
     }
   };
 
   private handleTouchEnd = (event: TouchEvent) => {
     const touches = event.changedTouches;
-    for (const touch of touches) {
-      const pointer = this.pointers.find(
-        (pointer) => pointer.id === touch.identifier,
-      );
+    for (let i = 0; i < touches.length; i++) {
+      const touch = touches[i];
+      if (!touch) continue;
+      const pointer = this.pointers.find((p) => p.id === touch.identifier);
       if (!pointer) continue;
       pointer.updatePointerUpData();
     }
@@ -263,7 +260,7 @@ class Simulation {
   private resizeCanvas(): boolean {
     const width = this.scaleByPixelRatio(this.canvas.clientWidth);
     const height = this.scaleByPixelRatio(this.canvas.clientHeight);
-    if (this.canvas.width != width || this.canvas.height != height) {
+    if (this.canvas.width !== width || this.canvas.height !== height) {
       this.canvas.width = width;
       this.canvas.height = height;
       return true;
@@ -283,30 +280,14 @@ class Simulation {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      internalFormat,
-      4,
-      4,
-      0,
-      format,
-      type,
-      null,
-    );
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, 4, 4, 0, format, type, null);
 
     const fbo = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      texture,
-      0,
-    );
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
     const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    return status == gl.FRAMEBUFFER_COMPLETE;
+    return status === gl.FRAMEBUFFER_COMPLETE;
   }
 
   private getSupportedFormat(
@@ -346,67 +327,33 @@ class Simulation {
     if (!isWebGL2)
       gl =
         (this.canvas.getContext("webgl", params) as WebGL2RenderingContext) ??
-        (this.canvas.getContext(
-          "experimental-webgl",
-          params,
-        ) as WebGLRenderingContext);
+        (this.canvas.getContext("experimental-webgl", params) as WebGLRenderingContext);
 
-    let halfFloat;
-    let supportLinearFiltering;
+    let halfFloat: OES_texture_half_float | null = null;
+    let supportLinearFiltering: OES_texture_float_linear | null = null;
     if (isWebGL2) {
       gl.getExtension("EXT_color_buffer_float");
-      supportLinearFiltering = gl.getExtension("OES_texture_float_linear")!;
+      supportLinearFiltering = gl.getExtension("OES_texture_float_linear");
     } else {
       halfFloat = gl.getExtension("OES_texture_half_float");
-      supportLinearFiltering = gl.getExtension(
-        "OES_texture_half_float_linear",
-      )!;
+      supportLinearFiltering = gl.getExtension("OES_texture_half_float_linear");
     }
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-    const halfFloatTexType = isWebGL2
-      ? gl.HALF_FLOAT
-      : halfFloat
-        ? halfFloat.HALF_FLOAT_OES
-        : 0;
+    const halfFloatTexType = isWebGL2 ? gl.HALF_FLOAT : halfFloat ? halfFloat.HALF_FLOAT_OES : 0;
     let formatRGBA;
     let formatRG;
     let formatR;
 
     if (isWebGL2) {
-      formatRGBA = this.getSupportedFormat(
-        gl,
-        gl.RGBA16F,
-        gl.RGBA,
-        halfFloatTexType,
-      )!;
-      formatRG = this.getSupportedFormat(
-        gl,
-        gl.RG16F,
-        gl.RG,
-        halfFloatTexType,
-      )!;
+      formatRGBA = this.getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, halfFloatTexType)!;
+      formatRG = this.getSupportedFormat(gl, gl.RG16F, gl.RG, halfFloatTexType)!;
       formatR = this.getSupportedFormat(gl, gl.R16F, gl.RED, halfFloatTexType)!;
     } else {
-      formatRGBA = this.getSupportedFormat(
-        gl,
-        gl.RGBA,
-        gl.RGBA,
-        halfFloatTexType,
-      )!;
-      formatRG = this.getSupportedFormat(
-        gl,
-        gl.RGBA,
-        gl.RGBA,
-        halfFloatTexType,
-      )!;
-      formatR = this.getSupportedFormat(
-        gl,
-        gl.RGBA,
-        gl.RGBA,
-        halfFloatTexType,
-      )!;
+      formatRGBA = this.getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType)!;
+      formatRG = this.getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType)!;
+      formatR = this.getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType)!;
     }
 
     return {
@@ -416,7 +363,7 @@ class Simulation {
         formatRG,
         formatR,
         halfFloatTexType,
-        supportLinearFiltering,
+        supportLinearFiltering: supportLinearFiltering as OES_texture_float_linear,
       },
     };
   }
@@ -441,9 +388,7 @@ class Simulation {
     const rgba = this.ext.formatRGBA;
     const rg = this.ext.formatRG;
     const r = this.ext.formatR;
-    const filtering = this.ext.supportLinearFiltering
-      ? this.gl.LINEAR
-      : this.gl.NEAREST;
+    const filtering = this.ext.supportLinearFiltering ? this.gl.LINEAR : this.gl.NEAREST;
 
     this.gl.disable(this.gl.BLEND);
 
@@ -495,14 +440,7 @@ class Simulation {
       texType,
       this.gl.NEAREST,
     );
-    this._curl = this.createFBO(
-      simRes.width,
-      simRes.height,
-      r.internalFormat,
-      r.format,
-      texType,
-      this.gl.NEAREST,
-    );
+    this._curl = this.createFBO(simRes.width, simRes.height, r.internalFormat, r.format, texType, this.gl.NEAREST);
     this._pressure = this.createDoubleFBO(
       simRes.width,
       simRes.height,
@@ -528,8 +466,7 @@ class Simulation {
     const min = Math.round(resolution);
     const max = Math.round(resolution * aspectRatio);
 
-    if (this.gl.drawingBufferWidth > this.gl.drawingBufferHeight)
-      return { width: max, height: min };
+    if (this.gl.drawingBufferWidth > this.gl.drawingBufferHeight) return { width: max, height: min };
     else return { width: min, height: max };
   }
 
@@ -580,10 +517,7 @@ class Simulation {
   ): FBO {
     const newFBO = this.createFBO(w, h, internalFormat, format, type, param);
     this.programs.copyProgram.bind();
-    this.gl.uniform1i(
-      this.programs.copyProgram.uniforms.uTexture!,
-      target.attach(0),
-    );
+    this.gl.uniform1i(this.programs.copyProgram.uniforms["uTexture"]!, target.attach(0));
     this.blit(newFBO);
     return newFBO;
   }
@@ -598,15 +532,7 @@ class Simulation {
     param: number,
   ): DoubleFBO {
     if (target.width === w && target.height === h) return target;
-    target.read = this.resizeFBO(
-      target.read,
-      w,
-      h,
-      internalFormat,
-      format,
-      type,
-      param,
-    );
+    target.read = this.resizeFBO(target.read, w, h, internalFormat, format, type, param);
     target.write = this.createFBO(w, h, internalFormat, format, type, param);
     target.width = w;
     target.height = h;
@@ -615,58 +541,19 @@ class Simulation {
     return target;
   }
 
-  private createFBO(
-    w: number,
-    h: number,
-    internalFormat: number,
-    format: number,
-    type: number,
-    param: number,
-  ): FBO {
+  private createFBO(w: number, h: number, internalFormat: number, format: number, type: number, param: number): FBO {
     this.gl.activeTexture(this.gl.TEXTURE0);
     const texture = this.gl.createTexture();
     this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    this.gl.texParameteri(
-      this.gl.TEXTURE_2D,
-      this.gl.TEXTURE_MIN_FILTER,
-      param,
-    );
-    this.gl.texParameteri(
-      this.gl.TEXTURE_2D,
-      this.gl.TEXTURE_MAG_FILTER,
-      param,
-    );
-    this.gl.texParameteri(
-      this.gl.TEXTURE_2D,
-      this.gl.TEXTURE_WRAP_S,
-      this.gl.CLAMP_TO_EDGE,
-    );
-    this.gl.texParameteri(
-      this.gl.TEXTURE_2D,
-      this.gl.TEXTURE_WRAP_T,
-      this.gl.CLAMP_TO_EDGE,
-    );
-    this.gl.texImage2D(
-      this.gl.TEXTURE_2D,
-      0,
-      internalFormat,
-      w,
-      h,
-      0,
-      format,
-      type,
-      null,
-    );
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, param);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, param);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, null);
 
     const fbo: WebGLFramebuffer | null = this.gl.createFramebuffer();
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo);
-    this.gl.framebufferTexture2D(
-      this.gl.FRAMEBUFFER,
-      this.gl.COLOR_ATTACHMENT0,
-      this.gl.TEXTURE_2D,
-      texture,
-      0,
-    );
+    this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, texture, 0);
     this.gl.viewport(0, 0, w, h);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
@@ -694,18 +581,9 @@ class Simulation {
 
     const texType = this.ext.halfFloatTexType;
     const rgba = this.ext.formatRGBA;
-    const filtering = this.ext.supportLinearFiltering
-      ? this.gl.LINEAR
-      : this.gl.NEAREST;
+    const filtering = this.ext.supportLinearFiltering ? this.gl.LINEAR : this.gl.NEAREST;
 
-    this._bloom = this.createFBO(
-      res.width,
-      res.height,
-      rgba.internalFormat,
-      rgba.format,
-      texType,
-      filtering,
-    );
+    this._bloom = this.createFBO(res.width, res.height, rgba.internalFormat, rgba.format, texType, filtering);
 
     this.bloomFramebuffers.length = 0;
     for (let i = 0; i < this.bloomIterations; i++) {
@@ -714,14 +592,7 @@ class Simulation {
 
       if (width < 2 || height < 2) break;
 
-      const fbo = this.createFBO(
-        width,
-        height,
-        rgba.internalFormat,
-        rgba.format,
-        texType,
-        filtering,
-      );
+      const fbo = this.createFBO(width, height, rgba.internalFormat, rgba.format, texType, filtering);
       this.bloomFramebuffers.push(fbo);
     }
   }
@@ -731,67 +602,31 @@ class Simulation {
 
     const texType = this.ext.halfFloatTexType;
     const r = this.ext.formatR;
-    const filtering = this.ext.supportLinearFiltering
-      ? this.gl.LINEAR
-      : this.gl.NEAREST;
+    const filtering = this.ext.supportLinearFiltering ? this.gl.LINEAR : this.gl.NEAREST;
 
-    this._sunrays = this.createFBO(
-      res.width,
-      res.height,
-      r.internalFormat,
-      r.format,
-      texType,
-      filtering,
-    );
-    this._sunraysTemp = this.createFBO(
-      res.width,
-      res.height,
-      r.internalFormat,
-      r.format,
-      texType,
-      filtering,
-    );
+    this._sunrays = this.createFBO(res.width, res.height, r.internalFormat, r.format, texType, filtering);
+    this._sunraysTemp = this.createFBO(res.width, res.height, r.internalFormat, r.format, texType, filtering);
   }
 
   private blitInit() {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.createBuffer());
-    this.gl.bufferData(
-      this.gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]),
-      this.gl.STATIC_DRAW,
-    );
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), this.gl.STATIC_DRAW);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.gl.createBuffer());
-    this.gl.bufferData(
-      this.gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array([0, 1, 2, 0, 2, 3]),
-      this.gl.STATIC_DRAW,
-    );
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), this.gl.STATIC_DRAW);
     this.gl.vertexAttribPointer(0, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(0);
   }
 
   private blit(target: FBO | null, clear = false) {
     if (target === null) {
-      this.gl.viewport(
-        0,
-        0,
-        this.gl.drawingBufferWidth,
-        this.gl.drawingBufferHeight,
-      );
+      this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
       this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
       if (this.scissorRect) {
-        // Шаг 1: очищаем весь canvas прозрачным (без scissor)
         this.gl.disable(this.gl.SCISSOR_TEST);
         this.gl.clearColor(0.0, 0.0, 0.0, 0.0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        // Шаг 2: рендерим только внутри границ секции
         this.gl.enable(this.gl.SCISSOR_TEST);
-        this.gl.scissor(
-          this.scissorRect[0],
-          this.scissorRect[1],
-          this.scissorRect[2],
-          this.scissorRect[3],
-        );
+        this.gl.scissor(this.scissorRect[0], this.scissorRect[1], this.scissorRect[2], this.scissorRect[3]);
       } else {
         this.gl.disable(this.gl.SCISSOR_TEST);
       }
@@ -823,33 +658,16 @@ class Simulation {
 
   public splat(x: number, y: number, dx: number, dy: number, color: RGBColor) {
     this.programs.splatProgram.bind();
-    this.gl.uniform1i(
-      this.programs.splatProgram.uniforms.uTarget!,
-      this._velocity.read.attach(0),
-    );
-    this.gl.uniform1f(
-      this.programs.splatProgram.uniforms.aspectRatio!,
-      this.canvas.width / this.canvas.height,
-    );
-    this.gl.uniform2f(this.programs.splatProgram.uniforms.point!, x, y);
-    this.gl.uniform3f(this.programs.splatProgram.uniforms.color!, dx, dy, 0.0);
-    this.gl.uniform1f(
-      this.programs.splatProgram.uniforms.radius!,
-      this.correctRadius(this.splatRadius / 100.0),
-    );
+    this.gl.uniform1i(this.programs.splatProgram.uniforms["uTarget"]!, this._velocity.read.attach(0));
+    this.gl.uniform1f(this.programs.splatProgram.uniforms["aspectRatio"]!, this.canvas.width / this.canvas.height);
+    this.gl.uniform2f(this.programs.splatProgram.uniforms["point"]!, x, y);
+    this.gl.uniform3f(this.programs.splatProgram.uniforms["color"]!, dx, dy, 0.0);
+    this.gl.uniform1f(this.programs.splatProgram.uniforms["radius"]!, this.correctRadius(this.splatRadius / 100.0));
     this.blit(this._velocity.write);
     this._velocity.swap();
 
-    this.gl.uniform1i(
-      this.programs.splatProgram.uniforms.uTarget!,
-      this._dye.read.attach(0),
-    );
-    this.gl.uniform3f(
-      this.programs.splatProgram.uniforms.color!,
-      color.r,
-      color.g,
-      color.b,
-    );
+    this.gl.uniform1i(this.programs.splatProgram.uniforms["uTarget"]!, this._dye.read.attach(0));
+    this.gl.uniform3f(this.programs.splatProgram.uniforms["color"]!, color.r, color.g, color.b);
     this.blit(this._dye.write);
     this._dye.swap();
   }
@@ -872,8 +690,6 @@ class Simulation {
     if (!this.paused) this.step(dt);
 
     this.render(null);
-
-    // This is bound in the constructor, so it's safe to call here
 
     this.animationFrameId = requestAnimationFrame(this.update);
   }
@@ -900,13 +716,14 @@ class Simulation {
 
   private wrap(value: number, min: number, max: number): number {
     const range: number = max - min;
-    if (range == 0) return min;
+    if (range === 0) return min;
     return ((value - min) % range) + min;
   }
 
   private applyInputs() {
     if (this.splatStack.length > 0) {
-      this.multipleSplats(this.splatStack.pop()!);
+      const count = this.splatStack.pop();
+      if (count !== undefined) this.multipleSplats(count);
     }
     this.pointers.forEach((p) => {
       if (p.moved) {
@@ -928,124 +745,84 @@ class Simulation {
 
     this.programs.curlProgram.bind();
     this.gl.uniform2f(
-      this.programs.curlProgram.uniforms.texelSize!,
+      this.programs.curlProgram.uniforms["texelSize"]!,
       this._velocity.texelSizeX,
       this._velocity.texelSizeY,
     );
-    this.gl.uniform1i(
-      this.programs.curlProgram.uniforms.uVelocity!,
-      this._velocity.read.attach(0),
-    );
+    this.gl.uniform1i(this.programs.curlProgram.uniforms["uVelocity"]!, this._velocity.read.attach(0));
     this.blit(this._curl);
 
     this.programs.vorticityProgram.bind();
     this.gl.uniform2f(
-      this.programs.vorticityProgram.uniforms.texelSize!,
+      this.programs.vorticityProgram.uniforms["texelSize"]!,
       this._velocity.texelSizeX,
       this._velocity.texelSizeY,
     );
-    this.gl.uniform1i(
-      this.programs.vorticityProgram.uniforms.uVelocity!,
-      this._velocity.read.attach(0),
-    );
-    this.gl.uniform1i(
-      this.programs.vorticityProgram.uniforms.uCurl!,
-      this._curl.attach(1),
-    );
-    this.gl.uniform1f(this.programs.vorticityProgram.uniforms.curl!, this.curl);
-    this.gl.uniform1f(this.programs.vorticityProgram.uniforms.dt!, dt);
+    this.gl.uniform1i(this.programs.vorticityProgram.uniforms["uVelocity"]!, this._velocity.read.attach(0));
+    this.gl.uniform1i(this.programs.vorticityProgram.uniforms["uCurl"]!, this._curl.attach(1));
+    this.gl.uniform1f(this.programs.vorticityProgram.uniforms["curl"]!, this.curl);
+    this.gl.uniform1f(this.programs.vorticityProgram.uniforms["dt"]!, dt);
     this.blit(this._velocity.write);
     this._velocity.swap();
 
     this.programs.divergenceProgram.bind();
     this.gl.uniform2f(
-      this.programs.divergenceProgram.uniforms.texelSize!,
+      this.programs.divergenceProgram.uniforms["texelSize"]!,
       this._velocity.texelSizeX,
       this._velocity.texelSizeY,
     );
-    this.gl.uniform1i(
-      this.programs.divergenceProgram.uniforms.uVelocity!,
-      this._velocity.read.attach(0),
-    );
+    this.gl.uniform1i(this.programs.divergenceProgram.uniforms["uVelocity"]!, this._velocity.read.attach(0));
     this.blit(this._divergence);
 
     this.programs.clearProgram.bind();
-    this.gl.uniform1i(
-      this.programs.clearProgram.uniforms.uTexture!,
-      this._pressure.read.attach(0),
-    );
-    this.gl.uniform1f(
-      this.programs.clearProgram.uniforms.value!,
-      this.pressure,
-    );
+    this.gl.uniform1i(this.programs.clearProgram.uniforms["uTexture"]!, this._pressure.read.attach(0));
+    this.gl.uniform1f(this.programs.clearProgram.uniforms["value"]!, this.pressure);
     this.blit(this._pressure.write);
     this._pressure.swap();
 
     this.programs.pressureProgram.bind();
     this.gl.uniform2f(
-      this.programs.pressureProgram.uniforms.texelSize!,
+      this.programs.pressureProgram.uniforms["texelSize"]!,
       this._velocity.texelSizeX,
       this._velocity.texelSizeY,
     );
-    this.gl.uniform1i(
-      this.programs.pressureProgram.uniforms.uDivergence!,
-      this._divergence.attach(0),
-    );
+    this.gl.uniform1i(this.programs.pressureProgram.uniforms["uDivergence"]!, this._divergence.attach(0));
     for (let i = 0; i < this.pressureIterations; i++) {
-      this.gl.uniform1i(
-        this.programs.pressureProgram.uniforms.uPressure!,
-        this._pressure.read.attach(1),
-      );
+      this.gl.uniform1i(this.programs.pressureProgram.uniforms["uPressure"]!, this._pressure.read.attach(1));
       this.blit(this._pressure.write);
       this._pressure.swap();
     }
 
     this.programs.gradienSubtractProgram.bind();
     this.gl.uniform2f(
-      this.programs.gradienSubtractProgram.uniforms.texelSize!,
+      this.programs.gradienSubtractProgram.uniforms["texelSize"]!,
       this._velocity.texelSizeX,
       this._velocity.texelSizeY,
     );
-    this.gl.uniform1i(
-      this.programs.gradienSubtractProgram.uniforms.uPressure!,
-      this._pressure.read.attach(0),
-    );
-    this.gl.uniform1i(
-      this.programs.gradienSubtractProgram.uniforms.uVelocity!,
-      this._velocity.read.attach(1),
-    );
+    this.gl.uniform1i(this.programs.gradienSubtractProgram.uniforms["uPressure"]!, this._pressure.read.attach(0));
+    this.gl.uniform1i(this.programs.gradienSubtractProgram.uniforms["uVelocity"]!, this._velocity.read.attach(1));
     this.blit(this._velocity.write);
     this._velocity.swap();
 
     this.programs.advectionProgram.bind();
     this.gl.uniform2f(
-      this.programs.advectionProgram.uniforms.texelSize!,
+      this.programs.advectionProgram.uniforms["texelSize"]!,
       this._velocity.texelSizeX,
       this._velocity.texelSizeY,
     );
     if (!this.ext.supportLinearFiltering)
       this.gl.uniform2f(
-        this.programs.advectionProgram.uniforms.dyeTexelSize!,
+        this.programs.advectionProgram.uniforms["dyeTexelSize"]!,
         this._velocity.texelSizeX,
         this._velocity.texelSizeY,
       );
     const velocityId = this._velocity.read.attach(0);
-    this.gl.uniform1i(
-      this.programs.advectionProgram.uniforms.uVelocity!,
-      velocityId,
-    );
-    this.gl.uniform1i(
-      this.programs.advectionProgram.uniforms.uSource!,
-      velocityId,
-    );
-    this.gl.uniform1f(this.programs.advectionProgram.uniforms.dt!, dt);
-    this.gl.uniform1f(
-      this.programs.advectionProgram.uniforms.dissipation!,
-      this.velocityDissipation,
-    );
-    // uBounds: зануляем velocity за пределами bounds → нет давления в мёртвой зоне → нет кипения
+    this.gl.uniform1i(this.programs.advectionProgram.uniforms["uVelocity"]!, velocityId);
+    this.gl.uniform1i(this.programs.advectionProgram.uniforms["uSource"]!, velocityId);
+    this.gl.uniform1f(this.programs.advectionProgram.uniforms["dt"]!, dt);
+    this.gl.uniform1f(this.programs.advectionProgram.uniforms["dissipation"]!, this.velocityDissipation);
     this.gl.uniform4f(
-      this.programs.advectionProgram.uniforms.uBounds!,
+      this.programs.advectionProgram.uniforms["uBounds"]!,
       this.bounds[0],
       this.bounds[1],
       this.bounds[2],
@@ -1056,25 +833,15 @@ class Simulation {
 
     if (!this.ext.supportLinearFiltering)
       this.gl.uniform2f(
-        this.programs.advectionProgram.uniforms.dyeTexelSize!,
+        this.programs.advectionProgram.uniforms["dyeTexelSize"]!,
         this._dye.texelSizeX,
         this._dye.texelSizeY,
       );
-    this.gl.uniform1i(
-      this.programs.advectionProgram.uniforms.uVelocity!,
-      this._velocity.read.attach(0),
-    );
-    this.gl.uniform1i(
-      this.programs.advectionProgram.uniforms.uSource!,
-      this._dye.read.attach(1),
-    );
-    this.gl.uniform1f(
-      this.programs.advectionProgram.uniforms.dissipation!,
-      this.densityDissipation,
-    );
-    // uBounds для dye тоже — зануляем краску за пределами секции
+    this.gl.uniform1i(this.programs.advectionProgram.uniforms["uVelocity"]!, this._velocity.read.attach(0));
+    this.gl.uniform1i(this.programs.advectionProgram.uniforms["uSource"]!, this._dye.read.attach(1));
+    this.gl.uniform1f(this.programs.advectionProgram.uniforms["dissipation"]!, this.densityDissipation);
     this.gl.uniform4f(
-      this.programs.advectionProgram.uniforms.uBounds!,
+      this.programs.advectionProgram.uniforms["uBounds"]!,
       this.bounds[0],
       this.bounds[1],
       this.bounds[2],
@@ -1098,67 +865,30 @@ class Simulation {
       this.gl.disable(this.gl.BLEND);
     }
 
-    if (!this.transparent)
-      this.drawColor(
-        target,
-        Color.normalizeColor(Color.HEXtoRGB(this.backgroundColor)),
-      );
+    if (!this.transparent) this.drawColor(target, Color.normalizeColor(Color.HEXtoRGB(this.backgroundColor)));
     this.drawDisplay(target);
   }
 
   private drawColor(target: FBO | null, color: RGBColor) {
     this.programs.colorProgram.bind();
-    this.gl.uniform4f(
-      this.programs.colorProgram.uniforms.color!,
-      color.r,
-      color.g,
-      color.b,
-      1,
-    );
+    this.gl.uniform4f(this.programs.colorProgram.uniforms["color"]!, color.r, color.g, color.b, 1);
     this.blit(target);
   }
 
   private drawDisplay(target: FBO | null) {
     const width = target === null ? this.gl.drawingBufferWidth : target.width;
-    const height =
-      target === null ? this.gl.drawingBufferHeight : target.height;
+    const height = target === null ? this.gl.drawingBufferHeight : target.height;
 
     this.displayMaterial.bind();
-    if (this.shading)
-      this.gl.uniform2f(
-        this.displayMaterial.uniforms.texelSize!,
-        1.0 / width,
-        1.0 / height,
-      );
-    this.gl.uniform1i(
-      this.displayMaterial.uniforms.uTexture!,
-      this._dye.read.attach(0),
-    );
+    if (this.shading) this.gl.uniform2f(this.displayMaterial.uniforms["texelSize"]!, 1.0 / width, 1.0 / height);
+    this.gl.uniform1i(this.displayMaterial.uniforms["uTexture"]!, this._dye.read.attach(0));
     if (this.bloom) {
-      this.gl.uniform1i(
-        this.displayMaterial.uniforms.uBloom!,
-        this._bloom.attach(1),
-      );
-      this.gl.uniform1i(
-        this.displayMaterial.uniforms.uDithering!,
-        this.ditheringTexture.attach(2),
-      );
-      const scale = Texture.getTextureScale(
-        this.ditheringTexture,
-        width,
-        height,
-      );
-      this.gl.uniform2f(
-        this.displayMaterial.uniforms.ditherScale!,
-        scale.x,
-        scale.y,
-      );
+      this.gl.uniform1i(this.displayMaterial.uniforms["uBloom"]!, this._bloom.attach(1));
+      this.gl.uniform1i(this.displayMaterial.uniforms["uDithering"]!, this.ditheringTexture.attach(2));
+      const scale = Texture.getTextureScale(this.ditheringTexture, width, height);
+      this.gl.uniform2f(this.displayMaterial.uniforms["ditherScale"]!, scale.x, scale.y);
     }
-    if (this.sunrays)
-      this.gl.uniform1i(
-        this.displayMaterial.uniforms.uSunrays!,
-        this._sunrays.attach(3),
-      );
+    if (this.sunrays) this.gl.uniform1i(this.displayMaterial.uniforms["uSunrays"]!, this._sunrays.attach(3));
     this.blit(target);
   }
 
@@ -1173,34 +903,16 @@ class Simulation {
     const curve0 = this.bloomThreshold - knee;
     const curve1 = knee * 2;
     const curve2 = 0.25 / knee;
-    this.gl.uniform3f(
-      this.programs.bloomPrefilterProgram.uniforms.curve!,
-      curve0,
-      curve1,
-      curve2,
-    );
-    this.gl.uniform1f(
-      this.programs.bloomPrefilterProgram.uniforms.threshold!,
-      this.bloomThreshold,
-    );
-    this.gl.uniform1i(
-      this.programs.bloomPrefilterProgram.uniforms.uTexture!,
-      source.attach(0),
-    );
+    this.gl.uniform3f(this.programs.bloomPrefilterProgram.uniforms["curve"]!, curve0, curve1, curve2);
+    this.gl.uniform1f(this.programs.bloomPrefilterProgram.uniforms["threshold"]!, this.bloomThreshold);
+    this.gl.uniform1i(this.programs.bloomPrefilterProgram.uniforms["uTexture"]!, source.attach(0));
     this.blit(last);
 
     this.programs.bloomBlurProgram.bind();
     for (const dest of this.bloomFramebuffers) {
       if (!dest) continue;
-      this.gl.uniform2f(
-        this.programs.bloomBlurProgram.uniforms.texelSize!,
-        last.texelSizeX,
-        last.texelSizeY,
-      );
-      this.gl.uniform1i(
-        this.programs.bloomBlurProgram.uniforms.uTexture!,
-        last.attach(0),
-      );
+      this.gl.uniform2f(this.programs.bloomBlurProgram.uniforms["texelSize"]!, last.texelSizeX, last.texelSizeY);
+      this.gl.uniform1i(this.programs.bloomBlurProgram.uniforms["uTexture"]!, last.attach(0));
       this.blit(dest);
       last = dest;
     }
@@ -1210,15 +922,8 @@ class Simulation {
 
     for (let i = this.bloomFramebuffers.length - 2; i >= 0; i--) {
       const baseTex = this.bloomFramebuffers[i]!;
-      this.gl.uniform2f(
-        this.programs.bloomBlurProgram.uniforms.texelSize!,
-        last.texelSizeX,
-        last.texelSizeY,
-      );
-      this.gl.uniform1i(
-        this.programs.bloomBlurProgram.uniforms.uTexture!,
-        last.attach(0),
-      );
+      this.gl.uniform2f(this.programs.bloomBlurProgram.uniforms["texelSize"]!, last.texelSizeX, last.texelSizeY);
+      this.gl.uniform1i(this.programs.bloomBlurProgram.uniforms["uTexture"]!, last.attach(0));
       this.gl.viewport(0, 0, baseTex.width, baseTex.height);
       this.blit(baseTex);
       last = baseTex;
@@ -1226,67 +931,34 @@ class Simulation {
 
     this.gl.disable(this.gl.BLEND);
     this.programs.bloomFinalProgram.bind();
-    this.gl.uniform2f(
-      this.programs.bloomFinalProgram.uniforms.texelSize!,
-      last.texelSizeX,
-      last.texelSizeY,
-    );
-    this.gl.uniform1i(
-      this.programs.bloomFinalProgram.uniforms.uTexture!,
-      last.attach(0),
-    );
+    this.gl.uniform2f(this.programs.bloomFinalProgram.uniforms["texelSize"]!, last.texelSizeX, last.texelSizeY);
+    this.gl.uniform1i(this.programs.bloomFinalProgram.uniforms["uTexture"]!, last.attach(0));
 
-    this.gl.uniform1f(
-      this.programs.bloomFinalProgram.uniforms.intensity!,
-      this.bloomIntensity,
-    );
+    this.gl.uniform1f(this.programs.bloomFinalProgram.uniforms["intensity"]!, this.bloomIntensity);
     this.blit(destination);
   }
 
   private applySunrays(source: FBO, mask: FBO, destination: FBO) {
     this.gl.disable(this.gl.BLEND);
     this.programs.sunraysMaskProgram.bind();
-    this.gl.uniform1i(
-      this.programs.sunraysMaskProgram.uniforms.uTexture!,
-      source.attach(0),
-    );
+    this.gl.uniform1i(this.programs.sunraysMaskProgram.uniforms["uTexture"]!, source.attach(0));
     this.blit(mask);
 
     this.programs.sunraysProgram.bind();
-    this.gl.uniform1f(
-      this.programs.sunraysProgram.uniforms.weight!,
-      this.sunraysWeight,
-    );
-    this.gl.uniform1i(
-      this.programs.sunraysProgram.uniforms.uTexture!,
-      mask.attach(0),
-    );
+    this.gl.uniform1f(this.programs.sunraysProgram.uniforms["weight"]!, this.sunraysWeight);
+    this.gl.uniform1i(this.programs.sunraysProgram.uniforms["uTexture"]!, mask.attach(0));
     this.blit(destination);
   }
 
   private blur(target: FBO, temp: FBO, iterations: number) {
     this.programs.blurProgram.bind();
     for (let i = 0; i < iterations; i++) {
-      this.gl.uniform2f(
-        this.programs.blurProgram.uniforms.texelSize!,
-        target.texelSizeX,
-        0.0,
-      );
-      this.gl.uniform1i(
-        this.programs.blurProgram.uniforms.uTexture!,
-        target.attach(0),
-      );
+      this.gl.uniform2f(this.programs.blurProgram.uniforms["texelSize"]!, target.texelSizeX, 0.0);
+      this.gl.uniform1i(this.programs.blurProgram.uniforms["uTexture"]!, target.attach(0));
       this.blit(temp);
 
-      this.gl.uniform2f(
-        this.programs.blurProgram.uniforms.texelSize!,
-        0.0,
-        target.texelSizeY,
-      );
-      this.gl.uniform1i(
-        this.programs.blurProgram.uniforms.uTexture!,
-        temp.attach(0),
-      );
+      this.gl.uniform2f(this.programs.blurProgram.uniforms["texelSize"]!, 0.0, target.texelSizeY);
+      this.gl.uniform1i(this.programs.blurProgram.uniforms["uTexture"]!, temp.attach(0));
       this.blit(target);
     }
   }
@@ -1304,17 +976,9 @@ class Simulation {
     this.render(target);
 
     const texture = Screenshot.framebufferToTexture(target, this.gl);
-    const normalizedTexture = Screenshot.normalizeTexture(
-      texture,
-      target.width,
-      target.height,
-    );
+    const normalizedTexture = Screenshot.normalizeTexture(texture, target.width, target.height);
 
-    const captureCanvas = Screenshot.textureToCanvas(
-      normalizedTexture,
-      target.width,
-      target.height,
-    );
+    const captureCanvas = Screenshot.textureToCanvas(normalizedTexture, target.width, target.height);
 
     if (this.inverted) {
       Screenshot.invertImageColors(captureCanvas);
@@ -1333,32 +997,16 @@ class Simulation {
     this.canvas.style.filter = value ? "invert(1)" : "none";
   }
 
-  /**
-   * Ограничивает рендер прямоугольником секции через WebGL scissor test.
-   * Физика симулируется на весь canvas — стенки viewport, без кипения.
-   * Только финальный рендер на экран обрезается по границам секции.
-   */
   public setScissor(x: number, y: number, width: number, height: number): void {
     const dpr = window.devicePixelRatio || 1;
-    this.scissorRect = [
-      Math.round(x * dpr),
-      Math.round(y * dpr),
-      Math.round(width * dpr),
-      Math.round(height * dpr),
-    ];
+    this.scissorRect = [Math.round(x * dpr), Math.round(y * dpr), Math.round(width * dpr), Math.round(height * dpr)];
   }
 
   public clearScissor(): void {
     this.scissorRect = null;
   }
 
-  /** Устанавливает bounds симуляции в UV (0–1). Зануляет velocity/dye за пределами. */
-  public setBounds(
-    left: number,
-    bottom: number,
-    right: number,
-    top: number,
-  ): void {
+  public setBounds(left: number, bottom: number, right: number, top: number): void {
     this.bounds[0] = left;
     this.bounds[1] = bottom;
     this.bounds[2] = right;

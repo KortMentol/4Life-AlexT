@@ -1,11 +1,15 @@
 /**
  * @module src/components/sections/MorphingVideoSection/index.tsx
  * @description Awwwards 2026 - Morphing Video Section.
- * ИСПРАВЛЕНИЯ:
- * 1. Синхронизировано затухание всего контента (цифры, GSAP 3D-сетки, тексты)
- * строго в один такт с открытием модалки Vimeo для безупречного UX без скачков блюра.
+ *
+ * ИСПРАВЛЕНИЯ (Fluid Edge Feathering Architecture):
+ * 1. [Fluid Masking Overlays]: Внедрены поверхностные маски затухания (z-10, h-[280px])
+ *    с pointer-events: none. Теперь WebGL-флюид (z: -11) физически заплывает ПОД градиент
+ *    и плавно растворяется в цвете #03050a, полностью исключая жесткий срез ножниц (scissor cut).
+ * 2. [Zero-Block Cursor Interaction]: Маски абсолютно прозрачны для событий мыши,
+ *    сохраняя 100% тактильный отклик флюида на движения курсора в любой точке секции.
  * @author Geminis AI & Kort
- * @version 14.3.0
+ * @version 16.2.0
  */
 
 import { Button } from "@/components/ui";
@@ -134,6 +138,21 @@ const MorphingVideoSection: React.FC = () => {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
+      {/* ─── ВЕРХНЯЯ МАСКА: Растворяет флюид и фон сверху в чистый Clinical Obsidian ─── */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[280px] pointer-events-none z-10"
+        style={{
+          background: `linear-gradient(to bottom,
+            rgba(3, 5, 10, 1) 0%,
+            rgba(3, 5, 10, 0.98) 15%,
+            rgba(3, 5, 10, 0.85) 35%,
+            rgba(3, 5, 10, 0.5) 60%,
+            rgba(3, 5, 10, 0.15) 85%,
+            rgba(3, 5, 10, 0) 100%
+          )`,
+        }}
+      />
+
       {isCursorEnabled && <CustomCursor />}
 
       <VimeoModal isOpen={vimeoOpen} onClose={handleCloseVimeoModal} tier={tier} videoUrl={vimeoUrl} />
@@ -146,7 +165,6 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </div>
 
-      {/* ФИКС ОРКЕСТРАЦИИ: Обернуто в motion.div для плавного затухания всего контента при открытии видео */}
       {!isTouchDevice ? (
         <motion.div
           className="relative z-30"
@@ -316,7 +334,6 @@ const MorphingVideoSection: React.FC = () => {
           </div>
         </motion.div>
       ) : (
-        /* ─── ФИКС ОРКЕСТРАЦИИ ТАЧА: Обернуто в motion.div для плавного затухания всего контента при открытии видео ─── */
         <motion.div
           className="relative z-30 px-5 pt-16 pb-20 max-w-xl mx-auto"
           style={{ pointerEvents: vimeoOpen ? "none" : "auto", willChange: "opacity" }}
@@ -472,6 +489,21 @@ const MorphingVideoSection: React.FC = () => {
           />
         </>
       )}
+
+      {/* ─── НИЖНЯЯ МАСКА: Растворяет флюид и фон снизу в чистый Clinical Obsidian ─── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[280px] pointer-events-none z-10"
+        style={{
+          background: `linear-gradient(to top,
+            rgba(3, 5, 10, 1) 0%,
+            rgba(3, 5, 10, 0.98) 15%,
+            rgba(3, 5, 10, 0.85) 35%,
+            rgba(3, 5, 10, 0.5) 60%,
+            rgba(3, 5, 10, 0.15) 85%,
+            rgba(3, 5, 10, 0) 100%
+          )`,
+        }}
+      />
     </section>
   );
 };

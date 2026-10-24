@@ -2,10 +2,10 @@
 /**
  * @module PartnershipSection/PartnershipSection.tsx
  * Root-компонент секции "Партнёрство".
- * ИСПРАВЛЕНИЕ: Бегущая строка (Ticker) возвращена на тач-устройства, так как
- * она аппаратно ускорена и идеально оптимизирована под мобильный скейл.
+ * ИСПРАВЛЕНИЕ: Удалены "грязные" линейные разделители (1px gradient divider).
+ * Теперь блоки разделяются только чистым визуальным ритмом и отступами (Whitespace).
  * @author Geminis AI & Kort
- * @version 13.1.0
+ * @version 14.0.0
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
@@ -53,7 +53,6 @@ const PartnershipSection = memo(() => {
         transition: "background-color 0.4s ease",
       }}
     >
-      {/* ChapterNav — только на /partnership, скрыт когда секция не во вьюпорте */}
       {isPartnershipPage && (
         <ChapterNav
           active={chapter}
@@ -64,32 +63,19 @@ const PartnershipSection = memo(() => {
         />
       )}
 
-      {/* Глава 0 — входной экран */}
       <Portal ref={portalRef} tier={tier} palette={palette} onChapter={handleChapter} />
 
-      {/* Бегущая строка работает на всех тирах и устройствах */}
       <Ticker tier={tier} palette={palette} />
 
-      {/* Глава 1 — наука */}
-      <Science ref={scienceRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      {/* Padding Bottom увеличен для естественного отрыва секций без полос */}
+      <div className="pb-16 md:pb-24">
+        <Science ref={scienceRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      </div>
 
-      {/* Разделитель */}
-      <div
-        className="mx-auto"
-        style={{
-          maxWidth: 1400,
-          height: 1,
-          background: `linear-gradient(90deg, transparent, ${palette.overlay10}, transparent)`,
-        }}
-      />
-
-      {/* Глава 2 — модель */}
       <Model ref={modelRef} tier={tier} palette={palette} onChapter={handleChapter} />
 
-      {/* Глава 3 — экономика */}
       <Economics ref={economicsRef} tier={tier} palette={palette} onChapter={handleChapter} />
 
-      {/* Глава 4 — приглашение */}
       <Invitation ref={invitationRef} tier={tier} palette={palette} onChapter={handleChapter} />
     </div>
   );

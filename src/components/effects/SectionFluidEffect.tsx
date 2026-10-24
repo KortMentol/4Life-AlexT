@@ -1,9 +1,16 @@
 /**
  * @module SectionFluidEffect
  * @description Оптимизированный WebGL fluid эффект с мягким засыпанием.
- * Внедрен принудительный однокадровый прогрев (Pre-compile & Link) шейдеров под прелоадером.
+ *
+ * ИСПРАВЛЕНИЯ ПРОСАДКИ FPS НА 144HZ (Zero Layout-Thrashing):
+ * 1. [Eliminate getBoundingClientRect]: Полностью удален synchronous layout call
+ *    из requestAnimationFrame цикла. Координаты секции кэшируются при скролле
+ *    и ресайзе, спасая движок Firefox от принудительного reflow.
+ * 2. [Single WebGL Warm-up]: Защита от повторной перекомпиляции и аллокации FBO
+ *    при первом активном взмахе мыши после прелоадера.
+ *
  * @author Geminis AI & Kort
- * @version 9.1.0
+ * @version 9.2.0
  */
 
 import { FluidInstance } from "@/context/FluidContext.types";
@@ -46,10 +53,29 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
   const isInViewportRef = useRef<boolean>(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Рефы для отслеживания времени сворачивания вкладки и мгновенного DOM-скрытия
   const outerWrapperRef = useRef<HTMLDivElement>(null);
   const tabHiddenTimeRef = useRef<number>(0);
   const wasRunningBeforeHideRef = useRef<boolean>(false);
+
+  // КЭШИРОВАННАЯ ГЕОМЕТРИЯ СЕКЦИИ (Спасает от Layout Thrashing в Firefox на 144Hz)
+  const cachedGeometryRef = useRef<{ top: number; height: number; width: number; left: number }>({
+    top: 0,
+    height: 0,
+    width: 0,
+    left: 0,
+  });
+
+  const updateGeometryCache = useCallback(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
+    cachedGeometryRef.current = {
+      top: rect.top + window.scrollY,
+      height: rect.height,
+      width: rect.width,
+      left: rect.left,
+    };
+  }, [sectionRef]);
 
   const startAnimation = useCallback(() => {
     if (simulationRef.current && !isRunningRef.current) {
@@ -66,20 +92,19 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
   const scheduleStopAnimation = useCallback(() => {
     if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
 
-    // Мягкое засыпание через 4.5 секунды бездействия
     stopTimerRef.current = setTimeout(() => {
-      setIsVisible(false); // Плавно гасим прозрачность через CSS Transition (0.5s)
+      setIsVisible(false);
 
       stopTimerRef.current = setTimeout(() => {
         if (simulationRef.current && isRunningRef.current) {
-          simulationRef.current.stop(); // Останавливаем расчеты физики (0% GPU)
+          simulationRef.current.stop();
           isRunningRef.current = false;
         }
       }, 500);
     }, 4500);
   }, []);
 
-  // ИНИЦИАЛИЗАЦИЯ И ОДНОКАДРОВЫЙ ПРОГРЕВ WEBGL ШЕЙДЕРОВ ПОД ЗАНАВЕСОМ
+  // ИНИЦИАЛИЗАЦИЯ И ОДНОКРАТНЫЙ ПРОГРЕВ WEBGL ШЕЙДЕРОВ
   useEffect(() => {
     if (isTouchDevice || !isFluidEnabled || !container) {
       setFluidInstance(null);
@@ -119,13 +144,11 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
 
       simulationRef.current.setConfig({ ...fluidConfig, ...commonConfig });
 
-      // ─── РЕШЕНИЕ: Однокадровый принудительный прогрев (Warm-up) ───
-      // Запускаем симуляцию на 1 кадр для мгновенной линковки шейдеров в VRAM,
-      // пока прелоадер еще закрывает экран. Это убирает просадку FPS при первом скролле.
+      // Однокадровый прогрев под прелоадером
       simulationRef.current.start();
       requestAnimationFrame(() => {
         if (simulationRef.current) {
-          simulationRef.current.stop(); // Мягко гасим расчеты, сохраняя скомпилированный контекст
+          simulationRef.current.stop();
           isRunningRef.current = false;
         }
       });
@@ -161,24 +184,33 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     tier,
   ]);
 
-  // SCISSOR TEST
+  // SCISSOR TEST БЕЗ LAYOUT THRASHING
   useEffect(() => {
-    const section = sectionRef.current;
     const simulation = simulationRef.current;
-    if (!section || !simulation || !isFluidEnabled || !container) return;
+    if (!simulation || !isFluidEnabled || !container) return;
 
-    const updateScissor = () => {
+    updateGeometryCache();
+    window.addEventListener("resize", updateGeometryCache, { passive: true });
+
+    let lastScroll = -1;
+
+    const updateScissor = (scrollY: number) => {
       if (!isInViewportRef.current) return;
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
+      if (scrollY === lastScroll) return;
+      lastScroll = scrollY;
 
-      if (rect.bottom <= 0 || rect.top >= vh) {
+      const geom = cachedGeometryRef.current;
+      const vh = window.innerHeight;
+      const relTop = geom.top - scrollY;
+      const relBottom = relTop + geom.height;
+
+      if (relBottom <= 0 || relTop >= vh) {
         simulation.clearScissor();
       } else {
-        const top = Math.max(0, rect.top);
-        const bottom = Math.min(vh, rect.bottom);
-        const left = Math.max(0, rect.left);
-        const right = Math.min(window.innerWidth, rect.right);
+        const top = Math.max(0, relTop);
+        const bottom = Math.min(vh, relBottom);
+        const left = Math.max(0, geom.left);
+        const right = Math.min(window.innerWidth, geom.left + geom.width);
 
         simulation.setScissor(left, vh - bottom, right - left, bottom - top);
       }
@@ -187,9 +219,10 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     const unsub = rafLoop.subscribe(updateScissor);
     return () => {
       unsub();
+      window.removeEventListener("resize", updateGeometryCache);
       simulation.clearScissor();
     };
-  }, [sectionRef, isFluidEnabled, container]);
+  }, [sectionRef, isFluidEnabled, container, updateGeometryCache]);
 
   // INTERSECTION OBSERVER
   useEffect(() => {
@@ -200,7 +233,9 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
       (entries) => {
         entries.forEach((entry) => {
           isInViewportRef.current = entry.isIntersecting;
-          if (!entry.isIntersecting) {
+          if (entry.isIntersecting) {
+            updateGeometryCache();
+          } else {
             if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
             if (simulationRef.current && isRunningRef.current) {
               simulationRef.current.stop();
@@ -215,7 +250,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
 
     observer.observe(section);
     return () => observer.disconnect();
-  }, [sectionRef, isFluidEnabled]);
+  }, [sectionRef, isFluidEnabled, updateGeometryCache]);
 
   // СЛУШАТЕЛЬ МЫШИ
   useEffect(() => {
@@ -279,7 +314,7 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
     };
   }, []);
 
-  // ИНТЕЛЛЕКТУАЛЬНЫЙ КОНТРОЛЬ СВЕРТЫВАНИЯ ВКЛАДКИ (VISIBILITY API)
+  // VISIBILITY API
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
