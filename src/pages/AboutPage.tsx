@@ -21,16 +21,16 @@ const AboutPage: React.FC = () => (
       type="website"
     />
 
-    <section className="relative overflow-hidden px-4 pb-20 pt-32 md:px-8 md:pb-28 md:pt-40">
+    <section className="relative overflow-hidden bg-[#F0EDE8] px-4 pb-20 pt-32 text-[#151821] md:px-8 md:pb-28 md:pt-40">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_72%_12%,rgba(6,182,212,0.11),transparent_44%)]" aria-hidden="true" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-7">
           <PageEntrance className="flex flex-col items-start">
-            <span data-entrance="badge" className="typography-label mb-6 text-cyan-300">Сэнди, штат Юта · Основана в 1998 году</span>
+            <span data-entrance="badge" className="typography-label mb-6 text-cyan-800">Сэнди, штат Юта · Основана в 1998 году</span>
             <div data-entrance="title">
-              <h1 className="typography-display max-w-4xl text-white">4Life Research — <span className="mx-1.5 inline-flex h-10 w-20 items-center justify-center overflow-hidden rounded-full border border-white/15 align-middle shadow-[0_0_30px_rgba(6,182,212,0.15)] md:h-14 md:w-32"><img src={transferFactorImage} alt="" className="h-full w-full scale-110 object-cover" loading="lazy" decoding="async" /></span> история формул</h1>
+              <h1 className="typography-display max-w-4xl text-[#151821]">4Life Research — <span className="mx-1.5 inline-flex h-10 w-20 items-center justify-center overflow-hidden rounded-full border border-black/10 align-middle md:h-14 md:w-32"><img src={transferFactorImage} alt="" className="h-full w-full scale-110 object-cover" loading="lazy" decoding="async" /></span> история формул</h1>
             </div>
-            <p data-entrance="lead" className="typography-lead mt-7 max-w-2xl text-slate-300">Что означает термин Transfer Factor, как компания описывает свои продукты и где заканчиваются маркетинговые заявления.</p>
+            <p data-entrance="lead" className="typography-lead mt-7 max-w-2xl text-[#4b4e58]">История компании, значение термина Transfer Factor и составы формул — без подмены фактов рекламными обещаниями.</p>
             <div data-entrance="buttons" className="mt-8">
               <Button to="/products" variant="primary" size="lg" icon={<Icons.ArrowRight className="h-4 w-4" />}>
                 Перейти к каталогу
@@ -38,8 +38,8 @@ const AboutPage: React.FC = () => (
             </div>
           </PageEntrance>
         </div>
-        <div className="lg:col-span-5">
-          <ParallaxImage src={transferFactorImage} alt="Абстрактное молекулярное изображение на тёмном фоне" caption="Научный контекст · не медицинское обещание" ratio="portrait" priority />
+        <div className="lg:order-first lg:col-span-5">
+          <ParallaxImage src={transferFactorImage} alt="Иллюстрация лабораторного оборудования в бирюзовом свете" caption="Визуальная иллюстрация · не фотография лаборатории 4Life" ratio="portrait" priority />
         </div>
       </div>
     </section>
@@ -62,20 +62,20 @@ const AboutPage: React.FC = () => (
       </div>
     </section>
 
-    <section className="border-y border-white/[0.08] bg-[#050811] px-4 py-20 md:px-8 md:py-28">
+    <section className="border-y border-black/[0.08] bg-[#F0EDE8] px-4 py-20 text-[#151821] md:px-8 md:py-28">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-12 lg:items-start">
         <div className="lg:sticky lg:top-32 lg:col-span-5">
-          <span className="typography-label text-cyan-400">02 — Хронология · 1949–2026</span>
-          <h2 className="typography-h2 mt-4 text-white">История идеи и компании</h2>
-          <p className="typography-body mt-5 text-slate-400">Таймлайн разделяет научный термин, историю производителя и маркетинговые заявления — это разные типы информации.</p>
+          <span className="typography-label text-cyan-800">02 — Хронология · 1949–2026</span>
+          <h2 className="typography-h2 mt-4 text-[#151821]">История идеи и компании</h2>
+          <p className="typography-body mt-5 text-[#53565e]">Таймлайн разделяет научный термин, историю производителя и маркетинговые заявления — это разные типы информации.</p>
         </div>
-        <div className="divide-y divide-white/[0.08] lg:col-span-7">
+        <div className="divide-y divide-black/[0.12] border-y border-black/[0.12] lg:col-span-7">
           {timeline.map((item, index) => (
             <article key={item.year} className={`grid gap-4 py-8 md:grid-cols-12 md:gap-8 md:py-10 ${index % 2 === 1 ? "md:pl-8" : ""}`}>
-              <span className="typography-label tabular-nums text-cyan-400 md:col-span-2">{item.year}</span>
+              <span className="typography-label tabular-nums text-cyan-800 md:col-span-2">{item.year}</span>
               <div className="md:col-span-10">
-                <h3 className="typography-h3 text-white">{item.title}</h3>
-                <p className="typography-body mt-3 text-slate-400">{item.copy}</p>
+                <h3 className="typography-h3 text-[#151821]">{item.title}</h3>
+                <p className="typography-body mt-3 text-[#53565e]">{item.copy}</p>
               </div>
             </article>
           ))}

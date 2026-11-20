@@ -16,7 +16,7 @@ import { Button } from "@/components/ui";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BiotechBackground from "@/components/effects/BiotechBackground";
@@ -86,6 +86,7 @@ interface MobileChapterVideoCardProps {
   videoSrc: string;
   videoRef: React.Ref<HTMLVideoElement>;
   onPlay: () => void;
+  shouldReveal: boolean;
 }
 
 const MobileChapterVideoCard: React.FC<MobileChapterVideoCardProps> = ({
@@ -96,8 +97,15 @@ const MobileChapterVideoCard: React.FC<MobileChapterVideoCardProps> = ({
   videoSrc,
   videoRef,
   onPlay,
+  shouldReveal,
 }) => (
-  <article className="flex flex-col gap-5 rounded-[2rem] border border-white/[0.08] bg-[#050811]/90 p-6 shadow-2xl">
+  <motion.article
+    initial={shouldReveal ? { opacity: 0, y: 16 } : false}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.2 }}
+    transition={{ duration: shouldReveal ? 0.55 : 0, ease: [0.16, 1, 0.3, 1] }}
+    className="flex flex-col gap-5 rounded-[2rem] border border-white/[0.08] bg-[#050811]/90 p-6 shadow-2xl"
+  >
     <header className="flex items-start justify-between gap-5">
       <div className="min-w-0">
         <p className="typography-label mb-2 text-cyan-400/80">{eyebrow}</p>
@@ -129,7 +137,7 @@ const MobileChapterVideoCard: React.FC<MobileChapterVideoCardProps> = ({
         </span>
       </button>
     </div>
-  </article>
+  </motion.article>
 );
 
 const MorphingVideoSection: React.FC = () => {
@@ -137,7 +145,8 @@ const MorphingVideoSection: React.FC = () => {
   const efxFlags = useEffectsDebug();
   const { isTouchDevice } = useDeviceType();
 
-  const isGrid3dEnabled = efxFlags.grid3d;
+  const isAdvancedDesktop = !isTouchDevice && tier === "high";
+  const isGrid3dEnabled = isAdvancedDesktop && efxFlags.grid3d;
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const block1Ref = useRef<HTMLDivElement>(null);
@@ -147,9 +156,13 @@ const MorphingVideoSection: React.FC = () => {
 
   const [vimeoOpen, setVimeoOpen] = useState(false);
   const [vimeoUrl, setVimeoUrl] = useState("");
-  const isCursorEnabled = !isTouchDevice;
+  const isCursorEnabled = isAdvancedDesktop;
+  const prefersReducedMotion = useReducedMotion();
+  const shouldRevealStaticScenes = tier !== "low" && !prefersReducedMotion;
 
   useEffect(() => {
+    if (!isAdvancedDesktop) return;
+
     const preloadVideos = () => {
       const link = document.createElement("link");
       link.rel = "preload";
@@ -157,9 +170,15 @@ const MorphingVideoSection: React.FC = () => {
       link.href = VIDEO_ASSETS.video1;
       document.head.appendChild(link);
     };
-    if (document.readyState === "complete") preloadVideos();
-    else window.addEventListener("load", preloadVideos);
-  }, []);
+
+    if (document.readyState === "complete") {
+      preloadVideos();
+      return;
+    }
+
+    window.addEventListener("load", preloadVideos, { once: true });
+    return () => window.removeEventListener("load", preloadVideos);
+  }, [isAdvancedDesktop]);
 
   const handleOpenVimeoModal = useCallback((url: string) => {
     window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: true } }));
@@ -174,7 +193,7 @@ const MorphingVideoSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!isTouchDevice || vimeoOpen) return;
+    if (isAdvancedDesktop || vimeoOpen) return;
 
     const videos = mobileVideoRefs.current.filter((video): video is HTMLVideoElement => video !== null);
     if (videos.length === 0) return;
@@ -214,7 +233,7 @@ const MorphingVideoSection: React.FC = () => {
       observer.disconnect();
       videos.forEach((video) => video.pause());
     };
-  }, [isTouchDevice, vimeoOpen]);
+  }, [isAdvancedDesktop, vimeoOpen]);
 
   const handleOpenVimeo1 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[0]!), [handleOpenVimeoModal]);
   const handleOpenVimeo2 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[1]!), [handleOpenVimeoModal]);
@@ -255,7 +274,7 @@ const MorphingVideoSection: React.FC = () => {
 
       <VimeoModal isOpen={vimeoOpen} onClose={handleCloseVimeoModal} tier={tier} videoUrl={vimeoUrl} />
 
-      {!isTouchDevice && <SectionFluidEffect sectionRef={sectionRef} />}
+      {isAdvancedDesktop && <SectionFluidEffect sectionRef={sectionRef} />}
 
       <div className="absolute inset-0 -z-30 overflow-hidden bg-transparent">
         <div className="absolute inset-0 w-full h-full">
@@ -263,7 +282,7 @@ const MorphingVideoSection: React.FC = () => {
         </div>
       </div>
 
-      {!isTouchDevice ? (
+      {isAdvancedDesktop ? (
         <motion.div
           className="relative z-30"
           style={{ pointerEvents: vimeoOpen ? "none" : "auto", willChange: "opacity" }}
@@ -273,27 +292,12 @@ const MorphingVideoSection: React.FC = () => {
         >
           <div className="px-4 pt-24 md:pt-32 pb-12 text-center">
             <div className="mx-auto max-w-4xl relative">
-              <h2
-                className="mb-4 text-sm font-medium uppercase tracking-[0.2em]"
-                style={{
-                  background: "linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9)",
-                  backgroundSize: "200% 100%",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  animation: "gradient-shift 6s ease-in-out infinite",
-                  textShadow: "0 0 20px rgba(14, 165, 233, 0.3)",
-                  filter: "drop-shadow(0 0 8px rgba(14, 165, 233, 0.2))",
-                }}
-              >
-                Наука • Качество • Доверие
-              </h2>
+              <p className="typography-label mb-4 text-cyan-300">Компания · формулы · документы</p>
               <h1 className="typography-h1 mb-6 text-center text-white">Почему 4Life?</h1>
 
-              <div className="max-w-3xl mx-auto flex items-center justify-center">
-                <ScrollTextReveal className="typography-lead text-center max-w-3xl mx-auto opacity-80">
-                  Более двух десятилетий компания 4Life посвятила углублённому изучению иммунной системы, создавая
-                  продукты, которые являются результатом фундаментальных исследований и передовых технологий.
+              <div className="mx-auto flex max-w-3xl items-center justify-center">
+                <ScrollTextReveal className="typography-lead mx-auto max-w-3xl text-center text-white/75">
+                  История компании, подходы к производству и составы — через проверяемую информацию, а не обещания результата.
                 </ScrollTextReveal>
               </div>
             </div>
@@ -322,17 +326,14 @@ const MorphingVideoSection: React.FC = () => {
 
                         <h2 className="typography-h2 text-left text-white m-0">Исследования и Инновации</h2>
                         <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
-                          В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
-                          уникальные молекулы, которые &quot;обучают&quot; иммунную систему, оптимизируя её естественные защитные
-                          функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
-                          создаёт.
+                          Transfer Factor — название, которое компания использует для компонентов ряда формул. Состав и заявленные свойства различаются: для конкретного продукта сверяйтесь с этикеткой и официальной информацией для своего рынка.
                         </ScrollTextReveal>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="relative z-10 min-h-[200vh]">
+              <div className="relative z-10 min-h-[130vh]">
                 {isGrid3dEnabled && <Grid3D type={1} triggerRef={block1Ref} />}
               </div>
             </div>
@@ -352,9 +353,7 @@ const MorphingVideoSection: React.FC = () => {
 
                         <h2 className="typography-h2 text-right text-white m-0">Бескомпромиссный Контроль Качества</h2>
                         <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl ml-auto">
-                          Каждый этап производства проходит строгий контроль качества. Современные технологии и
-                          сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты,
-                          безопасности и эффективности продукции.
+                          Производитель сообщает о стандартах производства и контроле качества, включая cGMP. Актуальные сертификаты и сведения о конкретной формуле проверяйте в документах 4Life для вашего региона.
                         </ScrollTextReveal>
                       </div>
                     </div>
@@ -368,7 +367,7 @@ const MorphingVideoSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="relative z-10 min-h-[200vh]">
+              <div className="relative z-10 min-h-[130vh]">
                 {isGrid3dEnabled && <Grid3D type={2} triggerRef={block2Ref} />}
               </div>
             </div>
@@ -393,17 +392,14 @@ const MorphingVideoSection: React.FC = () => {
 
                         <h2 className="typography-h2 text-center text-white m-0">Подтверждённая Эффективность</h2>
                         <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
-                          Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт
-                          ключом, мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша
-                          иммунная система работает как швейцарские часы. Миллионы людей уже почувствовали эту разницу.
-                          Теперь ваша очередь открыть для себя, каково это — жить в полную силу.
+                          Каталог помогает сравнить состав, формат выпуска и маркировку. Индивидуальные ощущения различаются; пищевые добавки не заменяют сбалансированный рацион и медицинскую помощь.
                         </ScrollTextReveal>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="relative z-10 min-h-[200vh]">
+              <div className="relative z-10 min-h-[130vh]">
                 {isGrid3dEnabled && <Grid3D type={3} triggerRef={block3Ref} />}
               </div>
             </div>
@@ -437,7 +433,7 @@ const MorphingVideoSection: React.FC = () => {
             <h2 className="typography-label mb-3 text-cyan-400">Наука · качество · осознанный выбор</h2>
             <h1 className="typography-h2 text-white">Почему 4Life?</h1>
             <p className="typography-body mt-4 text-slate-400 text-pretty">
-              История компании и её продуктов — через технологии, производственные стандарты и проверяемую информацию.
+              История компании, производственные подходы и маркировка — через проверяемую информацию.
             </p>
           </div>
 
@@ -446,19 +442,21 @@ const MorphingVideoSection: React.FC = () => {
               number="01"
               eyebrow="Иммунный интеллект"
               title="Исследования и инновации"
-              description="В основе линейки — патентованные технологии Transfer Factor. Чтобы оценить заявленные свойства, сверяйте сведения конкретного продукта с маркировкой и первичными исследованиями."
+              description="Transfer Factor — название, которое 4Life использует для компонентов ряда формул. Состав конкретного продукта смотрите в актуальной маркировке."
               videoSrc={VIDEO_ASSETS.video1}
               videoRef={(video) => { mobileVideoRefs.current[0] = video; }}
               onPlay={handleOpenVimeo1}
+              shouldReveal={shouldRevealStaticScenes}
             />
             <MobileChapterVideoCard
               number="02"
               eyebrow="Стандарт чистоты cGMP"
               title="Контроль качества"
-              description="Производитель указывает стандарты и процессы контроля качества. Актуальные сертификаты, состав и сведения о партии проверяйте в официальных материалах."
+                description="Производитель публикует сведения о стандартах и контроле качества. Актуальные сертификаты и данные о конкретном рынке сверяйте в официальных материалах."
               videoSrc={VIDEO_ASSETS.video2}
               videoRef={(video) => { mobileVideoRefs.current[1] = video; }}
               onPlay={handleOpenVimeo2}
+              shouldReveal={shouldRevealStaticScenes}
             />
             <MobileChapterVideoCard
               number="03"
@@ -468,6 +466,7 @@ const MorphingVideoSection: React.FC = () => {
               videoSrc={VIDEO_ASSETS.video3}
               videoRef={(video) => { mobileVideoRefs.current[2] = video; }}
               onPlay={handleOpenVimeo3}
+              shouldReveal={shouldRevealStaticScenes}
             />
           </div>
 

@@ -27,14 +27,13 @@ const ProductsHero: React.FC = () => {
     offset: ["start start", "end start"],
   });
 
-  const isLowTier = tier === "low";
   const isHighTier = tier === "high";
 
-  const scale = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 1 : 0.85]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, isLowTier ? 0.3 : 0.1]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, isHighTier ? 0.88 : 1]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, isHighTier ? 0.2 : 1]);
   const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0, isHighTier ? 1 : 0]);
 
-  const dynamicWillChange = useTransform(opacity, (val) => (val > 0.02 ? "transform, opacity" : "auto"));
+  const dynamicWillChange = useTransform(opacity, (val) => (isHighTier && val > 0.02 ? "transform, opacity" : "auto"));
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -83,7 +82,7 @@ const ProductsHero: React.FC = () => {
           </video>
           {isHighTier && (
             <motion.div
-              className="absolute inset-0 backdrop-blur-2xl bg-black/10 pointer-events-none"
+              className="absolute inset-0 backdrop-blur-[8px] bg-black/10 pointer-events-none"
               style={{ opacity: overlayOpacity, willChange: "opacity" }}
             />
           )}

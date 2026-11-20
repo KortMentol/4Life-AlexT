@@ -21,7 +21,11 @@ import { getPalette } from "./constants";
 import ChapterNav from "./ui/ChapterNav";
 import Ticker from "./ui/Ticker";
 
-const PartnershipSection = memo(() => {
+interface PartnershipSectionProps {
+  showNavigation?: boolean;
+}
+
+const PartnershipSection = memo(({ showNavigation = true }: PartnershipSectionProps) => {
   const tier = usePerformanceTier();
   const palette = getPalette();
   const location = useLocation();
@@ -53,7 +57,7 @@ const PartnershipSection = memo(() => {
         transition: "background-color 0.4s ease",
       }}
     >
-      {isPartnershipPage && (
+      {showNavigation && isPartnershipPage && (
         <ChapterNav
           active={chapter}
           tier={tier}
@@ -68,15 +72,21 @@ const PartnershipSection = memo(() => {
       <Ticker tier={tier} palette={palette} />
 
       {/* Padding Bottom увеличен для естественного отрыва секций без полос */}
-      <div className="pb-16 md:pb-24">
+      <div id="partner-foundation" className="scroll-mt-28 pb-16 md:pb-24">
         <Science ref={scienceRef} tier={tier} palette={palette} onChapter={handleChapter} />
       </div>
 
-      <Model ref={modelRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <div id="partner-model" className="scroll-mt-28">
+        <Model ref={modelRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      </div>
 
-      <Economics ref={economicsRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <div id="partner-economics" className="scroll-mt-28">
+        <Economics ref={economicsRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      </div>
 
-      <Invitation ref={invitationRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      <div id="partner-invitation" className="scroll-mt-28">
+        <Invitation ref={invitationRef} tier={tier} palette={palette} onChapter={handleChapter} />
+      </div>
     </div>
   );
 });

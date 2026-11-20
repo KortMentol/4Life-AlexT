@@ -8,9 +8,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const steps = [
-  { number: "01", title: "Выберите продукты", copy: "Соберите список в каталоге. В карточках указаны состав, формат выпуска и баллы LP из текущих материалов сайта.", href: "/products" },
-  { number: "02", title: "Передайте партнёрский ID", copy: `ID ${siteConfig.distributor.fourLifeId} уже будет указан в сообщении заказа. Он помогает центру найти данные партнёра; скидку и итоговую цену подтвердите до оплаты.`, href: "/contact" },
-  { number: "03", title: "Уточните оформление", copy: "Отправьте список в РЦ 67 и согласуйте наличие, способ оплаты, самовывоз или доставку до того, как оплачивать заказ.", href: "/contact" },
+  { number: "01", title: "Список продуктов", copy: "В карточках каталога указаны состав, формат выпуска и баллы LP из текущих материалов сайта.", href: "/products" },
+  { number: "02", title: "Партнёрский ID", copy: `ID ${siteConfig.distributor.fourLifeId} будет указан в сообщении заказа. Итоговая цена и условия скидки зависят от подтверждения продавца.`, href: "/contact" },
+  { number: "03", title: "Оформление и получение", copy: "РЦ 67 уточняет наличие, способы оплаты, самовывоз и доставку для конкретного заказа.", href: "/contact" },
 ];
 
 const HowToBuyPage: React.FC = () => (
@@ -29,9 +29,7 @@ const HowToBuyPage: React.FC = () => (
           <PageEntrance className="flex flex-col items-start">
             <span data-entrance="badge" className="typography-label mb-6 text-cyan-300">Порядок заказа в России · РЦ 67</span>
             <div data-entrance="title">
-              <h1 className="typography-display max-w-4xl text-white">
-                Как заказать <span className="mx-1.5 inline-flex h-10 w-20 items-center justify-center overflow-hidden rounded-full border border-white/15 align-middle shadow-[0_0_30px_rgba(6,182,212,0.15)] md:h-14 md:w-32"><img src={logisticsImage} alt="" className="h-full w-full scale-110 object-cover" loading="lazy" decoding="async" /></span> оригинальные продукты 4Life
-              </h1>
+              <h1 className="typography-display max-w-4xl text-white">Как оформить заказ 4Life</h1>
             </div>
             <p data-entrance="lead" className="typography-lead mt-7 max-w-2xl text-slate-300">
               Партнёрский ID {siteConfig.distributor.fourLifeId} можно приложить к заказу. Актуальные скидку, наличие и цену подтвердите в РЦ 67 до оплаты.
@@ -47,33 +45,35 @@ const HowToBuyPage: React.FC = () => (
           </PageEntrance>
         </div>
         <div className="lg:col-span-5">
-          <ParallaxImage src={logisticsImage} alt="Нейтральное пространство для сортировки заказов" caption="Перед оплатой подтвердите наличие и условия" ratio="portrait" priority />
+          <ParallaxImage src={logisticsImage} alt="Иллюстрация аккуратно подготовленных посылок" caption="Иллюстрация логистики · детали заказа уточняйте у продавца" ratio="portrait" priority />
         </div>
       </div>
     </section>
 
-    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-t border-white/[0.08] px-4 py-24 md:px-8 md:py-36 lg:grid-cols-12 lg:gap-16">
+    <section className="border-y border-black/[0.08] bg-[#F0EDE8] px-4 py-20 text-[#151821] md:px-8 md:py-28">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
       <div className="space-y-6 lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
-        <span className="typography-label block text-cyan-400">01 — Порядок оформления</span>
-        <h2 className="typography-h2 text-white">Чёткий список. Проверенные условия.</h2>
-        <p className="typography-body text-slate-400">
-          РЦ 67 — контактная точка для оформления и получения заказа по данным сайта. Этот сайт не проверяет остатки, не принимает оплату и не может гарантировать происхождение товара или скидку. Уточните детали у продавца.
+        <span className="typography-label block text-cyan-800">01 — Порядок оформления</span>
+        <h2 className="typography-h2 text-[#151821]">Чёткий список. Понятные условия.</h2>
+        <p className="typography-body text-[#53565e]">
+          РЦ 67 — контактная точка для оформления и получения заказа по данным сайта. Наличие, итоговая цена, скидка и способ получения подтверждаются продавцом до оплаты.
         </p>
-        <div className="border-l-2 border-cyan-400/40 pl-4 text-sm leading-relaxed text-slate-400">
-          Партнёрский ID: <span className="font-mono tabular-nums text-white">{siteConfig.distributor.fourLifeId}</span> · {siteConfig.distributor.name}
+        <div className="border-l-2 border-cyan-700/40 pl-4 text-sm leading-relaxed text-[#53565e]">
+          Партнёрский ID: <span className="font-mono tabular-nums text-[#151821]">{siteConfig.distributor.fourLifeId}</span> · {siteConfig.distributor.name}
         </div>
       </div>
-      <div className="divide-y divide-white/[0.08] lg:col-span-7">
+      <div className="divide-y divide-black/[0.12] lg:col-span-7">
         {steps.map((step) => (
           <Link key={step.number} to={step.href} className="group flex flex-col gap-4 py-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 md:flex-row md:items-baseline md:gap-8 md:py-10">
-            <span className="w-16 shrink-0 font-heading text-2xl font-light tabular-nums text-cyan-400/70 md:text-3xl">{step.number}</span>
+            <span className="w-16 shrink-0 font-heading text-2xl font-light tabular-nums text-cyan-800 md:text-3xl">{step.number}</span>
             <div className="flex-1">
-              <h3 className="typography-h3 text-white">{step.title}</h3>
-              <p className="typography-body mt-3 text-slate-400">{step.copy}</p>
+              <h3 className="typography-h3 text-[#151821]">{step.title}</h3>
+              <p className="typography-body mt-3 text-[#53565e]">{step.copy}</p>
             </div>
-            <Icons.ArrowRight className="h-5 w-5 shrink-0 text-cyan-400 transition-transform group-hover:translate-x-1" />
+            <Icons.ArrowRight className="h-5 w-5 shrink-0 text-cyan-800 transition-transform group-hover:translate-x-1" />
           </Link>
         ))}
+      </div>
       </div>
     </section>
 
@@ -81,13 +81,13 @@ const HowToBuyPage: React.FC = () => (
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 max-w-2xl">
           <span className="typography-label text-cyan-400">02 — Два способа</span>
-          <h2 className="typography-h2 mt-4 text-white">Выберите удобный формат</h2>
+          <h2 className="typography-h2 mt-4 text-white">Два варианта оформления</h2>
         </div>
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start">
           <article className="border border-white/[0.08] bg-[#080d18] p-7 md:p-10 lg:col-span-7">
             <span className="typography-label text-cyan-400">Разовый заказ</span>
-            <h3 className="typography-h3 mt-4 text-white">Без регистрации на этом сайте</h3>
-            <p className="typography-body mt-4 max-w-2xl text-slate-400">Добавьте продукты в список заказа и отправьте его в РЦ 67. ID {siteConfig.distributor.fourLifeId} будет указан в тексте автоматически; продавец подтвердит итоговую цену и доступность.</p>
+            <h3 className="typography-h3 mt-4 text-white">Заказ через РЦ 67</h3>
+            <p className="typography-body mt-4 max-w-2xl text-slate-400">Список из каталога можно отправить в РЦ 67. ID {siteConfig.distributor.fourLifeId} добавляется в сообщение автоматически; продавец подтверждает итоговую цену и наличие.</p>
             <Button to="/products" variant="secondary" size="md" className="mt-7" icon={<Icons.ArrowRight className="h-4 w-4" />}>
               Собрать список
             </Button>

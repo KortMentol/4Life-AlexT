@@ -221,7 +221,7 @@ const ProductsPage: React.FC = () => {
         />
       </section>
 
-      <section aria-labelledby="synergy-programs-title" className="mx-auto max-w-[1440px] px-4 pb-16 md:px-8 md:pb-24">
+      <section aria-labelledby="synergy-programs-title" className="relative z-10 mx-auto max-w-[1440px] bg-[#03050a] px-4 pb-16 md:px-8 md:pb-24">
         <div className="mb-7 grid gap-5 border-b border-white/[0.08] pb-6 md:grid-cols-12 md:items-end">
           <div className="md:col-span-7">
             <p className="typography-label mb-3 text-cyan-400">Сочетания из каталога</p>
@@ -269,7 +269,7 @@ const ProductsPage: React.FC = () => {
         </div>
       </section>
 
-      <section id="products-faq" className="border-t border-white/[0.08] bg-[#050811]">
+      <section id="products-faq" className="relative z-20 isolate">
         <ProductsFAQ />
       </section>
 

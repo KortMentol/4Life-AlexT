@@ -52,7 +52,7 @@ const ModelStep = memo(
           ease: [0.16, 1, 0.3, 1],
         }}
         className="relative py-12 md:py-16"
-        style={{ borderTop: `1px solid ${palette.overlay10}` }}
+        style={{ borderTop: "1px solid rgba(21,24,33,0.12)" }}
       >
         <div className="grid md:grid-cols-[120px_1fr_1fr] gap-8 md:gap-12 items-start">
           {/* Number */}
@@ -60,7 +60,7 @@ const ModelStep = memo(
             className="typography-h1"
             style={{
               fontSize: "clamp(3rem, 5vw, 4.5rem)",
-              color: palette.overlay10,
+              color: "rgba(21,24,33,0.16)",
             }}
           >
             {step.n}
@@ -71,7 +71,7 @@ const ModelStep = memo(
             className="typography-h2"
             style={{
               fontSize: "clamp(1.6rem, 3vw, 2.5rem)",
-              color: accentColor,
+              color: step.accentKey === "cream" ? "#151821" : accentColor,
             }}
           >
             {step.title}
@@ -82,7 +82,7 @@ const ModelStep = memo(
             className="font-light leading-relaxed"
             style={{
               fontSize: "clamp(0.88rem, 1.1vw, 1rem)",
-              color: palette.overlay40,
+              color: "rgba(21,24,33,0.72)",
             }}
           >
             {step.body}
@@ -90,19 +90,11 @@ const ModelStep = memo(
         </div>
 
         {/* Animated accent line */}
-        <motion.div
-          className="absolute bottom-0 left-0 h-px"
-          initial={{ width: "0%" }}
-          animate={inView ? { width: "100%" } : { width: "0%" }}
-          transition={{
-            duration: 1.1,
-            delay: index * 0.12 + 0.35,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          style={{
-            background: `linear-gradient(90deg, ${accentColor}60, transparent)`,
-          }}
-        />
+      <div
+        aria-hidden="true"
+        className="absolute bottom-0 left-0 h-px w-full"
+        style={{ background: `linear-gradient(90deg, ${accentColor}50, rgba(21,24,33,0.04))` }}
+      />
       </motion.div>
     );
   },
@@ -123,7 +115,7 @@ const Model = memo(
       <section
         ref={activeRef}
         className="relative px-6 md:px-16 lg:px-24 py-28 md:py-40"
-        style={{ background: palette.bg }}
+        style={{ background: palette.cream }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-start justify-between mb-20 flex-wrap gap-6">
@@ -143,11 +135,11 @@ const Model = memo(
                 className="typography-h2 font-extralight text-right"
                 style={{
                   fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
-                  color: palette.cream,
+                  color: "#151821",
                 }}
               >
-                Как это устроено —<br />
-                три простых факта.
+                Как устроен формат —<br />
+                три стороны одной модели.
               </p>
             </ClipLine>
           </div>

@@ -296,7 +296,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             style={
               {
                 opacity: isTransitioning || !isVideoLoaded ? 0 : 1,
-                imageRendering: tier === "high" ? "optimizeQuality" : "auto",
                 transform: "translateZ(0)",
               } as React.CSSProperties
             }

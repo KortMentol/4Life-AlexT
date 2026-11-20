@@ -6,7 +6,8 @@
  */
 
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { usePerformanceTier } from "@/hooks";
 
 interface FAQItemProps {
   question: string;
@@ -23,84 +24,55 @@ const FAQItem: React.FC<FAQItemProps> = ({
   isOpen = false,
   onToggle,
 }) => {
+  const prefersReducedMotion = useReducedMotion();
+  const tier = usePerformanceTier();
+  const shouldAnimate = tier !== "low" && !prefersReducedMotion;
+  const triggerId = `faq-trigger-${index}`;
+  const panelId = `faq-panel-${index}`;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.5 }}
-      className="relative group mb-4"
-      style={{ contain: "content" }}
+      transition={{ delay: shouldAnimate ? index * 0.05 : 0, duration: shouldAnimate ? 0.45 : 0, ease: [0.16, 1, 0.3, 1] }}
+      className="group border-b border-white/[0.08] last:border-b-0"
     >
-      {/* Контейнер темной темы */}
-      <div className="relative rounded-2xl border overflow-hidden transition-all duration-300 bg-black/30 border-cyan-400/20 group-hover:border-cyan-400/40">
-        {/* Sci-fi углы */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-cyan-400/40" />
-        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-cyan-400/40" />
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-cyan-400/40" />
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-cyan-400/40" />
-
-        {/* Заголовок */}
-        <button
-          onClick={() => onToggle?.(index)}
-          className="w-full p-6 flex items-center justify-between text-left relative z-10 group/btn"
+      <button
+        id={triggerId}
+        type="button"
+        onClick={() => onToggle?.(index)}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        className="flex min-h-20 w-full items-center justify-between gap-6 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400"
+      >
+        <h3 className="typography-h3 text-left text-white transition-colors duration-200 group-hover:text-cyan-200">
+          {question}
+        </h3>
+        <span
+          aria-hidden="true"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-xl font-light text-cyan-300 transition-colors group-hover:border-cyan-300/60"
         >
-          <h3 className="text-lg md:text-xl font-semibold pr-6 transition-colors duration-300 text-white group-hover/btn:text-cyan-400">
-            {question}
-          </h3>
+          {isOpen ? "−" : "+"}
+        </span>
+      </button>
 
-          {/* Иконка ромбика */}
+      <AnimatePresence initial={false}>
+        {isOpen && (
           <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center"
+            id={panelId}
+            role="region"
+            aria-labelledby={triggerId}
+            initial={shouldAnimate ? { opacity: 0, y: -8 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldAnimate ? { opacity: 0, y: -6 } : undefined}
+            transition={{ duration: shouldAnimate ? 0.25 : 0, ease: [0.16, 1, 0.3, 1] }}
+            className="pb-6 pr-12"
           >
-            <div className="relative w-5 h-5">
-              <div className="absolute inset-0 border transform rotate-45 border-cyan-400/60" />
-              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 bg-cyan-400/80" />
-              <div className="absolute top-0 left-1/2 w-px h-1 -translate-x-1/2 bg-cyan-400/60" />
-              <div className="absolute bottom-0 left-1/2 w-px h-1 -translate-x-1/2 bg-cyan-400/60" />
-            </div>
+            <p className="max-w-3xl text-base leading-7 text-slate-300">{answer}</p>
           </motion.div>
-        </button>
-
-        {/* Контент */}
-        <AnimatePresence initial={false}>
-          {isOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{
-                height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.3, delay: isOpen ? 0.1 : 0 },
-              }}
-              className="overflow-hidden"
-            >
-              <motion.div
-                initial={{ y: -10 }}
-                animate={{ y: 0 }}
-                exit={{ y: -10 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="px-6 pb-6"
-              >
-                {/* Разделитель */}
-                <div className="w-full h-px mb-4 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
-
-                <p className="leading-relaxed text-base text-white/80">
-                  {answer}
-                </p>
-
-                {/* Нижний акцент */}
-                <div className="mt-4 w-16 h-px bg-gradient-to-r from-cyan-400/60 to-transparent" />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Эффект наведения */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-cyan-400/3" />
-      </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

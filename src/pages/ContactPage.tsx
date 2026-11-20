@@ -37,8 +37,13 @@ const ContactPage: React.FC = () => {
                 <h1 className="typography-display max-w-4xl text-white">Говорите с <span className="text-cyan-300">человеком</span></h1>
               </div>
               <p data-entrance="lead" className="typography-lead mt-7 max-w-2xl text-slate-300">
-                Личные вопросы — Александру. Готовый заказ и получение — в РЦ 67. Выберите нужный контакт.
+                Александру — вопросы о продуктах и партнёрстве. РЦ 67 — оформление, наличие и получение заказа.
               </p>
+              <div data-entrance="buttons" className="mt-8">
+                <Button href={siteConfig.contact.whatsapp} isExternal variant="primary" size="lg" icon={<Icons.WhatsApp className="h-4 w-4" />}>
+                  Написать Александру
+                </Button>
+              </div>
             </PageEntrance>
           </div>
           <div className="lg:col-span-5">
@@ -53,7 +58,10 @@ const ContactPage: React.FC = () => {
           <h2 className="typography-h2 text-white">Александр Тощев</h2>
           <p className="typography-body text-slate-400">Вопросы о каталоге, порядке оформления и партнёрстве. Я не медицинский специалист и не даю назначения или схемы лечения.</p>
           <p className="text-sm leading-relaxed text-slate-500">Звонки: {siteConfig.contact.callSchedule.replace("Звонки: ", "")}</p>
-          <ParallaxImage src={logisticsImage} alt="Деталь блокнота на рабочем столе" caption="Ответы в мессенджерах — по мере возможности" ratio="landscape" />
+          <div className="border-l-2 border-cyan-400/50 pl-5">
+            <p className="typography-label text-cyan-300">Личный контакт</p>
+            <p className="mt-3 max-w-sm text-base leading-7 text-slate-300">Можно написать в удобный мессенджер или позвонить в часы связи, указанные ниже.</p>
+          </div>
         </div>
         <div className="divide-y divide-white/[0.08] lg:col-span-7">
           <a className="group flex flex-col gap-3 py-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 md:flex-row md:items-center md:justify-between" href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
@@ -98,29 +106,29 @@ const ContactPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="border-y border-white/[0.08] bg-[#050811] px-4 py-20 md:px-8 md:py-28">
+      <section className="border-y border-black/[0.08] bg-[#F0EDE8] px-4 py-20 text-[#151821] md:px-8 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-12 lg:items-start">
           <div className="space-y-6 lg:col-span-5">
-            <span className="typography-label text-cyan-400">02 — Оформление и получение</span>
-            <h2 className="typography-h2 text-white">Региональный центр РЦ 67</h2>
-            <p className="typography-body text-slate-400">Центр принимает вопросы по готовому заказу и его получению. При обращении назовите ID {siteConfig.distributor.fourLifeId}; текущую цену и возможность самовывоза или доставки подтвердите у сотрудника.</p>
-            <address className="not-italic text-base leading-relaxed text-slate-300">{siteConfig.office.address}</address>
-            <a className="inline-flex items-center gap-2 text-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={`tel:${siteConfig.office.phoneRaw}`}>
+            <span className="typography-label text-cyan-800">02 — Оформление и получение</span>
+            <h2 className="typography-h2 text-[#151821]">Региональный центр РЦ 67</h2>
+            <p className="typography-body text-[#53565e]">Центр принимает вопросы по готовому заказу и его получению. При обращении назовите ID {siteConfig.distributor.fourLifeId}; текущую цену и возможность самовывоза или доставки подтвердите у сотрудника.</p>
+            <address className="not-italic text-base leading-relaxed text-[#30343b]">{siteConfig.office.address}</address>
+            <a className="inline-flex items-center gap-2 text-cyan-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700" href={`tel:${siteConfig.office.phoneRaw}`}>
               <Icons.Phone className="h-4 w-4" /> {siteConfig.office.phone}
             </a>
           </div>
-          <div className="divide-y divide-white/[0.08] border-y border-white/[0.08] lg:col-span-7">
-            <a className="group flex items-center justify-between gap-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={siteConfig.office.whatsapp} target="_blank" rel="noopener noreferrer">
-              <span><span className="typography-label text-slate-500">Мессенджер склада</span><span className="typography-h3 mt-2 block text-white">WhatsApp РЦ 67</span></span>
-              <Icons.ArrowRight className="h-5 w-5 text-cyan-300 transition-transform group-hover:translate-x-1" />
+          <div className="divide-y divide-black/[0.12] border-y border-black/[0.12] lg:col-span-7">
+            <a className="group flex items-center justify-between gap-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={siteConfig.office.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Написать в WhatsApp РЦ 67">
+              <span><span className="typography-label text-slate-700">Мессенджер склада</span><span className="typography-h3 mt-2 block text-[#151821]">WhatsApp РЦ 67</span></span>
+              <Icons.ArrowRight className="h-5 w-5 text-cyan-800 transition-transform group-hover:translate-x-1" />
             </a>
-            <a className="group flex items-center justify-between gap-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={siteConfig.office.telegram} target="_blank" rel="noopener noreferrer">
-              <span><span className="typography-label text-slate-500">Мессенджер склада</span><span className="typography-h3 mt-2 block text-white">Telegram РЦ 67</span></span>
-              <Icons.ArrowRight className="h-5 w-5 text-cyan-300 transition-transform group-hover:translate-x-1" />
+            <a className="group flex items-center justify-between gap-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={siteConfig.office.telegram} target="_blank" rel="noopener noreferrer" aria-label="Написать в Telegram РЦ 67">
+              <span><span className="typography-label text-slate-700">Мессенджер склада</span><span className="typography-h3 mt-2 block text-[#151821]">Telegram РЦ 67</span></span>
+              <Icons.ArrowRight className="h-5 w-5 text-cyan-800 transition-transform group-hover:translate-x-1" />
             </a>
-            <a className="group flex items-center justify-between gap-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={siteConfig.office.max} target="_blank" rel="noopener noreferrer">
-              <span><span className="typography-label text-slate-500">Мессенджер склада</span><span className="typography-h3 mt-2 block text-white">MAX РЦ 67</span></span>
-              <Icons.Max className="h-5 w-5 text-cyan-300" />
+            <a className="group flex items-center justify-between gap-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" href={siteConfig.office.max} target="_blank" rel="noopener noreferrer" aria-label="Написать в MAX РЦ 67">
+              <span><span className="typography-label text-slate-700">Мессенджер склада</span><span className="typography-h3 mt-2 block text-[#151821]">MAX РЦ 67</span></span>
+              <Icons.Max className="h-5 w-5 text-cyan-800" />
             </a>
           </div>
         </div>

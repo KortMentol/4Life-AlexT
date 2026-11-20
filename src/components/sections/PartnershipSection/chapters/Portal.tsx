@@ -54,7 +54,7 @@ const Portal = memo(
     }, [inView, onChapter]);
 
     return (
-      <div ref={forwardedRef}>
+      <div id="partner-entry" ref={forwardedRef} className="scroll-mt-28">
         <motion.section
           ref={innerRef}
           className="relative flex flex-col items-center justify-center overflow-hidden"
@@ -88,7 +88,7 @@ const Portal = memo(
             >
               <div className="w-6 h-px" style={{ background: palette.gold }} />
               <span className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: palette.gold }}>
-                4Life Network
+                Партнёрская программа 4Life
               </span>
               <div className="w-6 h-px" style={{ background: palette.gold }} />
             </motion.div>
@@ -133,9 +133,9 @@ const Portal = memo(
                 color: palette.overlay40,
               }}
             >
-              План и условия. Без гарантий дохода.
+              Модель, расходы и правила участия.
               <br />
-              Пространство для тех, кто хочет большего.{" "}
+              Всё важное — до регистрации.{" "}
             </motion.p>
 
             {/* Scroll cue */}
