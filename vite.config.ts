@@ -51,6 +51,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: false,
       open: true,
+      allowedHosts: ["sb-6pkzp463q9t2.vercel.run"],
     },
     resolve: {
       alias: {
