@@ -1,144 +1,92 @@
-/**
- * ContentPanel — весь текстовый контент продукта.
- * Используется и на мобилке (в скроллируемой области), и на десктопе.
- * Все иконки строго импортируются из единого пульта @/utils/icons.
- */
-import { DetailedProduct } from "@/data/productsData";
+import { siteConfig } from "@/site-config/site";
+import { DetailedProduct, getProductCatalogSummary } from "@/data/productsData";
+import { useProductList } from "@/hooks/useProductList";
 import { Icons } from "@/utils/icons";
-import React from "react";
+import React, { useMemo } from "react";
 
 interface ContentPanelProps {
   product: DetailedProduct;
   isMobile: boolean;
-  onAddToCart: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const ContentPanel: React.FC<ContentPanelProps> = ({ product, isMobile, onAddToCart }) => {
-  const qty = product.capsules ? `${product.capsules} капсул` : product.servings ? `${product.servings} порций` : null;
+export const ContentPanel: React.FC<ContentPanelProps> = ({ product }) => {
+  const { items, addToList } = useProductList();
+  const currentItem = items.find((item) => item.id === product.id);
+  const quantity = currentItem?.quantity ?? 0;
+  const ingredients = useMemo(() => product.keyIngredients ?? [], [product.keyIngredients]);
+  const productFormat = product.capsules
+    ? `${product.capsules} капсул`
+    : product.servings
+      ? `${product.servings} порций`
+      : "см. упаковку";
 
-  const t = {
-    text: "text-white",
-    muted: "text-slate-400",
-    subtle: "text-slate-500",
-    border: "border-white/[0.08]",
-    tag: "bg-white/5 text-slate-300 border border-white/10",
-    support: "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20",
-    science: "bg-blue-500/5 border border-blue-400/10",
-    scienceText: "text-slate-400",
-    scienceLabel: "text-blue-400/70",
-    composition: "text-slate-500",
-  };
+  const handleAddToList = () => addToList(product, 1);
 
   return (
-    <div className="space-y-5">
-      {/* Categories */}
-      <div className="flex flex-wrap gap-1.5">
-        {product.categories.map((cat) => (
-          <span key={cat} className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${t.tag}`}>
-            {cat}
-          </span>
-        ))}
-      </div>
+    <div className="flex flex-col gap-7 px-5 py-6 md:gap-8 md:px-8 md:py-8">
+      <header>
+        <p className="typography-label mb-3 text-cyan-400">4Life · {product.categories.slice(0, 2).join(" / ")}</p>
+        <h2 className="typography-h2 text-balance text-white">{product.name}</h2>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">{getProductCatalogSummary(product)}</p>
+      </header>
 
-      {/* Name */}
-      <h2
-        className={`font-bold leading-tight tracking-tight ${t.text} ${isMobile ? "text-2xl" : "text-2xl md:text-3xl"}`}
-      >
-        {product.name}
-      </h2>
-
-      {/* Price + volume */}
-      <div className={`flex items-center gap-4 py-3 px-4 rounded-2xl border ${t.border} bg-white/[0.02]`}>
-        <div>
-          <p className={`text-[9px] uppercase tracking-widest font-semibold mb-0.5 ${t.subtle}`}>Цена</p>
-          <p className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent from-cyan-400 to-blue-400">
-            {product.lp} LP
-          </p>
+      <dl className="grid grid-cols-3 divide-x divide-white/[0.08] border-y border-white/[0.08] py-4">
+        <div className="pr-3">
+          <dt className="typography-label text-slate-500">Лояльность</dt>
+          <dd className="mt-2 font-mono text-lg tabular-nums text-white">{product.lp} LP</dd>
         </div>
-        {qty && (
-          <>
-            <div className="w-px h-8 bg-white/10" />
-            <div>
-              <p className={`text-[9px] uppercase tracking-widest font-semibold mb-0.5 ${t.subtle}`}>Объём</p>
-              <p className={`text-sm font-medium ${t.muted}`}>{qty}</p>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Description */}
-      <p className={`text-sm leading-relaxed ${t.muted}`}>{product.mainDescription}</p>
-
-      {/* Main support */}
-      {product.mainSupport.length > 0 && (
-        <div className="space-y-2">
-          <p className={`text-[10px] font-bold uppercase tracking-widest ${t.subtle}`}>Поддерживает</p>
-          <div className="flex flex-wrap gap-1.5">
-            {product.mainSupport.map((s) => (
-              <span key={s} className={`px-2.5 py-1 text-xs rounded-lg font-medium ${t.support}`}>
-                {s}
-              </span>
-            ))}
-          </div>
+        <div className="px-3">
+          <dt className="typography-label text-slate-500">Формат</dt>
+          <dd className="mt-2 text-sm text-white">{productFormat}</dd>
         </div>
-      )}
+        <div className="pl-3">
+          <dt className="typography-label text-slate-500">ID партнёра</dt>
+          <dd className="mt-2 font-mono text-sm tabular-nums text-white">{siteConfig.distributor.fourLifeId}</dd>
+        </div>
+      </dl>
 
-      {/* Key benefits */}
-      {product.keyBenefits.length > 0 && (
-        <div className="space-y-2">
-          <p className={`text-[10px] font-bold uppercase tracking-widest ${t.subtle}`}>Преимущества</p>
-          <ul className="space-y-2">
-            {product.keyBenefits.map((b, i) => (
-              <li key={i} className="flex items-start gap-2.5">
-                <div className="mt-1 w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-400/15 border border-emerald-400/30">
-                  <Icons.Check className="w-2 h-2 text-emerald-400" />
-                </div>
-                <span className={`text-xs leading-relaxed ${t.muted}`}>{b}</span>
+      <section aria-labelledby="product-composition-title">
+        <div className="mb-4 flex items-end justify-between gap-4">
+          <h3 id="product-composition-title" className="typography-h3 text-white">Состав и маркировка</h3>
+          <span className="typography-label text-slate-500">по каталогу</span>
+        </div>
+        <p className="text-sm leading-7 text-slate-300">{product.composition}</p>
+        {ingredients.length > 0 ? (
+          <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-white/[0.08] pt-4">
+            {ingredients.map((ingredient, index) => (
+              <li key={`${ingredient}-${index}`} className="text-xs leading-5 text-slate-400">
+                <span className="mr-2 font-mono tabular-nums text-cyan-400">{String(index + 1).padStart(2, "0")}</span>
+                {ingredient}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : null}
+        <p className="mt-4 text-xs leading-6 text-slate-500">Сверяйте полный состав, аллергены и предупреждения с этикеткой конкретного продукта и рынка.</p>
+      </section>
 
-      {/* How to use */}
-      <div className="space-y-1.5">
-        <p className={`text-[10px] font-bold uppercase tracking-widest ${t.subtle}`}>Применение</p>
-        <p className={`text-xs leading-relaxed ${t.muted}`}>{product.howToUse}</p>
+      <section className="border-l border-cyan-400/50 pl-4" aria-labelledby="product-evidence-title">
+        <h3 id="product-evidence-title" className="typography-label text-cyan-300">Научные данные и патенты</h3>
+        <p className="mt-3 text-sm leading-6 text-slate-400">Для этой формулы на странице не приведены проверяемые ссылки на независимые клинические исследования или конкретные патенты. Поэтому количественные медицинские эффекты здесь не заявляются.</p>
+      </section>
+
+      <section aria-labelledby="product-use-title">
+        <h3 id="product-use-title" className="typography-h3 text-white">Применение</h3>
+        <p className="mt-3 text-sm leading-6 text-slate-300">В каталоге указано: {product.howToUse}</p>
+        <p className="mt-3 text-xs leading-6 text-slate-500">Информация не заменяет инструкцию производителя и медицинскую консультацию. При беременности, хронических заболеваниях, аллергиях или приёме лекарств уточните применение у врача.</p>
+      </section>
+
+      <div className="flex flex-col gap-3 border-t border-white/[0.08] pt-6">
+        <button
+          type="button"
+          onClick={handleAddToList}
+          className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-cyan-400 px-5 text-sm font-semibold text-[#03050a] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label={quantity > 0 ? `Добавить ещё одну упаковку ${product.name} в список заказа` : `Добавить ${product.name} в список заказа`}
+        >
+          <Icons.ShoppingBag className="size-4" aria-hidden="true" />
+          {quantity > 0 ? `✓ В вашем списке (${quantity} шт.) — добавить ещё` : "Добавить в список заказа"}
+        </button>
+        <p className="text-center text-xs leading-5 text-slate-500">Партнёрский ID будет включён в сообщение. Итоговую цену, скидку и наличие подтвердите перед оплатой.</p>
       </div>
-
-      {/* Scientific evidence */}
-      {product.scientificEvidence && (
-        <div className={`p-4 rounded-2xl space-y-1.5 ${t.science}`}>
-          <div className="flex items-center gap-2">
-            <Icons.FlaskConical className={`w-3.5 h-3.5 flex-shrink-0 ${t.scienceLabel}`} />
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${t.scienceLabel}`}>Научная база</span>
-          </div>
-          <p className={`text-xs leading-relaxed ${t.scienceText}`}>{product.scientificEvidence}</p>
-        </div>
-      )}
-
-      {/* Composition */}
-      {product.composition && (
-        <div className="space-y-1.5 pb-2">
-          <p className={`text-[10px] font-bold uppercase tracking-widest ${t.subtle}`}>Состав</p>
-          <p className={`text-[11px] leading-relaxed ${t.composition}`}>{product.composition}</p>
-        </div>
-      )}
-
-      {/* Desktop CTA */}
-      {!isMobile && (
-        <div className={`pt-4 border-t ${t.border}`}>
-          <button
-            onClick={onAddToCart}
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-semibold text-base text-white transition-all duration-200 active:scale-[0.98] shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-cyan-500/20 hover:shadow-cyan-500/30"
-          >
-            {/* ИСПРАВЛЕНИЕ: Иконка ShoppingCart заменена на ShoppingBag для сквозной гармонии с хедером */}
-            <Icons.ShoppingBag className="w-5 h-5" />
-            <span>Добавить в список</span>
-          </button>
-          <p className={`text-center text-xs mt-2 ${t.subtle}`}>Консультация по подбору — бесплатно</p>
-        </div>
-      )}
     </div>
   );
 };

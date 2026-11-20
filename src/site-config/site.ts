@@ -2,25 +2,40 @@
  * Конфигурация сайта с использованием переменных окружения для чувствительных данных
  */
 export const siteConfig = {
-  name: "4Life: Здоровье, Энергия, Возможности",
+  name: "4Life Biophysics — Александр Тощев",
   description:
-    "Официальный представитель 4Life. Инвестируйте в свое здоровье и будущее с продукцией для иммунной системы, энергией и возможностями партнерства.",
-  url: import.meta.env.VITE_SITE_URL || "https://example.com",
+    "Независимый дистрибьютор 4Life Research. Информация о продуктах, заказе и партнёрстве в Москве.",
+  url: import.meta.env.VITE_SITE_URL || "https://4life-toshchev.ru",
   ogImage: import.meta.env.VITE_OG_IMAGE || "/favicon.svg",
   links: {
-    telegram: import.meta.env.VITE_TELEGRAM_URL || "https://t.me/username",
-    whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",
+    telegram: "https://t.me/+79152561177",
+    whatsapp: "https://wa.me/79152561177",
   },
   distributor: {
     name: "Александр Тощев",
-    title: "Независимый Дистрибьютор 4Life & Наставник по саморазвитию",
+    rank: "Builder Elite",
+    title: "Независимый дистрибьютор 4Life & Наставник",
+    fourLifeId: "12299550",
+    signupUrl: "https://russia.4life.com/12299550/signup/PC",
   },
   contact: {
-    fourLifeId: import.meta.env.VITE_4LIFE_ID || "00000000",
-    whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/",
-    email: import.meta.env.VITE_CONTACT_EMAIL || "contact@example.com",
-    phone: import.meta.env.VITE_DISTRIBUTOR_PHONE || "+7 (XXX) XXX-XX-XX",
-    address: import.meta.env.VITE_OFFICE_ADDRESS || "Москва, Россия",
+    fourLifeId: "12299550",
+    phone: "+7 (915) 256-11-77",
+    phoneRaw: "+79152561177",
+    whatsapp: "https://wa.me/79152561177",
+    telegram: "https://t.me/+79152561177",
+    email: "contact@4life-toshchev.ru",
+    address: "Москва, Россия",
+    callSchedule: "Звонки: Будни 19:00–21:00 МСК | Сб 18:00–20:00 | Вс 11:00–13:00. В мессенджерах — круглосуточно.",
+  },
+  office: {
+    name: "Региональный Центр 4Life РЦ 67",
+    address: "г. Москва, м. Новослободская, ул. Селезнёвская, 11А, стр. 2, офис 220А (2-й этаж)",
+    phone: "8 (929) 681-10-22",
+    phoneRaw: "+79296811022",
+    whatsapp: "https://wa.me/79296811022",
+    telegram: "https://t.me/+79296811022",
+    max: "https://max.ru",
   },
 };
 

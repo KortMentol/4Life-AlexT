@@ -72,15 +72,15 @@ const HomePage: React.FC = () => {
       title: "Трай-Фактор Формула",
       description:
         "Революционное достижение науки о трансферцевтиках, поднимает здоровье иммунной системы на новый уровень",
-      image: tfPlusImg,
+      image: tfTrifactorImg,
       link: "/products",
     },
     {
       id: 2,
       title: "Трансфер Фактор Плюс",
       description:
-        "Помогает работе вашего иммунитета и поддерживает оптимальное здоровье, самочувствие и качество жизни",
-      image: tfTrifactorImg,
+        "Состав с трансфер-факторами и растительными компонентами для повседневного рациона.",
+      image: tfPlusImg,
       link: "/products",
     },
     {
@@ -192,10 +192,11 @@ const HomePage: React.FC = () => {
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
+          contentClasses="flex flex-col items-center justify-center w-full"
           edgeFade={{ top: 250, bottom: 250, colorDark: "#03050a" }}
         >
-          <div className="py-24 sm:py-32">
-            <div className="container max-w-7xl mx-auto px-6">
+          <div className="py-24 sm:py-32 w-full">
+            <div className="container max-w-7xl mx-auto w-full px-4 md:px-8">
               <div className="text-center mb-20">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/60 mb-4">
                   Научный подход к здоровью
@@ -212,11 +213,9 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="container max-w-7xl mx-auto">
+            <div className="container max-w-7xl mx-auto w-full px-4 md:px-8">
               <Suspense fallback={<div className="h-[480px] w-full" />}>
-                <div className="px-20">
-                  <ImmersiveProductShowcase products={popularProducts} />
-                </div>
+                <ImmersiveProductShowcase products={popularProducts} />
               </Suspense>
 
               <div className="mt-20 mb-8 text-center px-6">

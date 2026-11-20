@@ -1,270 +1,240 @@
-/**
- * @module ProductsGrid
- * @description Three distinct grid layouts — Tibico-exact structure with high-performance asset loading.
- *
- * ОПТИМИЗАЦИЯ ЗАГРУЗКИ (Awwwards Pro):
- * 1. [Adaptive Eager Loading]: Первые 6 карточек каталога (первый экран) загружаются принудительно (loading="eager"),
- *    что полностью устраняет "вспышки" пустых блоков при входе на страницу.
- * 2. [Deferred Lazy Loading]: Остальные 11 карточек грузятся отложено (loading="lazy"), не забивая сетевой поток при старте.
- * 3. [Off-Thread Decoding]: Все изображения декодируются асинхронно (decoding="async") для защиты от фризов основного потока.
- *
- * @author Geminis AI & Kort
- * @version 15.1.0
- */
-
-import { DetailedProduct } from "@/data/productsData";
+import { DetailedProduct, getProductCatalogSummary } from "@/data/productsData";
+import { useProductList } from "@/hooks/useProductList";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { Icons } from "@/utils/icons";
-import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import React, { ChangeEvent } from "react";
+
+export interface CatalogFilter {
+  id: string;
+  label: string;
+  categories?: string[];
+}
+
+export type CatalogGridColumns = 2 | 3 | 4;
 
 interface ProductsGridProps {
   products: DetailedProduct[];
-  gridMode: 2 | 3 | 4;
-  setGridMode: (mode: 2 | 3 | 4) => void;
-  selectedCategory: string | null;
-  onClearFilters: () => void;
+  allProducts: DetailedProduct[];
+  filters: CatalogFilter[];
+  activeFilter: string;
+  onFilterChange: (filterId: string) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  gridColumns: CatalogGridColumns;
+  onGridColumnsChange: (columns: CatalogGridColumns) => void;
   onProductClick: (product: DetailedProduct) => void;
+  onClearFilters: () => void;
 }
 
-const TibicoIcon: React.FC = () => (
-  <div
-    className="absolute bottom-0 right-0 z-10 w-14 h-14 rounded-tl-3xl flex items-center justify-center"
-    style={{ backgroundColor: "#020617" }}
-  >
-    <div className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-800">
-      <Icons.Menu className="w-4 h-4 text-slate-400" strokeWidth={1.8} />
-    </div>
-  </div>
-);
-
-const TibicoCard: React.FC<{
-  product: DetailedProduct;
-  idx: number;
-  gridMode: 3 | 4;
-  onClick: () => void;
-}> = ({ product, idx, gridMode, onClick }) => (
-  <div
-    data-product-id={product.id}
-    className="product-card-wrapper product-card-tibico"
-    style={{ "--card-delay": `${Math.min(idx * 30, 350)}ms` } as React.CSSProperties}
-    onClick={onClick}
-  >
-    <div className="product-image-container rounded-2xl overflow-hidden bg-[#111827]">
-      <img
-        src={product.image}
-        alt={product.name}
-        // Оптимизация: Первые 6 продуктов на первом экране грузятся мгновенно, остальные лениво
-        loading={idx < 6 ? "eager" : "lazy"}
-        decoding="async"
-        className="product-image-premium w-full h-full object-contain p-4 relative z-10"
-      />
-      <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/50 text-white/80 border border-white/10">
-        {product.lp} LP
-      </div>
-      <TibicoIcon />
-    </div>
-
-    <div className="pt-3 px-0.5">
-      <div className="flex flex-wrap gap-x-2 mb-1">
-        {product.categories.slice(0, gridMode === 4 ? 1 : 2).map((cat) => (
-          <span key={cat} className="text-[9px] uppercase tracking-[0.14em] font-semibold text-slate-500">
-            {cat}
-          </span>
-        ))}
-      </div>
-      <h3
-        className={`font-bold leading-snug line-clamp-2 ${
-          gridMode === 3 ? "text-base" : "text-sm min-h-[2.5rem]"
-        } text-white`}
-      >
-        {product.name}
-      </h3>
-      {gridMode === 3 && (
-        <p className="text-xs leading-relaxed line-clamp-2 mt-1 mb-[1.5rem] text-slate-500">
-          {product.shortDescription}
-        </p>
-      )}
-    </div>
-  </div>
-);
-
-const DetailCard: React.FC<{
-  product: DetailedProduct;
-  idx: number;
-  onClick: () => void;
-}> = ({ product, idx, onClick }) => {
-  const qty = product.capsules ? `${product.capsules} капс.` : product.servings ? `${product.servings} порц.` : null;
-
-  return (
-    <div
-      data-product-id={product.id}
-      className="product-card-wrapper product-card-tibico cursor-pointer flex flex-row gap-4 items-start"
-      style={{ "--card-delay": `${Math.min(idx * 35, 400)}ms` } as React.CSSProperties}
-      onClick={onClick}
-    >
-      <div
-        className="product-image-container rounded-2xl overflow-hidden flex-shrink-0 bg-[#111827]"
-        style={{ width: "42%", aspectRatio: "1/1" }}
-      >
-        <img
-          src={product.image}
-          alt={product.name}
-          // Оптимизация: Первые 6 продуктов на первом экране грузятся мгновенно, остальные лениво
-          loading={idx < 6 ? "eager" : "lazy"}
-          decoding="async"
-          className="product-image-premium w-full h-full object-contain p-4 relative z-10"
-        />
-        <div className="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/50 text-white/70 border border-white/10">
-          {product.lp} LP
-        </div>
-        <TibicoIcon />
-      </div>
-
-      <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
-        <div className="flex flex-wrap gap-x-2">
-          {product.categories.slice(0, 2).map((cat) => (
-            <span key={cat} className="text-[9px] uppercase tracking-[0.14em] font-semibold text-slate-500">
-              {cat}
-            </span>
-          ))}
-        </div>
-        <h3 className="text-sm font-bold leading-snug line-clamp-2 text-white">{product.name}</h3>
-        <p className="text-xs leading-relaxed line-clamp-3 text-slate-500">{product.shortDescription}</p>
-        <div className="flex flex-wrap gap-1">
-          {product.mainSupport.slice(0, 2).map((s) => (
-            <span
-              key={s}
-              className="px-2 py-0.5 text-[10px] rounded-lg font-medium bg-white/[0.02] text-slate-400 border border-white/[0.031]"
-            >
-              {s}
-            </span>
-          ))}
-        </div>
-        {qty && <span className="text-[10px] text-slate-600">{qty}</span>}
-      </div>
-    </div>
-  );
+const GRID_CLASS: Record<CatalogGridColumns, string> = {
+  2: "grid-cols-1 md:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3",
+  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
 };
 
-const ProductsGrid: React.FC<ProductsGridProps> = ({
-  products,
-  gridMode,
-  setGridMode,
-  selectedCategory,
-  onClearFilters,
-  onProductClick,
-}) => {
-  return (
-    <>
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">Коллекция</h2>
-          <span className="text-sm font-medium text-gray-400 mt-2">
-            {products.length} {products.length === 1 ? "продукт" : products.length < 5 ? "продукта" : "продуктов"}
-          </span>
-          <AnimatePresence>
-            {selectedCategory && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-                onClick={onClearFilters}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors mt-2 bg-white/10 text-gray-300 hover:bg-white/20"
-              >
-                <Icons.X className="w-3 h-3" /> Сбросить
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
+const getProductAura = (product: DetailedProduct): string => {
+  const categories = product.categories.map((category) => category.toLocaleLowerCase("ru"));
+  if (categories.some((category) => category.includes("энергия") || category.includes("спорт"))) return "rgba(6,182,212,0.22)";
+  if (categories.some((category) => category.includes("красота") || category.includes("женское"))) return "rgba(185,151,74,0.20)";
+  if (categories.some((category) => category.includes("пищеварение") || category.includes("детокс"))) return "rgba(34,197,94,0.17)";
+  if (categories.some((category) => category.includes("сердце") || category.includes("память"))) return "rgba(129,140,248,0.18)";
+  return "rgba(6,182,212,0.20)";
+};
 
-        {/* Grid switcher */}
-        <div className="hidden md:flex items-center gap-1 p-1 rounded-xl bg-gray-900/80 border border-gray-800">
-          {([2, 3, 4] as const).map((num) => {
-            const labels: Record<number, string> = {
-              2: "Детали",
-              3: "Каталог",
-              4: "Обзор",
-            };
-            return (
-              <button
-                key={num}
-                onClick={() => setGridMode(num)}
-                title={labels[num]}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  gridMode === num ? "bg-gray-800 text-cyan-400 shadow-sm" : "text-gray-500 hover:text-gray-300"
-                }`}
-                aria-label={labels[num]}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  {num === 2 && (
-                    <>
-                      <rect x="3" y="3" width="8" height="18" rx="1.5" />
-                      <rect x="13" y="3" width="8" height="18" rx="1.5" />
-                    </>
-                  )}
-                  {num === 3 && (
-                    <>
-                      <rect x="3" y="3" width="5" height="18" rx="1" />
-                      <rect x="10" y="3" width="4" height="18" rx="1" />
-                      <rect x="16" y="3" width="5" height="18" rx="1" />
-                    </>
-                  )}
-                  {num === 4 && (
-                    <>
-                      <rect x="3" y="3" width="4" height="18" rx="0.5" />
-                      <rect x="8.5" y="3" width="3" height="18" rx="0.5" />
-                      <rect x="13" y="3" width="3" height="18" rx="0.5" />
-                      <rect x="17.5" y="3" width="3.5" height="18" rx="0.5" />
-                    </>
-                  )}
-                </svg>
-              </button>
-            );
-          })}
+export const ProductsGrid: React.FC<ProductsGridProps> = ({
+  products,
+  allProducts,
+  filters,
+  activeFilter,
+  onFilterChange,
+  searchValue,
+  onSearchChange,
+  gridColumns,
+  onGridColumnsChange,
+  onProductClick,
+  onClearFilters,
+}) => {
+  const tier = usePerformanceTier();
+  const prefersReducedMotion = useReducedMotion();
+  const { items, addToList } = useProductList();
+  const reduceEntrance = tier === "low" || Boolean(prefersReducedMotion);
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(event.currentTarget.value);
+  };
+
+  const getFilterCount = (filter: CatalogFilter): number => {
+    if (!filter.categories?.length) return allProducts.length;
+    return allProducts.filter((product) =>
+      product.categories.some((category) => {
+        const normalizedCategory = category.toLocaleLowerCase("ru");
+        return filter.categories?.some((term) => {
+          const normalizedTerm = term.toLocaleLowerCase("ru");
+          return normalizedCategory.includes(normalizedTerm) || normalizedTerm.includes(normalizedCategory);
+        });
+      }),
+    ).length;
+  };
+
+  return (
+    <section aria-labelledby="product-catalog-title" className="mx-auto w-full max-w-[1440px] px-4 pb-20 md:px-8">
+      <div className="mb-7 flex flex-col gap-5 border-b border-white/[0.08] pb-6 md:mb-9 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="typography-label mb-3 text-cyan-400">Линейка 4Life · 17 формул</p>
+          <h2 id="product-catalog-title" className="typography-h2 text-white">Каталог формул</h2>
+        </div>
+        <p className="max-w-lg typography-body text-slate-400">
+          Состав и маркировка могут различаться по рынкам и партиям. Перед заказом сверяйте информацию с актуальной упаковкой.
+        </p>
+      </div>
+
+      <div className="sticky top-[4.5rem] z-30 mb-9 rounded-2xl border border-white/[0.08] bg-[#050811]/95 p-3 shadow-[0_18px_48px_rgba(0,0,0,0.32)] md:px-5 md:py-3.5">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex min-w-0 gap-1 overflow-x-auto pb-1 xl:pb-0" role="tablist" aria-label="Категории продуктов">
+            {filters.map((filter) => {
+              const isActive = activeFilter === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  id={`catalog-tab-${filter.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="catalog-products"
+                  onClick={() => onFilterChange(filter.id)}
+                  className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 md:px-3.5 ${isActive ? "border border-cyan-400/30 bg-cyan-400/[0.08] text-cyan-200" : "border border-transparent text-slate-400"}`}
+                >
+                  <span>{filter.label}</span>
+                  <span className="tabular-nums text-[10px] text-slate-500">{getFilterCount(filter)}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-3 xl:shrink-0">
+            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/[0.08] bg-[#080d18] px-3 py-2.5 focus-within:border-cyan-400/40 xl:w-64 xl:flex-none">
+              <Icons.Search aria-hidden="true" className="size-4 shrink-0 text-slate-500" />
+              <span className="sr-only">Поиск по названию и описанию</span>
+              <input
+                type="search"
+                value={searchValue}
+                onChange={handleSearchChange}
+                placeholder="Название или эффект"
+                className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                aria-label="Поиск по названию и описанию продуктов"
+              />
+            </label>
+            <div className="flex shrink-0 items-center gap-1" role="group" aria-label="Количество колонок каталога">
+              {([2, 3, 4] as const).map((columns) => (
+                <button
+                  key={columns}
+                  type="button"
+                  aria-label={`Сетка: ${columns} колонки`}
+                  aria-pressed={gridColumns === columns}
+                  onClick={() => onGridColumnsChange(columns)}
+                  className={`grid size-10 place-items-center rounded-lg border text-xs tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${gridColumns === columns ? "border-cyan-400/35 bg-cyan-400/[0.08] text-cyan-200" : "border-white/[0.08] text-slate-500"}`}
+                >
+                  {columns}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ─── GRID 4: Compact overview ─── */}
-      {gridMode === 4 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-          {products.map((product, idx) => (
-            <TibicoCard
-              key={product.id}
-              product={product}
-              idx={idx}
-              gridMode={4}
-              onClick={() => onProductClick(product)}
-            />
-          ))}
-        </div>
-      )}
+      <div id="catalog-products" role="tabpanel" aria-labelledby={`catalog-tab-${activeFilter}`}>
+        <p className="mb-4 typography-label text-slate-500" aria-live="polite">
+          {products.length} {products.length === 1 ? "формула" : "формул"}
+        </p>
+        {products.length > 0 ? (
+          <div className={`grid ${GRID_CLASS[gridColumns]} gap-4 md:gap-5`}>
+            {products.map((product, index) => {
+              const listItem = items.find((item) => item.id === product.id);
+              const quantity = listItem?.quantity ?? 0;
+              const aura = getProductAura(product);
+              const category = product.categories[0] ?? "Формула 4Life";
 
-      {/* ─── GRID 3: Catalog ─── */}
-      {gridMode === 3 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {products.map((product, idx) => (
-            <TibicoCard
-              key={product.id}
-              product={product}
-              idx={idx}
-              gridMode={3}
-              onClick={() => onProductClick(product)}
-            />
-          ))}
-        </div>
-      )}
+              return (
+                <motion.article
+                  key={product.id}
+                  initial={reduceEntrance ? false : { opacity: 0, y: 18 }}
+                  whileInView={reduceEntrance ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-5%" }}
+                  transition={{ duration: 0.55, delay: Math.min(index, 7) * 0.035, ease: [0.16, 1, 0.3, 1] }}
+                  className={`group flex min-w-0 flex-col overflow-hidden rounded-[1.6rem] border border-white/[0.08] bg-[#050811] ${gridColumns === 2 ? "md:flex-row" : ""}`}
+                >
+                  <div
+                    className={`relative flex min-h-64 items-center justify-center overflow-hidden bg-[#060a14] p-5 ${gridColumns === 2 ? "md:min-h-80 md:w-[46%]" : ""}`}
+                    style={{ backgroundImage: `radial-gradient(ellipse at 50% 58%, ${aura}, transparent 64%)` }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onProductClick(product)}
+                      className="absolute inset-0 z-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400"
+                      aria-label={`Подробнее о продукте: ${product.name}`}
+                    />
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="pointer-events-none relative z-[1] max-h-56 max-w-full object-contain md:max-h-64"
+                    />
+                    <div className="pointer-events-none absolute bottom-4 left-5 z-[2] typography-label text-white/55">{category}</div>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        addToList(product, 1);
+                      }}
+                      aria-label={quantity > 0 ? `В списке заказа ${quantity} штук. Добавить ещё ${product.name}` : `Добавить ${product.name} в список заказа`}
+                      title={quantity > 0 ? `В списке: ${quantity}. Добавить ещё` : "Добавить в список заказа"}
+                      className={`absolute bottom-3 right-3 z-[3] grid min-h-11 min-w-11 place-items-center rounded-xl border px-3 text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 ${quantity > 0 ? "border-cyan-400/50 bg-cyan-400/[0.12] text-cyan-200" : "border-white/[0.12] bg-[#03050a]/85 text-white"}`}
+                    >
+                      {quantity > 0 ? `✓ ${quantity}` : "+"}
+                    </button>
+                  </div>
 
-      {/* ─── GRID 2: Detail horizontal ─── */}
-      {gridMode === 2 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-          {products.map((product, idx) => (
-            <DetailCard key={product.id} product={product} idx={idx} onClick={() => onProductClick(product)} />
-          ))}
-        </div>
-      )}
-    </>
+                  <div className={`flex min-w-0 flex-1 flex-col p-5 md:p-6 ${gridColumns === 2 ? "md:justify-center" : ""}`}>
+                    <p className="typography-label mb-2 text-cyan-400/80">{product.lp} LP</p>
+                    <button
+                      type="button"
+                      onClick={() => onProductClick(product)}
+                      className="text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                    >
+                      <h3 className="typography-h3 text-white">{product.name}</h3>
+                    </button>
+                    <p className="mt-3 typography-body text-slate-400">{getProductCatalogSummary(product)}</p>
+                    {gridColumns === 2 ? (
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">{product.keyIngredients.slice(0, 4).join(" · ")}</p>
+                    ) : null}
+                    <div className="mt-auto flex items-end justify-between gap-4 border-t border-white/[0.08] pt-4">
+                      <p className="typography-label text-slate-500">
+                        {product.servings ? `${product.servings} порций` : "Состав — на упаковке"}
+                      </p>
+                      <span className="typography-label text-white/70">Подробнее <Icons.ArrowRight aria-hidden="true" className="ml-1 inline size-3.5" /></span>
+                    </div>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-white/[0.12] px-6 text-center">
+            <p className="typography-h3 text-white">Ничего не найдено</p>
+            <p className="mt-2 max-w-md typography-body text-slate-400">Измените запрос или вернитесь ко всем формулам.</p>
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="mt-5 rounded-xl border border-cyan-400/30 px-4 py-2.5 text-sm text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            >
+              Сбросить фильтры
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 

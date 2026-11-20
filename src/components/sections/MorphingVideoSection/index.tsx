@@ -78,6 +78,60 @@ const ContinuousGlowFrame: React.FC<{
   );
 };
 
+interface MobileChapterVideoCardProps {
+  number: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  videoSrc: string;
+  videoRef: React.Ref<HTMLVideoElement>;
+  onPlay: () => void;
+}
+
+const MobileChapterVideoCard: React.FC<MobileChapterVideoCardProps> = ({
+  number,
+  eyebrow,
+  title,
+  description,
+  videoSrc,
+  videoRef,
+  onPlay,
+}) => (
+  <article className="flex flex-col gap-5 rounded-[2rem] border border-white/[0.08] bg-[#050811]/90 p-6 shadow-2xl">
+    <header className="flex items-start justify-between gap-5">
+      <div className="min-w-0">
+        <p className="typography-label mb-2 text-cyan-400/80">{eyebrow}</p>
+        <h2 className="typography-h3 text-white">{title}</h2>
+      </div>
+      <span className="shrink-0 font-heading text-4xl font-light tabular-nums text-cyan-400/35">{number}</span>
+    </header>
+    <p className="typography-body text-slate-400 text-pretty">{description}</p>
+    <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/[0.08] bg-[#03050a]">
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+        className="h-full w-full object-cover opacity-75"
+      />
+      <button
+        type="button"
+        onClick={onPlay}
+        aria-label={`Смотреть видео: ${title}`}
+        className="absolute inset-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400 active:scale-[0.96]"
+      >
+        <span className="flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-3 text-white">
+          <Icons.Play fill="currentColor" stroke="none" className="h-4 w-4 text-cyan-400" aria-hidden="true" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
+        </span>
+      </button>
+    </div>
+  </article>
+);
+
 const MorphingVideoSection: React.FC = () => {
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
@@ -89,6 +143,7 @@ const MorphingVideoSection: React.FC = () => {
   const block1Ref = useRef<HTMLDivElement>(null);
   const block2Ref = useRef<HTMLDivElement>(null);
   const block3Ref = useRef<HTMLDivElement>(null);
+  const mobileVideoRefs = useRef<Array<HTMLVideoElement | null>>([null, null, null]);
 
   const [vimeoOpen, setVimeoOpen] = useState(false);
   const [vimeoUrl, setVimeoUrl] = useState("");
@@ -117,6 +172,49 @@ const MorphingVideoSection: React.FC = () => {
     setVimeoOpen(false);
     setVimeoUrl("");
   }, []);
+
+  useEffect(() => {
+    if (!isTouchDevice || vimeoOpen) return;
+
+    const videos = mobileVideoRefs.current.filter((video): video is HTMLVideoElement => video !== null);
+    if (videos.length === 0) return;
+
+    const visibility = new Map<HTMLVideoElement, number>(videos.map((video): [HTMLVideoElement, number] => [video, 0]));
+    let activeVideo: HTMLVideoElement | null = null;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target instanceof HTMLVideoElement) {
+            visibility.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+          }
+        }
+
+        let nextVideo: HTMLVideoElement | null = null;
+        let highestRatio = 0.6;
+        for (const video of videos) {
+          const ratio = visibility.get(video) ?? 0;
+          if (ratio >= highestRatio) {
+            highestRatio = ratio;
+            nextVideo = video;
+          }
+        }
+
+        if (activeVideo !== nextVideo) activeVideo?.pause();
+        activeVideo = nextVideo;
+        for (const video of videos) {
+          if (video !== activeVideo) video.pause();
+        }
+        if (activeVideo?.paused) void activeVideo.play().catch(() => undefined);
+      },
+      { threshold: [0, 0.6] },
+    );
+
+    videos.forEach((video) => observer.observe(video));
+    return () => {
+      observer.disconnect();
+      videos.forEach((video) => video.pause());
+    };
+  }, [isTouchDevice, vimeoOpen]);
 
   const handleOpenVimeo1 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[0]!), [handleOpenVimeoModal]);
   const handleOpenVimeo2 = useCallback(() => handleOpenVimeoModal(VIMEO_URLS[1]!), [handleOpenVimeoModal]);
@@ -220,14 +318,12 @@ const MorphingVideoSection: React.FC = () => {
                           <ContinuousGlowFrame blockIndex={1} neonColor1="#06b6d4" neonColor2="#0ea5e9" />
                         )}
 
-                        <div className="absolute top-4 right-6 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-500/40 dark:text-slate-500/30 select-none">
-                          [TF.01]
-                        </div>
+                        <p className="typography-label absolute right-6 top-4 max-w-[70%] text-right text-cyan-300/70">Иммунный интеллект</p>
 
                         <h2 className="typography-h2 text-left text-white m-0">Исследования и Инновации</h2>
                         <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
                           В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы,
-                          уникальные молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные
+                          уникальные молекулы, которые &quot;обучают&quot; иммунную систему, оптимизируя её естественные защитные
                           функции для точного и своевременного реагирования. 4Life не просто следует науке — компания её
                           создаёт.
                         </ScrollTextReveal>
@@ -252,9 +348,7 @@ const MorphingVideoSection: React.FC = () => {
                           <ContinuousGlowFrame blockIndex={2} neonColor1="#3b82f6" neonColor2="#0ea5e9" />
                         )}
 
-                        <div className="absolute top-4 right-6 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-500/40 dark:text-slate-500/30 select-none">
-                          [TF.02]
-                        </div>
+                        <p className="typography-label absolute right-6 top-4 max-w-[70%] text-right text-cyan-300/70">Стандарт чистоты cGMP</p>
 
                         <h2 className="typography-h2 text-right text-white m-0">Бескомпромиссный Контроль Качества</h2>
                         <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl ml-auto">
@@ -295,9 +389,7 @@ const MorphingVideoSection: React.FC = () => {
                           <ContinuousGlowFrame blockIndex={3} neonColor1="#06b6d4" neonColor2="#3b82f6" />
                         )}
 
-                        <div className="absolute top-4 right-6 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-500/40 dark:text-slate-500/30 select-none">
-                          [TF.03]
-                        </div>
+                        <p className="typography-label absolute right-6 top-4 max-w-[70%] text-right text-cyan-300/70">Энергия и тонус жизни</p>
 
                         <h2 className="typography-h2 text-center text-white m-0">Подтверждённая Эффективность</h2>
                         <ScrollTextReveal className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto">
@@ -341,109 +433,42 @@ const MorphingVideoSection: React.FC = () => {
           animate={{ opacity: vimeoOpen ? 0 : 1 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="text-center mb-14">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400 mb-3 drop-shadow-md">
-              Наука • Качество • Доверие
-            </h2>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Почему 4Life?</h1>
-            <p className="text-sm text-slate-400 mt-4 leading-relaxed text-pretty">
-              Более двух десятилетий компания посвятила изучению иммунной системы, создавая продукты на стыке науки и
-              природы.
+          <div className="mb-14 text-center">
+            <h2 className="typography-label mb-3 text-cyan-400">Наука · качество · осознанный выбор</h2>
+            <h1 className="typography-h2 text-white">Почему 4Life?</h1>
+            <p className="typography-body mt-4 text-slate-400 text-pretty">
+              История компании и её продуктов — через технологии, производственные стандарты и проверяемую информацию.
             </p>
           </div>
 
-          <div className="space-y-16">
-            <div className="relative border-t border-cyan-500/10 pt-8 flex flex-col gap-5">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-bold text-white">Исследования и Инновации</h2>
-                <span className="text-4xl font-light text-cyan-400/25 font-heading">01</span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы, молекулы,
-                которые "обучают" иммунную систему, оптимизируя её естественные защитные функции для точного
-                реагирования.
-              </p>
-              <div
-                onClick={handleOpenVimeo1}
-                className="relative aspect-video rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-500/15 shadow-xl glass-smoked-acrylic cursor-pointer active:scale-[0.98] transition-all duration-200"
-              >
-                <video
-                  src={VIDEO_ASSETS.video1}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="w-full h-full object-cover opacity-75"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white shadow-lg active:scale-95 transition-transform duration-150">
-                    <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative border-t border-cyan-500/10 pt-8 flex flex-col gap-5">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-bold text-white">Контроль Качества</h2>
-                <span className="text-4xl font-light text-cyan-400/25 font-heading">02</span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                Каждый этап производства проходит строгий контроль. Современные технологии и сертифицированные процессы
-                по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности и эффективности продукции.
-              </p>
-              <div
-                onClick={handleOpenVimeo2}
-                className="relative aspect-video rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-500/15 shadow-xl glass-smoked-acrylic cursor-pointer active:scale-[0.98] transition-all duration-200"
-              >
-                <video
-                  src={VIDEO_ASSETS.video2}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="w-full h-full object-cover opacity-75"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white shadow-lg active:scale-95 transition-transform duration-150">
-                    <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative border-t border-cyan-500/10 pt-8 flex flex-col gap-5">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-bold text-white">Подтверждённая Эффективность</h2>
-                <span className="text-4xl font-light text-cyan-400/25 font-heading">03</span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом,
-                мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная система
-                работает как швейцарские часы.
-              </p>
-              <div
-                onClick={handleOpenVimeo3}
-                className="relative aspect-video rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-500/15 shadow-xl glass-smoked-acrylic cursor-pointer active:scale-[0.98] transition-all duration-200"
-              >
-                <video
-                  src={VIDEO_ASSETS.video3}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="w-full h-full object-cover opacity-75"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white shadow-lg active:scale-95 transition-transform duration-150">
-                    <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-col gap-28">
+            <MobileChapterVideoCard
+              number="01"
+              eyebrow="Иммунный интеллект"
+              title="Исследования и инновации"
+              description="В основе линейки — патентованные технологии Transfer Factor. Чтобы оценить заявленные свойства, сверяйте сведения конкретного продукта с маркировкой и первичными исследованиями."
+              videoSrc={VIDEO_ASSETS.video1}
+              videoRef={(video) => { mobileVideoRefs.current[0] = video; }}
+              onPlay={handleOpenVimeo1}
+            />
+            <MobileChapterVideoCard
+              number="02"
+              eyebrow="Стандарт чистоты cGMP"
+              title="Контроль качества"
+              description="Производитель указывает стандарты и процессы контроля качества. Актуальные сертификаты, состав и сведения о партии проверяйте в официальных материалах."
+              videoSrc={VIDEO_ASSETS.video2}
+              videoRef={(video) => { mobileVideoRefs.current[1] = video; }}
+              onPlay={handleOpenVimeo2}
+            />
+            <MobileChapterVideoCard
+              number="03"
+              eyebrow="Энергия и тонус жизни"
+              title="Повседневная поддержка"
+              description="Ощущения и результаты индивидуальны. Пищевые добавки не заменяют сбалансированное питание, лечение или рекомендации медицинского специалиста."
+              videoSrc={VIDEO_ASSETS.video3}
+              videoRef={(video) => { mobileVideoRefs.current[2] = video; }}
+              onPlay={handleOpenVimeo3}
+            />
           </div>
 
           <div className="mt-14 text-center">

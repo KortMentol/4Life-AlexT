@@ -15,6 +15,7 @@ import { useLocation } from "react-router-dom";
 import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
+import SoundWaveToggle from "@/components/ui/SoundWaveToggle";
 import { useTransition } from "@/context";
 import { useIsMobile, useNativeScroll } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
@@ -216,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                       fontWeight: "500",
                     }}
                   >
-                    Builder Elite
+                    {siteConfig.distributor.rank}
                   </div>
                 </motion.div>
               </button>
@@ -241,16 +242,17 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               <div>
                 <ProductListIcon />
               </div>
-              <div className="w-px h-6 mx-1 bg-white/60" />
-              <div className="w-9 h-9" />
+              <div className="w-px h-6 mx-1 bg-white/20" />
+              <SoundWaveToggle />
             </motion.div>
             <div
-              className="md:hidden"
+              className="md:hidden flex items-center gap-2"
               style={{
                 color: "white",
                 contain: "layout style paint",
               }}
             >
+              <SoundWaveToggle />
               <ProductListIcon />
             </div>
           </div>

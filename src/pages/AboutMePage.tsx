@@ -1,251 +1,104 @@
-/**
- * @module src/pages/AboutMePage.tsx
- * @description Личная страница Александра Тощева в стиле Immersive Garden.
- * Интегрирован единый оркестратор входа PageEntrance для бесшовной анимации переходов.
- * Унифицирована дизайн-система кнопок во всех секциях.
- * @author Kort & AI
- * @version 2.1.0
- */
-
 import { PageEntrance } from "@/components/transitions/PageEntrance";
-import { Button } from "@/components/ui";
-import { useIsMobile, usePerformanceTier } from "@/hooks";
+import { Button, ParallaxImage } from "@/components/ui";
 import { SEO } from "@/seo/SEO";
+import { siteConfig } from "@/site-config/site";
 import { Icons } from "@/utils/icons";
-import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useRef } from "react";
+import workspaceImage from "@/assets/images/backgrounds/editorial-personal-workspace.png";
+import React from "react";
 
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
-  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
-};
+const workingPrinciples = [
+  { number: "01", title: "Разобраться в запросе", copy: "Сначала обсуждаем цель, ограничения и то, что уже известно о продукте. Я не ставлю диагнозы, не назначаю лечение и не подменяю консультацию врача." },
+  { number: "02", title: "Показать источники и условия", copy: "Сверяем состав и маркировку, объясняем порядок заказа и отдельно отмечаем, что является заявлением производителя, а что — подтверждённым условием покупки." },
+  { number: "03", title: "Оставить решение за человеком", copy: "Никаких обещаний результата или дохода. Если продукт или партнёрство не подходит — это нормальный ответ." },
+];
 
-const AboutMePage: React.FC = () => {
-  const tier = usePerformanceTier();
-  const isMobile = useIsMobile();
-  const heroRef = useRef<HTMLDivElement>(null);
+const AboutMePage: React.FC = () => (
+  <main className="bg-[#03050a] text-white">
+    <SEO
+      title="Александр Тощев — независимый партнёр 4Life"
+      description="О подходе Александра Тощева к разговору о продуктах 4Life, оформлении заказов и партнёрстве."
+      path="/about-me"
+      type="website"
+    />
 
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  const shouldAnimate = !isMobile && tier !== "low";
-  const heroY = useTransform(scrollYProgress, [0, 1], shouldAnimate ? ["0%", "25%"] : ["0%", "0%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.4]);
-
-  const values = [
-    {
-      icon: Icons.Heart,
-      title: "Здоровье",
-      description: "Верю, что здоровье — это основа счастливой и полноценной жизни каждого человека.",
-    },
-    {
-      icon: Icons.Users,
-      title: "Помощь людям",
-      description: "Моя цель — делиться знаниями и помогать другим обретать здоровье и благополучие.",
-    },
-    {
-      icon: Icons.TrendingUp,
-      title: "Развитие",
-      description: "Постоянно учусь и совершенствуюсь, чтобы предоставлять лучшую поддержку своим клиентам.",
-    },
-  ];
-
-  return (
-    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <SEO
-        title="Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life"
-        description="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни с помощью продуктов 4Life."
-        path="/about-me"
-        type="website"
-      />
-
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
-        <motion.div className="absolute inset-0 z-0" style={{ y: heroY, opacity: heroOpacity }}>
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage:
-                "url(https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2099&auto=format&fit=crop)",
-              filter: "brightness(0.35)",
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
-        </motion.div>
-
-        {/* Content с оркестрированным входом */}
-        <div className="relative z-10 container mx-auto px-4 py-24 text-center">
-          <PageEntrance className="flex flex-col items-center justify-center">
-            {/* Badge */}
-            <div data-entrance="badge" className="mb-6">
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/10 text-xs font-semibold text-cyan-300">
-                Александр Тощев
-              </span>
-            </div>
-
-            {/* Title */}
-            <div data-entrance="title" className="mb-6">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-                Помогаю людям
-                <br />
-                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  обретать здоровье
-                </span>
-              </h1>
-            </div>
-
-            {/* Lead Description */}
-            <div data-entrance="lead" className="max-w-3xl mx-auto">
-              <p className="text-xl md:text-2xl text-white/90 leading-relaxed text-pretty">
-                Независимый дистрибьютор 4Life. Объясняю сложное простым языком и помогаю найти путь к благополучию
-              </p>
-            </div>
-          </PageEntrance>
+    <section className="relative overflow-hidden px-4 pb-20 pt-32 md:px-8 md:pb-28 md:pt-40">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_76%_10%,rgba(6,182,212,0.11),transparent_44%)]" aria-hidden="true" />
+      <PageEntrance className="relative mx-auto flex max-w-7xl flex-col items-start">
+        <span data-entrance="badge" className="typography-label mb-6 text-cyan-300">{siteConfig.distributor.name} · {siteConfig.distributor.rank} 4Life</span>
+        <div data-entrance="title">
+          <h1 className="typography-display max-w-5xl text-white">Здоровье — тема для <span className="mx-1.5 inline-flex h-10 w-20 items-center justify-center overflow-hidden rounded-full border border-white/15 align-middle shadow-[0_0_30px_rgba(6,182,212,0.15)] md:h-14 md:w-32"><img src={workspaceImage} alt="" className="h-full w-full scale-110 object-cover" loading="lazy" decoding="async" /></span> внимательного разговора</h1>
         </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-20 md:py-32 bg-gray-950">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="order-2 lg:order-1"
-            >
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Моя история</h2>
-              <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
-                <p>
-                  Всё началось с моего собственного пути к здоровью. Столкнувшись с проблемами самочувствия, я начал
-                  искать натуральные способы укрепления организма. Так я открыл для себя 4Life и Трансфер Факторы,
-                  которые изменили мою жизнь.
-                </p>
-                <p>
-                  Увидев потрясающие результаты на себе, я понял, что должен делиться этим знанием с другими. Теперь я
-                  помогаю людям обрести здоровье, энергию и улучшить качество жизни с помощью инновационных продуктов
-                  4Life.
-                </p>
-                <p>
-                  Я не врач и не продавец. Я — предприниматель, который создает партнерскую программу по просвещению о
-                  молекулах иммунитета. Моя задача — объяснить простым языком, как работают Трансфер Факторы и как они
-                  могут помочь вам.
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="order-1 lg:order-2"
-            >
-              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop"
-                  alt="Александр Тощев"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </motion.div>
-          </div>
+        <p data-entrance="lead" className="typography-lead mt-7 max-w-3xl text-slate-300">
+          Я помогаю разобраться в информации о продуктах 4Life и в порядке оформления заказа. Без медицинских назначений, обещаний результата и давления.
+        </p>
+        <div data-entrance="buttons" className="mt-8 flex flex-wrap gap-3">
+          <Button href={siteConfig.contact.whatsapp} isExternal variant="primary" size="lg" icon={<Icons.WhatsApp className="h-4 w-4" />}>
+            Написать Александру
+          </Button>
+          <Button to="/products" variant="secondary" size="lg">Посмотреть каталог</Button>
         </div>
-      </section>
+      </PageEntrance>
+    </section>
 
-      {/* Values Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-900 to-gray-950">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Мои ценности</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">Принципы, которыми я руководствуюсь в работе</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map((value, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={tier !== "low" ? { y: -8 } : {}}
-                className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 text-center"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-900/30 mb-6">
-                  <value.icon className="w-8 h-8 text-cyan-400" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{value.description}</p>
-              </motion.div>
-            ))}
-          </div>
+    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-t border-white/[0.08] px-4 py-24 md:px-8 md:py-36 lg:grid-cols-12 lg:gap-16">
+      <div className="lg:col-span-5">
+        <ParallaxImage src={workspaceImage} alt="Рабочий стол с заметками и книгой, без портретного изображения" caption={`${siteConfig.distributor.name} · Москва · ID ${siteConfig.distributor.fourLifeId}`} ratio="portrait" priority />
+      </div>
+      <div className="space-y-7 lg:col-span-7">
+        <span className="typography-label text-cyan-400">Личный подход</span>
+        <h2 className="typography-h2 text-white">Сначала ясность, потом выбор</h2>
+        <div className="space-y-5 text-base leading-relaxed text-slate-300">
+          <p>Я предприниматель и партнёр 4Life. Мой интерес к теме здоровья вырос из личного поиска и желания лучше понимать, как устроены продукты, которые люди выбирают для себя.</p>
+          <p>Личный опыт остаётся личным: он не доказывает эффективность формулы и не гарантирует такой же результат другому человеку. Поэтому я предпочитаю говорить о составе, официальной маркировке, ограничениях и доступных источниках, а не обещать изменения самочувствия.</p>
+          <p>Моя задача — объяснять сложную информацию понятным языком и помогать с заказом. Медицинские вопросы, включая схемы приёма, противопоказания и взаимодействия, должны решаться с врачом.</p>
         </div>
-      </section>
+        <div className="border-l-2 border-cyan-400/40 pl-4 text-sm leading-relaxed text-slate-400">Я независимый дистрибьютор, не врач и не представитель производителя.</div>
+      </div>
+    </section>
 
-      {/* Mission Section */}
-      <section className="py-20 md:py-32 bg-gray-950">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Почему я это делаю</h2>
-            <div className="space-y-6 text-lg text-gray-300 leading-relaxed">
-              <p>
-                Я верю, что каждый заслуживает жить полной, здоровой и счастливой жизнью. Моя миссия — помогать людям
-                обретать здоровье через образование и качественные продукты 4Life.
-              </p>
-              <p>
-                Со мной способные становятся способнее. Я помогаю не только клиентам, но и врачам, докторам наук,
-                объясняя сложные вещи простым языком.
-              </p>
-              <p>
-                Присоединяйтесь ко мне в этом путешествии к лучшей версии себя. Вместе мы сможем достичь невероятных
-                результатов и создать сообщество здоровых и счастливых людей.
-              </p>
+    <section className="border-y border-white/[0.08] bg-[#050811] px-4 py-20 md:px-8 md:py-28">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-5">
+          <span className="typography-label text-cyan-400">Привычка, а не обещание</span>
+          <h2 className="typography-h2 mt-4 text-white">Устойчивость строится на повседневных решениях</h2>
+        </div>
+        <div className="space-y-5 lg:col-span-7">
+          <p className="typography-body text-slate-300">Забота о себе — это не один продукт и не «очищение» организма по рекламному обещанию. На самочувствие влияют сон, питание, движение, медицинская помощь и множество других факторов.</p>
+          <p className="typography-body text-slate-400">Добавки не заменяют сбалансированный рацион, лечение или рекомендации специалиста. При выборе важно учитывать этикетку, возможные противопоказания и собственную ситуацию.</p>
+        </div>
+      </div>
+    </section>
+
+    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-24 md:px-8 md:py-36 lg:grid-cols-12 lg:gap-16">
+      <div className="space-y-6 lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
+        <span className="typography-label block text-cyan-400">Как мы работаем</span>
+        <h2 className="typography-h2 text-white">Три простых принципа</h2>
+      </div>
+      <div className="divide-y divide-white/[0.08] lg:col-span-7">
+        {workingPrinciples.map((item) => (
+          <article key={item.number} className="flex flex-col gap-4 py-8 md:flex-row md:items-baseline md:gap-8 md:py-10">
+            <span className="w-16 shrink-0 font-heading text-2xl font-light tabular-nums text-cyan-400/70 md:text-3xl">{item.number}</span>
+            <div className="flex-1">
+              <h3 className="typography-h3 text-white">{item.title}</h3>
+              <p className="typography-body mt-3 text-slate-400">{item.copy}</p>
             </div>
-          </motion.div>
-        </div>
-      </section>
+          </article>
+        ))}
+      </div>
+    </section>
 
-      {/* CTA Section с унифицированной системой кнопок */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-900 to-cyan-900 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Готовы начать свой путь?</h2>
-            <p className="text-xl text-white/90 mb-10 leading-relaxed">
-              Свяжитесь со мной, и я помогу вам сделать первый шаг к здоровью и благополучию
-            </p>
-            <div className="flex justify-center items-center">
-              <Button to="/contact" variant="primary" size="lg" icon={<Icons.MessageCircle className="w-5 h-5" />}>
-                Связаться со мной
-              </Button>
-            </div>
-          </motion.div>
+    <section className="border-t border-white/[0.08] px-4 py-20 md:px-8 md:py-28">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <span className="typography-label text-cyan-400">Прямой диалог</span>
+          <h2 className="typography-h3 mt-3 text-white">Вопросы о заказе или партнёрстве?</h2>
         </div>
-      </section>
-    </motion.div>
-  );
-};
+        <Button to="/contact" variant="secondary" size="lg" icon={<Icons.ArrowRight className="h-4 w-4" />}>
+          Все способы связи
+        </Button>
+      </div>
+    </section>
+  </main>
+);
 
 export default React.memo(AboutMePage);

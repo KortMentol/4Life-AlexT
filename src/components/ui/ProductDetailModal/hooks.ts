@@ -41,19 +41,15 @@ export function useModalDragSync(isOpen: boolean, isMobile: boolean) {
  */
 export function useModalBodyLock(isOpen: boolean, isMobile: boolean) {
   useEffect(() => {
-    const root = document.getElementById("root");
+    if (!isOpen) return;
 
-    if (isOpen) {
-      document.body.classList.add("modal-open");
-      document.documentElement.classList.add("modal-open");
-      if (root) root.inert = true;
-      if (!isMobile) lenis?.stop();
-    }
+    document.body.classList.add("modal-open");
+    document.documentElement.classList.add("modal-open");
+    if (!isMobile) lenis?.stop();
 
     return () => {
       document.body.classList.remove("modal-open");
       document.documentElement.classList.remove("modal-open");
-      if (root) root.inert = false;
       if (!isMobile) lenis?.start();
     };
   }, [isOpen, isMobile]);

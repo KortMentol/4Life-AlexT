@@ -1,227 +1,104 @@
-/**
- * @module src/pages/AboutPage.tsx
- * @description Страница "О компании 4Life" в стиле Immersive Garden.
- * Интегрирован единый оркестратор входа PageEntrance для бесшовной анимации переходов.
- * Унифицирована дизайн-система кнопок во всех секциях.
- * @author Kort & AI
- * @version 2.1.0
- */
-
 import { PageEntrance } from "@/components/transitions/PageEntrance";
-import { Button } from "@/components/ui";
-import { useIsMobile, usePerformanceTier } from "@/hooks";
+import { Button, ParallaxImage } from "@/components/ui";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
-import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useRef } from "react";
+import transferFactorImage from "@/assets/images/backgrounds/editorial-transfer-factor-lab.png";
+import React from "react";
 
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
-  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
-};
+const timeline = [
+  { year: "1949", title: "Работы Шервуда Лоуренса", copy: "Иммунолог Шервуд Лоуренс описал явление переноса клеточно-опосредованной иммунной реактивности. Это историческое наблюдение стало частью научного контекста для термина Transfer Factor; оно само по себе не доказывает эффективность конкретной добавки." },
+  { year: "1998", title: "Основание 4Life Research", copy: "Компания была основана в штате Юта, США. По материалам производителя, ранняя продуктовая линейка включала формулу Transfer Factor на основе молозива." },
+  { year: "2003–04", title: "Исследования и публикации", copy: "В партнёрских материалах цитируются клинические наблюдения и документы в России. Без первичных публикаций, протоколов и оценки качества данных мы не трактуем эти цифры как доказательство клинической пользы или лечения." },
+  { year: "2007 →", title: "Развитие формул", copy: "Производитель описывает формулы, сочетающие ингредиенты из разных источников, включая молозиво и яичный желток. Состав, разрешённые заявления и маркировка зависят от продукта и рынка." },
+];
 
-const AboutPage: React.FC = () => {
-  const tier = usePerformanceTier();
-  const isMobile = useIsMobile();
-  const heroRef = useRef<HTMLDivElement>(null);
+const AboutPage: React.FC = () => (
+  <main className="bg-[#03050a] text-white">
+    <SEO
+      title="О компании 4Life Research | Александр Тощев"
+      description="Краткая история 4Life Research и объяснение, чем являются продукты Transfer Factor. Информация не заменяет медицинскую консультацию."
+      path="/about"
+      type="website"
+    />
 
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  const shouldAnimate = !isMobile && tier !== "low";
-  const heroY = useTransform(scrollYProgress, [0, 1], shouldAnimate ? ["0%", "30%"] : ["0%", "0%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.3]);
-
-  const features = [
-    {
-      icon: Icons.Award,
-      title: "Научные исследования",
-      description:
-        "Более 25 лет инвестиций в научные разработки и клинические испытания продуктов с Трансфер Факторами.",
-    },
-    {
-      icon: Icons.Globe,
-      title: "Глобальное присутствие",
-      description: "Продукция 4Life доступна в более чем 50 странах мира, помогая миллионам людей укреплять здоровье.",
-    },
-    {
-      icon: Icons.Shield,
-      title: "Качество и безопасность",
-      description: "Производство по стандартам cGMP с многоступенчатым контролем качества на каждом этапе.",
-    },
-  ];
-
-  return (
-    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
-      <SEO
-        title="О 4Life - Наука, Миссия и Инновации | Александр Тощев"
-        description="Узнайте о научном подходе 4Life к здоровью и благополучию. Инновационные продукты с Трансфер Факторами для укрепления иммунитета с 1998 года."
-        path="/about"
-        type="website"
-      />
-
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-        <motion.div className="absolute inset-0 z-0" style={{ y: heroY, opacity: heroOpacity }}>
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage:
-                "url(https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop)",
-              filter: "brightness(0.4)",
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
-        </motion.div>
-
-        {/* Content с оркестрированным входом */}
-        <div className="relative z-10 container mx-auto px-4 py-24 text-center">
-          <PageEntrance className="flex flex-col items-center justify-center">
-            {/* Title */}
-            <div data-entrance="title" className="mb-6">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-                Наука на службе
-                <br />
-                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  вашего здоровья
-                </span>
-              </h1>
+    <section className="relative overflow-hidden px-4 pb-20 pt-32 md:px-8 md:pb-28 md:pt-40">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_72%_12%,rgba(6,182,212,0.11),transparent_44%)]" aria-hidden="true" />
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-7">
+          <PageEntrance className="flex flex-col items-start">
+            <span data-entrance="badge" className="typography-label mb-6 text-cyan-300">Сэнди, штат Юта · Основана в 1998 году</span>
+            <div data-entrance="title">
+              <h1 className="typography-display max-w-4xl text-white">4Life Research — <span className="mx-1.5 inline-flex h-10 w-20 items-center justify-center overflow-hidden rounded-full border border-white/15 align-middle shadow-[0_0_30px_rgba(6,182,212,0.15)] md:h-14 md:w-32"><img src={transferFactorImage} alt="" className="h-full w-full scale-110 object-cover" loading="lazy" decoding="async" /></span> история формул</h1>
             </div>
-
-            {/* Lead Description */}
-            <div data-entrance="lead" className="max-w-3xl mx-auto">
-              <p className="text-xl md:text-2xl text-white/90 leading-relaxed text-pretty">
-                С 1998 года компания 4Life исследует иммунную систему, создавая продукты, которые помогают организму
-                работать эффективнее
-              </p>
+            <p data-entrance="lead" className="typography-lead mt-7 max-w-2xl text-slate-300">Что означает термин Transfer Factor, как компания описывает свои продукты и где заканчиваются маркетинговые заявления.</p>
+            <div data-entrance="buttons" className="mt-8">
+              <Button to="/products" variant="primary" size="lg" icon={<Icons.ArrowRight className="h-4 w-4" />}>
+                Перейти к каталогу
+              </Button>
             </div>
           </PageEntrance>
         </div>
-      </section>
-
-      {/* Mission Section */}
-      <section className="py-20 md:py-32 bg-gray-950">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Миссия 4Life</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Мы верим, что каждый человек заслуживает жить полной, здоровой жизнью. Наша миссия — предоставлять научно
-              обоснованные решения для поддержки иммунной системы, помогая людям достигать оптимального здоровья и
-              благополучия.
-            </p>
-          </motion.div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={tier !== "low" ? { y: -8 } : {}}
-                className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800"
-              >
-                <feature.icon className="w-12 h-12 text-cyan-400 mb-6" strokeWidth={1.5} />
-                <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
+        <div className="lg:col-span-5">
+          <ParallaxImage src={transferFactorImage} alt="Абстрактное молекулярное изображение на тёмном фоне" caption="Научный контекст · не медицинское обещание" ratio="portrait" priority />
         </div>
-      </section>
+      </div>
+    </section>
 
-      {/* History Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-900 to-gray-950">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-            >
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">История инноваций</h2>
-              <div className="space-y-6 text-gray-300 leading-relaxed">
-                <p>
-                  В 1998 году основатели 4Life открыли революционный способ извлечения Трансфер Факторов из молозива
-                  коров и яичного желтка. Эта технология стала основой для создания уникальных продуктов, которые
-                  помогают иммунной системе работать умнее.
-                </p>
-                <p>
-                  Сегодня 4Life — это глобальная компания с научно-исследовательским центром, собственным производством
-                  и командой ученых, которые продолжают исследовать возможности Трансфер Факторов.
-                </p>
-                <p>
-                  Каждый продукт проходит строгий контроль качества и соответствует международным стандартам cGMP,
-                  гарантируя безопасность и эффективность.
-                </p>
+    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-t border-white/[0.08] px-4 py-24 md:px-8 md:py-36 lg:grid-cols-12 lg:gap-16">
+      <div className="space-y-6 lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
+        <span className="typography-label block text-cyan-400">01 — Термины без упрощений</span>
+        <h2 className="typography-h2 text-white">Не витамин и не лекарство</h2>
+        <p className="typography-body text-slate-400">«Transfer Factor» — термин, который компания использует для описания компонентов своих формул. Это не название самостоятельной лечебной технологии.</p>
+        <ParallaxImage src={transferFactorImage} alt="Абстрактная структура молекул" caption="Иллюстрация, не лабораторная микрофотография" ratio="landscape" />
+      </div>
+      <div className="space-y-8 lg:col-span-7">
+        <p className="typography-lead text-slate-300">Удобная метафора не равна установленному механизму действия.</p>
+        <div className="space-y-5 text-base leading-relaxed text-slate-400">
+          <p>Витамины и минералы участвуют в обменных процессах. «Иммунная память» — более сложная биология, связанная с клетками и конкретными антигенами. Сравнение формулы с «инструкцией» или «памятью» может помочь объяснить маркетинговый термин, но не должно восприниматься буквально.</p>
+          <p>Состав Transfer Factor продуктов, предполагаемые свойства и разрешённые формулировки следует читать по этикетке конкретного продукта. Данные о лабораторном или механистическом эффекте не доказывают, что добавка предотвращает заболевание, усиливает иммунитет у каждого человека или заменяет лечение.</p>
+          <p>Добавки не диагностируют, не лечат и не предотвращают заболевания. При хроническом состоянии, беременности, приёме лекарств или сомнениях обсудите состав и возможные взаимодействия с врачом.</p>
+        </div>
+        <div className="border-l-2 border-cyan-400/40 pl-4 text-sm leading-relaxed text-slate-500">В частности, мы не используем рекламные проценты изменения активности NK-клеток как доказательство эффективности продукта без доступной первичной публикации и независимой оценки.</div>
+      </div>
+    </section>
+
+    <section className="border-y border-white/[0.08] bg-[#050811] px-4 py-20 md:px-8 md:py-28">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-12 lg:items-start">
+        <div className="lg:sticky lg:top-32 lg:col-span-5">
+          <span className="typography-label text-cyan-400">02 — Хронология · 1949–2026</span>
+          <h2 className="typography-h2 mt-4 text-white">История идеи и компании</h2>
+          <p className="typography-body mt-5 text-slate-400">Таймлайн разделяет научный термин, историю производителя и маркетинговые заявления — это разные типы информации.</p>
+        </div>
+        <div className="divide-y divide-white/[0.08] lg:col-span-7">
+          {timeline.map((item, index) => (
+            <article key={item.year} className={`grid gap-4 py-8 md:grid-cols-12 md:gap-8 md:py-10 ${index % 2 === 1 ? "md:pl-8" : ""}`}>
+              <span className="typography-label tabular-nums text-cyan-400 md:col-span-2">{item.year}</span>
+              <div className="md:col-span-10">
+                <h3 className="typography-h3 text-white">{item.title}</h3>
+                <p className="typography-body mt-3 text-slate-400">{item.copy}</p>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="relative"
-            >
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=2070&auto=format&fit=crop"
-                  alt="Научная лаборатория 4Life"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </motion.div>
-          </div>
+            </article>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
-      {/* CTA Section с унифицированной системой кнопок */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-900 to-cyan-900 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Готовы узнать больше?</h2>
-            <p className="text-xl text-white/90 mb-10 leading-relaxed">
-              Свяжитесь со мной, и я расскажу о научном подходе 4Life и помогу подобрать продукты для ваших целей
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button to="/contact" variant="primary" size="lg" icon={<Icons.MessageCircle className="w-5 h-5" />}>
-                Получить консультацию
-              </Button>
-              <Button
-                to="/products"
-                variant="secondary"
-                size="lg"
-                className="bg-white/10 border-white/30"
-                icon={<Icons.ArrowRight className="w-5 h-5" />}
-              >
-                Изучить продукты
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-    </motion.div>
-  );
-};
+    <section className="mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-8 md:py-36 lg:grid-cols-12 lg:items-end lg:gap-16">
+      <div className="lg:col-span-7">
+        <span className="typography-label text-cyan-400">03 — Прозрачный выбор</span>
+        <h2 className="typography-h2 mt-4 max-w-3xl text-white">Читайте состав. Сверяйте источник. Решайте сами.</h2>
+      </div>
+      <div className="lg:col-span-5 lg:justify-self-end">
+        <Button to="/products" variant="secondary" size="lg" icon={<Icons.ArrowRight className="h-4 w-4" />}>
+          Посмотреть продукты
+        </Button>
+      </div>
+    </section>
+
+    <section className="border-t border-white/[0.08] px-4 py-10 md:px-8">
+      <p className="mx-auto max-w-7xl text-sm leading-relaxed text-slate-500">Страница независимого дистрибьютора, не официальный сайт производителя. Сведения о компании и составе продуктов требуют сверки с актуальной маркировкой и официальными материалами 4Life.</p>
+    </section>
+  </main>
+);
 
 export default React.memo(AboutPage);

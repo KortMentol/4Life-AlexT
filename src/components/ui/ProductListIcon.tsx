@@ -1,326 +1,269 @@
 import { useProductList } from "@/hooks/useProductList";
-import { Icons } from "@/utils/icons"; // <--- ЕДИНСТВЕННЫЙ ИМПОРТ ИКОНОК
+import { siteConfig } from "@/site-config/site";
+import { generateQrMatrix } from "@/utils/qrCodeSvg";
+import { Icons } from "@/utils/icons";
 import { Dialog, Transition } from "@headlessui/react";
-import { AnimatePresence, motion } from "framer-motion";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import "./ProductListIcon.css";
 
 interface ProductListIconProps {
   className?: string;
 }
 
-const messengerButtonVariants = {
-  hidden: { opacity: 0, y: 10, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.3, ease: "easeOut" },
-  },
-  exit: {
-    opacity: 0,
-    y: 10,
-    scale: 0.8,
-    transition: { duration: 0.2, ease: "easeIn" },
-  },
+const copyText = async (text: string): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.setAttribute("aria-hidden", "true");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    return copied;
+  }
+};
+
+const OrderQr: React.FC<{ value: string }> = ({ value }) => {
+  const matrix = useMemo(() => {
+    try {
+      return generateQrMatrix(value);
+    } catch {
+      return null;
+    }
+  }, [value]);
+
+  const path = useMemo(() => {
+    if (!matrix) return "";
+    const segments: string[] = [];
+    matrix.forEach((row, y) => {
+      row.forEach((isDark, x) => {
+        if (isDark) segments.push(`M${x + 4},${y + 4}h1v1h-1z`);
+      });
+    });
+    return segments.join("");
+  }, [matrix]);
+
+  if (!matrix) {
+    return <p className="max-w-xs text-sm leading-relaxed text-slate-500">Список слишком длинный для QR. Скопируйте текст заказа или отправьте его в WhatsApp.</p>;
+  }
+
+  const dimension = matrix.length + 8;
+  return (
+    <svg className="h-44 w-44 rounded-lg bg-white p-2" viewBox={`0 0 ${dimension} ${dimension}`} role="img" aria-label="QR-код для открытия готового заказа в WhatsApp">
+      <rect width={dimension} height={dimension} fill="#fff" />
+      <path d={path} fill="#03050a" shapeRendering="crispEdges" />
+    </svg>
+  );
 };
 
 const ProductListIcon: React.FC<ProductListIconProps> = ({ className }) => {
   const { items, removeFromList, updateItemQuantity, getTotalItems, clearList } = useProductList();
-
+  const tier = usePerformanceTier();
   const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [toast, setToast] = useState("");
 
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isOpen) {
-        closeModal();
-      }
-    };
-
-    const handleClickOutside = (event: Event) => {
-      if (isOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
-        const dialogElement = document.querySelector('[role="dialog"]');
-        if (dialogElement && !dialogElement.contains(event.target as Node)) {
-          closeModal();
-        }
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscapeKey);
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside, { passive: true });
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const [showMessengerOptions, setShowMessengerOptions] = useState(false);
-  const [clientId, setClientId] = useState<string>(
-    () => (typeof window !== "undefined" && localStorage.getItem("clientId4life")) || "",
+  const totalLp = useMemo(() => items.reduce((total, item) => total + item.lp * item.quantity, 0), [items]);
+  const orderText = useMemo(() => {
+    const rows = items.map((item) => `• ${item.name} — ${item.quantity} шт. (${item.lp} LP/шт.; ${item.lp * item.quantity} LP)`);
+    return [
+      "Здравствуйте! Хочу оформить заказ в РЦ 67 (Москва):",
+      "",
+      ...rows,
+      "",
+      `Итого: ${totalLp} LP`,
+      "",
+      `Прошу проверить цену и условия по партнёрскому ID: ${siteConfig.distributor.fourLifeId} (${siteConfig.distributor.name}).`,
+    ].join("\n");
+  }, [items, totalLp]);
+  const whatsappUrl = useMemo(
+    () => `https://wa.me/${siteConfig.office.phoneRaw.replace(/\D/g, "")}?text=${encodeURIComponent(orderText)}`,
+    [orderText],
   );
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("clientId4life", clientId);
-    }
-  }, [clientId]);
+    window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: false } }));
+    };
+  }, [isOpen]);
 
-  const telegramUsername = "diementol";
-  const whatsappNumber = "79659781912";
-  const fatherName = "Александр";
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(""), 4200);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
-  const openModal = () => setIsOpen(true);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setIsOpen(false);
-      setShowMessengerOptions(false);
-    }
+  const handleCopyOrder = async () => {
+    const copied = await copyText(orderText);
+    setToast(copied ? "Заказ скопирован — вставьте его в чат склада." : "Не удалось скопировать. Выделите текст заказа вручную.");
   };
 
-  const closeModal = () => {
-    setIsOpen(false);
-    setShowMessengerOptions(false);
+  const handleOpenTelegram = async () => {
+    window.open(siteConfig.office.telegram, "_blank", "noopener,noreferrer");
+    const copied = await copyText(orderText);
+    setToast(copied ? "Заказ скопирован — вставьте его в чат склада." : "Открылся Telegram. Скопируйте текст заказа вручную.");
   };
 
-  const generateMessage = () => {
-    let message = `Здравствуйте, ${fatherName}! Хочу приобрести у вас:\n\n`;
-    items.forEach((item) => {
-      message += `- ${item.name} (${item.quantity} шт.)\n`;
-    });
-    if (clientId) {
-      message += `\nID клиента: ${clientId}`;
-    }
-    message += `\nПожалуйста, свяжитесь со мной для оформления заказа.`;
-    return encodeURIComponent(message);
+  const handleOpenMax = async () => {
+    window.open(siteConfig.office.max, "_blank", "noopener,noreferrer");
+    const copied = await copyText(orderText);
+    setToast(copied ? `Текст заказа скопирован. Отправьте его в MAX по номеру ${siteConfig.office.phone}.` : `Открылся MAX. Номер склада: ${siteConfig.office.phone}.`);
   };
 
-  const handleSendMessage = (messenger: "telegram" | "whatsapp") => {
-    if (items.length === 0) return;
-    const encodedMessage = generateMessage();
-    const link =
-      messenger === "telegram"
-        ? `https://t.me/${telegramUsername}?text=${encodedMessage}`
-        : `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    window.open(link, "_blank", "noopener noreferrer");
-    clearList();
-    closeModal();
+  const handleConsultation = (messenger: "whatsapp" | "telegram") => {
+    const baseUrl = messenger === "whatsapp" ? siteConfig.contact.whatsapp : siteConfig.contact.telegram;
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    window.open(`${baseUrl}${separator}text=${encodeURIComponent(orderText)}`, "_blank", "noopener,noreferrer");
   };
 
   return (
     <>
       <motion.button
-        ref={buttonRef}
+        type="button"
         data-product-list-icon
-        className={`product-list-icon relative p-2 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent] ${className}`}
-        onClick={openModal}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        aria-label="Мой Список"
+        className={`product-list-icon relative rounded-full p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${className ?? ""}`}
+        onClick={() => setIsOpen(true)}
+        whileTap={tier === "low" ? undefined : { scale: 0.96 }}
+        aria-label={`Список заказа, ${getTotalItems()} товаров`}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
       >
-        <Icons.ShoppingBag className="h-6 w-6 header-adaptive-text" />
-        <AnimatePresence>
-          {getTotalItems() > 0 && (
-            <motion.span
-              key="list-count"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full border-2 border-current"
-            >
-              {getTotalItems()}
-            </motion.span>
-          )}
-        </AnimatePresence>
+        <Icons.ShoppingBag className="h-6 w-6 header-adaptive-text" aria-hidden="true" />
+        {getTotalItems() > 0 ? (
+          <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-[#03050a] bg-cyan-400 px-1 text-[10px] font-bold tabular-nums text-[#03050a]">
+            {getTotalItems()}
+          </span>
+        ) : null}
       </motion.button>
 
-      <Transition show={isOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-50"
-          onClose={() => {
-            setIsOpen(false);
-            setShowMessengerOptions(false);
-          }}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/70" />
+      <Transition show={isOpen} as={Fragment} appear>
+        <Dialog as="div" className="relative z-[100]" onClose={() => setIsOpen(false)}>
+          <Transition.Child as={Fragment} enter="ease-out duration-250" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="fixed inset-0 bg-black/80" aria-hidden="true" />
           </Transition.Child>
-
-          <div
-            className="fixed inset-0 overflow-y-auto"
-            onClick={handleBackdropClick}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleBackdropClick(e as unknown as React.MouseEvent);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-black p-8 text-left shadow-xl transition-all relative text-white">
-                  <button
-                    type="button"
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors duration-200"
-                    onClick={closeModal}
-                  >
-                    <Icons.X className="h-7 w-7" />
-                  </button>
-                  <Dialog.Title className="text-2xl font-bold text-blue-400 mb-6 border-b border-gray-700 pb-3">
-                    Ваш Список
-                  </Dialog.Title>
+          <div className="fixed inset-0 overflow-y-auto overscroll-contain p-3 md:p-6" data-lenis-prevent>
+            <div className="flex min-h-full items-center justify-center">
+              <Transition.Child as={Fragment} enter="ease-out duration-250" enterFrom="opacity-0 translate-y-3 scale-[0.98]" enterTo="opacity-100 translate-y-0 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 scale-100" leaveTo="opacity-0 translate-y-3 scale-[0.98]">
+                <Dialog.Panel className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-white/[0.09] bg-[#050811] text-left text-white shadow-2xl">
+                  <header className="flex items-start justify-between gap-5 border-b border-white/[0.08] px-5 py-5 md:px-8 md:py-7">
+                    <div>
+                      <Dialog.Title className="typography-h3 text-white">Ваш список заказа</Dialog.Title>
+                      <p className="mt-2 text-sm text-slate-400">Партнёрский ID {siteConfig.distributor.fourLifeId} ({siteConfig.distributor.name}) приложен к сообщению.</p>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500">Итоговую цену и право на скидку подтвердите у продавца до оплаты.</p>
+                    </div>
+                    <button type="button" onClick={() => setIsOpen(false)} className="rounded-full p-2 text-slate-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" aria-label="Закрыть список заказа">
+                      <Icons.X className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </header>
 
                   {items.length === 0 ? (
-                    <p className="text-gray-400 text-center py-10">Ваш список пуст. Добавьте продукты!</p>
+                    <div className="px-5 py-16 text-center md:px-8">
+                      <Icons.ShoppingBag className="mx-auto h-8 w-8 text-slate-500" aria-hidden="true" />
+                      <p className="typography-h3 mt-5 text-white">Список пока пуст</p>
+                      <p className="mt-2 text-sm text-slate-400">Добавьте формулы из каталога — здесь появятся позиции и сумма LP.</p>
+                      <Link to="/products" onClick={() => setIsOpen(false)} className="mt-6 inline-flex items-center gap-2 text-sm text-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">
+                        Открыть каталог <Icons.ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                    </div>
                   ) : (
                     <>
-                      <ul className="divide-y divide-gray-700 max-h-96 overflow-y-auto pr-2">
-                        {items.map((item) => (
-                          <motion.li
-                            key={item.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            className="py-4 flex items-center space-x-4"
-                          >
-                            <img src={item.image} alt={item.name} className="w-16 h-16 object-contain rounded-md" />
-                            <div className="flex-grow">
-                              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
-                              <p className="text-gray-400 text-sm line-clamp-2">{item.shortDescription}</p>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                                className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
-                              >
-                                <Icons.Minus className="h-4 w-4" />
+                      <div className="max-h-[46dvh] overflow-y-auto px-5 md:px-8" data-lenis-prevent>
+                        <ul className="divide-y divide-white/[0.08]">
+                          {items.map((item) => (
+                            <li key={item.id} className="flex items-center gap-3 py-4 md:gap-5">
+                              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/[0.06] bg-[radial-gradient(circle_at_50%_55%,rgba(6,182,212,0.16),transparent_68%),#080d18] p-2">
+                                <img src={item.image} alt="" className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-sm font-medium text-white md:text-base">{item.name}</h3>
+                                <p className="mt-1 text-xs text-slate-400">{item.lp} LP / шт.</p>
+                              </div>
+                              <div className="flex items-center gap-2" role="group" aria-label={`Количество: ${item.quantity}`}>
+                                <button type="button" onClick={() => updateItemQuantity(item.id, item.quantity - 1)} className="rounded-full border border-white/[0.12] p-2 text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" aria-label={`Уменьшить количество ${item.name}`}>
+                                  <Icons.Minus className="h-3.5 w-3.5" aria-hidden="true" />
+                                </button>
+                                <span className="min-w-6 text-center font-mono text-sm tabular-nums text-white">{item.quantity}</span>
+                                <button type="button" onClick={() => updateItemQuantity(item.id, item.quantity + 1)} className="rounded-full border border-white/[0.12] p-2 text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" aria-label={`Увеличить количество ${item.name}`}>
+                                  <Icons.Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                                </button>
+                              </div>
+                              <button type="button" onClick={() => removeFromList(item.id)} className="rounded-full p-2 text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" aria-label={`Удалить ${item.name}`}>
+                                <Icons.Trash2 className="h-4 w-4" aria-hidden="true" />
                               </button>
-                              <span className="text-white text-md font-semibold min-w-[1.5rem] text-center">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                                className="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
-                              >
-                                <Icons.Plus className="h-4 w-4" />
-                              </button>
-                            </div>
-                            <button
-                              onClick={() => removeFromList(item.id)}
-                              className="p-1 rounded-full text-red-400 hover:text-red-600 transition-colors duration-200"
-                            >
-                              <Icons.Trash2 className="h-6 w-6" />
-                            </button>
-                          </motion.li>
-                        ))}
-                      </ul>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
 
-                      <div className="mt-8 flex flex-col md:flex-row justify-between items-center border-t border-gray-700 pt-6">
-                        <button
-                          onClick={clearList}
-                          className="text-red-400 hover:text-red-600 transition-colors duration-200 text-sm flex items-center mb-4 md:mb-0"
-                        >
-                          <Icons.Trash2 className="h-5 w-5 mr-1" /> Очистить список
-                        </button>
-                        <div className="relative">
-                          {!showMessengerOptions ? (
-                            <motion.button
-                              onClick={() => setShowMessengerOptions(true)}
-                              whileHover={{ scale: 1.03 }}
-                              whileTap={{ scale: 0.97 }}
-                              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 w-full justify-center"
-                            >
-                              <Icons.Send className="h-6 w-6" />
-                              <span>Отправить Заказ</span>
-                            </motion.button>
-                          ) : clientId.trim() === "" ? (
-                            <div className="flex flex-col space-y-4 w-full">
-                              <label className="text-sm text-gray-300 flex flex-col items-start w-full">
-                                <span className="mb-1">Введите ваш ID клиента 4Life:</span>
-                                <input
-                                  type="text"
-                                  value={clientId}
-                                  onChange={(e) => setClientId(e.target.value)}
-                                  placeholder="Напр., 12345678"
-                                  className="w-full p-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                                />
-                              </label>
-                              <motion.button
-                                onClick={() => clientId.trim() && setShowMessengerOptions(true)}
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all duration-300 w-full"
-                              >
-                                Продолжить
-                              </motion.button>
-                            </div>
-                          ) : (
-                            <AnimatePresence>
-                              <motion.div
-                                className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                <motion.button
-                                  variants={messengerButtonVariants}
-                                  initial="hidden"
-                                  animate="visible"
-                                  exit="exit"
-                                  onClick={() => handleSendMessage("telegram")}
-                                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-sky-600 text-white rounded-lg font-bold shadow-lg hover:from-blue-600 hover:to-sky-700 transition-all duration-300 flex items-center space-x-2 justify-center"
-                                >
-                                  <Icons.Telegram className="h-6 w-6" />
-                                  <span>В Telegram</span>
-                                </motion.button>
-                                <motion.button
-                                  variants={messengerButtonVariants}
-                                  initial="hidden"
-                                  animate="visible"
-                                  exit="exit"
-                                  onClick={() => handleSendMessage("whatsapp")}
-                                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 justify-center"
-                                >
-                                  <Icons.WhatsApp className="h-6 w-6" />
-                                  <span>В WhatsApp</span>
-                                </motion.button>
-                              </motion.div>
-                            </AnimatePresence>
-                          )}
+                      <div className="flex flex-col gap-5 border-t border-white/[0.08] px-5 py-5 md:flex-row md:items-center md:justify-between md:px-8">
+                        <div className="flex items-end gap-4">
+                          <div>
+                            <span className="typography-label text-slate-500">Итого</span>
+                            <p className="mt-1 font-mono text-2xl tabular-nums text-white">{totalLp} <span className="text-sm text-slate-400">LP</span></p>
+                          </div>
+                          <button type="button" onClick={clearList} className="mb-1 text-xs text-slate-500 underline decoration-white/20 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">Очистить список</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button type="button" onClick={() => window.open(whatsappUrl, "_blank", "noopener,noreferrer")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-cyan-400 px-5 text-sm font-semibold text-[#03050a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                            <Icons.WhatsApp className="h-4 w-4" aria-hidden="true" /> WhatsApp РЦ 67
+                          </button>
+                          <button type="button" onClick={handleOpenTelegram} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/[0.12] px-5 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">
+                            <Icons.Telegram className="h-4 w-4" aria-hidden="true" /> Telegram
+                          </button>
+                          <button type="button" onClick={handleOpenMax} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/[0.12] px-5 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">
+                            <Icons.Max className="h-4 w-4" aria-hidden="true" /> MAX
+                          </button>
+                          <button type="button" onClick={handleCopyOrder} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/[0.12] px-4 text-sm text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" aria-label="Скопировать готовый текст заказа">
+                            <Icons.Copy className="h-4 w-4" aria-hidden="true" /> <span className="sr-only md:not-sr-only">Скопировать</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="hidden grid-cols-2 gap-4 border-t border-white/[0.08] px-8 py-6 md:grid">
+                        <div className="flex flex-col justify-center border-r border-white/[0.08] pr-6">
+                          <span className="typography-label text-slate-500">Заказ по телефону</span>
+                          <a href={`tel:${siteConfig.office.phoneRaw}`} className="mt-3 font-heading text-2xl text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">{siteConfig.office.phone}</a>
+                          <p className="mt-3 text-sm leading-relaxed text-slate-400">Назовите сотруднику выбранные позиции и партнёрский ID {siteConfig.distributor.fourLifeId} ({siteConfig.distributor.name}).</p>
+                        </div>
+                        <div className="flex items-center justify-between gap-5 pl-2">
+                          <div>
+                            <span className="typography-label text-slate-500">Открыть заказ на телефоне</span>
+                            <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-400">Наведите камеру смартфона — WhatsApp откроет готовый текст.</p>
+                          </div>
+                          <OrderQr value={whatsappUrl} />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-4 border-t border-white/[0.08] px-5 py-5 md:flex-row md:items-center md:justify-between md:px-8">
+                        <div>
+                          <span className="typography-label text-slate-500">Личная консультация</span>
+                          <p className="mt-1 text-xs text-slate-400">Список будет приложен к сообщению Александру.</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => handleConsultation("whatsapp")} className="rounded-full border border-white/[0.12] px-4 py-2.5 text-sm text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">WhatsApp</button>
+                          <button type="button" onClick={() => handleConsultation("telegram")} className="rounded-full border border-white/[0.12] px-4 py-2.5 text-sm text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">Telegram</button>
                         </div>
                       </div>
                     </>
                   )}
+                  <div className="px-5 pb-4 md:px-8">
+                    <p className="text-xs leading-relaxed text-slate-500">БАДы не являются лекарством. Информация о продуктах не заменяет консультацию врача. LP — баллы из каталога, не цена в рублях.</p>
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
           </div>
+          <div className="sr-only" role="status" aria-live="polite">{toast}</div>
+          {toast ? <div className="fixed bottom-5 left-1/2 z-[110] -translate-x-1/2 rounded-full border border-white/[0.1] bg-[#080d18] px-5 py-3 text-sm text-white shadow-xl" aria-hidden="true">{toast}</div> : null}
         </Dialog>
       </Transition>
     </>

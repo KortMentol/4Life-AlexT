@@ -5,6 +5,7 @@ export interface ProductDetailModalProps {
   products: DetailedProduct[];
   isOpen: boolean;
   onClose: () => void;
+  onNavigate?: (index: number) => void;
 }
 
 export interface ProductDetailModalHandle {

@@ -1,6 +1,14 @@
 // src/utils/icons.tsx
 
 import {
+  Building2,
+  Compass,
+  Copy,
+  FileText,
+  Layers,
+  QrCode,
+  RefreshCw,
+  Sparkles,
   ArrowRight,
   ArrowUp,
   Award,
@@ -60,6 +68,8 @@ import {
   TrendingUp,
   Truck,
   Users,
+  Volume2,
+  VolumeX,
   X,
   Zap,
 } from "lucide-react";
@@ -105,8 +115,37 @@ const WhatsApp = ({ className = "", ...props }: React.SVGProps<SVGSVGElement>) =
   </svg>
 );
 
+const Max = ({ className = "", ...props }: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path d="M20.2 11.3a8.2 8.2 0 0 1-8.4 8.1 9.2 9.2 0 0 1-3.6-.7L3 20l1.4-4.2a7.8 7.8 0 0 1-1.4-4.5 8.2 8.2 0 0 1 8.4-8.1 8.2 8.2 0 0 1 8.8 8.1Z" />
+    <path d="m7.2 14.5 2.2-6 2.5 3.2 2.7-3.2 2.2 6" />
+  </svg>
+);
+
 // [ЕДИНАЯ ТОЧКА ИСТИНЫ] Централизованный экспорт
 export const Icons = {
+  Building2,
+  Compass,
+  Copy,
+  FileText,
+  Layers,
+  Max,
+  QrCode,
+  RefreshCw,
+  Sparkles,
   ArrowRight,
   ArrowUp,
   Award,
@@ -167,6 +206,8 @@ export const Icons = {
   TrendingUp,
   Truck,
   Users,
+  Volume2,
+  VolumeX,
   WhatsApp,
   X,
   Zap,
