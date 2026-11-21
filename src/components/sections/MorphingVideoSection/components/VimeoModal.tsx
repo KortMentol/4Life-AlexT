@@ -108,11 +108,11 @@ export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, v
                 <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-cyan-500/20">
                   <iframe
                     src={videoUrl}
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    allow="autoplay; fullscreen; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
                     frameBorder="0"
                     allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                    title="Vimeo Presentation"
+                    className="absolute inset-0 w-full h-full border-0"
+                    title="4Life Presentation"
                   />
                 </div>
               </motion.div>

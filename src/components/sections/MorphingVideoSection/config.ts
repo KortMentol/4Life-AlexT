@@ -5,9 +5,9 @@ export const VIDEO_ASSETS = {
 };
 
 export const VIMEO_URLS = [
-  "https://player.vimeo.com/video/1203804812?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&texttrack=ru",
-  "https://player.vimeo.com/video/1108208519?h=aee2e74b63&autoplay=1&texttrack=ru",
-  "https://player.vimeo.com/video/1203804812?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&texttrack=ru",
+  "https://kinescope.io/embed/5Wopj9r3XBMdXdh51dskFd?autoplay=1&playsinline=1&autofocus=1",
+  "https://kinescope.io/embed/5Wopj9r3XBMdXdh51dskFd?autoplay=1&playsinline=1&autofocus=1",
+  "https://kinescope.io/embed/5Wopj9r3XBMdXdh51dskFd?autoplay=1&playsinline=1&autofocus=1",
 ];
 
 export const BLOCK_CONFIG = {
