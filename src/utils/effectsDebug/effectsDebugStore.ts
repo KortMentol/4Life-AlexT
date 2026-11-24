@@ -1,12 +1,3 @@
-// src/utils/effectsDebug/effectsDebugStore.ts
-/**
- * @module src/utils/effectsDebug/effectsDebugStore.ts
- * @description Реактивный синглтон-стор для управления флагами эффектов.
- * ИСПРАВЛЕНИЕ: Вычищены флаги удаленной MolecularNet для чистоты стора.
- * @author Kort & AI
- * @version 8.0.0
- */
-
 import {
   PerformanceTier,
   calculatePerformanceScore,
@@ -32,12 +23,10 @@ export interface EffectsDebugFlags {
   textShineAnimation: boolean;
   premiumTransitions: boolean;
 
-  // Hero Section
   parallaxBackground: boolean;
   auroraText: boolean;
   heroScrollAnimation: boolean;
 
-  // Morphing Video
   renderVideoBlocks: boolean;
   renderCardsBackground: boolean;
   cardsBackdropBlur: boolean;
@@ -45,24 +34,20 @@ export interface EffectsDebugFlags {
   videoProgressOrb: boolean;
   playButtonBlur: boolean;
 
-  // Typography
   scrollTextBlur: boolean;
   scrollTextOpacity: boolean;
   scrollTextBlockOpacity: boolean;
   scrollNumberAnimation: boolean;
 
-  // Background Grids
   morphingBackground: boolean;
   bgGlowLights: boolean;
   grid3d: boolean;
 
-  // WebGL Dynamics
   webglFluid: boolean;
   webglFluidPressureHigh: boolean;
   webglFluidSunrays: boolean;
   webglFluidShading: boolean;
 
-  // Featured Products
   cardScrollGather: boolean;
 }
 
@@ -398,14 +383,18 @@ class EffectsDebugStore {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.flags));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   private saveLastPreset(flags: EffectsDebugFlags): void {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(LAST_PRESET_KEY, JSON.stringify(flags));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   public getLastPreset(): EffectsDebugFlags | null {

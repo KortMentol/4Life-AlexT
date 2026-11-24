@@ -1,250 +1,490 @@
 /**
  * @module src/pages/AboutMePage.tsx
- * @description Личная страница Александра Тощева в стиле Immersive Garden.
- * Интегрирован единый оркестратор входа PageEntrance для бесшовной анимации переходов.
- * Унифицирована дизайн-система кнопок во всех секциях.
- * @author Kort & AI
- * @version 2.1.0
+ * @description Ultra-Awwwards editorial monograph of Alexander Toshchev (Builder Elite 4Life, ID 12299550).
+ * - AtmosphericBackdrop for deep Clinical Obsidian luminosity.
+ * - Section 01: Asymmetric editorial portrait + verified Builder Elite credential ledger.
+ * - Section 02: Crystal-sharp, ZERO-BLUR Cormorant Garamond Italic manifesto (1 of 3 flagship italic moments on site).
+ * - Section 03: Interactive Personal Selection Matrix («С какой задачей вы пришли?») featuring 4 selectable goals
+ *   with real .webp packshots from productsData, RC 67 wholesale RUB estimates, and prefilled WhatsApp/Telegram CTAs.
+ * - Section 04: Direct calm dialogue closing band.
  */
 
+import mentorPortraitImg from "@/assets/images/mentor_editorial_atmosphere_1795192951045.jpg";
 import { PageEntrance } from "@/components/transitions/PageEntrance";
-import { Button } from "@/components/ui";
-import { useIsMobile, usePerformanceTier } from "@/hooks";
+import { AtmosphericBackdrop, Button, OpticalSurface, ParallaxImage } from "@/components/ui";
+import ScrollNumber from "@/components/ui/ScrollNumber";
+import { productsData } from "@/data/productsData";
+import { usePerformanceTier } from "@/hooks";
 import { SEO } from "@/seo/SEO";
+import { siteConfig } from "@/site-config/site";
+import { formatRub } from "@/utils/catalogHelpers";
 import { Icons } from "@/utils/icons";
-import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useMemo, useState } from "react";
 
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
-  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
-};
+const MANIFESTO_LINES = [
+  "«Когда-то людей приучали чистить зубы. Сегодня никому не приходит в голову удивляться, что это нужно делать каждый день.",
+  "Точно так же работает спокойная ежедневная забота о клеточном ресурсе: маленькие регулярные шаги дают больше, чем любые экстренные рывки».",
+] as const;
+
+interface GoalOption {
+  id: string;
+  index: string;
+  tabTitle: string;
+  tag: string;
+  headline: string;
+  approach: string;
+  productIds: readonly string[];
+  courseNote: string;
+  prefillMessage: string;
+  isPartnership?: boolean;
+}
+
+const SELECTION_GOALS: readonly GoalOption[] = [
+  {
+    id: "family-immunity",
+    index: "01",
+    tabTitle: "Иммунитет семьи и детей",
+    tag: "Базовая клеточная защита",
+    headline: "Спокойный фундамент на сезон нагрузок и школы",
+    approach:
+      "Не перегружаем организм лишними банками. Для детей и мягкого старта берём чистый Трансфер Фактор Классик из молозива, для взрослых — Трай-Фактор с тройной пептидной фракцией. Разберём точную схему приёма под возраст и режим семьи.",
+    productIds: ["tf-classic", "tf-trifactor"],
+    courseNote: "Оптимальный старт на 30 дней с оптовой скидкой −25% через РЦ 67",
+    prefillMessage:
+      "Здравствуйте, Александр! Интересует базовый подбор формул 4Life для иммунитета семьи и детей (Классик / Трай-Фактор). Подскажите схему старта.",
+  },
+  {
+    id: "energy-stress",
+    index: "02",
+    tabTitle: "Энергия, сон и защита от стресса",
+    tag: "Восстановление ресурса",
+    headline: "Ровный тонус днём и глубокое восстановление ночью",
+    approach:
+      "Если привычная усталость больше не снимается кофе, работаем с причиной: адаптогены Ренуво снижают кортизоловый фон и защищают митохондрии, а Энерджи Гоу Стикс даёт мягкую концентрацию без резкого отката.",
+    productIds: ["renuvo", "energy-go-stix"],
+    courseNote: "Связка для предпринимателей, родителей и высоких нагрузок",
+    prefillMessage:
+      "Здравствуйте, Александр! Хочу подобрать связку 4Life для энергии, качества сна и восстановления от стресса (Ренуво / Энерджи Гоу Стикс).",
+  },
+  {
+    id: "targeted-organs",
+    index: "03",
+    tabTitle: "Сердце, сосуды, мозг или ЖКТ",
+    tag: "Целевые формулы",
+    headline: "Точечная поддержка ведущей системы организма",
+    approach:
+      "Целевая линейка 4Life сочетает Трансфер Фактор с профильными нутриентами: Кардио — для сосудов и миокарда, Реколл — для памяти и когнитивной ясности, Пре/О Биотики — для микробиома, где живёт 70% иммунных клеток.",
+    productIds: ["tf-cardio", "tf-recall", "pre-o-biotics"],
+    courseNote: "Подберём 1–2 ключевые формулы под ваш приоритет без лишних позиций",
+    prefillMessage:
+      "Здравствуйте, Александр! Нужна консультация по целевым формулам 4Life (сердце / память и фокус / микробиом ЖКТ).",
+  },
+  {
+    id: "partnership-income",
+    index: "04",
+    tabTitle: "Партнёрский доход с 4Life",
+    tag: "Бизнес и наставничество",
+    headline: "Прозрачная модель Life Rewards без складов и спама",
+    approach:
+      "Если вам близка тема здоровья и интересен дополнительный или основной доход на базе международного бренда в 70+ странах — спокойно разберём математику LP, правила РФ (НПД / ИП) и пошаговый план выхода на Builder Bonus и Diamond.",
+    productIds: [],
+    courseNote: "Вход без стартовых взносов • Официальные выплаты в РФ • Личное сопровождение",
+    prefillMessage:
+      "Здравствуйте, Александр! Хочу спокойно разобрать партнёрскую модель 4Life Life Rewards и формат старта в вашей команде.",
+    isPartnership: true,
+  },
+] as const;
 
 const AboutMePage: React.FC = () => {
   const tier = usePerformanceTier();
-  const isMobile = useIsMobile();
-  const heroRef = useRef<HTMLDivElement>(null);
+  const isLow = tier === "low";
+  const [selectedGoalId, setSelectedGoalId] = useState<string>(SELECTION_GOALS[0]!.id);
 
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
+  const productsMap = useMemo(() => {
+    const map = new Map<string, (typeof productsData)[number]>();
+    for (const p of productsData) {
+      map.set(p.id, p);
+    }
+    return map;
+  }, []);
 
-  const shouldAnimate = !isMobile && tier !== "low";
-  const heroY = useTransform(scrollYProgress, [0, 1], shouldAnimate ? ["0%", "25%"] : ["0%", "0%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.4]);
+  const activeGoal = SELECTION_GOALS.find((g) => g.id === selectedGoalId) ?? SELECTION_GOALS[0]!;
 
-  const values = [
-    {
-      icon: Icons.Heart,
-      title: "Здоровье",
-      description: "Верю, что здоровье — это основа счастливой и полноценной жизни каждого человека.",
-    },
-    {
-      icon: Icons.Users,
-      title: "Помощь людям",
-      description: "Моя цель — делиться знаниями и помогать другим обретать здоровье и благополучие.",
-    },
-    {
-      icon: Icons.TrendingUp,
-      title: "Развитие",
-      description: "Постоянно учусь и совершенствуюсь, чтобы предоставлять лучшую поддержку своим клиентам.",
-    },
-  ];
+  const activeProducts = useMemo(
+    () =>
+      activeGoal.productIds
+        .map((id) => productsMap.get(id))
+        .filter((p): p is (typeof productsData)[number] => Boolean(p)),
+    [activeGoal.productIds, productsMap],
+  );
+
+  const bundleTotalRub = useMemo(
+    () => activeProducts.reduce((sum, p) => sum + p.priceRub, 0),
+    [activeProducts],
+  );
+  const bundleTotalLp = useMemo(
+    () => activeProducts.reduce((sum, p) => sum + p.lp, 0),
+    [activeProducts],
+  );
+
+  const whatsappPrefillUrl = `${siteConfig.contact.whatsapp}?text=${encodeURIComponent(activeGoal.prefillMessage)}`;
 
   return (
-    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
+    <div className="relative min-h-screen bg-[#03050a] text-slate-300">
+      <AtmosphericBackdrop variant="cyan" />
+
       <SEO
-        title="Обо мне - Александр Тощев | Независимый Дистрибьютор 4Life"
-        description="Александр Тощев - независимый дистрибьютор 4Life. Мой путь к здоровью и как я помогаю другим улучшить качество жизни с помощью продуктов 4Life."
+        title="Александр Тощев — Независимый дистрибьютор 4Life и наставник"
+        description="Личный путь, философия культуры внутренней чистоты, интерактивный подбор курса под задачу и принципы работы Александра Тощева (Builder Elite 4Life, ID 12299550)."
         path="/about-me"
-        type="website"
       />
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
-        <motion.div className="absolute inset-0 z-0" style={{ y: heroY, opacity: heroOpacity }}>
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage:
-                "url(https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2099&auto=format&fit=crop)",
-              filter: "brightness(0.35)",
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
-        </motion.div>
+      {/* HERO SECTION */}
+      <section className="relative z-10 pt-36 md:pt-44 pb-16 md:pb-24 overflow-x-clip">
+        <PageEntrance className="max-w-7xl mx-auto px-4 md:px-8 space-y-6">
+          <div data-entrance="badge" className="flex items-center gap-3">
+            <span className="w-7 h-px bg-cyan-400/80" aria-hidden="true" />
+            <span className="typography-label text-cyan-400">
+              {siteConfig.distributor.name} • {siteConfig.distributor.rank} 4Life
+            </span>
+          </div>
 
-        {/* Content с оркестрированным входом */}
-        <div className="relative z-10 container mx-auto px-4 py-24 text-center">
-          <PageEntrance className="flex flex-col items-center justify-center">
-            {/* Badge */}
-            <div data-entrance="badge" className="mb-6">
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/10 text-xs font-semibold text-cyan-300">
-                Александр Тощев
-              </span>
+          <div data-entrance="title" className="max-w-5xl">
+            <h1 className="typography-h1 text-white leading-[1.04]">
+              Здоровье начинается с привычки{" "}
+              <span className="text-cyan-300 block mt-1">мыслить категориями ресурса, а не усталости</span>
+            </h1>
+          </div>
+        </PageEntrance>
+      </section>
+
+      {/* SECTION 01: ASYMMETRIC EDITORIAL PORTRAIT + PERSONAL STORY */}
+      <section className="relative z-10 py-20 md:py-32 px-4 md:px-8 max-w-7xl mx-auto border-t border-white/[0.08]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          <div className="lg:col-span-5">
+            <ParallaxImage
+              src={mentorPortraitImg}
+              alt={`${siteConfig.distributor.name} — ${siteConfig.distributor.rank} 4Life`}
+              caption={`${siteConfig.distributor.name} • Москва • ${siteConfig.distributor.rank}`}
+              aspectClassName="aspect-[4/5]"
+              priority
+            />
+          </div>
+
+          <div className="lg:col-span-7 space-y-9 lg:pt-4">
+            <span className="typography-label text-cyan-400 block">01 — Личный опыт</span>
+            <h2 className="typography-h2 text-white">От личного интереса к осознанной практике</h2>
+
+            <div className="space-y-6 text-base md:text-lg text-slate-300 leading-relaxed text-pretty">
+              <p>
+                Моё знакомство с Трансфер Факторами началось с простого человеческого запроса: хотелось не маскировать
+                усталость кофе и короткими курсами витаминов, а понять, как помочь организму самому держать высокий
+                тонус и восстанавливаться глубже.
+              </p>
+              <p>
+                Когда первые месяцы принесли ощутимую разницу в качестве сна, ясности головы и устойчивости к нагрузкам,
+                стало очевидно, насколько редко сегодня о сложной биологии говорят просто и честно. Так вокруг этого
+                опыта постепенно сложилось дело и команда — без суеты, с уважением к выбору каждого человека.
+              </p>
             </div>
 
-            {/* Title */}
-            <div data-entrance="title" className="mb-6">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-                Помогаю людям
-                <br />
-                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  обретать здоровье
+            {/* Unboxed Swiss 3-column hairline credential ledger */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 border-y border-white/[0.1] divide-y sm:divide-y-0 sm:divide-x divide-white/[0.08]">
+              <div className="py-5 sm:pr-6">
+                <span className="typography-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1.5">
+                  Статус
                 </span>
-              </h1>
-            </div>
-
-            {/* Lead Description */}
-            <div data-entrance="lead" className="max-w-3xl mx-auto">
-              <p className="text-xl md:text-2xl text-white/90 leading-relaxed text-pretty">
-                Независимый дистрибьютор 4Life. Объясняю сложное простым языком и помогаю найти путь к благополучию
-              </p>
-            </div>
-          </PageEntrance>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-20 md:py-32 bg-gray-950">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="order-2 lg:order-1"
-            >
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Моя история</h2>
-              <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
-                <p>
-                  Всё началось с моего собственного пути к здоровью. Столкнувшись с проблемами самочувствия, я начал
-                  искать натуральные способы укрепления организма. Так я открыл для себя 4Life и Трансфер Факторы,
-                  которые изменили мою жизнь.
-                </p>
-                <p>
-                  Увидев потрясающие результаты на себе, я понял, что должен делиться этим знанием с другими. Теперь я
-                  помогаю людям обрести здоровье, энергию и улучшить качество жизни с помощью инновационных продуктов
-                  4Life.
-                </p>
-                <p>
-                  Я не врач и не продавец. Я — предприниматель, который создает партнерскую программу по просвещению о
-                  молекулах иммунитета. Моя задача — объяснить простым языком, как работают Трансфер Факторы и как они
-                  могут помочь вам.
-                </p>
+                <span className="font-heading text-xl font-bold text-white">{siteConfig.distributor.rank}</span>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="order-1 lg:order-2"
-            >
-              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop"
-                  alt="Александр Тощев"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+              <div className="py-5 sm:px-6">
+                <span className="typography-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1.5">
+                  Партнёрский ID
+                </span>
+                <span className="typography-mono text-xl font-bold text-cyan-400">
+                  {siteConfig.distributor.fourLifeId}
+                </span>
               </div>
-            </motion.div>
+              <div className="py-5 sm:pl-6 col-span-2 sm:col-span-1">
+                <span className="typography-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1.5">
+                  Локация
+                </span>
+                <span className="font-heading text-xl font-bold text-white">{siteConfig.contact.address}</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-gray-900 to-gray-950">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Мои ценности</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">Принципы, которыми я руководствуюсь в работе</p>
-          </motion.div>
+      {/* SECTION 02: CRYSTAL-SHARP ZERO-BLUR MANIFESTO QUOTE (Flagship Cormorant Italic Moment) */}
+      <section className="relative z-10 py-28 md:py-40 border-t border-white/[0.08] overflow-x-clip">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 text-center">
+          <div className="flex justify-center mb-6 pointer-events-none select-none">
+            <ScrollNumber
+              number="02"
+              className="font-heading text-[7rem] sm:text-[9.5rem] md:text-[12rem] font-light leading-none tracking-tighter opacity-85"
+            />
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map((value, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
+          <div className="space-y-4 mb-12">
+            <span className="typography-label text-cyan-400 block">Философия регулярности</span>
+            <h2 className="typography-h2 text-white">Культура внутренней чистоты</h2>
+          </div>
+
+          <blockquote
+            data-manifesto-quote
+            className="pt-10 border-t border-cyan-400/25 space-y-6 max-w-4xl mx-auto"
+          >
+            {MANIFESTO_LINES.map((line, idx) => (
+              <motion.p
+                key={idx}
+                initial={isLow ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={tier !== "low" ? { y: -8 } : {}}
-                className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 text-center"
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.65, delay: idx * 0.14, ease: [0.16, 1, 0.3, 1] }}
+                className="typography-editorial-italic text-2xl sm:text-3xl md:text-4xl leading-snug text-white font-normal text-pretty"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-900/30 mb-6">
-                  <value.icon className="w-8 h-8 text-cyan-400" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{value.description}</p>
-              </motion.div>
+                {line}
+              </motion.p>
             ))}
+            <footer className="typography-mono text-xs uppercase tracking-[0.24em] text-cyan-400 pt-2">
+              — {siteConfig.distributor.name}
+            </footer>
+          </blockquote>
+        </div>
+      </section>
+
+      {/* SECTION 03: INTERACTIVE PERSONAL SELECTION MATRIX («С какой задачей вы пришли?») */}
+      <section className="relative z-10 py-24 md:py-36 px-4 md:px-8 max-w-7xl mx-auto border-t border-white/[0.08]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+          <div className="max-w-2xl space-y-3">
+            <span className="typography-label text-cyan-400 block">03 — Матрица подбора</span>
+            <h2 className="typography-h2 text-white">
+              С какой задачей <span className="text-cyan-300">вы пришли?</span>
+            </h2>
+          </div>
+          <p className="text-sm text-slate-400 max-w-sm text-pretty">
+            Выберите ваш приоритет — покажу логику подбора, реальные стартовые формулы с оптовыми ценами РЦ 67 и
+            подготовлю текст для диалога.
+          </p>
+        </div>
+
+        <div data-goal-matrix className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+          {/* Left 5 cols: 4 Selectable Goal Tabs */}
+          <div
+            role="tablist"
+            aria-label="Выбор цели обращения"
+            className="lg:col-span-5 border-y border-white/[0.1] divide-y divide-white/[0.08]"
+          >
+            {SELECTION_GOALS.map((goal) => {
+              const isSelected = goal.id === selectedGoalId;
+              return (
+                <button
+                  key={goal.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  data-goal-tab={goal.id}
+                  onClick={() => setSelectedGoalId(goal.id)}
+                  className={`relative w-full text-left py-6 px-4 sm:px-5 transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 ${
+                    isSelected ? "bg-cyan-500/[0.06]" : "hover:bg-white/[0.02]"
+                  }`}
+                >
+                  <div className="flex items-baseline gap-4">
+                    <span
+                      className={`typography-mono text-2xl font-light leading-none w-9 flex-shrink-0 transition-colors ${
+                        isSelected ? "text-cyan-300" : "text-white/25 group-hover:text-cyan-400/70"
+                      }`}
+                    >
+                      {goal.index}
+                    </span>
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <span className="typography-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400/85 block">
+                        {goal.tag}
+                      </span>
+                      <span
+                        className={`font-heading text-base sm:text-lg font-semibold block leading-snug ${
+                          isSelected ? "text-white" : "text-slate-300 group-hover:text-white"
+                        }`}
+                      >
+                        {goal.tabTitle}
+                      </span>
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-0 top-4 bottom-4 w-[2px] bg-cyan-400 rounded-full"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right 7 cols: OpticalSurface Detail Card with Real .webp Product Thumbnails */}
+          <div className="lg:col-span-7">
+            <OpticalSurface accent="cyan" className="rounded-[1.75rem] p-6 sm:p-8 lg:p-9">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeGoal.id}
+                  initial={isLow ? { opacity: 1 } : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={isLow ? { opacity: 1 } : { opacity: 0, y: -6 }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-7"
+                >
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="typography-mono text-[10px] uppercase tracking-[0.22em] text-cyan-400">
+                        Сценарий {activeGoal.index} / 04 • {activeGoal.tag}
+                      </span>
+                      {bundleTotalRub > 0 && (
+                        <span className="typography-mono text-xs text-cyan-200">
+                          Старт: {bundleTotalLp} LP • ≈ {formatRub(bundleTotalRub)}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="typography-h3 text-white">{activeGoal.headline}</h3>
+                    <p className="typography-body text-slate-300 leading-relaxed text-pretty">{activeGoal.approach}</p>
+                  </div>
+
+                  {/* Real .webp Product Thumbnails for Health Goals */}
+                  {activeProducts.length > 0 ? (
+                    <div className="space-y-3">
+                      <span className="typography-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 block">
+                        Опорные формулы на старт (оптовый прайс РЦ 67 −25%)
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        {activeProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[#03050a]/90 border border-white/[0.08]"
+                          >
+                            <div
+                              className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 p-1.5"
+                              style={{
+                                backgroundImage:
+                                  "radial-gradient(circle at 50% 50%, rgba(6,182,212,0.18), rgba(5,8,17,0.95) 75%)",
+                              }}
+                            >
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <p className="text-sm font-semibold text-white leading-snug line-clamp-2">
+                                {product.name}
+                              </p>
+                              <div className="flex items-center gap-2 typography-mono text-[11px]">
+                                <span className="text-cyan-300 font-semibold">{formatRub(product.priceRub)}</span>
+                                <span className="text-slate-500">• {product.lp} LP</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5 rounded-2xl bg-[#03050a]/90 border border-cyan-400/20 space-y-3">
+                      <span className="typography-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400 block">
+                        Архитектура Life Rewards РФ 2026
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                          <span className="typography-mono text-base font-bold text-white block">25%</span>
+                          <span className="text-slate-400">Rapid Rewards с 1-х заказов</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                          <span className="typography-mono text-base font-bold text-cyan-300 block">$50–$800</span>
+                          <span className="text-slate-400">Builder Bonus (TV ≥ 600 LP)</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                          <span className="typography-mono text-base font-bold text-white block">НПД / ИП</span>
+                          <span className="text-slate-400">Официальные выплаты в РФ</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-5 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <span className="text-xs text-slate-400">{activeGoal.courseNote}</span>
+                    <div className="flex flex-wrap gap-2.5 flex-shrink-0">
+                      <a
+                        href={whatsappPrefillUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-goal-whatsapp-cta
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-xs font-semibold text-emerald-200 transition-colors active:scale-95"
+                      >
+                        <Icons.WhatsApp className="w-4 h-4 text-emerald-400" />
+                        <span>Обсудить в WhatsApp</span>
+                      </a>
+                      {activeGoal.isPartnership ? (
+                        <Button
+                          to="/partnership"
+                          variant="secondary"
+                          size="sm"
+                          icon={<Icons.ArrowRight className="w-3.5 h-3.5" />}
+                        >
+                          К расчёту дохода
+                        </Button>
+                      ) : (
+                        <Button
+                          to="/products"
+                          variant="secondary"
+                          size="sm"
+                          icon={<Icons.ArrowRight className="w-3.5 h-3.5" />}
+                        >
+                          Открыть каталог
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </OpticalSurface>
           </div>
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section className="py-20 md:py-32 bg-gray-950">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Почему я это делаю</h2>
-            <div className="space-y-6 text-lg text-gray-300 leading-relaxed">
-              <p>
-                Я верю, что каждый заслуживает жить полной, здоровой и счастливой жизнью. Моя миссия — помогать людям
-                обретать здоровье через образование и качественные продукты 4Life.
-              </p>
-              <p>
-                Со мной способные становятся способнее. Я помогаю не только клиентам, но и врачам, докторам наук,
-                объясняя сложные вещи простым языком.
-              </p>
-              <p>
-                Присоединяйтесь ко мне в этом путешествии к лучшей версии себя. Вместе мы сможем достичь невероятных
-                результатов и создать сообщество здоровых и счастливых людей.
-              </p>
-            </div>
-          </motion.div>
+      {/* SECTION 04: DIRECT DIALOGUE — FULL-BLEED UNCLIPPED CLOSING BAND */}
+      <section className="relative z-10 py-24 md:py-32 border-t border-white/[0.08] overflow-x-clip">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10">
+          <div className="max-w-2xl space-y-4">
+            <span className="typography-label text-cyan-400 block">Прямой диалог</span>
+            <h2 className="typography-h2 text-white">
+              Напишите мне лично — <span className="text-cyan-300">обсудим задачу спокойно и по существу</span>
+            </h2>
+            <p className="typography-body text-slate-300">{siteConfig.contact.callSchedule}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              href={siteConfig.contact.whatsapp}
+              isExternal
+              variant="primary"
+              size="lg"
+              icon={<Icons.WhatsApp className="w-5 h-5 text-emerald-400" />}
+            >
+              Написать в WhatsApp
+            </Button>
+            <Button
+              href={siteConfig.contact.telegram}
+              isExternal
+              variant="secondary"
+              size="lg"
+              icon={<Icons.Telegram className="w-5 h-5 text-sky-400" />}
+            >
+              Написать в Telegram
+            </Button>
+          </div>
         </div>
       </section>
-
-      {/* CTA Section с унифицированной системой кнопок */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-blue-900 to-cyan-900 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Готовы начать свой путь?</h2>
-            <p className="text-xl text-white/90 mb-10 leading-relaxed">
-              Свяжитесь со мной, и я помогу вам сделать первый шаг к здоровью и благополучию
-            </p>
-            <div className="flex justify-center items-center">
-              <Button to="/contact" variant="primary" size="lg" icon={<Icons.MessageCircle className="w-5 h-5" />}>
-                Связаться со мной
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-    </motion.div>
+    </div>
   );
 };
 

@@ -12,6 +12,7 @@ declare global {
 }
 
 const STORAGE_KEY = "scroll_positions_v3_keys";
+const LAST_ACTIVE_PATH_KEY = "last_active_route_path_v1";
 
 let memoryScrollCache: Record<string, number> | null = null;
 let diskFlushTimeout: NodeJS.Timeout | null = null;
@@ -211,6 +212,7 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
       const targetPathname = window.location.pathname;
       if (targetPathname === prevPathnameRef.current) {
+        lenis?.start();
         return;
       }
 
@@ -283,13 +285,28 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
     let cleanup: (() => void) | undefined = undefined;
 
     if (isFirstLoad.current) {
-      const savedY = getScrollPosition(location.key, currentPath);
+      let lastActivePath: string | null = null;
+      try {
+        lastActivePath = sessionStorage.getItem(LAST_ACTIVE_PATH_KEY);
+      } catch {
+        lastActivePath = null;
+      }
+
+      // Only restore saved scroll on genuine reload of the SAME route.
+      // If a preview/iframe reload resets URL back to '/' while user was on another route, start cleanly at top (0).
+      const isSameRouteReload = lastActivePath === null || lastActivePath === currentPath;
+      const savedY = isSameRouteReload ? getScrollPosition(location.key, currentPath) : 0;
 
       const performRestore = () => {
         if (savedY !== null && savedY > 0) {
           restorationController.start(savedY);
         } else {
-          lenis?.start();
+          if (lenis) {
+            lenis.scrollTo(0, { immediate: true, force: true } as any);
+            lenis.start();
+          } else {
+            window.scrollTo(0, 0);
+          }
         }
         setTimeout(() => {
           isFirstLoad.current = false;
@@ -346,6 +363,11 @@ const RouteChangeHandler = ({ isMenuActionRef, wasMenuOpenRef }: RouteChangeHand
 
   useEffect(() => {
     const currentPath = location.pathname + location.search;
+    try {
+      sessionStorage.setItem(LAST_ACTIVE_PATH_KEY, currentPath);
+    } catch {
+      /* ignore storage errors */
+    }
     if (window.history.state?.path !== currentPath || window.history.state?.key !== location.key) {
       window.history.replaceState({ ...window.history.state, path: currentPath, key: location.key }, "", currentPath);
     }

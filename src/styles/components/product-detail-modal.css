@@ -1,14 +1,3 @@
-/* src/styles/components/product-detail-modal.css */
-
-/**
- * @module src/styles/components/product-detail-modal.css
- * @description Premium Modal Styles - Awwwards 2025 (v4.1.0 Optimized)
- * @author Kort
- * @version 4.1.0
- * @usage ProductDetailModal.tsx - кастомный скроллбар и индикатор прокрутки
- */
-
-/* ─── Modal Gallery Swiper pagination ───────────────────────────────────────── */
 .modal-gallery-swiper {
   width: 100%;
   height: 100%;
@@ -27,132 +16,104 @@
   background: rgba(255, 255, 255, 0.4);
   margin: 0 3px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
 }
 
 .modal-gallery-bullet--active {
   width: 18px;
-  background: #22d3ee; /* cyan-400 */
+  background: #22d3ee;
 }
 
-/* ─── CSS Variables - цвета и анимации ──────────────────────────────────────── */
-:root {
-  --modal-accent: rgba(6, 182, 212, 0.8); /* Основной cyan цвет */
-  --modal-accent-light: rgba(6, 182, 212, 0.5); /* Светлый cyan */
-  --modal-accent-glow: rgba(6, 182, 212, 0.3); /* Свечение */
-  --modal-dark-bg: rgba(17, 24, 39, 0.3); /* Темный фон */
-  --modal-easing: cubic-bezier(0.4, 0, 0.2, 1); /* Плавная анимация */
-}
-
-/* Premium Scrollbar - появляется только при скролле */
-.premium-scroll {
-  position: relative;
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.5s var(--modal-easing);
+/* SmoothModalScroll: hide native scrollbars & render calm, architectural neutral monochrome track */
+.smooth-modal-viewport {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
 }
 
-.premium-scroll.is-scrolling {
-  scrollbar-color: var(--modal-accent) var(--modal-dark-bg);
+.smooth-modal-viewport::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
-.premium-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.premium-scroll::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 12px 0;
-  transition: background 0.5s ease;
-}
-
-.premium-scroll.is-scrolling::-webkit-scrollbar-track {
-  background: var(--modal-dark-bg);
-}
-
-.premium-scroll::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 10px;
-  transition:
-    background 0.5s var(--modal-easing),
-    box-shadow 0.5s ease;
-}
-
-.premium-scroll.is-scrolling::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(6, 182, 212, 0.7), rgba(59, 130, 246, 0.8));
-}
-
-.premium-scroll.is-scrolling::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgb(6, 182, 212), rgb(59, 130, 246));
-  box-shadow: 0 0 20px var(--modal-accent);
-}
-
-/* Scroll Arrow Indicator - кнопка "листай вниз" */
-.scroll-arrow-indicator {
+/* Full 14px ergonomic hit-zone with strictly default system arrow cursor (zero hand/finger flicker) */
+.smooth-modal-track {
   position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.2));
-  border: 1.5px solid var(--modal-accent-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 11;
-  box-shadow:
-    0 0 30px var(--modal-accent-glow),
-    inset 0 0 20px rgba(6, 182, 212, 0.1);
+  top: 12px;
+  bottom: 12px;
+  right: 1px;
+  width: 14px;
+  z-index: 25;
+  cursor: default !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.smooth-modal-track[data-overflow="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.smooth-modal-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 5px;
+  width: 2px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+}
+
+/* Thumb hit-box spans the full 14px track width so grabbing works seamlessly anywhere along the bar */
+.smooth-modal-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  cursor: default !important;
+  will-change: transform;
+}
+
+/* Visible 3px monochrome pill centered over the hairline rail (zero cyan flashing or distracting glow) */
+.smooth-modal-thumb::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 4.5px;
+  width: 3px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.18);
   transition:
-    transform 0.3s var(--modal-easing),
-    opacity 0.8s var(--modal-easing);
-  will-change: transform, opacity;
+    background-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    width 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    right 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.scroll-arrow-indicator:hover {
-  transform: translateX(-50%) scale(1.15);
+.smooth-modal-track:hover .smooth-modal-thumb::after,
+.smooth-modal-track[data-active="true"] .smooth-modal-thumb::after {
+  background-color: rgba(255, 255, 255, 0.32);
 }
 
-.scroll-arrow-indicator:active {
-  transform: translateX(-50%) scale(0.9);
+.smooth-modal-track[data-dragging="true"] .smooth-modal-thumb::after {
+  width: 4px;
+  right: 4px;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Responsive - адаптация под мобильные */
-@media (max-width: 1024px) {
-  .scroll-arrow-indicator {
-    width: 34px;
-    height: 34px;
+@media (hover: none) and (pointer: coarse) {
+  .smooth-modal-track {
+    display: none;
   }
 }
 
-@media (max-width: 768px) {
-  .scroll-arrow-indicator {
-    width: 32px;
-    height: 32px;
-    bottom: 20px;
-  }
-}
-
-/* Accessibility - отключение анимаций для пользователей с вестибулярными нарушениями */
 @media (prefers-reduced-motion: reduce) {
-  .premium-scroll {
-    transition: scrollbar-color 0.2s ease;
-  }
-
-  .premium-scroll.has-scroll {
-    mask-image: none;
-    -webkit-mask-image: none;
+  .smooth-modal-track,
+  .smooth-modal-thumb::after {
     transition: none;
-  }
-
-  .scroll-arrow-indicator {
-    animation: none;
-    transition: all 0.2s ease;
   }
 }

@@ -1,11 +1,3 @@
-/**
- * @module src/hooks/useProductFilters.ts
- * @description High-performance product filtering hook with memoization
- * @author Kort
- * @version 1.0.0
- * @usage Global search: useProductFilters
- */
-
 import { DetailedProduct } from "@/data/productsData";
 import { useMemo } from "react";
 
@@ -24,7 +16,6 @@ export const useProductFilters = (
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // Search filter
     if (filters.search.trim()) {
       const searchTerm = filters.search.toLowerCase().trim();
       result = result.filter(
@@ -44,7 +35,6 @@ export const useProductFilters = (
       );
     }
 
-    // Category filter
     if (filters.categories.length > 0) {
       result = result.filter((product) =>
         filters.categories.some((category) =>
@@ -53,14 +43,12 @@ export const useProductFilters = (
       );
     }
 
-    // Price range filter
     result = result.filter(
       (product) =>
         product.lp >= filters.priceRange[0] &&
         product.lp <= filters.priceRange[1],
     );
 
-    // Sorting
     result.sort((a, b) => {
       let comparison = 0;
 
@@ -72,7 +60,6 @@ export const useProductFilters = (
           comparison = a.lp - b.lp;
           break;
         case "newest":
-          // Assuming newer products have higher IDs or use a different logic
           comparison = a.id.localeCompare(b.id);
           break;
       }

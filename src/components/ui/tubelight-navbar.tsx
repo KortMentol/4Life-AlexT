@@ -53,7 +53,6 @@ export const TubelightNavbar: React.FC = () => {
       ref={navRef}
       role="navigation"
       className="hidden md:flex items-center justify-center h-full"
-      style={{ marginLeft: "4rem" }}
       onMouseLeave={() => setHoveredIndex(null)}
       onMouseMove={(e) => {
         if (!inView || rectsCache.current.length === 0) return;
@@ -84,7 +83,9 @@ export const TubelightNavbar: React.FC = () => {
         {mainNav.map((item, index) => (
           <motion.div
             key={item.href}
-            ref={(el) => (itemRefs.current[index] = el)}
+            ref={(el) => {
+              itemRefs.current[index] = el;
+            }}
             className="relative flex items-center h-full"
           >
             <NavLink

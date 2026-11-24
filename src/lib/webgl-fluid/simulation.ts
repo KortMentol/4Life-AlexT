@@ -110,8 +110,6 @@ class Simulation {
 
     this.updateKeywords();
 
-    // ─── ОПТИМИЗАЦИЯ GPU: Выделяем FBO только если они еще не созданы ───
-    // Это предотвращает повторную синхронную аллокацию 10+ текстур при выходе из сна
     if (!this._dye) {
       this.initFramebuffers();
     }

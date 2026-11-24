@@ -8,17 +8,14 @@ export const useTheodoreMenu = () => {
   const isMenuActionRef = useRef(false);
   const wasMenuOpenRef = useRef(false);
 
-  // Reset menu action flag after state update
   useEffect(() => {
     isMenuActionRef.current = false;
   }, [isMenuOpen]);
 
-  // Track previous menu state
   useEffect(() => {
     wasMenuOpenRef.current = isMenuOpen;
   }, [isMenuOpen]);
 
-  // Sync menu state with browser history (back/forward buttons)
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       setIsMenuOpen(event.state?.menuOpen === true);
@@ -50,7 +47,6 @@ export const useTheodoreMenu = () => {
       if (isMenuOpen) {
         isMenuActionRef.current = true;
         if (isNavigatingAway) {
-          // Мы уходим на другой роут. Просто закрываем UI, без шага назад в истории.
           setIsMenuOpen(false);
         } else {
           navigate(-1);

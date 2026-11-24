@@ -1,40 +1,19 @@
 import { siteConfig } from "@/site-config/site";
-import React from "react";
-import { Helmet } from "react-helmet-async";
+import React, { useEffect } from "react";
 
-// --- Вспомогательные функции ---
-/**
- * Преобразует относительный путь в абсолютный URL.
- * @param path - Относительный путь или полный URL.
- * @returns Абсолютный URL.
- */
 const toAbsoluteUrl = (path?: string): string => {
   if (!path) return siteConfig.url;
-  // Если путь уже является полным URL, возвращаем его как есть.
   if (path.startsWith("http")) return path;
-  // Убираем завершающий слэш у siteConfig.url, если он есть.
-  const baseUrl = siteConfig.url.endsWith("/")
-    ? siteConfig.url.slice(0, -1)
-    : siteConfig.url;
-  // Убираем начальный слэш у path, если он есть.
+  const baseUrl = siteConfig.url.endsWith("/") ? siteConfig.url.slice(0, -1) : siteConfig.url;
   const cleanPath = path.startsWith("/") ? path.slice(1) : path;
   return `${baseUrl}/${cleanPath}`;
 };
 
-/**
- * Объединяет заголовок страницы с названием сайта.
- * @param title - Заголовок страницы.
- * @returns Объединенный заголовок.
- */
 const mergeTitle = (title?: string): string => {
   if (!title) return siteConfig.name;
-  // Проверяем, содержит ли заголовок уже название сайта, чтобы избежать дублирования.
-  return title.includes(siteConfig.name)
-    ? title
-    : `${title} | ${siteConfig.name}`;
+  return title.includes(siteConfig.name) ? title : `${title} | ${siteConfig.name}`;
 };
 
-// --- JSON-LD Schema Builders ---
 const buildBreadcrumbsJSONLD = (items?: { name: string; url: string }[]) => {
   if (!items || items.length === 0) return undefined;
   return {
@@ -63,12 +42,9 @@ const buildWebSiteSearchJSONLD = () => ({
 const buildOrganizationJSONLD = () => ({
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: siteConfig.distributor?.name
-    ? `4Life с ${siteConfig.distributor.name}`
-    : siteConfig.name,
+  name: siteConfig.distributor?.name ? `4Life с ${siteConfig.distributor.name}` : siteConfig.name,
   url: siteConfig.url,
   logo: toAbsoluteUrl("/favicon.svg") || toAbsoluteUrl(siteConfig.ogImage),
-  // Удалены ссылки на социальные сети, так как они не используются
 });
 
 const buildPersonJSONLD = () => ({
@@ -79,8 +55,17 @@ const buildPersonJSONLD = () => ({
   image: toAbsoluteUrl(siteConfig.ogImage || "/favicon.svg"),
   jobTitle: siteConfig.distributor?.title || "",
   worksFor: { "@type": "Organization", name: "4Life" },
-  // Удалены ссылки на социальные сети, так как они не используются
 });
+
+const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+};
 
 export interface SEOProps {
   title?: string;
@@ -108,45 +93,64 @@ export const SEO: React.FC<SEOProps> = ({
   const url = toAbsoluteUrl(path) || siteConfig.url;
   const absoluteImage = toAbsoluteUrl(image || siteConfig.ogImage);
   const finalTitle = mergeTitle(title);
+  const finalDesc = description ?? siteConfig.description;
 
-  type JsonLdObject = Record<string, unknown>;
-  const jsonLd: JsonLdObject[] = [];
-  const bc = buildBreadcrumbsJSONLD(breadcrumbs);
-  if (bc) jsonLd.push(bc);
-  if (includeWebSiteSearch) jsonLd.push(buildWebSiteSearchJSONLD());
-  if (includeOrganizationAndPerson) {
-    jsonLd.push(buildOrganizationJSONLD());
-    jsonLd.push(buildPersonJSONLD());
-  }
+  useEffect(() => {
+    document.title = finalTitle;
+    upsertMeta("name", "description", finalDesc);
+    upsertMeta("name", "robots", noIndex ? "noindex, nofollow" : "index, follow");
+    upsertMeta("property", "og:title", finalTitle);
+    upsertMeta("property", "og:description", finalDesc);
+    upsertMeta("property", "og:type", type);
+    upsertMeta("property", "og:url", url);
+    upsertMeta("property", "og:image", absoluteImage);
+    upsertMeta("property", "og:site_name", siteConfig.name);
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", finalTitle);
+    upsertMeta("name", "twitter:description", finalDesc);
+    upsertMeta("name", "twitter:image", absoluteImage);
 
-  return (
-    <Helmet>
-      <title>{finalTitle}</title>
-      <meta name="description" content={description} />
-      <meta
-        name="robots"
-        content={noIndex ? "noindex, nofollow" : "index, follow"}
-      />
-      <link rel="canonical" href={url} />
+    let canonical = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = url;
 
-      {/* Open Graph */}
-      <meta property="og:title" content={finalTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
-      <meta property="og:image" content={absoluteImage} />
-      <meta property="og:site_name" content={siteConfig.name} />
+    const jsonLd: Record<string, unknown>[] = [];
+    const bc = buildBreadcrumbsJSONLD(breadcrumbs);
+    if (bc) jsonLd.push(bc);
+    if (includeWebSiteSearch) jsonLd.push(buildWebSiteSearchJSONLD());
+    if (includeOrganizationAndPerson) {
+      jsonLd.push(buildOrganizationJSONLD());
+      jsonLd.push(buildPersonJSONLD());
+    }
 
-      {/* Twitter Card */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={finalTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={absoluteImage} />
+    const scriptId = "seo-json-ld-4life";
+    let scriptEl = document.getElementById(scriptId) as HTMLScriptElement | null;
+    if (jsonLd.length > 0) {
+      if (!scriptEl) {
+        scriptEl = document.createElement("script");
+        scriptEl.id = scriptId;
+        scriptEl.type = "application/ld+json";
+        document.head.appendChild(scriptEl);
+      }
+      scriptEl.textContent = JSON.stringify(jsonLd);
+    } else if (scriptEl) {
+      scriptEl.remove();
+    }
+  }, [
+    finalTitle,
+    finalDesc,
+    noIndex,
+    type,
+    url,
+    absoluteImage,
+    breadcrumbs,
+    includeWebSiteSearch,
+    includeOrganizationAndPerson,
+  ]);
 
-      {/* JSON-LD */}
-      {jsonLd.length > 0 && (
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      )}
-    </Helmet>
-  );
+  return null;
 };

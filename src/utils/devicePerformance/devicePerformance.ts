@@ -1,11 +1,3 @@
-/**
- * @module src/utils/devicePerformance/devicePerformance.ts
- * @description Production-ready система определения производительности устройства.
- * ИСПРАВЛЕНИЕ: Убрана дискриминация 6-ядерных процессоров Apple на iPhone для честного High Tier.
- * @author Kort
- * @version 4.2.0
- */
-
 export type PerformanceTier = "low" | "medium" | "high";
 
 export interface DeviceSpecs {
@@ -29,7 +21,7 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
   const ua = navigator.userAgent;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
-  const navMem = (navigator as any).deviceMemory;
+  const navMem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const cpuCores = navigator.hardwareConcurrency || 4;
   let ram = "4 GB";
 
@@ -43,7 +35,14 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
     }
   }
 
-  let gpu = typeof window !== "undefined" ? sessionStorage.getItem("4life_gpu") : null;
+  let gpu: string | null = null;
+  if (typeof window !== "undefined") {
+    try {
+      gpu = window.sessionStorage.getItem("4life_gpu");
+    } catch {
+      gpu = null;
+    }
+  }
   let webglVersion = "Not Supported";
 
   if (!gpu) {
@@ -57,7 +56,7 @@ export const detectDeviceSpecs = (): DeviceSpecs => {
           gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
         }
       }
-    } catch (e) {
+    } catch {
       /* silent */
     }
   } else {
@@ -90,7 +89,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   const ua = navigator.userAgent.toLowerCase();
   const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
 
-  // 1. RAM (max 25 баллов)
   let ramValue = parseFloat(specs.ram) || 4;
 
   if (isMobile && ramValue <= 4 && specs.cpuCores >= 8) {
@@ -120,7 +118,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   else if (ramValue >= 3) score += 6;
   else score += 3;
 
-  // 2. CPU (max 25 баллов)
   if (specs.cpuCores >= 16) score += 25;
   else if (specs.cpuCores >= 12) score += 22;
   else if (specs.cpuCores >= 8) score += 20;
@@ -128,7 +125,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   else if (specs.cpuCores >= 4) score += 10;
   else score += 5;
 
-  // 3. GPU (max 50 баллов)
   const gpuString = specs.gpu.toLowerCase();
   let gpuScore = 0;
 
@@ -137,8 +133,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   } else if (specs.webglVersion.startsWith("WebGL 1")) {
     gpuScore += 5;
   }
-
-  // --- DESKTOP GPU ---
 
   if (gpuString.includes("rtx")) {
     if (/rtx\s*[56]\d{3}/.test(gpuString)) gpuScore += 45;
@@ -168,7 +162,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     else if (apuNum >= 700) gpuScore += 25;
     else gpuScore += 18;
   } else if (gpuString.includes("radeon")) gpuScore += 15;
-  // --- MOBILE GPU ---
   else if (gpuString.includes("immortalis")) {
     gpuScore += 40;
   } else if (gpuString.includes("adreno")) {
@@ -201,9 +194,7 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     else if (maliNum >= 31) gpuScore += 5;
     else if (gpuString.includes("g")) gpuScore += 7;
     else gpuScore += 4;
-  }
-  // Apple GPU
-  else if (gpuString.includes("apple")) {
+  } else if (gpuString.includes("apple")) {
     if (gpuString.includes("m4") || gpuString.includes("ultra")) {
       gpuScore += 45;
     } else if (gpuString.includes("m3") || gpuString.includes("max")) {
@@ -213,10 +204,8 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
     } else if (gpuString.includes("m1")) {
       gpuScore += 35;
     } else {
-      // ИСПРАВЛЕНИЕ: На мобильных устройствах Apple (iPhone) видеокарта всегда мощная
-      // и легко справляется с WebGL. Убираем дискриминацию по 6 ядрам процессора.
       if (isMobile) {
-        gpuScore += 35; // Любой современный iPhone (A14+) имеет мощный GPU
+        gpuScore += 35;
       } else {
         const cores = specs.cpuCores;
         if (cores >= 10) gpuScore += 38;
@@ -287,20 +276,6 @@ export const calculatePerformanceScore = (specs: DeviceSpecs): { score: number; 
   }
 
   cachedPerformance = { score, tier };
-
-  if (import.meta.env.DEV) {
-    console.log(
-      `%c⚡ PERFORMANCE TIER: ${tier.toUpperCase()} | Score: ${score}`,
-      "color: #00d9ff; font-weight: bold; font-size: 12px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px;",
-    );
-    console.log("%c📊 Device Specs:", "color: #888; font-weight: bold;", {
-      GPU: specs.gpu,
-      RAM: specs.ram,
-      CPU: `${specs.cpuCores} cores`,
-      WebGL: specs.webglVersion,
-      Mobile: isMobile,
-    });
-  }
 
   return cachedPerformance;
 };

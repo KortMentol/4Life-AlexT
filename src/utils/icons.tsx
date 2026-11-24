@@ -7,6 +7,7 @@ import {
   BadgePercent,
   Beaker,
   Bug,
+  Building2,
   Check,
   CheckCircle,
   ChevronDown,
@@ -14,10 +15,13 @@ import {
   ChevronRight,
   ChevronUp,
   Clock,
+  Compass,
+  Copy,
   Cpu,
   DollarSign,
   ExternalLink,
   Eye,
+  FileText,
   Filter,
   FlaskConical,
   Gauge,
@@ -28,6 +32,7 @@ import {
   Heart,
   HeartPulse,
   Info,
+  Layers,
   LifeBuoy,
   Lightbulb,
   Loader2,
@@ -43,7 +48,9 @@ import {
   PieChart,
   Play,
   Plus,
+  QrCode,
   Quote,
+  RefreshCw,
   Scale,
   Search,
   Send,
@@ -53,6 +60,7 @@ import {
   ShoppingCart,
   Sliders,
   Smartphone,
+  Sparkles,
   Star,
   Sun,
   Tag,
@@ -60,13 +68,14 @@ import {
   TrendingUp,
   Truck,
   Users,
+  Volume2,
+  VolumeX,
   X,
   Zap,
 } from "lucide-react";
 import React from "react";
 
-// --- КАСТОМНЫЕ ПРЕМИАЛЬНЫЕ ИКОНКИ (Zero Dependencies) ---
-// ИСПРАВЛЕНИЕ: Настоящие контурные SVG брендов (сетка 24x24, strokeWidth="2")
+// Custom stroke SVG brand icons (24x24 grid, strokeWidth="2")
 const Telegram = ({ className = "", ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +114,26 @@ const WhatsApp = ({ className = "", ...props }: React.SVGProps<SVGSVGElement>) =
   </svg>
 );
 
-// [ЕДИНАЯ ТОЧКА ИСТИНЫ] Централизованный экспорт
+// MAX messenger icon: stylized speech bubble with geometric "M" monogram
+const Max = ({ className = "", ...props }: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    {...props}
+  >
+    <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.4 0-2.75-.34-3.94-.94L3 20.5l1.48-4.44A8.46 8.46 0 0 1 3.5 12 8.5 8.5 0 1 1 21 11.5z" />
+    <path d="M8.25 14.75V9.25L12 13l3.75-3.75v5.5" />
+  </svg>
+);
+
 export const Icons = {
   ArrowRight,
   ArrowUp,
@@ -113,6 +141,7 @@ export const Icons = {
   BadgePercent,
   Beaker,
   Bug,
+  Building2,
   Check,
   CheckCircle,
   ChevronDown,
@@ -120,10 +149,13 @@ export const Icons = {
   ChevronRight,
   ChevronUp,
   Clock,
+  Compass,
+  Copy,
   Cpu,
   DollarSign,
   ExternalLink,
   Eye,
+  FileText,
   Filter,
   FlaskConical,
   Gauge,
@@ -134,11 +166,13 @@ export const Icons = {
   Heart,
   HeartPulse,
   Info,
+  Layers,
   LifeBuoy,
   Lightbulb,
   Loader: Loader2,
   Mail,
   MapPin,
+  Max,
   Menu,
   MessageCircle,
   Minus,
@@ -147,9 +181,11 @@ export const Icons = {
   Package,
   Phone,
   PieChart,
-  Plus,
   Play,
+  Plus,
+  QrCode,
   Quote,
+  RefreshCw,
   Scale,
   Search,
   Send,
@@ -159,6 +195,7 @@ export const Icons = {
   ShoppingCart,
   Sliders,
   Smartphone,
+  Sparkles,
   Star,
   Sun,
   Tag,
@@ -167,6 +204,8 @@ export const Icons = {
   TrendingUp,
   Truck,
   Users,
+  Volume2,
+  VolumeX,
   WhatsApp,
   X,
   Zap,

@@ -15,6 +15,7 @@ import { useLocation } from "react-router-dom";
 import { logoVariants } from "@/animations/headerAnimations";
 import TextShineEffect from "@/components/effects/TextShineEffect";
 import { HamburgerButton, ProductListIcon, TubelightNavbar } from "@/components/ui";
+import SoundWaveToggle from "@/components/ui/SoundWaveToggle";
 import { useTransition } from "@/context";
 import { useIsMobile, useNativeScroll } from "@/hooks";
 import { siteConfig } from "@/site-config/site";
@@ -146,14 +147,14 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
       className="header-premium header-premium--dark"
     >
       <div className="header-content">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center justify-start w-full md:w-auto md:flex-1">
+        <div className="flex items-center justify-between w-full gap-4">
+          <div className="flex items-center justify-start shrink-0 md:flex-1">
             <div className="md:hidden relative z-[100] no-highlight flex items-center">
               <HamburgerButton isOpen={isMenuOpen} toggle={() => setIsMenuOpen((prev) => !prev)} />
             </div>
             <button
               onClick={handleLogoClick}
-              className="hidden md:flex items-center space-x-3 group relative"
+              className="hidden md:flex items-center space-x-3 group relative shrink-0"
               aria-label="Главная страница"
             >
               <motion.div
@@ -170,7 +171,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                   color: "white",
                   textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                 }}
-                className="flex flex-col items-center"
+                className="flex flex-col items-start"
               >
                 <TextShineEffect
                   text={siteConfig.distributor.name}
@@ -190,7 +191,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
             </button>
           </div>
 
-          <div className="absolute left-1/2 transform -translate-x-1/2 md:relative md:left-auto md:transform-none md:flex-1 md:flex md:justify-center">
+          <div className="absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:translate-x-0 md:flex-none md:flex md:justify-center">
             <div className="md:hidden">
               <button
                 onClick={handleLogoClick}
@@ -213,7 +214,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
                     style={{
                       color: "#e6b800",
                       textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                      fontWeight: "500",
+                      fontWeight: 500,
                     }}
                   >
                     Builder Elite
@@ -225,7 +226,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
             <TubelightNavbar />
           </div>
 
-          <div className="flex items-center justify-end w-full md:w-auto md:flex-1">
+          <div className="flex items-center justify-end shrink-0 md:flex-1">
             <motion.div
               className="hidden md:flex items-center space-x-3"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -241,17 +242,18 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
               <div>
                 <ProductListIcon />
               </div>
-              <div className="w-px h-6 mx-1 bg-white/60" />
-              <div className="w-9 h-9" />
+              <div className="w-px h-6 mx-1 bg-white/20" />
+              <SoundWaveToggle />
             </motion.div>
             <div
-              className="md:hidden"
+              className="md:hidden flex items-center gap-1.5"
               style={{
                 color: "white",
                 contain: "layout style paint",
               }}
             >
               <ProductListIcon />
+              <SoundWaveToggle />
             </div>
           </div>
         </div>

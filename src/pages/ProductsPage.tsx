@@ -1,110 +1,145 @@
 /**
  * @module src/pages/ProductsPage.tsx
- * @description Immersive Garden 2026 - Каталог продуктов.
- * ИСПРАВЛЕНИЯ: Внедрен паттерн Section Stacking (Острый наезд Одеяла)
- * между Hero секцией и каталогом для идеальной чистоты границ.
- * @author KortMentol
- * @version 9.0.0
+ * @description Awwwards SOTY 2027+ Luminous Clinical Obsidian Apothecary Catalog.
+ * Clean, calm, distraction-free 4-beat flow:
+ *   1) Luminous Obsidian Hero with desktop ambient video over still-life underlay
+ *   2) Immediate Product Collection with Swiss Editorial Underline Tabs (items-baseline 14px + 12px count),
+ *      `/` keyboard search focus shortcut, full-height volumetric studio illumination,
+ *      and 144–240Hz Zero-Paint 17-formula gallery (natural negative space, zero forced filler card)
+ *   3) Mathematically Y-centered Optical Shutter Wipe Synergy Showcase (`clip-path: inset` + clickable 01/02/03 rail)
+ *   4) Zero-Jump Hydraulic 5-question FAQ -> Global Sticky Curtain Footer
  */
 
+import ProductsFAQ from "@/components/sections/ProductsCatalog/ProductsFAQ";
+import ProductsGrid from "@/components/sections/ProductsCatalog/ProductsGrid";
+import ProductsHero from "@/components/sections/ProductsCatalog/ProductsHero";
+import SynergyAtelier from "@/components/sections/ProductsCatalog/SynergyAtelier";
 import ProductDetailModal from "@/components/ui/ProductDetailModal";
 import { DetailedProduct, productsData } from "@/data/productsData";
+import { usePerformanceTier } from "@/hooks";
+import { useProductList } from "@/hooks/useProductList";
 import { lenis } from "@/lib/lenis";
 import { SEO } from "@/seo/SEO";
+import { siteConfig } from "@/site-config/site";
+import "@/styles/pages/products-page.css";
+import {
+  CATALOG_FILTER_GROUPS,
+  CatalogFilterGroupId,
+  filterProducts,
+  getCategoryGroupCounts,
+} from "@/utils/catalogHelpers";
 import { Icons } from "@/utils/icons";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-// Секции
-import ProductsFAQ from "@/components/sections/ProductsCatalog/ProductsFAQ";
-import ProductsFilters from "@/components/sections/ProductsCatalog/ProductsFilters";
-import ProductsGrid from "@/components/sections/ProductsCatalog/ProductsGrid";
-import ProductsHero from "@/components/sections/ProductsCatalog/ProductsHero";
-
-import "@/styles/pages/products-page.css";
+const VALID_GROUP_IDS = new Set<string>(CATALOG_FILTER_GROUPS.map((g) => g.id));
 
 const ProductsPage: React.FC = () => {
+  const tier = usePerformanceTier();
+  const isLow = tier === "low";
+  const { addToList, isModalOpen } = useProductList();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [showFloatingFilter, setShowFloatingFilter] = useState(false);
+  const initialGroup = searchParams.get("group");
+  const [activeGroup, setActiveGroup] = useState<CatalogFilterGroupId>(
+    initialGroup && VALID_GROUP_IDS.has(initialGroup) ? (initialGroup as CatalogFilterGroupId) : "all",
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [addedProgramId, setAddedProgramId] = useState<string | null>(null);
 
-  const selectedProductId = searchParams.get("productId");
+  const catalogAnchorRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const urlProductId = searchParams.get("productId");
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(urlProductId);
+
+  useEffect(() => {
+    setSelectedProductId(urlProductId);
+  }, [urlProductId]);
 
   const selectedProduct = useMemo(() => {
     if (!selectedProductId) return null;
     return productsData.find((p) => p.id === selectedProductId) ?? null;
   }, [selectedProductId]);
 
-  const isModalOpen = !!selectedProduct;
+  const categoryCounts = useMemo(() => getCategoryGroupCounts(productsData), []);
 
-  const [gridMode, setGridMode] = useState<2 | 3 | 4>(() => {
-    try {
-      const saved = localStorage.getItem("products-grid-mode");
-      if (saved === "2" || saved === "3" || saved === "4") return Number(saved) as 2 | 3 | 4;
-    } catch {}
-    return 4;
-  });
+  const filteredProducts = useMemo(
+    () => filterProducts(productsData, activeGroup, searchQuery),
+    [activeGroup, searchQuery],
+  );
 
-  const catalogRef = useRef<HTMLDivElement>(null);
-  const gridAnchorRef = useRef<HTMLDivElement>(null);
-  const lastClickedCardRef = useRef<string | null>(null);
-
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    productsData.forEach((p) => p.categories.forEach((c) => cats.add(c)));
-    return Array.from(cats).sort();
+  const scrollToCatalog = useCallback(() => {
+    const anchor = catalogAnchorRef.current;
+    if (!anchor) return;
+    if (lenis) {
+      lenis.scrollTo(anchor, { offset: -76, duration: 1.05 });
+    } else {
+      const top = anchor.getBoundingClientRect().top + window.scrollY - 76;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
   }, []);
 
-  const filteredProducts = useMemo(() => {
-    if (!selectedCategory) return productsData;
-    return productsData.filter((p) => p.categories.includes(selectedCategory));
-  }, [selectedCategory]);
+  // Desktop `/` shortcut focuses catalog search cleanly without interfering with inputs or open modals
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isModalOpen || Boolean(selectedProduct)) return;
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
 
-  const handleCategoryChange = useCallback(
-    (category: string | null) => {
-      if (gridAnchorRef.current) {
-        lenis?.scrollTo(gridAnchorRef.current, {
-          offset: -100,
-          duration: 1.2,
-          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          force: true,
-          lock: false,
-        });
-      }
-      setTimeout(() => {
-        setSelectedCategory(category);
-        if (category) {
-          setSearchParams({ cat: category }, { replace: true });
-        } else {
-          setSearchParams({}, { replace: true });
-        }
-      }, 150);
+      const target = e.target as HTMLElement | null;
+      const tagName = target?.tagName ?? "";
+      if (tagName === "INPUT" || tagName === "TEXTAREA" || target?.isContentEditable) return;
+
+      const input = searchInputRef.current;
+      if (!input) return;
+      e.preventDefault();
+      input.focus({ preventScroll: false });
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isModalOpen, selectedProduct]);
+
+  const handleGroupChange = useCallback(
+    (groupId: CatalogFilterGroupId) => {
+      const resolvedId: CatalogFilterGroupId = groupId !== "all" && activeGroup === groupId ? "all" : groupId;
+      setActiveGroup(resolvedId);
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (resolvedId === "all") next.delete("group");
+          else next.set("group", resolvedId);
+          return next;
+        },
+        { replace: true },
+      );
     },
-    [setSearchParams],
+    [activeGroup, setSearchParams],
   );
 
   const clearFilters = useCallback(() => {
-    setSelectedCategory(null);
-    setSearchParams({}, { replace: true });
+    setActiveGroup("all");
+    setSearchQuery("");
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("group");
+        return next;
+      },
+      { replace: true },
+    );
   }, [setSearchParams]);
 
-  const handleSetGridMode = useCallback((mode: 2 | 3 | 4) => {
-    setGridMode(mode);
-    try {
-      localStorage.setItem("products-grid-mode", String(mode));
-    } catch {}
-  }, []);
-
   const handleProductClick = useCallback(
-    (p: DetailedProduct) => {
-      lastClickedCardRef.current = p.id;
+    (product: DetailedProduct) => {
+      setSelectedProductId(product.id);
       setSearchParams(
         (prev) => {
-          prev.set("productId", p.id);
-          return prev;
+          const next = new URLSearchParams(prev);
+          next.set("productId", product.id);
+          return next;
         },
         { replace: false },
       );
@@ -112,115 +147,233 @@ const ProductsPage: React.FC = () => {
     [setSearchParams],
   );
 
-  const handleCloseFilters = useCallback(() => {
-    setIsFiltersOpen(false);
-  }, []);
-
-  useEffect(() => {
-    const catalogElement = catalogRef.current;
-    if (!catalogElement) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry) setShowFloatingFilter(entry.isIntersecting);
+  const handleCloseProductModal = useCallback(() => {
+    // Urgent synchronous state close so scrollLock unlocks and modal goes wheel-through on frame 0
+    setSelectedProductId(null);
+    // Strictly preserve user's exact scroll position on close — never yank back up to catalog grid
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("productId");
+        return next;
       },
-      {
-        root: null,
-        threshold: 0,
-        rootMargin: "-20% 0px -20% 0px",
-      },
+      { replace: true },
     );
+  }, [setSearchParams]);
 
-    observer.observe(catalogElement);
-    return () => observer.disconnect();
-  }, []);
+  const handleAddProgram = useCallback(
+    (programId: string, productIds: readonly [string, string]) => {
+      for (const pid of productIds) {
+        const prod = productsData.find((p) => p.id === pid);
+        if (prod) addToList(prod, 1);
+      }
+      setAddedProgramId(programId);
+      window.setTimeout(() => {
+        setAddedProgramId((curr) => (curr === programId ? null : curr));
+      }, 2400);
+    },
+    [addToList],
+  );
 
   return (
-    <div className="relative min-h-screen bg-[#03050a]">
+    <div className="relative min-h-screen bg-[#03050a] text-slate-200">
       <SEO
-        title="Коллекция 4Life - Каталог здоровья"
-        description="Полный каталог инновационных продуктов 4Life с Трансфер Факторами."
+        title="Продукты 4Life — Коллекция 17 формул Трансфер Фактор со скидкой −25% РЦ 67"
+        description="Полная коллекция из 17 оригинальных формул 4Life Research по ценам склада РЦ 67 Москва со скидкой −25% от 1 упаковки и проверенные синергичные связки."
         path="/products"
       />
 
-      <ProductsHero />
+      {/* ACT 1: Luminous Obsidian Opening (flows directly into the catalog) */}
+      <ProductsHero totalCount={productsData.length} onExploreCatalog={scrollToCatalog} />
 
-      {/* ОСТРЫЙ НОЖ (ОДЕЯЛО) НАД ВИДЕО HERO */}
-      <div
-        ref={catalogRef}
-        className="relative z-10 w-full bg-[#03050a] border-t border-white/[0.04] shadow-[0_-30px_60px_rgba(0,0,0,0.8)]"
+      {/* ACT 2: Immediate Apothecary Product Collection (Full-Height Illuminated Laboratory Canvas) */}
+      <section
+        ref={catalogAnchorRef}
+        id="catalog-archive"
+        className="relative bg-[#03050a] overflow-x-clip"
       >
-        <div className="py-24 relative z-20">
-          <div ref={gridAnchorRef} className="w-full h-0 pointer-events-none" aria-hidden="true" />
+        {/* Full-Height Multi-Zone Volumetric Studio Illumination */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            backgroundImage: [
+              "radial-gradient(62% 520px at 18% 8%, rgba(14, 165, 233, 0.13) 0%, rgba(3, 5, 10, 0) 72%)",
+              "radial-gradient(56% 540px at 84% 28%, rgba(30, 64, 175, 0.14) 0%, rgba(3, 5, 10, 0) 74%)",
+              "radial-gradient(58% 580px at 16% 62%, rgba(6, 182, 212, 0.11) 0%, rgba(3, 5, 10, 0) 74%)",
+              "radial-gradient(60% 520px at 82% 90%, rgba(37, 99, 235, 0.13) 0%, rgba(3, 5, 10, 0) 74%)",
+            ].join(", "),
+          }}
+        />
 
-          <div className="max-w-[1600px] mx-auto px-4 md:px-8">
-            <ProductsGrid
-              products={filteredProducts}
-              gridMode={gridMode}
-              setGridMode={handleSetGridMode}
-              selectedCategory={selectedCategory}
-              onClearFilters={clearFilters}
-              onProductClick={handleProductClick}
-            />
+        {/* Pure CSS Architectural Micro-Dot Laboratory Texture */}
+        <div aria-hidden="true" className="obsidian-micro-grid pointer-events-none absolute inset-0 z-0 opacity-75" />
+
+        {/* Zero-Mask Seamless Top & Bottom Edge Scrims over dot-grid (eliminates hard horizontal shelf at Hero/Synergy seams) */}
+        <div
+          aria-hidden="true"
+          data-catalog-top-seam-fade="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-36 z-[1]"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, #03050a 0%, rgba(3,5,10,0.84) 36%, rgba(3,5,10,0.28) 72%, rgba(3,5,10,0) 100%)",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-36 z-[1]"
+          style={{
+            backgroundImage:
+              "linear-gradient(0deg, #03050a 0%, rgba(3,5,10,0.82) 38%, rgba(3,5,10,0.22) 74%, rgba(3,5,10,0) 100%)",
+          }}
+        />
+
+        <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 pt-8 sm:pt-12 pb-20 sm:pb-28">
+          {/* 2-Zone Swiss Architectural Catalog Control Header (Zero 5+1 Orphan Wrap) */}
+          <div data-catalog-filter-bar="true" className="mb-10 sm:mb-12">
+            {/* Zone 1: Index Telemetry on Left + Sleek Search Input on Right */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6">
+              <div className="space-y-1.5 min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="typography-label text-slate-400">Каталог формул</span>
+                  <span className="text-white/15" aria-hidden="true">
+                    /
+                  </span>
+                  <span className="typography-mono text-xs text-cyan-300/90 tabular-nums">
+                    {filteredProducts.length === productsData.length
+                      ? `${productsData.length} позиций`
+                      : `${filteredProducts.length} из ${productsData.length}`}
+                  </span>
+                  {(activeGroup !== "all" || searchQuery.trim().length > 0) && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="ml-1 text-xs text-slate-400 hover:text-cyan-300 underline underline-offset-4 decoration-white/20 hover:decoration-cyan-400 transition-colors cursor-pointer"
+                    >
+                      Сбросить
+                    </button>
+                  )}
+                </div>
+                <p data-catalog-pricing-note="true" className="text-xs text-slate-400/90">
+                  Цены склада РЦ 67 по ID {siteConfig.distributor.fourLifeId} (−25% от 1 упаковки)
+                </p>
+              </div>
+
+              {/* Minimalist Search Input (14px floor) with `/` keyboard shortcut */}
+              <div className="relative flex-shrink-0 w-full sm:w-72 md:w-80">
+                <Icons.Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSearchQuery("");
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  placeholder="Поиск по названию или задаче..."
+                  aria-label="Поиск по каталогу"
+                  className="w-full h-10 pl-10 pr-10 rounded-full bg-white/[0.045] border border-white/[0.11] focus:border-cyan-400/65 text-sm text-white placeholder:text-slate-400/80 focus:outline-none transition-colors"
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Очистить поиск"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <Icons.X className="w-4 h-4" />
+                  </button>
+                ) : (
+                  !isSearchFocused && (
+                    <kbd
+                      aria-hidden="true"
+                      className="hidden sm:inline-flex items-center justify-center w-5 h-5 rounded-md border border-white/[0.12] bg-white/[0.04] text-xs font-mono text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                    >
+                      /
+                    </kbd>
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* Zone 2: Full-Width Swiss Editorial Underline Tabs (1 clean row on lg+, balanced 3×2 on sm/md, 2×3 on mobile) */}
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-nowrap lg:items-baseline lg:justify-between gap-x-4 gap-y-1 border-b border-white/[0.1]"
+              role="tablist"
+              aria-label="Направления формул"
+            >
+              {CATALOG_FILTER_GROUPS.map((group) => {
+                const isActive = activeGroup === group.id;
+                const count = categoryCounts[group.id] ?? 0;
+                return (
+                  <button
+                    key={group.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    data-catalog-tab={group.id}
+                    onClick={() => handleGroupChange(group.id)}
+                    className={`relative pb-3.5 pt-2 inline-flex items-baseline justify-center lg:justify-start gap-1.5 text-[13px] xl:text-sm font-medium whitespace-nowrap transition-colors duration-200 cursor-pointer ${
+                      isActive ? "text-white" : "text-slate-400 hover:text-slate-100"
+                    }`}
+                  >
+                    <span>{group.label}</span>
+                    <span
+                      className={`typography-mono text-xs tabular-nums transition-colors ${
+                        isActive ? "text-cyan-300" : "text-slate-500"
+                      }`}
+                    >
+                      {count}
+                    </span>
+
+                    {isActive && (
+                      <motion.span
+                        layoutId={isLow ? undefined : "catalog-active-underline"}
+                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                        aria-hidden="true"
+                        className="absolute -bottom-px inset-x-0 h-[2px] rounded-full bg-cyan-400 shadow-[0_0_14px_rgba(34,211,238,0.65)]"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Spacious 3-Column 144Hz Zero-Paint Apothecary Gallery (Clean 17-Formula Collection) */}
+          <ProductsGrid
+            products={filteredProducts}
+            onClearFilters={clearFilters}
+            onProductClick={handleProductClick}
+          />
         </div>
+      </section>
 
-        <ProductsFAQ />
-      </div>
-
-      <AnimatePresence>
-        {showFloatingFilter && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0, opacity: 0, y: 20 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-            className="fixed bottom-6 left-6 z-[60] flex items-center justify-center w-14 h-14 rounded-2xl shadow-2xl floating-filter-btn bg-gray-800/90 text-cyan-400 border border-gray-700 hover:border-cyan-400/50"
-            aria-label="Фильтры"
-          >
-            {isFiltersOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Filter className="w-6 h-6" />}
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      <ProductsFilters
-        isOpen={isFiltersOpen}
-        onClose={handleCloseFilters}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-        productCount={filteredProducts.length}
+      {/* ACT 3: Mathematically Y-Centered Optical Shutter Wipe Synergy Showcase */}
+      <SynergyAtelier
+        products={productsData}
+        addedProgramId={addedProgramId}
+        onAddProgram={handleAddProgram}
+        onProductClick={handleProductClick}
       />
 
+      {/* ACT 4: Zero-Jump Hydraulic 5-Question FAQ -> Sticky Curtain Footer */}
+      <ProductsFAQ />
+
+      {/* Product Detail Dossier Modal */}
       <ProductDetailModal
         product={selectedProduct}
-        products={filteredProducts}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setSearchParams(
-            (prev) => {
-              prev.delete("productId");
-              return prev;
-            },
-            { replace: true },
-          );
-
-          if (lastClickedCardRef.current) {
-            const cardEl = document.querySelector(
-              `[data-product-id="${lastClickedCardRef.current}"]`,
-            ) as HTMLElement | null;
-            if (cardEl) {
-              setTimeout(() => {
-                lenis?.scrollTo(cardEl, { offset: -120, duration: 1.0 });
-              }, 350);
-            }
-          }
-        }}
+        products={filteredProducts.length > 0 ? filteredProducts : productsData}
+        isOpen={Boolean(selectedProduct)}
+        onClose={handleCloseProductModal}
       />
     </div>
   );
 };
 
-export default React.memo(ProductsPage);
+export default ProductsPage;

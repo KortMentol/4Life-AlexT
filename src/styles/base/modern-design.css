@@ -1,37 +1,39 @@
 /**
  * @module src/styles/base/modern-design.css
- * @description Современная дизайн-система через CSS-переменные (Awwwards 2026)
- * @author Kort & AI
- * @version 4.8.0 - Добавлен динамический реактивный блёр подложек секции 2.
+ * @description Clinical Obsidian 2026/2027 Design Tokens & Button Primitives.
+ * Removes legacy broken `.glass-backdrop-blur::before` selector so MorphingVideoSection
+ * frosted refraction works deterministically across Firefox, Chrome, and Safari.
  */
 
 :root {
-  /* Fluid Spacing Scale */
   --space-xs: clamp(0.5rem, 0.428rem + 0.357vw, 0.75rem);
   --space-sm: clamp(0.75rem, 0.607rem + 0.714vw, 1.25rem);
   --space-md: clamp(1.25rem, 1.035rem + 1.071vw, 2rem);
   --space-lg: clamp(2rem, 1.428rem + 2.857vw, 4rem);
+  --space-xl: clamp(4rem, 3rem + 4.5vw, 7.5rem);
 
-  /* Dark theme surface tokens */
-  --surface-card: rgba(15, 23, 42, 0.8);
-  --surface-card-hover: rgba(30, 41, 59, 0.9);
+  --canvas-obsidian: #03050a;
+  --surface-elevated: #060a14;
+  --surface-subtle: #09101f;
+  --surface-card: rgba(6, 10, 20, 0.88);
+  --surface-card-hover: rgba(10, 17, 32, 0.94);
   --surface-border: rgba(255, 255, 255, 0.08);
-  --surface-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
-  --surface-shadow-hover: 0 12px 40px -12px rgba(0, 0, 0, 0.6);
+  --surface-border-strong: rgba(255, 255, 255, 0.14);
+  --surface-shadow: 0 14px 40px -16px rgba(0, 0, 0, 0.65);
+  --surface-shadow-hover: 0 22px 55px -16px rgba(0, 0, 0, 0.78);
 
-  /* Heading colors */
   --heading-primary: #ffffff;
   --heading-secondary: #e2e8f0;
   --text-muted: #94a3b8;
+  --accent-cyan: #22d3ee;
+  --accent-gold: #c9a659;
+  --accent-cream: #f0ede8;
 
   -webkit-text-size-adjust: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── BUTTON ARCHITECTURE (Awwwards 2026: Masterpiece) ─── */
-
-/* 1. Base Class: Zero Artifacts & Anti-Aliasing Hack */
 .btn-base {
   position: relative;
   display: inline-flex;
@@ -39,38 +41,37 @@
   justify-content: center;
   gap: 0.5rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   border-radius: 9999px;
-  outline: 1px solid transparent; /* ФИКС МЕРЦАНИЯ */
+  outline: 1px solid transparent;
   text-decoration: none;
   flex-shrink: 0;
   border: none;
+  white-space: nowrap;
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
+    background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* Touch Response */
 .btn-base:active {
   transform: scale(0.96) translate3d(0, 0, 0) !important;
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 2. Variant: Primary (Milled Steel Obsidian - Повышенный контраст) */
 .btn-primary-obsidian {
-  background-color: #050811;
+  background-color: #050914;
   color: #ffffff;
   box-shadow:
-    inset 0 0 0 1px rgba(6, 182, 212, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.35),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.5),
-    0 10px 25px -5px rgba(0, 0, 0, 0.6);
+    inset 0 0 0 1px rgba(34, 211, 238, 0.38),
+    inset 0 1px 1px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+    0 12px 28px -6px rgba(0, 0, 0, 0.65);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -79,9 +80,9 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(circle at 50% 120%, rgba(6, 182, 212, 0.2) 0%, transparent 60%);
+    background: radial-gradient(circle at 50% 120%, rgba(34, 211, 238, 0.24) 0%, transparent 62%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 1;
     pointer-events: none;
   }
@@ -90,9 +91,9 @@
   }
   .btn-primary-obsidian:hover {
     box-shadow:
-      inset 0 0 0 1px rgba(6, 182, 212, 0.5),
-      inset 0 1px 1px rgba(255, 255, 255, 0.3),
-      0 0 15px rgba(6, 182, 212, 0.15);
+      inset 0 0 0 1px rgba(34, 211, 238, 0.58),
+      inset 0 1px 1px rgba(255, 255, 255, 0.34),
+      0 0 22px rgba(6, 182, 212, 0.18);
   }
 }
 
@@ -103,7 +104,6 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* 3. Variant: Secondary (Real Frosted Glass - Тонкое изящное стекло) */
 .btn-secondary-ghost {
   color: #f1f5f9;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -128,15 +128,14 @@
 
 @media (hover: hover) and (pointer: fine) {
   .btn-secondary-ghost:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.05) 100%);
     box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.25),
-      inset 0 1px 1px rgba(255, 255, 255, 0.35),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.26),
+      inset 0 1px 1px rgba(255, 255, 255, 0.32),
       0 6px 20px rgba(0, 0, 0, 0.4);
   }
 }
 
-/* 4. Variant: Icon Action */
 .btn-icon-action {
   padding: 0;
   border-radius: 50%;
@@ -145,43 +144,14 @@
   justify-content: center;
 }
 
-/* ─── РЕШЕНИЕ 4: РЕАКТИВНЫЙ БЛЮР ПОДЛОЖЕК СЕКЦИИ 2 ─── */
-.glass-backdrop-blur::before {
-  /* Мы заменяем жестко зашитые 16px на контролируемую из JS CSS-переменную */
-  backdrop-filter: blur(var(--card-blur-value, 16px)) saturate(135%) !important;
-  -webkit-backdrop-filter: blur(var(--card-blur-value, 16px)) saturate(135%) !important;
-}
-
-/* ─── LEGACY TOKENS (Preserved) ─── */
-.card-modern {
-  background: rgba(31, 41, 55, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-.card-modern:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-}
 .gradient-heading {
-  background: linear-gradient(135deg, #ffffff, #0369a1);
+  background-image: linear-gradient(135deg, #ffffff, #38bdf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
 }
-.section-accent-line {
-  display: block;
-  width: 80px;
-  height: 3px;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
-  margin: 0 auto 1.5rem;
-}
+
 .pb-safe-area {
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }

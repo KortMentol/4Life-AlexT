@@ -79,12 +79,6 @@ class WebGLFluidEnhanced {
     this.simulation.captureScreenshot();
   }
 
-  /**
-   * Ограничивает рендер прямоугольником секции через WebGL scissor test.
-   * Физика на весь canvas — стенки viewport, без кипения.
-   * Вызывай каждый RAF с getBoundingClientRect() секции.
-   * x, y, width, height — в CSS пикселях. y считается от НИЖНЕГО края viewport.
-   */
   public setScissor(x: number, y: number, width: number, height: number): void {
     this.simulation.setScissor(x, y, width, height);
   }
@@ -93,7 +87,6 @@ class WebGLFluidEnhanced {
     this.simulation.clearScissor();
   }
 
-  /** @deprecated используй setScissor */
   public setBounds(
     left: number,
     bottom: number,

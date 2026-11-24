@@ -159,4 +159,3 @@ export const Science = memo(
 
 Science.displayName = "Science";
 export default Science;
-  

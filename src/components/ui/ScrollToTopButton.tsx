@@ -1,23 +1,3 @@
-/**
- * @module ScrollToTopButton
- * @description Сверхплавная кнопка возврата наверх (Awwwards 2026 Protocol).
- *
- * УЛЬТИМАТИВНЫЕ ИСПРАВЛЕНИЯ И ОПТИМИЗАЦИЯ UX (Awwwards 2026):
- * 1. [Touch Sticky Hover Annihilation]: На смартфонах класс `hover:!opacity-100` теперь полностью
- *    исключен из DOM на основе константы `IS_TOUCH`. Это на 100% решило баг мобильных браузеров,
- *    которые ложно эмулировали наведение мыши после тапа и намертво "прилепляли" видимость кнопки.
- * 2. [Instant Dismiss on Click]: Внедрен метод `handleClick`. В момент тапа кнопка мгновенно
- *    исчезает за 200мс (`opacity: 0`, `visibility: hidden`), и только потом начинается скролл.
- *    Это предотвращает назойливое "сопровождение" пользователя кнопкой во время автоматического подъема.
- * 3. [Snappy Hysteresis (50px)]: Порог непрерывного скролла для показа кнопки уменьшен со 120px
- *    до сверхчувствительных 50px. Кнопка реагирует на жест практически мгновенно, но по-прежнему
- *    игнорирует микро-дрожание пальцев.
- * 4. [Awwwards Opacity (75%)]: Пассивная прозрачность поднята до 75% (`0.75`), что делает её
- *    идеально читаемой на любых экранах, исключая эффект "глючной полупрозрачности".
- *
- * @version 5.1.0
- */
-
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { rafLoop } from "@/lib/rafLoop";
@@ -43,7 +23,6 @@ const ScrollToTopButton: React.FC = () => {
     turnPoint: 0,
   });
 
-  // ─── 1. ГЛОБАЛЬНЫЙ СКРОЛЛ-КОНТРОЛЛЕР (БЕЗ REACT STATE) ───
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
@@ -58,8 +37,6 @@ const ScrollToTopButton: React.FC = () => {
 
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = scrollHeight > 0 ? scrollY / scrollHeight : 0;
-
-      // Мертвая зона сверху — кнопка гарантированно скрыта в пределах первых 80px страницы
       const isNearTop = scrollY < 80;
 
       const lastY = stateRef.current.lastScrollY;
@@ -75,7 +52,6 @@ const ScrollToTopButton: React.FC = () => {
 
         if (currentDirection === "up") {
           const scrolledUpDistance = stateRef.current.turnPoint - scrollY;
-          // Порог уменьшен до 50px для мгновенного и чуткого отклика на жест
           if (scrolledUpDistance > 50) {
             stateRef.current.isScrollingUp = true;
           }
@@ -96,7 +72,6 @@ const ScrollToTopButton: React.FC = () => {
         stateRef.current.isVisible = shouldShow;
 
         if (shouldShow) {
-          // Идеальные 75% пассивной видимости для премиальной читаемости
           wrapper.style.setProperty("--btn-opacity", "0.75");
           wrapper.style.visibility = "visible";
           wrapper.style.pointerEvents = "auto";
@@ -117,7 +92,6 @@ const ScrollToTopButton: React.FC = () => {
     return unsub;
   }, [isMobile]);
 
-  // ─── 2. БЛОКИРОВКА ВО ВРЕМЯ РОУТИНГА ───
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
@@ -138,14 +112,12 @@ const ScrollToTopButton: React.FC = () => {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  // ─── 3. МГНОВЕННОЕ СКРЫТИЕ ПРИ КЛИКЕ (ПАТТЕРН ОЛИВЬЕ ЛАРОЗА) ───
   const handleClick = () => {
     const wrapper = wrapperRef.current;
     if (wrapper) {
       stateRef.current.isVisible = false;
       stateRef.current.isScrollingUp = false;
 
-      // Срочно гасим кнопку за 200мс, чтобы она не летела с пользователем наверх
       wrapper.style.setProperty("--btn-opacity", "0");
       wrapper.style.pointerEvents = "none";
       wrapper.style.transform = "translate3d(0, 16px, 0)";
@@ -157,7 +129,6 @@ const ScrollToTopButton: React.FC = () => {
 
   const isLowTier = tier === "low";
 
-  // Базовые стили кнопки (полностью прозрачная)
   const buttonStyle: React.CSSProperties = {
     background: "transparent",
     border: "none",
@@ -181,7 +152,6 @@ const ScrollToTopButton: React.FC = () => {
   return (
     <div
       ref={wrapperRef}
-      // hover:!opacity-100 применяется СТРОГО на десктопе, полностью исключая "липкий ховер" на тачах
       className={`fixed z-50 ${!IS_TOUCH ? "hover:!opacity-100" : ""} ${isMobile ? "bottom-4 right-4" : "bottom-6 right-6"}`}
       style={{
         opacity: "var(--btn-opacity, 0)",
@@ -198,12 +168,8 @@ const ScrollToTopButton: React.FC = () => {
         style={buttonStyle}
         aria-label="Вернуться наверх"
       >
-        {/* ─── ВЕКТОРНАЯ ПОДЛОЖКА (0% ПИКСЕЛИЗАЦИИ) ─── */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-0" viewBox="0 0 100 100">
-          {/* Математически идеальный обсидиановый круг подложки */}
           <circle cx="50" cy="50" r="49.5" fill="#050811" />
-
-          {/* Векторный неоновый контур с реакцией на ховер (строго на ПК) */}
           <circle
             cx="50"
             cy="50"
@@ -216,12 +182,10 @@ const ScrollToTopButton: React.FC = () => {
           />
         </svg>
 
-        {/* Внутренний градиентный слой хедера */}
         {!isLowTier && (
           <div className="absolute inset-[0.5px] rounded-[50%] pointer-events-none z-10" style={gradientStyle} />
         )}
 
-        {/* Слой матового блика */}
         {!isLowTier && (
           <div
             className="absolute inset-[1.5px] rounded-[50%] pointer-events-none z-10"
@@ -229,7 +193,6 @@ const ScrollToTopButton: React.FC = () => {
           />
         )}
 
-        {/* Слой неонового свечения при наведении (только ПК) */}
         {!IS_TOUCH && (
           <div
             className="absolute inset-[0.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-[50%] z-10"

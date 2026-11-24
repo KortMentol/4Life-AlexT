@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       drop: mode === "production" ? ["console", "debugger"] : [],
     },
     build: {
-      target: "esnext", // Modern JS standard
+      target: "esnext",
       sourcemap: false,
       rollupOptions: {
         input: {
@@ -32,7 +32,6 @@ export default defineConfig(({ mode }) => {
           },
           chunkFileNames: "assets/js/[name]-[hash].js",
           entryFileNames: "assets/js/[name]-[hash].js",
-          // Разбиваем крупные библиотеки в отдельные чанки для эффективного кэширования
           manualChunks(id) {
             if (id.includes("node_modules")) {
               if (id.includes("framer-motion")) return "vendor-framer-motion";
@@ -40,7 +39,6 @@ export default defineConfig(({ mode }) => {
               if (id.includes("swiper")) return "vendor-swiper";
               if (id.includes("webgl-fluid-enhanced") || id.includes("ogl")) return "vendor-webgl";
             }
-            // Собственный движок WebGL-флюида — отдельный чанк
             if (id.includes("/src/lib/webgl-fluid/")) return "webgl-fluid";
             return undefined;
           },

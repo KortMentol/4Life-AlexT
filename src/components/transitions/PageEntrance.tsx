@@ -1,21 +1,17 @@
 /**
  * @module PageEntrance
- * @description Глобальный оркестратор сценического входа (Awwwards Pro 2026+)
- * ИСПРАВЛЕНИЕ: Добавлена гибкая настройка задержки `MOBILE_MENU_SYNC_DELAY` специально
- * для синхронизации текста и закрывающейся волны мобильного меню.
- * @author Kort & AI
- * @version 1.5.0
+ * @description Global staged hero entrance orchestrator (Awwwards Pro 2026+).
+ * Fixes closure race condition where PageEntrance could remain at opacity: 0 if preloader-outro-start
+ * fired before mount or while #preloader was being removed.
  */
 
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { gsap } from "gsap";
 import React, { useEffect, useRef, useState } from "react";
 
-// --- НАСТРОЙКИ ТАЙМИНГОВ ---
-const PRELOADER_DELAY = 550;
-const PC_ROUTE_DELAY = 160;
+const PRELOADER_DELAY = 320;
+const PC_ROUTE_DELAY = 140;
 const POP_DELAY = 1;
-
 const MOBILE_MENU_SYNC_DELAY = 0;
 
 interface PageEntranceProps {
@@ -23,23 +19,24 @@ interface PageEntranceProps {
   className?: string;
 }
 
+type WindowWithPreloaderFlag = Window & {
+  __preloaderFinished?: boolean;
+};
+
 export const PageEntrance: React.FC<PageEntranceProps> = ({ children, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const tier = usePerformanceTier();
-
   const [isActive, setIsActive] = useState(false);
-
-  // Флаг защиты от интервала-перехватчика
   const eventTriggeredRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const hasPreloader = document.getElementById("preloader") !== null;
+    const win = window as WindowWithPreloaderFlag;
     let timerId: ReturnType<typeof setTimeout> | null = null;
 
-    // ─── ЖЕСТКОЕ РАЗДЕЛЕНИЕ ТАЙМИНГОВ ───
     const triggerStart = (type: "preload" | "route" | "pop" | "mobile-menu") => {
+      if (eventTriggeredRef.current) return;
       eventTriggeredRef.current = true;
       if (timerId) clearTimeout(timerId);
 
@@ -55,11 +52,9 @@ export const PageEntrance: React.FC<PageEntranceProps> = ({ children, className 
 
     const handlePreloaderStart = () => triggerStart("preload");
     const handlePopTransition = () => triggerStart("pop");
-
     const handleRouteTransition = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      // Если сигнал пришел из TheodoreMenu, даем задержку
-      if (customEvent.detail && customEvent.detail.fromMobileMenu) {
+      const customEvent = e as CustomEvent<{ fromMobileMenu?: boolean }>;
+      if (customEvent.detail?.fromMobileMenu) {
         triggerStart("mobile-menu");
       } else {
         triggerStart("route");
@@ -70,23 +65,35 @@ export const PageEntrance: React.FC<PageEntranceProps> = ({ children, className 
     window.addEventListener("menu-transition-complete", handleRouteTransition);
     window.addEventListener("pop-transition-complete", handlePopTransition);
 
-    // ИДЕАЛЬНЫЙ ФОЛБЭК-ПОЛЛИНГ
-    const pollingInterval = setInterval(() => {
-      const isTransitionActive = window.__menuTransitionInProgress || window.__popTransitionInProgress;
-      if (!hasPreloader && !isTransitionActive && !isActive && !eventTriggeredRef.current) {
+    // Dynamic check: re-queries #preloader and __preloaderFinished every tick so it can never freeze at opacity: 0
+    const checkReady = () => {
+      const preloaderEl = document.getElementById("preloader");
+      const preloaderGoneOrDone = !preloaderEl || Boolean(win.__preloaderFinished);
+      const isTransitionActive = Boolean(window.__menuTransitionInProgress || window.__popTransitionInProgress);
+      if (preloaderGoneOrDone && !isTransitionActive && !eventTriggeredRef.current) {
         triggerStart("route");
-        clearInterval(pollingInterval);
+        return true;
       }
-    }, 50);
+      return false;
+    };
+
+    const immediate = checkReady();
+    const pollingInterval = immediate
+      ? null
+      : setInterval(() => {
+          if (checkReady() && pollingInterval) {
+            clearInterval(pollingInterval);
+          }
+        }, 60);
 
     return () => {
       if (timerId) clearTimeout(timerId);
-      clearInterval(pollingInterval);
+      if (pollingInterval) clearInterval(pollingInterval);
       window.removeEventListener("preloader-outro-start", handlePreloaderStart);
       window.removeEventListener("menu-transition-complete", handleRouteTransition);
       window.removeEventListener("pop-transition-complete", handlePopTransition);
     };
-  }, [isActive]);
+  }, []);
 
   useEffect(() => {
     if (!isActive || !containerRef.current) return;
@@ -98,7 +105,6 @@ export const PageEntrance: React.FC<PageEntranceProps> = ({ children, className 
     const buttonsContainer = container.querySelector('[data-entrance="buttons"]');
 
     const targets = [badge, title, lead, buttonsContainer].filter((el): el is HTMLElement => el !== null);
-
     if (targets.length === 0) return;
 
     if (tier === "low") {
@@ -106,28 +112,25 @@ export const PageEntrance: React.FC<PageEntranceProps> = ({ children, className 
       return;
     }
 
-    const tl = gsap.timeline({
-      defaults: { ease: "power3.out" },
-    });
-
-    tl.fromTo(
-      targets,
-      { opacity: 0, y: 32 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: tier === "high" ? 1.8 : 1.4,
-        stagger: 0.15,
-        force3D: true,
-        onComplete: () => {
-          gsap.set(targets, { clearProps: "all" });
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        targets,
+        { opacity: 0, y: 28 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: tier === "high" ? 1.35 : 1.05,
+          stagger: 0.12,
+          ease: "power3.out",
+          force3D: true,
+          onComplete: () => {
+            gsap.set(targets, { clearProps: "all" });
+          },
         },
-      },
-    );
+      );
+    }, containerRef);
 
-    return () => {
-      tl.kill();
-    };
+    return () => ctx.revert();
   }, [isActive, tier]);
 
   const initialStyle = !isActive && tier !== "low" ? { opacity: 0 } : undefined;

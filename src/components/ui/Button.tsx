@@ -78,8 +78,8 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const sizeClasses = {
-    sm: variant === "icon" ? "w-8 h-8" : "px-5 py-2.5 text-xs",
-    md: variant === "icon" ? "w-10 h-10" : "px-7 py-3.5 text-sm",
+    sm: variant === "icon" ? "w-9 h-9" : "px-5 py-2.5 text-sm",
+    md: variant === "icon" ? "w-10 h-10" : "px-7 py-3.5 text-sm sm:text-[15px]",
     lg: variant === "icon" ? "w-12 h-12" : "px-9 py-4 text-base",
   };
 

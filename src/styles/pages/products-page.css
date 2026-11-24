@@ -1,178 +1,240 @@
 /**
  * @module src/styles/pages/products-page.css
- * @version 8.0.0 — Ethereal Depth (Awwwards 2026)
+ * @description Awwwards SOTY 2026+ 144–240Hz Zero-Paint Compositor Craft for /products.
  *
- * PERFORMANCE RULES:
- * - will-change: NEVER at rest, only on :hover
- * - box-shadow on hover: via ::after opacity (compositor-only, zero repaint)
- * - transform: translate3d only (GPU compositor path, Firefox safe)
- * - contain: paint only on image container
- * - NO backdrop-filter on cards (Firefox FPS killer)
- * - NO Framer Motion on cards — pure CSS animations
+ * Hard Performance Laws enforced here:
+ * 1. ZERO `radial-gradient(... at var(--mx) var(--my))` or `mask-composite: exclude` on pointermove.
+ *    Instead, a 1px outer shell holds a pre-baked static radial orb moved strictly via `transform: translate3d()`,
+ *    masked by an opaque inner card surface (`border-radius: calc(1.5rem - 1px)`). Zero Skia repaint per frame.
+ * 2. ZERO `filter: drop-shadow()` or `filter: blur()` on grid cards or bottles.
+ * 3. ZERO `transition: border-color` or giant animated `box-shadow` repaints.
+ * 4. ZERO full-height `mask-image` on `.obsidian-micro-grid`.
+ * 5. `contain: layout style paint` + `content-visibility: auto` on `.apothecary-card`.
+ * 6. Strict Low-Tier isolation (`data-tier="low"`): zero hover orb nodes, zero multi-layer hover transitions.
  */
 
-/* ─── Card appear ────────────────────────────────────────────────────────────── */
-@keyframes card-appear {
+@keyframes specimen-reveal {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translate3d(0, 14px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-.product-card-wrapper {
+@keyframes card-added-flash {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.35) translateZ(0);
+  }
+  35% {
+    opacity: 1;
+    transform: scaleX(1) translateZ(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1) translateZ(0);
+  }
+}
+
+.specimen-cell-enter {
   opacity: 0;
-  animation: card-appear 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  animation-delay: var(--card-delay, 0ms);
+  animation: specimen-reveal 0.44s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--cell-delay, 0ms);
 }
 
-/* ─── Grid 3 & 4: Tibico-style (image standalone + text below) ──────────────── */
-.product-card-tibico {
-  position: relative;
-  cursor: pointer;
+/* Architectural Swiss micro-dot laboratory field (pure CSS, zero mask-image GPU layer bloat) */
+.obsidian-micro-grid {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* ─── Premium Image Container & Ethereal Depth (Awwwards 2026) ─────────────── */
-.product-image-container {
+/* 1px Outer Hairline Shell — Zero-Paint Perimeter Beam Architecture */
+.apothecary-card {
   position: relative;
+  border-radius: 1.5rem;
+  padding: 1px;
   overflow: hidden;
-  contain: paint;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  flex-shrink: 0;
-  /* Hardware acceleration boundary */
-  transform: translateZ(0);
+  background-color: rgba(255, 255, 255, 0.085);
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px 550px;
 }
 
-/* Subtle dimming layer to create depth on hover */
-.product-image-container::before {
-  content: "";
+/* Pre-baked static 280px radial orb moved purely via GPU transform: translate3d() behind the opaque inner surface */
+.apothecary-beam-orb {
   position: absolute;
-  inset: 0;
-  background: #ffffff;
+  top: -140px;
+  left: -140px;
+  width: 280px;
+  height: 280px;
+  border-radius: 9999px;
+  pointer-events: none;
   opacity: 0;
+  z-index: 0;
+  background-image: radial-gradient(
+    circle,
+    rgba(186, 230, 253, 0.85) 0%,
+    rgba(34, 211, 238, 0.42) 38%,
+    transparent 70%
+  );
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Opaque Clinical-Obsidian Inner Monolith (masks everything except the 1px outer shell edge) */
+.apothecary-card-inner {
+  position: relative;
   z-index: 1;
-  pointer-events: none;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.product-image-premium {
-  transition:
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  transform: translate3d(0, 0, 0) scale(1);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  /* Forces GPU rasterization for sharp text/images */
-  transform-style: preserve-3d;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  /* MICRO-DELAY (60ms): Prevents the animation from triggering if the user is just scrolling past.
-     Only intentional hovers will trigger the beautiful scale effect. */
-
-  .product-card-tibico:hover .product-image-container::before {
-    opacity: 0.03;
-    transition-delay: 60ms;
-  }
-
-  .product-card-tibico:hover .product-image-premium {
-    /* Moves up slightly and scales, creating a 3D pop-out effect */
-    transform: translate3d(0, -4px, 0) scale(1.06);
-    /* Soft shadow directly on the product inside the container */
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
-    transition-delay: 60ms;
-    will-change: transform, filter;
-  }
-}
-
-/* ─── Grid 3 & 4: Standard card ─────────────────────────────────────────────── */
-.product-card-inner {
-  position: relative;
+  width: 100%;
   height: 100%;
-  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: calc(1.5rem - 1px);
+  overflow: hidden;
+  background-color: #060b15;
+  background-image: linear-gradient(174deg, #0b1324 0%, #070d19 46%, #040811 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .product-card-inner:hover {
-    transform: translateY(-4px);
-    will-change: transform;
-  }
+/* Low-tier flat solid obsidian surface (zero multi-stop gradient cost) */
+.apothecary-card[data-tier="low"] .apothecary-card-inner {
+  background-image: none;
+  background-color: #070d1a;
 }
 
-/* Shadow via pseudo — compositor-only opacity, no repaint on transform */
-.product-card-inner::after {
-  content: "";
+/* Pre-baked static 340px interior specular orb (High Tier Desktop only, pure GPU transform) */
+.apothecary-glow-orb {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  top: -170px;
+  left: -170px;
+  width: 340px;
+  height: 340px;
+  border-radius: 9999px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.6);
-  z-index: -1;
+  z-index: 2;
+  background-image: radial-gradient(
+    circle,
+    rgba(186, 230, 253, 0.09) 0%,
+    rgba(34, 211, 238, 0.03) 44%,
+    transparent 70%
+  );
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .product-card-inner:hover::after {
-    opacity: 1;
-  }
-}
-
-/* ─── Grid 2: Horizontal card (image left/right, text right/left) ────────────── */
-.product-card-horizontal {
-  position: relative;
-  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .product-card-horizontal:hover {
-    transform: translateY(-3px);
-    will-change: transform;
-  }
-}
-
-.product-card-horizontal::after {
-  content: "";
+/* Top-rim optical pulse when item is added to order list */
+.apothecary-added-pulse {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  border-radius: 9999px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.55);
-  z-index: -1;
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgba(34, 211, 238, 0.9),
+    #ffffff,
+    rgba(34, 211, 238, 0.9),
+    transparent
+  );
+  animation: card-added-flash 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 25;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .product-card-horizontal:hover::after {
-    opacity: 1;
-  }
-}
-
-/* Image container for horizontal card — fixed height, no aspect-ratio */
-.product-image-container-h {
+/* Seamless full-bleed architectural studio chamber */
+.apothecary-vitrine {
   position: relative;
   overflow: hidden;
   contain: paint;
-  flex-shrink: 0;
 }
 
-/* ─── prefers-reduced-motion ─────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .product-card-wrapper {
-    animation: none;
+.apothecary-bottle {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Pure pre-baked radial floor contact shadow — ZERO CSS filter: blur() */
+.apothecary-floor-shadow {
+  transform: scaleX(1) scaleY(1) translateZ(0);
+  opacity: 0.78;
+  background-image: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.32) 48%,
+    transparent 74%
+  );
+}
+
+/* Quiet editorial title arrow: visible subtly on touch/low, kinetic slide-in on fine-pointer desktop */
+.apothecary-title-arrow {
+  transform: translate3d(0, 0, 0);
+  opacity: 0.55;
+}
+
+/* Compositor-only hover transitions gated strictly to Fine-Pointer Desktop + Medium/High Tiers */
+@media (hover: hover) and (pointer: fine) {
+  .apothecary-card:not([data-tier="low"]) .apothecary-bottle {
+    transition: transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .apothecary-card:not([data-tier="low"]) .apothecary-floor-shadow {
+    transition:
+      transform 0.52s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .apothecary-card:not([data-tier="low"]) .apothecary-title-arrow {
+    opacity: 0;
+    transform: translate3d(-5px, 0, 0);
+    transition:
+      opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.24s ease;
+  }
+
+  .apothecary-card:not([data-tier="low"]):hover .apothecary-beam-orb,
+  .apothecary-card:not([data-tier="low"]):hover .apothecary-glow-orb {
     opacity: 1;
   }
-  .product-card-inner,
-  .product-card-horizontal {
-    transition: none;
+
+  .apothecary-card:not([data-tier="low"]):hover .apothecary-bottle {
+    transform: translate3d(0, -8px, 0) scale(1.045);
   }
-  .product-image-premium,
-  .product-image-container::before {
+
+  .apothecary-card:not([data-tier="low"]):hover .apothecary-floor-shadow {
+    transform: scaleX(0.84) scaleY(0.84) translateZ(0);
+    opacity: 0.44;
+  }
+
+  .apothecary-card:not([data-tier="low"]):hover .apothecary-title-arrow {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Instant tactile feedback on touch screens */
+@media (hover: none) and (pointer: coarse) {
+  .apothecary-card {
+    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .apothecary-card:active {
+    transform: scale(0.985) translateZ(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .specimen-cell-enter {
+    opacity: 1;
+    animation: none;
+  }
+  .apothecary-card,
+  .apothecary-beam-orb,
+  .apothecary-glow-orb,
+  .apothecary-bottle,
+  .apothecary-floor-shadow,
+  .apothecary-title-arrow {
     transition: none !important;
     transform: none !important;
   }

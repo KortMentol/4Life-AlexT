@@ -1,17 +1,3 @@
-/**
- * @module src/context/ProductListProvider.tsx
- * @description Провайдер для управления состоянием списка продуктов (корзины). Реализует логику добавления, удаления, обновления количества и очистки списка. Синхронизирует состояние с `localStorage`, чтобы сохранять выбор пользователя между сессиями.
- * @author Kort
- * @version 1.1.0 - Updated to use DetailedProduct type
- * @param {React.ReactNode} children - Дочерние компоненты, которые получат доступ к контексту.
- * @see ProductListUtils - Утилиты для работы с `localStorage`.
- * @usage
- * 1. `src/App.tsx`: Оборачивает все приложение, чтобы обеспечить глобальный доступ к списку продуктов.
- * @example
- * <ProductListProvider>
- *   <App />
- * </ProductListProvider>
- */
 import { DetailedProduct } from "@/data/productsData";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -25,26 +11,29 @@ import {
   STORAGE_KEY,
 } from "./ProductListUtils";
 
+export const MAX_QTY_PER_PRODUCT = 10;
+export const MAX_TOTAL_CART_ITEMS = 30;
+
 const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [items, setItems] = useState<ProductListItem[]>(loadFromStorage);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = useCallback(() => setIsModalOpen(true), []);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   useEffect(() => {
     saveToStorage(items);
   }, [items]);
 
-  // Real-time синхронизация корзины между вкладками браузера
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handleStorageChange = (event: StorageEvent) => {
-      // Проверяем, что изменение произошло в другой вкладке и касается нашего STORAGE_KEY
       if (event.key === STORAGE_KEY) {
         try {
           const newItems = event.newValue ? JSON.parse(event.newValue) : [];
-
-          // Предотвращаем холостые ре-рендеры: обновляем стейт только при реальном изменении данных
           setItems((currentItems) => {
             const hasChanged =
               JSON.stringify(currentItems) !== JSON.stringify(newItems);
@@ -52,7 +41,7 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
           });
         } catch (error) {
           console.error(
-            "[ProductListProvider] Ошибка синхронизации вкладок:",
+            "[ProductListProvider] Storage sync error:",
             error,
           );
         }
@@ -67,16 +56,26 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addToList = useCallback(
     (product: DetailedProduct, quantity: number = 1) => {
+      const safeDelta = Math.max(1, Math.floor(quantity));
       setItems((prev) => {
+        const currentTotal = prev.reduce((sum, item) => sum + item.quantity, 0);
+        const remainingGlobal = Math.max(0, MAX_TOTAL_CART_ITEMS - currentTotal);
+        if (remainingGlobal <= 0) return prev;
+
         const existing = prev.find((item) => item.id === product.id);
         if (existing) {
+          const allowedNewQty = Math.min(
+            MAX_QTY_PER_PRODUCT,
+            existing.quantity + Math.min(safeDelta, remainingGlobal),
+          );
+          if (allowedNewQty === existing.quantity) return prev;
           return prev.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + quantity }
-              : item,
+            item.id === product.id ? { ...item, quantity: allowedNewQty } : item,
           );
         }
-        return [...prev, { ...product, quantity }];
+        const initialQty = Math.min(MAX_QTY_PER_PRODUCT, safeDelta, remainingGlobal);
+        if (initialQty <= 0) return prev;
+        return [...prev, { ...product, quantity: initialQty }];
       });
     },
     [],
@@ -88,10 +87,21 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateItemQuantity = useCallback(
     (productId: string, quantity: number) => {
+      const safeQty = Math.floor(quantity);
       setItems((prev) => {
-        if (quantity <= 0) return prev.filter((i) => i.id !== productId);
+        if (safeQty <= 0) return prev.filter((i) => i.id !== productId);
+        const otherTotal = prev.reduce(
+          (sum, item) => (item.id === productId ? sum : sum + item.quantity),
+          0,
+        );
+        const maxAllowed = Math.min(
+          MAX_QTY_PER_PRODUCT,
+          Math.max(0, MAX_TOTAL_CART_ITEMS - otherTotal),
+        );
+        const clamped = Math.min(safeQty, maxAllowed);
+        if (clamped <= 0) return prev.filter((i) => i.id !== productId);
         return prev.map((item) =>
-          item.id === productId ? { ...item, quantity } : item,
+          item.id === productId ? { ...item, quantity: clamped } : item,
         );
       });
     },
@@ -113,6 +123,9 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
       updateItemQuantity,
       clearList,
       getTotalItems,
+      isModalOpen,
+      openModal,
+      closeModal,
     }),
     [
       items,
@@ -121,6 +134,9 @@ const ProductListProvider: React.FC<{ children: React.ReactNode }> = ({
       updateItemQuantity,
       clearList,
       getTotalItems,
+      isModalOpen,
+      openModal,
+      closeModal,
     ],
   );
 

@@ -45,12 +45,12 @@ export const CHAPTERS = ["ВХОД", "ОСНОВА", "МОДЕЛЬ", "ДОХОД
 export const TICKER_ITEMS = [
   "Associate",
   "Builder",
+  "Diamond",
   "Presidential",
   "Bronze",
   "Silver",
   "Gold",
   "Platinum",
-  "Diamond",
 ] as const;
 
 // ─── Шаги модели ─────────────────────────────────────────────────────────────

@@ -1,11 +1,3 @@
-/**
- * @module src/components/ui/ScrollTextReveal/WordReveal.tsx
- * @description Индивидуальный компонент анимации слова для ScrollTextReveal.
- *
- * @author Senior Staff Frontend Engineer
- * @version 1.2.0
- */
-
 import { motion, useTransform } from "framer-motion";
 import React from "react";
 import { WordRevealProps } from "./ScrollTextReveal.types";
@@ -38,7 +30,6 @@ const WordReveal: React.FC<WordRevealProps> = ({
 
   const filter = useTransform(blur, (value) => `blur(${value}px)`);
 
-  // Умный динамический расчет will-change (спасает VRAM на мобильных устройствах)
   const willChange = useTransform(scrollProgress, (p) => {
     const isAnimating = p > startProgress - 0.05 && p < endProgress + 0.05;
     return isAnimating ? "transform, opacity" : "auto";

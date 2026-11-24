@@ -21,7 +21,7 @@ interface VimeoModalProps {
 
 export const VimeoModal: React.FC<VimeoModalProps> = ({ isOpen, onClose, tier, videoUrl }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Блокировка скролла
   useEffect(() => {

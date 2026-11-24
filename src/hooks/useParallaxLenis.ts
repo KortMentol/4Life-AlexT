@@ -13,8 +13,8 @@ interface Options {
 }
 
 export function useParallaxLenis(
-  ref: React.RefObject<HTMLElement>,
-  containerRef: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
+  containerRef: React.RefObject<HTMLElement | null>,
   options: Options = {},
 ) {
   const { strength = 60, disabled = false, direction = 1 } = options;

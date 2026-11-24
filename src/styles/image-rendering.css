@@ -1,15 +1,3 @@
-/**
- * @module src/styles/image-rendering.css
- * @description Глобальные CSS правила для устранения пикселизации изображений.
- * @author Kort
- * @version 3.0.0 - Video exempt (2026)
- * @note video теги намеренно исключены из image-rendering правил.
- *       Видео должно полагаться на нативное аппаратное декодирование браузера.
- *       Принудительный image-rendering на трансформируемых видео заставляет CPU
- *       постоянно перерастеризовывать кадры во время скролла.
- */
-
-/* Изображения, canvas, svg — применяем smooth rendering */
 img,
 canvas,
 svg,
@@ -18,24 +6,19 @@ svg,
   -webkit-image-rendering: auto;
   -moz-image-rendering: auto;
   -ms-image-rendering: auto;
-
-  /* Современный стандарт */
   image-rendering: smooth;
   -webkit-image-rendering: smooth;
 }
 
-/* Tailwind bg-* классы */
 [class*="bg-"] {
   image-rendering: auto;
   -webkit-image-rendering: auto;
   -moz-image-rendering: auto;
   -ms-image-rendering: auto;
-
   image-rendering: smooth;
   -webkit-image-rendering: smooth;
 }
 
-/* Анимированные/трансформируемые изображения */
 .will-change-transform img,
 .will-change-transform [style*="background-image"],
 [style*="transform"] img,
@@ -45,10 +28,6 @@ svg,
   -moz-image-rendering: auto;
 }
 
-/* VIDEO: намеренно НЕ переопределяем image-rendering.
-   Браузер использует аппаратное декодирование (GPU video decoder).
-   Любой image-rendering на video отключает этот путь и нагружает CPU.
-   Особенно критично на мобильных при scroll-driven трансформациях. */
 video {
   image-rendering: auto;
   -webkit-image-rendering: auto;

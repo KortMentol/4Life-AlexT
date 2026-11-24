@@ -15,44 +15,32 @@ import { AuroraText } from "@/components/magicui/aurora-text";
 import { FinalCTASection, MorphingVideoSection, PartnershipSection } from "@/components/sections";
 import { PageEntrance } from "@/components/transitions/PageEntrance";
 import { Button, ParallaxSection } from "@/components/ui";
-import { useEffectsDebug, usePerformanceTier } from "@/hooks";
+import { useEffectsDebug } from "@/hooks";
 import { SEO } from "@/seo/SEO";
 import { Icons } from "@/utils/icons";
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 
-// Media imports
-import bg2Img from "@/assets/images/backgrounds/HomePage/2.webp";
-import renuvoImg from "@/assets/images/products/MobileVersions/Mobile_renuvo.webp";
-import tfPlusImg from "@/assets/images/products/MobileVersions/Mobile_tf-plus.webp";
-import tfTrifactorImg from "@/assets/images/products/MobileVersions/Mobile_tf-trifactor.webp";
-
+// Media imports (real 4Life product bottle packshots + original HomePage backgrounds)
+import showcaseOpticsImg from "@/assets/images/backgrounds/HomePage/2.webp";
 import heroBgMobile from "@/assets/images/backgrounds/HomePage/bg-hero-Mobile.webp";
 import heroBgPC from "@/assets/images/backgrounds/HomePage/bg-hero-PC.webp";
-
-const heroVideoWebm = "/videos/why-4life-transfer-factor.webm";
+import renuvoBottleImg from "@/assets/images/products/renuvo.webp";
+import tfPlusBottleImg from "@/assets/images/products/tf-plus.webp";
+import tfTrifactorBottleImg from "@/assets/images/products/tf-trifactor.webp";
 
 const ImmersiveProductShowcase = lazy(() => import("@/components/ui/ImmersiveProductShowcase"));
-
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } },
-  exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
-};
 
 const HomePage: React.FC = () => {
   const efxFlags = useEffectsDebug();
   const [vh, setVh] = useState(800);
-  const currentTier = usePerformanceTier();
-  const [tier, setTier] = useState<string>("medium");
 
   const heroRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setVh(window.innerHeight);
-    setTier(currentTier);
-  }, [currentTier]);
+  }, []);
 
   const { scrollY } = useScroll();
 
@@ -72,7 +60,7 @@ const HomePage: React.FC = () => {
       title: "Трай-Фактор Формула",
       description:
         "Революционное достижение науки о трансферцевтиках, поднимает здоровье иммунной системы на новый уровень",
-      image: tfPlusImg,
+      image: tfTrifactorBottleImg,
       link: "/products",
     },
     {
@@ -80,7 +68,7 @@ const HomePage: React.FC = () => {
       title: "Трансфер Фактор Плюс",
       description:
         "Помогает работе вашего иммунитета и поддерживает оптимальное здоровье, самочувствие и качество жизни",
-      image: tfTrifactorImg,
+      image: tfPlusBottleImg,
       link: "/products",
     },
     {
@@ -88,13 +76,13 @@ const HomePage: React.FC = () => {
       title: "Трансфер Фактор Ренуво",
       description:
         "Запатентованная адаптогенная формула для системного восстановления организма в условиях современного стресса",
-      image: renuvoImg,
+      image: renuvoBottleImg,
       link: "/products",
     },
   ];
 
   return (
-    <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants}>
+    <div className="relative">
       <SEO
         title="4Life с Александром Тощевым - Здоровье, Благополучие, Бизнес"
         description="Официальный сайт Александра Тощева: узнайте о продуктах 4Life для укрепления иммунитета, улучшения здоровья и возможностях партнерства."
@@ -104,19 +92,20 @@ const HomePage: React.FC = () => {
         includeWebSiteSearch
       />
 
-      <div ref={heroSectionRef}>
+      <div ref={heroSectionRef} className="relative z-10 bg-[#03050a]">
         <ParallaxSection
-          backgroundVideo={heroVideoWebm}
           backgroundImageMobile={heroBgMobile}
           backgroundImagePC={heroBgPC}
+          backgroundVideo="/videos/why-4life-transfer-factor.webm"
           altText="Здоровье и благополучие с 4Life"
           height="h-screen"
+          imageBrightness="brightness-[.82]"
           contentClasses="flex flex-col items-center justify-center text-center py-8 pt-24"
           skipPreload={true}
-          edgeFade={{ bottom: 120, colorDark: "#03050a" }} // 120px не достает до кнопок, но мягко гасит видео
+          edgeFade={{ bottom: 140, colorDark: "#03050a" }}
         >
-          {/* Сбалансированный оверлей: чистый верх/низ и прозрачный центр для кнопок */}
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/80 via-black/20 to-black/70 z-0" />
+          {/* Balanced optical vignette: preserves glowing refraction ribs while guaranteeing razor-sharp white type */}
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#03050a]/65 via-[#03050a]/25 to-[#03050a]/80 z-0" />
 
           <PageEntrance className="relative z-10 w-full max-w-5xl mx-auto px-4 md:px-6 flex flex-col justify-center items-center h-full">
             <motion.div
@@ -128,17 +117,21 @@ const HomePage: React.FC = () => {
               }}
             >
               <div data-entrance="badge" className="mb-8 md:mb-10">
-                <motion.span
-                  className={`inline-flex items-center px-5 py-2 rounded-full border border-white/15 bg-white/5 text-[10px] md:text-xs font-bold tracking-[0.2em] text-white uppercase shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${tier !== "low" ? "backdrop-blur-md" : ""}`}
+                <motion.div
+                  className="inline-flex items-center gap-3.5"
                   style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
                 >
-                  Обучение вашего иммунитета
-                </motion.span>
+                  <span className="w-7 h-px bg-cyan-400/80" aria-hidden="true" />
+                  <span className="typography-label text-cyan-300/95 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                    Обучение вашего иммунитета
+                  </span>
+                  <span className="w-7 h-px bg-cyan-400/80" aria-hidden="true" />
+                </motion.div>
               </div>
 
               <div data-entrance="title" className="w-full mb-10 md:mb-14">
                 <motion.h1
-                  className="typography-display text-center w-full drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]"
+                  className="typography-display font-syne text-center w-full drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]"
                   style={{ opacity: shouldAnimateHero ? heroContentOpacity : 1 }}
                 >
                   Раскройте потенциал своего здоровья{" "}
@@ -186,37 +179,47 @@ const HomePage: React.FC = () => {
         <MorphingVideoSection />
       </div>
 
-      <section id="products">
+      <section id="products" className="relative z-10 bg-[#03050a]">
         <ParallaxSection
-          backgroundImage={bg2Img}
+          backgroundImage={showcaseOpticsImg}
           lazyLoad={true}
           altText="Продукты 4Life для укрепления иммунитета"
           height="auto"
-          edgeFade={{ top: 250, bottom: 250, colorDark: "#03050a" }}
+          imageBrightness="brightness-[.62]"
+          contentClasses="flex flex-col items-center justify-center w-full"
+          edgeFade={{ top: 220, bottom: 220, colorDark: "#03050a" }}
         >
-          <div className="py-24 sm:py-32">
-            <div className="container max-w-7xl mx-auto px-6">
+          <div className="relative py-24 sm:py-32 w-full">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-[420px] z-0"
+              style={{
+                backgroundImage:
+                  "radial-gradient(ellipse 64% 62% at 50% 42%, rgba(3, 5, 10, 0.72) 0%, rgba(3, 5, 10, 0.32) 55%, transparent 100%)",
+              }}
+            />
+            <div className="relative z-10 container max-w-7xl mx-auto w-full px-4 md:px-8">
               <div className="text-center mb-20">
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/60 mb-4">
+                <p className="typography-label text-cyan-300/85 mb-4 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
                   Научный подход к здоровью
                 </p>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                  <span className="bg-gradient-to-r from-cyan-400 via-blue-300 to-blue-400 bg-clip-text text-transparent drop-shadow-md">
+                <h2 className="typography-h1 text-white mb-5 leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
+                  <span className="bg-gradient-to-r from-cyan-300 via-sky-200 to-blue-300 bg-clip-text text-transparent">
                     Инновационные продукты
                   </span>
-                  <span className="block text-white/90">для иммунитета</span>
+                  <span className="block font-light text-white mt-1">
+                    для иммунитета
+                  </span>
                 </h2>
-                <p className="text-lg text-white/70 leading-relaxed max-w-xl mx-auto font-light">
+                <p className="text-lg text-slate-200/90 leading-relaxed max-w-xl mx-auto font-light drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
                   Целевые формулы 4Life Transfer Factor — от сердечно-сосудистой до когнитивной функции.
                 </p>
               </div>
             </div>
 
-            <div className="container max-w-7xl mx-auto">
+            <div className="container max-w-7xl mx-auto w-full px-4 md:px-8">
               <Suspense fallback={<div className="h-[480px] w-full" />}>
-                <div className="px-20">
-                  <ImmersiveProductShowcase products={popularProducts} />
-                </div>
+                <ImmersiveProductShowcase products={popularProducts} />
               </Suspense>
 
               <div className="mt-20 mb-8 text-center px-6">
@@ -237,9 +240,11 @@ const HomePage: React.FC = () => {
         </ParallaxSection>
       </section>
 
-      <PartnershipSection />
-      <FinalCTASection />
-    </motion.div>
+      <div className="relative z-10 bg-[#03050a]">
+        <PartnershipSection />
+        <FinalCTASection />
+      </div>
+    </div>
   );
 };
 

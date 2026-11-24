@@ -16,7 +16,6 @@ import { Button } from "@/components/ui";
 import ScrollNumber from "@/components/ui/ScrollNumber";
 import ScrollTextReveal from "@/components/ui/ScrollTextReveal";
 import { Icons } from "@/utils/icons";
-import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BiotechBackground from "@/components/effects/BiotechBackground";
@@ -25,6 +24,9 @@ import CustomCursor from "@/components/ui/CustomCursor";
 import { usePerformanceTier } from "@/hooks";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug";
 
+import chapterQualityImg from "@/assets/images/video_chapter_quality_1795221773477.jpg";
+import chapterScienceImg from "@/assets/images/video_chapter_science_1795221772449.jpg";
+import chapterVitalityImg from "@/assets/images/video_chapter_vitality_1795221772807.jpg";
 import { Grid3D } from "./components/Grid3D";
 import { VideoBlock } from "./components/VideoBlock";
 import { VimeoModal } from "./components/VimeoModal";
@@ -78,6 +80,120 @@ const ContinuousGlowFrame: React.FC<{
   );
 };
 
+interface MobileChapterVideoCardProps {
+  index: string;
+  label: string;
+  title: string;
+  description: string;
+  videoSrc: string;
+  posterImage: string;
+  onOpenVimeo: () => void;
+  tier: "low" | "medium" | "high";
+}
+
+const MobileChapterVideoCard: React.FC<MobileChapterVideoCardProps> = ({
+  index,
+  label,
+  title,
+  description,
+  videoSrc,
+  posterImage,
+  onOpenVimeo,
+  tier,
+}) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    const video = videoRef.current;
+    if (!card || !video) return;
+
+    const handleLoaded = () => setVideoReady(true);
+    video.addEventListener("loadeddata", handleLoaded);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6 && videoReady) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+
+    observer.observe(card);
+    return () => {
+      video.removeEventListener("loadeddata", handleLoaded);
+      observer.disconnect();
+      video.pause();
+    };
+  }, [videoReady]);
+
+  return (
+    <article
+      ref={cardRef}
+      className="p-6 rounded-[2rem] bg-[#050811]/90 border border-white/[0.08] shadow-2xl flex flex-col gap-5"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-cyan-400/80 font-semibold block mb-1.5">
+            {label}
+          </span>
+          <h2 className="typography-h3 text-white">{title}</h2>
+        </div>
+        <span className="text-4xl font-light text-cyan-400/30 font-heading tabular-nums leading-none">{index}</span>
+      </div>
+
+      <p className="typography-body text-sm text-slate-400 leading-relaxed text-pretty">{description}</p>
+
+      <button
+        type="button"
+        onClick={onOpenVimeo}
+        aria-label={`Смотреть видео: ${title}`}
+        className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-300/20 shadow-xl cursor-pointer active:scale-[0.98] transition-transform duration-200"
+      >
+        <img
+          src={posterImage}
+          alt={title}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          muted
+          loop
+          playsInline
+          preload="none"
+          className={`relative z-10 w-full h-full object-cover transition-opacity duration-500 ${
+            videoReady ? "opacity-90" : "opacity-0"
+          }`}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/15 to-black/30 pointer-events-none"
+        />
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div
+            className={`flex items-center gap-2 px-5 py-3 rounded-full bg-black/65 border border-white/20 text-white shadow-lg active:scale-95 transition-transform duration-150 ${
+              tier !== "low" ? "backdrop-blur-md" : ""
+            }`}
+          >
+            <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
+          </div>
+        </div>
+      </button>
+    </article>
+  );
+};
+
 const MorphingVideoSection: React.FC = () => {
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
@@ -93,18 +209,6 @@ const MorphingVideoSection: React.FC = () => {
   const [vimeoOpen, setVimeoOpen] = useState(false);
   const [vimeoUrl, setVimeoUrl] = useState("");
   const isCursorEnabled = !isTouchDevice;
-
-  useEffect(() => {
-    const preloadVideos = () => {
-      const link = document.createElement("link");
-      link.rel = "preload";
-      link.as = "video";
-      link.href = VIDEO_ASSETS.video1;
-      document.head.appendChild(link);
-    };
-    if (document.readyState === "complete") preloadVideos();
-    else window.addEventListener("load", preloadVideos);
-  }, []);
 
   const handleOpenVimeoModal = useCallback((url: string) => {
     window.dispatchEvent(new CustomEvent("modal-state-change", { detail: { isOpen: true } }));
@@ -124,23 +228,48 @@ const MorphingVideoSection: React.FC = () => {
 
   const boxBaseClass = "relative rounded-[2rem] transition-all duration-300";
 
+  const shouldApplyGlassBlur = tier !== "low" && efxFlags.renderCardsBackground && efxFlags.cardsBackdropBlur;
+
   const boxEffectClass = efxFlags.renderCardsBackground
-    ? efxFlags.cardsBackdropBlur
+    ? shouldApplyGlassBlur
       ? "glass-backdrop-blur"
       : "glass-smoked-acrylic"
     : "bg-transparent border-none shadow-none";
 
   const boxClass = `${boxBaseClass} ${boxEffectClass}`;
 
+  const blurPx = tier === "high" ? "22px" : "8px";
+  const glassFilterValue = shouldApplyGlassBlur ? `blur(${blurPx}) saturate(185%) brightness(1.08)` : undefined;
+
   const customProperties = {
-    "--card-blur-value": efxFlags.cardsBackdropBlur ? "16px" : "0px",
+    "--card-blur-value": shouldApplyGlassBlur ? blurPx : "0px",
+    ...(glassFilterValue
+      ? {
+          backdropFilter: glassFilterValue,
+          WebkitBackdropFilter: glassFilterValue,
+        }
+      : {}),
   } as React.CSSProperties;
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-transparent">
-      {/* ─── ВЕРХНЯЯ МАСКА: Растворяет флюид и фон сверху в чистый Clinical Obsidian ─── */}
+    <section
+      ref={sectionRef}
+      className="relative bg-[#03050a]"
+      style={{ isolation: "isolate" }}
+    >
+      {/* Layer 0: Biotech ambient base */}
+      <div className="absolute inset-0 z-0 overflow-hidden bg-transparent pointer-events-none">
+        <div className="absolute inset-0 w-full h-full">
+          <BiotechBackground />
+        </div>
+      </div>
+
+      {/* Layer 1: Live WebGL Fluid (fixed z-[1], scissored to section bounds, shared Backdrop Root for Firefox glass) */}
+      {!isTouchDevice && <SectionFluidEffect sectionRef={sectionRef} />}
+
+      {/* Layer 5: Seamless top edge fade dissolving fluid into Clinical Obsidian */}
       <div
-        className="absolute top-0 left-0 right-0 h-[280px] pointer-events-none z-10"
+        className="absolute top-0 left-0 right-0 h-[280px] pointer-events-none z-[5]"
         style={{
           background: `linear-gradient(to bottom,
             rgba(3, 5, 10, 1) 0%,
@@ -157,21 +286,11 @@ const MorphingVideoSection: React.FC = () => {
 
       <VimeoModal isOpen={vimeoOpen} onClose={handleCloseVimeoModal} tier={tier} videoUrl={vimeoUrl} />
 
-      {!isTouchDevice && <SectionFluidEffect sectionRef={sectionRef} />}
-
-      <div className="absolute inset-0 -z-30 overflow-hidden bg-transparent">
-        <div className="absolute inset-0 w-full h-full">
-          <BiotechBackground />
-        </div>
-      </div>
-
       {!isTouchDevice ? (
-        <motion.div
-          className="relative z-30"
-          style={{ pointerEvents: vimeoOpen ? "none" : "auto", willChange: "opacity" }}
-          initial={false}
-          animate={{ opacity: vimeoOpen ? 0 : 1 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        <div
+          className={`relative z-[20] transition-opacity duration-300 ${
+            vimeoOpen ? "opacity-0 pointer-events-none" : ""
+          }`}
         >
           <div className="px-4 pt-24 md:pt-32 pb-12 text-center">
             <div className="mx-auto max-w-4xl relative">
@@ -204,7 +323,7 @@ const MorphingVideoSection: React.FC = () => {
           <div className="relative">
             {/* ── Блок 01 ── */}
             <div ref={block1Ref} className="relative">
-              <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
+              <div className="relative z-20 flex h-screen items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-5xl">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                     <div className="lg:col-span-4 flex justify-end lg:pr-8 order-2 lg:order-1">
@@ -220,8 +339,8 @@ const MorphingVideoSection: React.FC = () => {
                           <ContinuousGlowFrame blockIndex={1} neonColor1="#06b6d4" neonColor2="#0ea5e9" />
                         )}
 
-                        <div className="absolute top-4 right-6 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-500/40 dark:text-slate-500/30 select-none">
-                          [TF.01]
+                        <div className="absolute top-4 right-6 text-[10px] uppercase tracking-[0.2em] text-cyan-400/50 select-none font-medium">
+                          Иммунный интеллект
                         </div>
 
                         <h2 className="typography-h2 text-left text-white m-0">Исследования и Инновации</h2>
@@ -236,14 +355,14 @@ const MorphingVideoSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="relative z-10 min-h-[200vh]">
+              <div className="relative z-10 min-h-[200vh] overflow-x-clip">
                 {isGrid3dEnabled && <Grid3D type={1} triggerRef={block1Ref} />}
               </div>
             </div>
 
             {/* ── Блок 02 ── */}
             <div ref={block2Ref} className="relative">
-              <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
+              <div className="relative z-20 flex h-screen items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-5xl">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                     <div className="lg:col-span-8 order-1">
@@ -252,8 +371,8 @@ const MorphingVideoSection: React.FC = () => {
                           <ContinuousGlowFrame blockIndex={2} neonColor1="#3b82f6" neonColor2="#0ea5e9" />
                         )}
 
-                        <div className="absolute top-4 right-6 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-500/40 dark:text-slate-500/30 select-none">
-                          [TF.02]
+                        <div className="absolute top-4 right-6 text-[10px] uppercase tracking-[0.2em] text-cyan-400/50 select-none font-medium">
+                          Стандарт чистоты cGMP
                         </div>
 
                         <h2 className="typography-h2 text-right text-white m-0">Бескомпромиссный Контроль Качества</h2>
@@ -274,14 +393,14 @@ const MorphingVideoSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="relative z-10 min-h-[200vh]">
+              <div className="relative z-10 min-h-[200vh] overflow-x-clip">
                 {isGrid3dEnabled && <Grid3D type={2} triggerRef={block2Ref} />}
               </div>
             </div>
 
             {/* ── Блок 03 ── */}
             <div ref={block3Ref} className="relative">
-              <div className="sticky top-0 z-20 flex h-screen items-center justify-center">
+              <div className="relative z-20 flex h-screen items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-5xl">
                   <div className="text-center space-y-8">
                     <ScrollNumber
@@ -295,8 +414,8 @@ const MorphingVideoSection: React.FC = () => {
                           <ContinuousGlowFrame blockIndex={3} neonColor1="#06b6d4" neonColor2="#3b82f6" />
                         )}
 
-                        <div className="absolute top-4 right-6 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-500/40 dark:text-slate-500/30 select-none">
-                          [TF.03]
+                        <div className="absolute top-4 right-6 text-[10px] uppercase tracking-[0.2em] text-cyan-400/50 select-none font-medium">
+                          Энергия и тонус жизни
                         </div>
 
                         <h2 className="typography-h2 text-center text-white m-0">Подтверждённая Эффективность</h2>
@@ -311,7 +430,7 @@ const MorphingVideoSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="relative z-10 min-h-[200vh]">
+              <div className="relative z-10 min-h-[200vh] overflow-x-clip">
                 {isGrid3dEnabled && <Grid3D type={3} triggerRef={block3Ref} />}
               </div>
             </div>
@@ -332,14 +451,12 @@ const MorphingVideoSection: React.FC = () => {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : (
-        <motion.div
-          className="relative z-30 px-5 pt-16 pb-20 max-w-xl mx-auto"
-          style={{ pointerEvents: vimeoOpen ? "none" : "auto", willChange: "opacity" }}
-          initial={false}
-          animate={{ opacity: vimeoOpen ? 0 : 1 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        <div
+          className={`relative z-30 px-5 pt-16 pb-20 max-w-xl mx-auto transition-opacity duration-300 ${
+            vimeoOpen ? "opacity-0 pointer-events-none" : ""
+          }`}
         >
           <div className="text-center mb-14">
             <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400 mb-3 drop-shadow-md">
@@ -352,98 +469,39 @@ const MorphingVideoSection: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-y-16">
-            <div className="relative border-t border-cyan-500/10 pt-8 flex flex-col gap-5">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-bold text-white">Исследования и Инновации</h2>
-                <span className="text-4xl font-light text-cyan-400/25 font-heading">01</span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы, молекулы,
-                которые "обучают" иммунную систему, оптимизируя её естественные защитные функции для точного
-                реагирования.
-              </p>
-              <div
-                onClick={handleOpenVimeo1}
-                className="relative aspect-video rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-500/15 shadow-xl glass-smoked-acrylic cursor-pointer active:scale-[0.98] transition-all duration-200"
-              >
-                <video
-                  src={VIDEO_ASSETS.video1}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="w-full h-full object-cover opacity-75"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white shadow-lg active:scale-95 transition-transform duration-150">
-                    <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-28">
+            <MobileChapterVideoCard
+              index="01"
+              label="Иммунный интеллект"
+              title="Исследования и Инновации"
+              description='В основе каждого продукта — запатентованные технологии. Ключевая из них — Трансфер Факторы, молекулы, которые "обучают" иммунную систему, оптимизируя её естественные защитные функции для точного реагирования.'
+              videoSrc={VIDEO_ASSETS.video1}
+              posterImage={chapterScienceImg}
+              onOpenVimeo={handleOpenVimeo1}
+              tier={tier}
+            />
 
-            <div className="relative border-t border-cyan-500/10 pt-8 flex flex-col gap-5">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-bold text-white">Контроль Качества</h2>
-                <span className="text-4xl font-light text-cyan-400/25 font-heading">02</span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                Каждый этап производства проходит строгий контроль. Современные технологии и сертифицированные процессы
-                по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности и эффективности продукции.
-              </p>
-              <div
-                onClick={handleOpenVimeo2}
-                className="relative aspect-video rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-500/15 shadow-xl glass-smoked-acrylic cursor-pointer active:scale-[0.98] transition-all duration-200"
-              >
-                <video
-                  src={VIDEO_ASSETS.video2}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="w-full h-full object-cover opacity-75"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white shadow-lg active:scale-95 transition-transform duration-150">
-                    <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <MobileChapterVideoCard
+              index="02"
+              label="Стандарт чистоты cGMP"
+              title="Контроль Качества"
+              description="Каждый этап производства проходит строгий контроль. Современные технологии и сертифицированные процессы по стандарту cGMP гарантируют высочайшие стандарты чистоты, безопасности и эффективности продукции."
+              videoSrc={VIDEO_ASSETS.video2}
+              posterImage={chapterQualityImg}
+              onOpenVimeo={handleOpenVimeo2}
+              tier={tier}
+            />
 
-            <div className="relative border-t border-cyan-500/10 pt-8 flex flex-col gap-5">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-bold text-white">Подтверждённая Эффективность</h2>
-                <span className="text-4xl font-light text-cyan-400/25 font-heading">03</span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом,
-                мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная система
-                работает как швейцарские часы.
-              </p>
-              <div
-                onClick={handleOpenVimeo3}
-                className="relative aspect-video rounded-2xl overflow-hidden bg-[#03050a] border border-cyan-500/15 shadow-xl glass-smoked-acrylic cursor-pointer active:scale-[0.98] transition-all duration-200"
-              >
-                <video
-                  src={VIDEO_ASSETS.video3}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="w-full h-full object-cover opacity-75"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white shadow-lg active:scale-95 transition-transform duration-150">
-                    <Icons.Play fill="currentColor" stroke="none" className="w-4 h-4 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Смотреть</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <MobileChapterVideoCard
+              index="03"
+              label="Энергия и тонус жизни"
+              title="Подтверждённая Эффективность"
+              description="Представьте утро, когда вы просыпаетесь с ощущением, что готовы свернуть горы. Энергия бьёт ключом, мысли ясные, настроение на высоте. Это не случайность — это результат того, что ваша иммунная система работает как швейцарские часы."
+              videoSrc={VIDEO_ASSETS.video3}
+              posterImage={chapterVitalityImg}
+              onOpenVimeo={handleOpenVimeo3}
+              tier={tier}
+            />
           </div>
 
           <div className="mt-14 text-center">
@@ -457,7 +515,7 @@ const MorphingVideoSection: React.FC = () => {
               Узнать больше о компании
             </Button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* ─── DESKTOP VIDEO OVERLAYS ─── */}
@@ -466,6 +524,9 @@ const MorphingVideoSection: React.FC = () => {
           <VideoBlock
             blockRef={block1Ref}
             videoSrc={VIDEO_ASSETS.video1}
+            posterImage={chapterScienceImg}
+            chapterLabel="Глава 01 • Иммунный интеллект"
+            chapterTitle="Как работают Трансфер Факторы"
             blockIndex={0}
             isTouchDevice={isTouchDevice}
             onClick={handleOpenVimeo1}
@@ -474,6 +535,9 @@ const MorphingVideoSection: React.FC = () => {
           <VideoBlock
             blockRef={block2Ref}
             videoSrc={VIDEO_ASSETS.video2}
+            posterImage={chapterQualityImg}
+            chapterLabel="Глава 02 • Стандарт cGMP"
+            chapterTitle="Лаборатория и контроль чистоты"
             blockIndex={1}
             isTouchDevice={isTouchDevice}
             onClick={handleOpenVimeo2}
@@ -482,6 +546,9 @@ const MorphingVideoSection: React.FC = () => {
           <VideoBlock
             blockRef={block3Ref}
             videoSrc={VIDEO_ASSETS.video3}
+            posterImage={chapterVitalityImg}
+            chapterLabel="Глава 03 • Энергия жизни"
+            chapterTitle="Подтверждённая эффективность"
             blockIndex={2}
             isTouchDevice={isTouchDevice}
             onClick={handleOpenVimeo3}
@@ -490,9 +557,9 @@ const MorphingVideoSection: React.FC = () => {
         </>
       )}
 
-      {/* ─── НИЖНЯЯ МАСКА: Растворяет флюид и фон снизу в чистый Clinical Obsidian ─── */}
+      {/* Layer 5: Seamless bottom edge fade dissolving fluid into Clinical Obsidian */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-[280px] pointer-events-none z-10"
+        className="absolute bottom-0 left-0 right-0 h-[280px] pointer-events-none z-[5]"
         style={{
           background: `linear-gradient(to top,
             rgba(3, 5, 10, 1) 0%,

@@ -1,105 +1,148 @@
 /**
  * @module src/styles/base/typography.css
- * @description Unified Typography System — Swiss-watch precision for all text
- * @author Kort
- * @version 3.0.0 - Variable Fonts 2026
- * @requires @fontsource-variable/syne (headings)
- * @requires @fontsource-variable/manrope (body)
+ * @description 2026/2027 Editorial Biotech Typography System (2+1 Rule):
+ * - Primary Sans & Architectural Headings: Manrope Variable (razor-sharp native Cyrillic)
+ * - Editorial Italic Accent: Cormorant Garamond Italic (human luxury warmth & contrast)
+ * - Precision Tabular Data: JetBrains Mono Variable (LP, Partner ID, Moscow hours, indices)
+ * - Scoped Legacy Display: .font-syne (preserved for Home Hero & MorphingVideo numerals)
+ * Plus native CSS Scroll-Driven Animations (@supports animation-timeline: view())
+ * paired 1-to-1 with Framer Motion fallback in ParallaxImage.tsx.
  */
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   DISPLAY: Huge, tight, futuristic (Used for Hero and Giant Numbers)
-   ═══════════════════════════════════════════════════════════════════════════ */
 .typography-display {
-  font-family: "Syne Variable", sans-serif;
-  font-weight: 800;
-  color: white;
-  /* Significantly reduced maximum size. Syne is very wide. */
-  font-size: clamp(2.5rem, 6vw + 1rem, 5.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   H1: Main Section Titles
-   ═══════════════════════════════════════════════════════════════════════════ */
-.typography-h1 {
-  font-family: "Syne Variable", sans-serif;
-  font-weight: 700;
-  font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   H2: Sub-section Titles
-   ═══════════════════════════════════════════════════════════════════════════ */
-.typography-h2 {
-  font-family: "Syne Variable", sans-serif;
-  font-weight: 700;
-  font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   H3: Card Titles
-   ═══════════════════════════════════════════════════════════════════════════ */
-.typography-h3 {
-  font-family: "Syne Variable", sans-serif;
+  font-family: "Manrope Variable", "Manrope", sans-serif;
   font-weight: 600;
-  font-size: clamp(1.25rem, 2vw, 1.75rem);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  color: #ffffff;
+  font-size: clamp(2.4rem, 5.2vw + 0.85rem, 5.15rem);
+  line-height: 1.03;
+  letter-spacing: -0.036em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LEAD: Large description under headings
-   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-h1 {
+  font-family: "Manrope Variable", "Manrope", sans-serif;
+  font-weight: 600;
+  font-size: clamp(2.25rem, 4.4vw + 0.75rem, 4.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.034em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.typography-h2 {
+  font-family: "Manrope Variable", "Manrope", sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.75rem, 2.75vw + 0.65rem, 3.15rem);
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.typography-h3 {
+  font-family: "Manrope Variable", "Manrope", sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.2rem, 1.45vw + 0.35rem, 1.65rem);
+  line-height: 1.22;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+
+.typography-editorial-italic {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  font-size: 1.09em;
+  line-height: 0.98;
+}
+
+.typography-quote {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.55rem, 2.4vw + 0.5rem, 2.55rem);
+  line-height: 1.3;
+  letter-spacing: -0.008em;
+  text-wrap: pretty;
+}
+
 .typography-lead {
-  font-family: "Manrope Variable", sans-serif;
-  font-weight: 500;
-  font-size: clamp(1.125rem, 1.5vw, 1.35rem);
-  line-height: 1.6;
-  text-wrap: pretty; /* Natively prevents orphans and isolated short words at line ends */
+  font-family: "Manrope Variable", "Manrope", sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.15vw + 0.25rem, 1.3rem);
+  line-height: 1.62;
+  letter-spacing: 0.004em;
+  text-wrap: pretty;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   BODY: Standard reading text
-   ═══════════════════════════════════════════════════════════════════════════ */
 .typography-body {
-  font-family: "Manrope Variable", sans-serif;
-  font-weight: 500;
-  font-size: clamp(0.9rem, 1vw + 0.1rem, 1.1rem);
-  line-height: 1.6;
-  text-wrap: pretty; /* Natively prevents orphans and isolated short words at line ends */
+  font-family: "Manrope Variable", "Manrope", sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.9375rem, 0.5vw + 0.65rem, 1.0625rem);
+  line-height: 1.68;
+  letter-spacing: 0.006em;
+  text-wrap: pretty;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LABEL: Tags, microcopy, badges (Awwwards staple)
-   ═══════════════════════════════════════════════════════════════════════════ */
 .typography-label {
-  font-family: "Manrope Variable", sans-serif;
-  font-weight: 700;
+  font-family: "JetBrains Mono Variable", "JetBrains Mono", "Manrope Variable", monospace;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+  font-size: clamp(0.65rem, 0.3vw + 0.52rem, 0.74rem);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   DISPLAY: Responsive height adjustment for short mobile displays
-   ═══════════════════════════════════════════════════════════════════════════ */
+.typography-mono {
+  font-family: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.font-syne {
+  font-family: "Syne Variable", "Syne", sans-serif;
+}
+
 @media (max-height: 700px) {
   .typography-display {
-    font-size: clamp(2rem, 5vw + 1rem, 3.8rem) !important;
+    font-size: clamp(2rem, 4.4vw + 0.75rem, 3.7rem) !important;
+  }
+}
+
+/* ─── Native CSS Scroll-Driven Animations (Chrome 115+, Safari 26+, Firefox 159+) ───
+   Paired 1-to-1 mathematically with Framer Motion fallback for older engines. */
+@keyframes sda-window-parallax {
+  from {
+    transform: translate3d(0, -6%, 0) scale(1.06);
+  }
+  to {
+    transform: translate3d(0, 6%, 0) scale(1);
+  }
+}
+
+@keyframes sda-curtain-unveil {
+  from {
+    clip-path: inset(12% 0% 12% 0% round 1.75rem);
+    opacity: 0.55;
+  }
+  to {
+    clip-path: inset(0% 0% 0% 0% round 1.75rem);
+    opacity: 1;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .sda-parallax-img {
+      animation: sda-window-parallax 1ms linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+
+    .sda-curtain-frame {
+      animation: sda-curtain-unveil 1ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 34%;
+    }
   }
 }

@@ -1,135 +1,215 @@
 /**
  * @module FinalCTASection
- * @description Awwwards 2026 — Final CTA with stats, immersive parallax, tier-aware.
- * ИСПРАВЛЕНИЯ: Интегрирован идеальный Fade to Void сверху.
- * Удалены жесткие линии (мосты).
- * @version 3.0.0
+ * @description Awwwards SOTY 2027+ Architectural Closing Horizon for HomePage.
+ * Features:
+ * - Seamless 280px top & 180px bottom #03050a mist dissolves (zero seam line with PartnershipSection or Footer).
+ * - Asymmetric Swiss editorial broadsheet layout replacing generic centered SaaS CTA blocks.
+ * - Distinct high-trust facts (zero stat duplication with Section 4) and direct warehouse/Telegram actions.
+ * - Full 3-tier hardware adaptation (High: scroll parallax horizon; Medium: triggered reveal; Low: crisp static).
  */
 
-import { Button, ParallaxSection } from "@/components/ui";
+import ctaHorizonImg from "@/assets/images/cta_horizon_light_1795221773224.jpg";
+import { Button } from "@/components/ui";
 import { usePerformanceTier } from "@/hooks";
+import { siteConfig } from "@/site-config/site";
 import { Icons } from "@/utils/icons";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import React, { useRef } from "react";
 
-import bg5Img from "@/assets/images/backgrounds/HomePage/5.jpg";
+interface ClosingFact {
+  value: string;
+  detail: string;
+}
 
-const stats = [
-  { value: "50+", label: "стран мира" },
-  { value: "25+", label: "лет науки" },
-  { value: "283%", label: "рост NK-клеток" },
-];
+const CLOSING_FACTS: readonly ClosingFact[] = [
+  {
+    value: "15 мин",
+    detail: "Спокойный разбор цели в Telegram или по телефону",
+  },
+  {
+    value: "−25%",
+    detail: `Складская цена от 1 упаковки по ID ${siteConfig.distributor.fourLifeId}`,
+  },
+  {
+    value: "РЦ 67",
+    detail: "Официальная отгрузка из Москвы с маркировкой cGMP",
+  },
+] as const;
 
 const FinalCTASection: React.FC = () => {
   const tier = usePerformanceTier();
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-15%" });
+  const isLow = tier === "low";
+  const isHigh = tier === "high";
 
-  const staggerDelay = tier === "low" ? 0 : 0.1;
+  const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(contentRef, { once: true, margin: "-12%" });
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const bgY = useTransform(scrollYProgress, [0, 1], isHigh ? ["-7%", "7%"] : ["0%", "0%"]);
 
   return (
-    <ParallaxSection
-      backgroundImage={bg5Img}
-      altText="Готовы сделать первый шаг к здоровью"
-      height="auto"
-      contentClasses="flex flex-col items-center justify-center text-center py-32 md:py-48"
-      imageBrightness="brightness-[.25]"
-      edgeFade={{ top: 250, colorDark: "#03050a" }}
+    <section
+      ref={sectionRef}
+      aria-label="Персональная консультация и подбор формул"
+      className="relative overflow-hidden bg-[#03050a]"
     >
-      <div ref={ref} className="container max-w-5xl mx-auto px-6">
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="flex justify-center gap-8 md:gap-16 mb-20"
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 16 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{
-                duration: 0.6,
-                delay: i * staggerDelay,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="flex flex-col items-center gap-1"
-            >
-              <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                {stat.value}
-              </span>
-              <span className="text-xs md:text-sm text-white/50 uppercase tracking-wider font-medium">
-                {stat.label}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
+      {/* Full-bleed architectural horizon photography with compositor-only parallax on High Tier */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <motion.img
+          src={ctaHorizonImg}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          style={{ y: bgY }}
+          className="relative -top-[8%] h-[116%] w-full object-cover object-center brightness-[0.68] contrast-[1.06]"
+        />
 
-        {/* Heading */}
-        <motion.h2
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-tight mb-6 tracking-tight"
+        {/* Editorial optical vignette keeping architectural pavilion visible on right while protecting left typography */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, rgba(3,5,10,0.88) 0%, rgba(3,5,10,0.64) 48%, rgba(3,5,10,0.46) 100%), radial-gradient(ellipse 75% 65% at 72% 46%, rgba(6,182,212,0.08) 0%, rgba(3,5,10,0.74) 82%)",
+          }}
+        />
+
+        {/* Seamless 280px top mist dissolve — eliminates any horizontal seam with PartnershipSection */}
+        <div
+          className="absolute top-0 inset-x-0 h-[280px]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, #03050a 0%, rgba(3,5,10,0.92) 26%, rgba(3,5,10,0.48) 62%, rgba(3,5,10,0) 100%)",
+          }}
+        />
+
+        {/* Seamless 180px bottom mist dissolve into pure #03050a before Sticky-Reveal Footer curtain */}
+        <div
+          className="absolute bottom-0 inset-x-0 h-[180px]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to top, #03050a 0%, rgba(3,5,10,0.86) 35%, rgba(3,5,10,0) 100%)",
+          }}
+        />
+      </div>
+
+      {/* Main Architectural Broadsheet */}
+      <div
+        ref={contentRef}
+        className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-32 pb-28 md:pt-44 md:pb-36"
+      >
+        {/* Top quiet mono metadata line (zero pills) */}
+        <motion.div
+          initial={isLow ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          animate={isInView ? { opacity: 1, y: 0 } : undefined}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-8 md:mb-10"
         >
-          Готовы сделать{" "}
-          <span className="font-semibold bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-400 bg-clip-text text-transparent">
-            первый шаг?
+          <span className="w-8 h-px bg-cyan-400/80" aria-hidden="true" />
+          <span className="typography-label text-cyan-300/90">Персональный подбор</span>
+          <span className="text-white/20 text-xs" aria-hidden="true">
+            ·
           </span>
-        </motion.h2>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-lg md:text-xl text-white/70 mb-10 leading-relaxed max-w-2xl mx-auto font-light"
-        >
-          Получите персональную консультацию. Я помогу подобрать продукты под ваши цели и объясню как они работают — без
-          давления и обязательств.
-        </motion.p>
-
-        {/* CTA buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row justify-center gap-4 items-center"
-        >
-          <Button
-            to="/contact"
-            variant="primary"
-            size="lg"
-            className="from-cyan-500 to-blue-600 shadow-2xl shadow-cyan-500/20 rounded-full px-8"
-            icon={<Icons.MessageCircle className="w-5 h-5" />}
-          >
-            Получить консультацию
-          </Button>
-
-          <Button
-            to="/products"
-            variant="secondary"
-            size="lg"
-            className="bg-white/10 border-white/25 backdrop-blur-sm rounded-full px-8 hover:bg-white/20"
-            icon={<Icons.ArrowRight className="w-5 h-5" />}
-          >
-            Изучить продукты
-          </Button>
+          <span className="typography-mono text-xs text-slate-400 tabular-nums">
+            ID {siteConfig.distributor.fourLifeId}
+          </span>
+          <span className="text-white/20 text-xs" aria-hidden="true">
+            ·
+          </span>
+          <span className="typography-mono text-xs text-slate-400">Москва, РЦ 67</span>
         </motion.div>
 
-        {/* Trust line */}
+        {/* 12-Column Asymmetric Split: Monumental Headline (Left 7) + Precision Facts (Right 5) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-end pb-14 md:pb-16 border-b border-white/[0.1]">
+          <motion.div
+            initial={isLow ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : undefined}
+            transition={{ duration: 0.75, delay: isLow ? 0 : 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 space-y-6"
+          >
+            <h2 className="typography-display text-white leading-[1.02]">
+              Подберём систему формул
+              <span className="block typography-editorial-italic text-cyan-300 font-normal mt-1.5">
+                под ваш ритм и задачу
+              </span>
+            </h2>
+
+            <p className="typography-lead text-slate-300/95 max-w-xl text-pretty">
+              Разберём запрос, составим спокойную связку из 1–2 базовых комплексов без лишних позиций и покажем, как
+              оформить заказ напрямую со склада 4Life.
+            </p>
+          </motion.div>
+
+          {/* Right 5 cols: 3 Unboxed Swiss Hairline Facts (zero repetition of Section 4 metrics) */}
+          <motion.div
+            initial={isLow ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+            animate={isInView ? { opacity: 1, y: 0 } : undefined}
+            transition={{ duration: 0.75, delay: isLow ? 0 : 0.16, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5 divide-y divide-white/[0.09] border-y border-white/[0.09]"
+          >
+            {CLOSING_FACTS.map((fact) => (
+              <div key={fact.value} className="py-4 md:py-5 flex items-baseline gap-5">
+                <span className="font-sans text-xl md:text-2xl font-semibold text-white tabular-nums tracking-tight w-24 flex-shrink-0">
+                  {fact.value}
+                </span>
+                <span className="text-sm text-slate-200/95 leading-snug text-pretty">{fact.detail}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Bottom Architectural Action Bar */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-10 flex items-center justify-center gap-2 text-white/40 text-sm"
+          initial={isLow ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : undefined}
+          transition={{ duration: 0.7, delay: isLow ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-10 md:pt-12 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-7"
         >
-          <Icons.Shield className="w-4 h-4 text-cyan-400/60 flex-shrink-0" />
-          <span>Консультация бесплатна и ни к чему не обязывает</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            <Button
+              to="/contact"
+              variant="primary"
+              size="lg"
+              className="justify-center rounded-full px-8"
+              icon={<Icons.MessageCircle className="w-5 h-5" />}
+            >
+              Получить консультацию
+            </Button>
+
+            <Button
+              to="/products"
+              variant="secondary"
+              size="lg"
+              className="justify-center rounded-full px-8"
+              icon={<Icons.ArrowRight className="w-5 h-5" />}
+            >
+              Открыть каталог
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+            <a
+              href={siteConfig.contact.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-cyan-300 hover:text-white transition-colors font-medium"
+            >
+              <Icons.Telegram className="w-4 h-4" />
+              <span>Написать в Telegram</span>
+              <Icons.ExternalLink className="w-3.5 h-3.5 opacity-75" />
+            </a>
+            <span className="text-white/15 hidden sm:inline" aria-hidden="true">
+              |
+            </span>
+            <span className="text-xs text-slate-400">Без давления, скриптов и обязательных закупок</span>
+          </div>
         </motion.div>
       </div>
-    </ParallaxSection>
+    </section>
   );
 };
 

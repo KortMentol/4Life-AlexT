@@ -17,8 +17,11 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"Manrope Variable"', "sans-serif"],
-        heading: ['"Syne Variable"', "sans-serif"],
+        sans: ['"Manrope Variable"', '"Manrope"', "system-ui", "sans-serif"],
+        heading: ['"Manrope Variable"', '"Manrope"', "system-ui", "sans-serif"],
+        syne: ['"Syne Variable"', '"Syne"', "sans-serif"],
+        serif: ['"Cormorant Garamond"', "Georgia", "serif"],
+        mono: ['"JetBrains Mono Variable"', '"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
       },
       boxShadow: {
         "3xl": "0 35px 60px -15px rgba(0, 0, 0, 0.4)",
@@ -105,6 +108,9 @@ export default {
       maxWidth: {
         "8xl": "90rem",
       },
+      opacity: Object.fromEntries(
+        Array.from({ length: 101 }, (_, i) => [i, `${i / 100}`])
+      ),
     },
   },
   plugins: [

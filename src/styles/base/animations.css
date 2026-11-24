@@ -1,21 +1,8 @@
-/**
- * @module src/styles/animations.css
- * @description Минимальная библиотека анимаций - только используемые эффекты.
- * @author Kort
- * @version 2.1.0 (2026 Perfect)
- * @usage Только aurora анимация для AuroraText компонента
- * @see src/components/magicui/aurora-text.tsx
- */
-
-/* Aurora Colors - Optimized for Clinical Obsidian theme */
 :root {
   --primary: #00ffff;
   --secondary: #ff00ff;
 }
 
-/* Aurora Text Animation - PERFORMANCE TIER ADAPTIVE */
-
-/* HIGH TIER (≥65 score): Полная анимация с rotation */
 @keyframes aurora-high {
   0% {
     background-position: 0% 50%;
@@ -39,7 +26,6 @@
   }
 }
 
-/* MEDIUM TIER (35-64 score): Только градиент */
 @keyframes aurora-medium {
   0% {
     background-position: 0% 50%;
@@ -52,7 +38,6 @@
   }
 }
 
-/* Base aurora gradient - DRY principle */
 .animate-aurora-high,
 .animate-aurora-medium,
 .animate-aurora-low {
@@ -60,7 +45,6 @@
   background-size: 200% 200%;
 }
 
-/* Tier-specific animations */
 .animate-aurora-high {
   animation: aurora-high 8s ease-in-out infinite alternate;
   transform: translateZ(0);
@@ -74,5 +58,5 @@
 }
 
 .animate-aurora-low {
-  /* Статичный градиент - никаких анимаций */
+  /* Static gradient on low tier */
 }

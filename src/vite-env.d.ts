@@ -1,41 +1,17 @@
 /// <reference types="vite/client" />
 /// <reference types="node" />
-/// <reference path="./types/headlessui-react.d.ts" />
 /// <reference path="./types/external-modules.d.ts" />
-/// <reference path="./types/emotion.d.ts" />
 
-// Font declarations
 declare module "@fontsource-variable/manrope";
 declare module "@fontsource-variable/syne";
-
-interface ImportMetaEnv {
-  /** @description Основной URL-адрес сайта. */
-  readonly VITE_SITE_URL: string;
-  /** @description URL изображения для Open Graph (используется при шеринге в соцсетях). */
-  readonly VITE_OG_IMAGE: string;
-  /** @description Контактный email-адрес. */
-  readonly VITE_CONTACT_EMAIL: string;
-  /** @description Контактный номер телефона для связи с сайтом. */
-  readonly VITE_CONTACT_PHONE: string;
-  /** @description Уникальный идентификатор партнера 4Life. */
-  readonly VITE_4LIFE_ID: string;
-  /** @description URL-адрес профиля в Telegram. */
-  readonly VITE_TELEGRAM_URL: string;
-  /** @description URL-адрес для связи в WhatsApp. */
-  readonly VITE_WHATSAPP_URL: string;
-  /** @description Физический адрес офиса. */
-  readonly VITE_OFFICE_ADDRESS: string;
-  /** @description Контактный номер телефона дистрибьютора. */
-  readonly VITE_DISTRIBUTOR_PHONE: string;
-}
+declare module "@fontsource-variable/jetbrains-mono";
+declare module "@fontsource/cormorant-garamond/400-italic.css";
+declare module "@fontsource/cormorant-garamond/500-italic.css";
+declare module "@fontsource/cormorant-garamond/600-italic.css";
 
 interface Window {
   __menuTransitionInProgress?: boolean;
   __isRoutingLock?: boolean;
   __popTransitionInProgress?: boolean;
   __isScrollRestorationActive?: boolean;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
 }

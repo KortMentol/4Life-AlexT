@@ -1,33 +1,41 @@
-import ReactDOM from "react-dom/client";
-import { HelmetProvider } from "react-helmet-async";
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
-import App from "./App";
-import { FluidProvider } from "./context/FluidProvider";
-import { TransitionProvider } from "./context/TransitionProvider";
-
-// Import variable fonts
-import "@fontsource-variable/manrope";
-import "@fontsource-variable/syne";
-
-// Стили
-import "./styles/base/animations.css";
+// 1. Base Tailwind 3.4 layers & theme CSS MUST be imported first before any React components
 import "./styles/base/base.css";
+import "./styles/base/animations.css";
 import "./styles/base/fixes.css";
 import "./styles/base/modern-design.css";
 import "./styles/globals.css";
 import "./styles/image-rendering.css";
 
-// Импорт оригинальных картинок продуктов для их упреждающего декодирования на GPU
-import renuvoMobile from "@/assets/images/products/MobileVersions/Mobile_renuvo.webp";
-import tfPlusMobile from "@/assets/images/products/MobileVersions/Mobile_tf-plus.webp";
-import tfTrifactorMobile from "@/assets/images/products/MobileVersions/Mobile_tf-trifactor.webp";
+// 2. Variable fonts (installed in local node_modules)
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/syne";
 
-import renuvoPC from "@/assets/images/products/renuvo.webp";
-import tfPlusPC from "@/assets/images/products/tf-plus.webp";
-import tfTrifactorPC from "@/assets/images/products/tf-trifactor.webp";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
+import App from "./App";
+import { FluidProvider } from "./context/FluidProvider";
+import { TransitionProvider } from "./context/TransitionProvider";
+
+gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== "undefined") {
+  window.ScrollTrigger = ScrollTrigger;
+}
+
+declare global {
+  interface Window {
+    __appMounted?: boolean;
+    ScrollTrigger?: typeof ScrollTrigger;
+  }
+}
 
 if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
-  window.history.scrollRestoration = "manual";
+  try {
+    window.history.scrollRestoration = "manual";
+  } catch {
+    /* silent */
+  }
 }
 
 const initApp = () => {
@@ -43,13 +51,11 @@ const initApp = () => {
       <Route
         path="*"
         element={
-          <HelmetProvider>
-            <FluidProvider>
-              <TransitionProvider>
-                <App />
-              </TransitionProvider>
-            </FluidProvider>
-          </HelmetProvider>
+          <FluidProvider>
+            <TransitionProvider>
+              <App />
+            </TransitionProvider>
+          </FluidProvider>
         }
       />,
     ),
@@ -62,46 +68,31 @@ const initApp = () => {
 
   ReactDOM.createRoot(rootElement).render(<RouterProvider router={router} />);
 
-  // ─── ИНТЕЛЛЕКТУАЛЬНАЯ ПРЕДЗАГРУЗКА И ДЕКОДИРОВАНИЕ РЕСУРСОВ VITE ───
-  const isMobile = window.innerWidth < 768;
+  window.__appMounted = true;
+  window.dispatchEvent(new CustomEvent("app-mounted"));
 
-  // Очередь критически важных банок продуктов
-  const productImages = isMobile
-    ? [tfPlusMobile, tfTrifactorMobile, renuvoMobile]
-    : [tfPlusPC, tfTrifactorPC, renuvoPC];
-
-  const imagePreloadPromises = productImages.map((src) => {
-    return new Promise<void>((resolve) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        if (typeof img.decode === "function") {
-          img
-            .decode()
-            .then(() => resolve())
-            .catch(() => resolve());
-        } else {
-          resolve();
-        }
-      };
-      img.onerror = () => resolve();
+  // Warm up secondary route chunks gently after first paint so boot never spikes network concurrency
+  const schedulePrefetch = () => {
+    const loaders = [
+      () => import("@/pages/ProductsPage"),
+      () => import("@/pages/PartnershipPage"),
+      () => import("@/pages/HowToBuyPage"),
+      () => import("@/pages/AboutPage"),
+      () => import("@/pages/AboutMePage"),
+      () => import("@/pages/ContactPage"),
+    ];
+    loaders.forEach((load, idx) => {
+      window.setTimeout(() => {
+        void load().catch(() => {});
+      }, 1400 + idx * 350);
     });
-  });
+  };
 
-  // Параллельно подгружаем JS чанки других страниц для бесшовного роутинга
-  const pageChunksPromise = Promise.allSettled([
-    import("@/pages/ProductsPage"),
-    import("@/pages/AboutPage"),
-    import("@/pages/AboutMePage"),
-    import("@/pages/ContactPage"),
-    import("@/pages/PartnershipPage"),
-    import("@/pages/HowToBuyPage"),
-  ]);
-
-  // Ждем завершения декодирования картинок и ленивой загрузки чанков
-  Promise.allSettled([...imagePreloadPromises, pageChunksPromise]).then(() => {
-    window.dispatchEvent(new CustomEvent("app-mounted"));
-  });
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(schedulePrefetch, { timeout: 2500 });
+  } else {
+    window.setTimeout(schedulePrefetch, 1200);
+  }
 };
 
 if (document.readyState === "loading") {

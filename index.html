@@ -11,8 +11,14 @@
       content="Инвестируйте в свое здоровье и будущее с 4Life. Узнайте о продуктах для иммунной системы, энергии и возможностях партнерства. Ваш наставник в мире 4Life."
     />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&family=JetBrains+Mono:wght@400..700&display=swap"
+    />
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <style>
       :root {
@@ -67,9 +73,9 @@
         position: absolute;
         inset: 0;
         z-index: 1;
-        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAP8AAAAAAAABAQEAAAAEBAQAAAACAgIeQjHFAAAACXRSTlMABgYLCw8PDx2b0A8AAAEfSURBVDjLpZTZEcMgDEQvA9r/KkADu0cby7C9zGv4kSW/A0TE9798jDHG97/8rDHG17983BhjfP3L1xtjfP/LnxtjfP/L3xtjfP3Lvxtj/H7H4x/i+IeIv3X8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+I1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73j8Qxz/EPG3jn+I4x8i/tbxD3H8Q8TfOv4hjn+I+FvHP8TxDxF/6/iHOP4h4m8d/xDHv+N1Y4zvf/lzY4zvf/l7Y4yvf/l3Y4zf73eAf8D+DSDPWks8AAAAABJRU5ErkJoggling==");
-        background-repeat: repeat;
-        opacity: 0.02;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 24px 24px;
+        opacity: 0.25;
         pointer-events: none;
       }
 
@@ -268,19 +274,23 @@
 
     <script>
       (function () {
-        if (navigator.gpu && typeof sessionStorage !== "undefined") {
-          navigator.gpu
-            .requestAdapter()
-            .then(function (adapter) {
-              if (adapter) {
-                const info = adapter.info;
-                if (info && info.device) {
-                  sessionStorage.setItem("4life_gpu", info.device);
+        try {
+          if (navigator.gpu && typeof window.sessionStorage !== "undefined") {
+            navigator.gpu
+              .requestAdapter()
+              .then(function (adapter) {
+                if (adapter) {
+                  const info = adapter.info;
+                  if (info && info.device) {
+                    try {
+                      window.sessionStorage.setItem("4life_gpu", info.device);
+                    } catch (_) {}
+                  }
                 }
-              }
-            })
-            .catch(function () {});
-        }
+              })
+              .catch(function () {});
+          }
+        } catch (_) {}
       })();
 
       (function () {
@@ -296,6 +306,32 @@
 
         const radius = 68;
         const circumference = 2 * Math.PI * radius;
+
+        // Capture CDN GSAP locally for the preloader and clear window.gsap so npm GSAP + ScrollTrigger never collide
+        const gsap = window.gsap;
+        try {
+          delete window.gsap;
+        } catch (_) {
+          window.gsap = undefined;
+        }
+
+        // If external CDN GSAP is blocked or slow, gracefully bypass preloader
+        if (typeof gsap === "undefined") {
+          const dismissFallback = () => {
+            window.__preloaderFinished = true;
+            window.dispatchEvent(new CustomEvent("preloader-outro-start"));
+            document.body.classList.remove("preloader-locked");
+            if (preloader) {
+              preloader.style.pointerEvents = "none";
+              preloader.style.transition = "opacity 0.45s ease";
+              preloader.style.opacity = "0";
+              setTimeout(() => preloader.remove(), 480);
+            }
+          };
+          window.addEventListener("app-mounted", dismissFallback, { once: true });
+          setTimeout(dismissFallback, 1500);
+          return;
+        }
 
         gsap.set(stage, { opacity: 0, y: 15, scale: 0.97 });
         gsap.set(textGroup, { opacity: 0, y: 8 });
@@ -413,11 +449,24 @@
           checkFinish();
         }
 
-        function checkFinish() {
-          if (!assetsReady || displayedProgress < 100 || !canFinish) return;
+        let outroStarted = false;
 
+        function forceFinishPreloader() {
+          if (outroStarted) return;
+          outroStarted = true;
+          window.__preloaderFinished = true;
           window.dispatchEvent(new CustomEvent("preloader-outro-start"));
           document.body.classList.remove("preloader-locked");
+
+          if (typeof gsap === "undefined") {
+            if (preloader) {
+              preloader.style.pointerEvents = "none";
+              preloader.style.transition = "opacity 0.5s ease";
+              preloader.style.opacity = "0";
+              setTimeout(() => preloader.remove(), 520);
+            }
+            return;
+          }
 
           const outroTl = gsap.timeline();
 
@@ -425,7 +474,7 @@
             scale: 0.8,
             z: -240,
             opacity: 0,
-            duration: 1.8,
+            duration: 1.4,
             ease: "power4.inOut",
           });
 
@@ -434,20 +483,20 @@
             {
               scale: 1.6,
               opacity: 0,
-              duration: 1.6,
+              duration: 1.3,
               ease: "power3.inOut",
               onStart: () => {
                 if (haze) haze.classList.remove("breathing");
               },
             },
-            "-=1.8",
+            "-=1.4",
           );
 
           outroTl.to(
             preloader,
             {
               opacity: 0,
-              duration: 1.8,
+              duration: 1.3,
               ease: "power3.inOut",
               onStart: () => {
                 if (preloader) {
@@ -460,9 +509,24 @@
                 }
               },
             },
-            "-=1.6",
+            "-=1.2",
           );
         }
+
+        function checkFinish() {
+          if (!assetsReady || displayedProgress < 100 || !canFinish) return;
+          forceFinishPreloader();
+        }
+
+        setTimeout(() => {
+          if (!outroStarted) {
+            assetsReady = true;
+            canFinish = true;
+            displayedProgress = 100;
+            updateProgress(100);
+            forceFinishPreloader();
+          }
+        }, 5500);
 
         document.addEventListener("visibilitychange", () => {
           if (document.hidden) {
@@ -479,65 +543,27 @@
         });
 
         const loadAssets = () => {
-          const isMobile = window.innerWidth < 768;
-          const criticalAssetUrl = isMobile
-            ? "/images/backgrounds/bg-hero-Mobile.webp"
-            : "/images/backgrounds/bg-hero-PC.webp";
-
-          const criticalBgPromise = new Promise((resolve) => {
-            const img = new Image();
-            img.src = criticalAssetUrl;
-            img.onload = () => {
-              if (typeof img.decode === "function") {
-                img.decode().then(resolve).catch(resolve);
-              } else {
-                resolve();
-              }
-            };
-            img.onerror = resolve;
-          });
-
-          // ФИКС 1: Не грузим сетку 3D на мобильных! (0 картинок)
-          const gridCount = isMobile ? 0 : 20;
-          const gridPromises = Array.from({ length: gridCount }, (_, i) => {
-            return new Promise((resolve) => {
-              const img = new Image();
-              img.src = `/images/backgrounds/HomePage/img/${i + 1}.jpg`;
-              img.onload = () => {
-                if (typeof img.decode === "function") {
-                  img.decode().then(resolve).catch(resolve);
-                } else {
-                  resolve();
-                }
-              };
-              img.onerror = resolve;
-            });
-          });
-
-          const videoUrls = ["/videos/why-4life-transfer-factor.webm", "/videos/bg-video-products-page.mp4"];
-          const videoPromises = videoUrls.map((url) => {
-            return new Promise((resolve) => {
-              const video = document.createElement("video");
-              video.preload = "metadata";
-              video.src = url;
-              video.onloadedmetadata = () => resolve();
-              video.onerror = () => resolve();
-            });
-          });
-
           const appMountedPromise = new Promise((resolve) => {
+            if (window.__appMounted) {
+              resolve();
+              return;
+            }
             window.addEventListener("app-mounted", resolve, { once: true });
           });
 
-          // ФИКС 2: Hard Timeout (предохранитель 4.5 секунды)
+          const fontsReadyPromise =
+            document.fonts && document.fonts.ready
+              ? document.fonts.ready.catch(() => {})
+              : Promise.resolve();
+
           const fallbackTimer = setTimeout(() => {
             if (!isOutroTriggered) {
               assetsReady = true;
               checkFinish();
             }
-          }, 4500);
+          }, 3500);
 
-          Promise.allSettled([criticalBgPromise, ...gridPromises, ...videoPromises, appMountedPromise]).then(() => {
+          Promise.allSettled([appMountedPromise, fontsReadyPromise]).then(() => {
             clearTimeout(fallbackTimer);
             assetsReady = true;
             checkFinish();

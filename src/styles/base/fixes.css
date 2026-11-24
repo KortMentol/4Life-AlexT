@@ -1,12 +1,3 @@
-/**
- * @module src/styles/base/fixes.css
- * @description Минимальные кросс-браузерные фиксы. Не содержит правил, конфликтующих
- * с нативным скроллом на мобильных (убраны touch-action, overscroll-behavior, position: static).
- * @author Kort
- * @version 3.0.0 - Mobile-native scroll safe
- */
-
-/* iOS Safari - предотвращение масштабирования при фокусе на инпутах */
 @supports (-webkit-touch-callout: none) {
   input,
   textarea,
@@ -15,26 +6,22 @@
   }
 }
 
-/* Основные фиксы для стабильности */
 html,
 body {
   overflow-x: clip;
   max-width: 100%;
 }
 
-/* Safari - фикс для fixed элементов (улучшает производительность) */
 .fixed {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
-/* Предотвращение скачков скроллбара на десктопе */
 html {
   scrollbar-gutter: stable;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
-/* Скрытие системного скроллбара в Chrome/Safari */
 body::-webkit-scrollbar {
   display: none;
 }

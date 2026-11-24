@@ -1,14 +1,21 @@
 /**
- * @module src/styles/base.css
- * @description Этот файл подключает базовые слои Tailwind CSS, которые необходимы для работы всего фреймворка.
- * Он сбрасывает стили браузера по умолчанию и закладывает фундамент для утилит Tailwind.
- * @author Kort
- * @version 1.0.0
- * @see https://tailwindcss.com/docs/functions-and-directives#tailwind
- * @usage
- * 1. `src/main.tsx`: Импортируется самым первым из всех стилей, чтобы гарантировать правильный каскад и работу Tailwind.
+ * @module src/styles/base/base.css
+ * @description Базовые слои Tailwind CSS 3.4 + CSS-переменные темы Clinical Obsidian.
  */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-primary: var(--primary, #06b6d4);
+  --color-secondary: var(--secondary, #3b82f6);
+  --color-accent: var(--accent, #22d3ee);
+  --color-background: #03050a;
+
+  --font-sans: "Manrope Variable", "Manrope", system-ui, sans-serif;
+  --font-heading: "Manrope Variable", "Manrope", system-ui, sans-serif;
+  --font-syne: "Syne Variable", "Syne", sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}

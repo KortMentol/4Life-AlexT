@@ -1,20 +1,3 @@
-/**
- * @module src/hooks/useNativeScroll.ts
- * @description Скрытие и отображение хедера при скролле.
- *
- * ИСПРАВЛЕНИЕ БАГА "МИРАЖА ХЕДЕРА ПРИ ЗАКРЫТИИ ПЛЕЕРА":
- * 1. В эффекте инициализации/разблокировки хука (`useEffect([disabled, isMobile])`)
- *    убран насильственный сброс `header.style.transform = "translateY(0px) translateZ(0)"`.
- * 2. Теперь при включении хука (когда модалка/видеоплеер закрывается и `disabled`
- *    становится `false`) применяется текущее сохраненное значение `displayYRef.current`.
- * 3. Если хедер был убран за пределы экрана (`-110px`) до открытия плеера, после закрытия
- *    плеера он сохранит позицию `-110px`. Хедер больше не появляется ложно, не застывает
- *    "миражом" при скролле вниз и не прыгает при скролле вверх.
- *
- * @author Geminis AI & Kort
- * @version 2.2.0
- */
-
 import { rafLoop } from "@/lib/rafLoop";
 import { useCallback, useEffect, useRef } from "react";
 import { useIsMobile } from "./useIsMobile";
@@ -123,8 +106,6 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
     const header = getCachedHeader();
     if (!header) return;
 
-    // ИСПРАВЛЕНИЕ: Вместо насильственного вытаскивания хедера на 0px
-    // при снятии блокировки (закрытии модалки/плеера), сохраняем реальную Y-координату!
     header.style.transition = "none";
     header.style.transform = `translateY(${displayYRef.current}px) translateZ(0)`;
 
@@ -159,7 +140,7 @@ export function useNativeScroll({ disabled = false }: { disabled?: boolean }) {
       prevScrollRef.current = scroll;
 
       if (Math.abs(delta) > 150) {
-        // Пропускаем скачки
+        // Skip large scroll jumps
       } else if (Math.abs(delta) > 1) {
         targetYRef.current = delta > 0 ? -HEADER_HEIGHT : 0;
       }

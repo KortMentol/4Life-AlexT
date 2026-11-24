@@ -1,10 +1,8 @@
 /**
  * @module src/components/sections/MorphingVideoSection/components/VideoBlock.tsx
- * @description Awwwards 2026 - Optimized Responsive Video Block.
- * ИСПРАВЛЕНИЯ: Внедрено "Правило 2%". Видео-декодер больше не работает вхолостую
- * за пределами экрана. Воспроизведение начинается только при 2% пересечении вьюпорта.
- * @author Geminis AI & Kort
- * @version 7.1.0
+ * @description Optimized responsive video & cinema poster block for MorphingVideoSection.
+ * Renders crisp studio cinematography immediately with graceful <video> upgrade when local streams exist,
+ * preventing empty grey static boxes while launching the full Kinescope player on click.
  */
 
 import { usePerformanceTier } from "@/hooks";
@@ -15,8 +13,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BLOCK_CONFIG } from "../config";
 
 interface VideoBlockProps {
-  blockRef: React.RefObject<HTMLDivElement>;
+  blockRef: React.RefObject<HTMLDivElement | null>;
   videoSrc: string;
+  posterImage: string;
+  chapterLabel: string;
+  chapterTitle: string;
   blockIndex: number;
   isTouchDevice: boolean;
   onClick?: () => void;
@@ -26,15 +27,18 @@ interface VideoBlockProps {
 export const VideoBlock: React.FC<VideoBlockProps> = ({
   blockRef,
   videoSrc,
+  posterImage,
+  chapterLabel,
+  chapterTitle,
   blockIndex,
   isTouchDevice,
   onClick,
   isModalOpen,
 }) => {
-  const [isNetworkInView, setIsNetworkInView] = useState(false);
   const [isPlaybackInView, setIsPlaybackInView] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(!!window.__menuTransitionInProgress);
   const [isVideoLoaded, setIsVideoReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
 
   const tier = usePerformanceTier();
   const efxFlags = useEffectsDebug();
@@ -57,15 +61,6 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     const block = blockRef.current;
     if (!block) return;
 
-    // Ранняя подгрузка метаданных
-    const networkObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry && entry.isIntersecting) setIsNetworkInView(true);
-      },
-      { threshold: 0, rootMargin: "1200px 0px" },
-    );
-
-    // ФИКС "ПРАВИЛО 2%": Старт воспроизведения ТОЛЬКО когда видео реально появилось на экране
     const playbackObserver = new IntersectionObserver(
       ([entry]) => {
         setIsPlaybackInView(entry?.isIntersecting ?? false);
@@ -73,64 +68,68 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
       { threshold: 0.02, rootMargin: "0px" },
     );
 
-    networkObserver.observe(block);
     playbackObserver.observe(block);
 
     return () => {
-      networkObserver.disconnect();
       playbackObserver.disconnect();
     };
   }, [blockRef, isTouchDevice]);
 
   useEffect(() => {
-    if (isTouchDevice) return;
+    if (isTouchDevice || videoFailed || !videoSrc) return;
 
     const video = videoRef.current;
-    if (!video || !isNetworkInView) return;
+    if (!video || !isPlaybackInView) return;
 
     if (!video.src || !video.src.includes(videoSrc)) {
       video.src = videoSrc;
       video.load();
     }
-  }, [isNetworkInView, videoSrc, isTouchDevice]);
+  }, [isPlaybackInView, videoSrc, isTouchDevice, videoFailed]);
 
   useEffect(() => {
-    if (isTouchDevice) return;
+    if (isTouchDevice || videoFailed) return;
 
     const video = videoRef.current;
     if (!video) return;
 
     const handleLoadedData = () => setIsVideoReady(true);
+    const handleError = () => {
+      setVideoFailed(true);
+      setIsVideoReady(false);
+    };
+
     video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("error", handleError);
     if (video.readyState >= 3) setIsVideoReady(true);
 
     const shouldPlay = isPlaybackInView && !isModalOpen && !isTransitioning;
 
-    if (shouldPlay) {
+    if (shouldPlay && isVideoLoaded) {
       const p = video.play();
       if (p !== undefined) {
         playPromiseRef.current = p;
         p.catch(() => {});
       }
-    } else {
+    } else if (!shouldPlay) {
       if (playPromiseRef.current) {
         playPromiseRef.current
           .then(() => {
-            const isStillShouldBePaused = !isPlaybackInView || isModalOpen || isTransitioning;
-            if (isStillShouldBePaused && videoRef.current && !videoRef.current.paused) {
+            if (videoRef.current && !videoRef.current.paused) {
               videoRef.current.pause();
             }
           })
           .catch(() => {});
-      } else {
+      } else if (!video.paused) {
         video.pause();
       }
     }
 
     return () => {
       video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("error", handleError);
     };
-  }, [isPlaybackInView, isModalOpen, isTransitioning, isTouchDevice]);
+  }, [isPlaybackInView, isModalOpen, isTransitioning, isTouchDevice, isVideoLoaded, videoFailed]);
 
   useEffect(() => {
     if (isTouchDevice) return;
@@ -138,11 +137,18 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
     const video = videoRef.current;
     const circle = progressCircleRef.current;
 
-    if (!video || !circle || !isPlaybackInView) return;
+    if (!circle || !isPlaybackInView) return;
 
     const radius = circle.r.baseVal.value;
     const circumference = 2 * Math.PI * radius;
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
+
+    // If running in crisp cinema-poster mode (when local video binary is not bundled),
+    // display a subtle refined 35% editorial arc rather than an empty dead ring.
+    if (!isVideoLoaded || !video) {
+      circle.style.strokeDashoffset = `${circumference * 0.65}`;
+      return;
+    }
 
     let rafId: number | null = null;
     let lastTime = 0;
@@ -223,7 +229,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   const desktopRawY = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
-    ["100vh", "0vh", "0vh", "0vh", "0vh", "-100vh"],
+    ["95vh", "0vh", "0vh", "0vh", "0vh", "-95vh"],
   );
 
   const opacity = useTransform(
@@ -233,7 +239,7 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
   );
 
   const tzHigh = import.meta.env.DEV ? efxFlags.blockVideoTranslateZHigh : true;
-  const tzVal = tier === "high" && tzHigh ? -400 : -200;
+  const tzVal = tier === "high" && tzHigh ? -360 : -180;
   const desktopTranslateZ = useTransform(
     scrollYProgress,
     [t.fadeInStart, t.fadeInEnd, t.stickStart, t.stickEnd, t.fadeOutStart, t.fadeOutEnd],
@@ -262,13 +268,15 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
           backfaceVisibility: "hidden",
           willChange: isLow ? "auto" : "transform, opacity",
         }}
-        className="w-[90vw] max-w-[900px] lg:w-[55vw] pointer-events-auto anti-pixel-snap"
+        className="w-[86vw] max-w-[780px] lg:w-[48vw] pointer-events-auto anti-pixel-snap"
       >
-        <motion.div
+        <motion.button
+          type="button"
+          aria-label={`Смотреть видео: ${chapterTitle}`}
           initial={false}
           animate={{ opacity: isModalOpen ? 0 : 1, scale: isModalOpen ? 0.95 : 1 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-[#03050a] border border-blue-500/20 shadow-2xl cursor-pointer group video-cursor-target"
+          className="relative block w-full aspect-video overflow-hidden rounded-2xl gpu-mask-radius bg-[#050811] border border-cyan-300/25 shadow-[0_32px_90px_rgba(0,0,0,0.75)] cursor-pointer group video-cursor-target text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           onClick={onClick}
           style={{
             transform: "translate3d(0, 0, 0)",
@@ -276,70 +284,88 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
             isolation: "isolate",
           }}
         >
-          <div
-            className="absolute inset-0 bg-[#03050a] bg-noise-overlay transition-opacity duration-1000 pointer-events-none"
+          {/* High-resolution cinema poster always ready (prevents blank grey box) */}
+          <img
+            src={posterImage}
+            alt={chapterTitle}
+            loading="eager"
+            decoding="async"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              !isLow && isPlaybackInView && !isVideoLoaded ? "cinema-poster-drift" : ""
+            }`}
             style={{
-              opacity: isTransitioning || !isVideoLoaded ? 1 : 0,
-              transform: "translateZ(0)",
+              opacity: isVideoLoaded ? 0 : 1,
             }}
           />
 
-          <video
-            ref={videoRef}
-            className="h-full w-full object-cover transition-opacity duration-1000"
-            muted
-            playsInline
-            loop
-            preload="none"
-            disablePictureInPicture
-            disableRemotePlayback
-            style={
-              {
+          {/* Optional local preview stream seamlessly crossfades over poster when present */}
+          {!videoFailed && (
+            <video
+              ref={videoRef}
+              className="relative z-10 h-full w-full object-cover transition-opacity duration-700"
+              muted
+              playsInline
+              loop
+              preload="none"
+              disablePictureInPicture
+              disableRemotePlayback
+              style={{
                 opacity: isTransitioning || !isVideoLoaded ? 0 : 1,
-                imageRendering: tier === "high" ? "optimizeQuality" : "auto",
                 transform: "translateZ(0)",
-              } as React.CSSProperties
-            }
+              }}
+            />
+          )}
+
+          {/* Editorial dark vignette & top/bottom cinema framing */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(3,5,10,0.45) 0%, rgba(3,5,10,0.12) 45%, rgba(3,5,10,0.76) 100%)",
+            }}
           />
 
-          {tier === "high" && (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 mix-blend-overlay pointer-events-none" />
-              <div
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{ background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)" }}
-              />
-            </>
-          )}
+          {/* Subtle editorial film-plate metadata at bottom edge */}
+          <div className="absolute inset-x-5 bottom-4 z-30 flex items-end justify-between gap-4 pointer-events-none">
+            <div>
+              <span className="block text-[10px] uppercase tracking-[0.24em] text-cyan-300/90 font-semibold">
+                {chapterLabel}
+              </span>
+              <span className="block font-heading text-sm md:text-base font-semibold text-white tracking-tight">
+                {chapterTitle}
+              </span>
+            </div>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-white/75 group-hover:text-cyan-300 transition-colors">
+              Смотреть фильм →
+            </span>
+          </div>
 
           {efxFlags.videoProgressOrb && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
               <div
                 className={[
-                  "w-16 md:w-20 lg:w-24 h-16 md:h-20 lg:h-24 rounded-full flex items-center justify-center transition-all duration-300 relative overflow-visible",
+                  "w-16 md:w-20 h-16 md:h-20 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 relative overflow-visible",
                   shouldBlurOrb
-                    ? "bg-[#03050a]/40 backdrop-blur-md border border-white/10 shadow-2xl"
-                    : "bg-[#0f172a]/85 border border-white/10 shadow-lg",
+                    ? "bg-[#03050a]/45 backdrop-blur-md border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
+                    : "bg-[#0b1324]/90 border border-cyan-400/35 shadow-lg",
                 ].join(" ")}
                 style={{ transform: "translateZ(0)" }}
               >
                 <svg
                   className="absolute inset-0 w-full h-full -rotate-90 overflow-visible pointer-events-none"
                   viewBox="0 0 100 100"
-                  style={{
-                    willChange: "stroke-dashoffset",
-                  }}
                 >
-                  <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
                   <circle
                     cx="50"
                     cy="50"
                     r="46"
                     fill="none"
                     stroke="#06b6d4"
-                    strokeWidth="6"
+                    strokeWidth="5"
                     strokeLinecap="round"
-                    className="opacity-20"
+                    className="opacity-25"
                   />
                   <circle
                     ref={progressCircleRef}
@@ -347,23 +373,23 @@ export const VideoBlock: React.FC<VideoBlockProps> = ({
                     cy="50"
                     r="46"
                     fill="none"
-                    stroke="#06b6d4"
+                    stroke="#22d3ee"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                   />
                 </svg>
 
-                <div className="relative flex items-center justify-center translate-x-[2px] md:translate-x-[3px]">
+                <div className="relative flex items-center justify-center translate-x-[2px]">
                   <Icons.Play
                     fill="currentColor"
                     stroke="none"
-                    className="text-white opacity-90 transition-transform duration-300 group-hover:scale-110 w-[18px] h-[18px] md:w-6 md:h-6"
+                    className="text-white opacity-95 transition-transform duration-300 group-hover:scale-110 w-5 h-5 md:w-6 md:h-6"
                   />
                 </div>
               </div>
             </div>
           )}
-        </motion.div>
+        </motion.button>
       </motion.div>
     </div>
   );

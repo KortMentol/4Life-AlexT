@@ -1,12 +1,22 @@
 /**
  * @module src/components/ui/FAQItem/FAQItem.tsx
- * @description Профессиональный sci-fi аккордеон как на Awwwards сайтах
- * @author Kort
- * @version 4.2.0 - Cleaned (2026) — темная тема зафиксирована
+ * @description Awwwards 2026+ Swiss Editorial Hairline Accordion Item.
+ *
+ * Craft & Performance Architecture:
+ * - Zero dated sci-fi corner brackets, double divider lines, or glowing cyan boxes.
+ * - Pure CSS Grid height transition (`grid-template-rows: 0fr -> 1fr`) + GPU `transform: rotate(45deg)`
+ *   on the `+` trigger (smoother and lighter than Framer Motion `height: "auto"` layout reflow).
+ * - Unified visual grammar with ProductDetailModal Swiss disclosures across /products and /how-to-buy.
  */
 
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Icons } from "@/utils/icons";
+import React, { useId } from "react";
+import { Link } from "react-router-dom";
+
+export interface FAQActionLink {
+  label: string;
+  to: string;
+}
 
 interface FAQItemProps {
   question: string;
@@ -14,6 +24,7 @@ interface FAQItemProps {
   index: number;
   isOpen?: boolean;
   onToggle?: (index: number) => void;
+  actionLink?: FAQActionLink;
 }
 
 const FAQItem: React.FC<FAQItemProps> = ({
@@ -22,86 +33,89 @@ const FAQItem: React.FC<FAQItemProps> = ({
   index,
   isOpen = false,
   onToggle,
+  actionLink,
 }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.5 }}
-      className="relative group mb-4"
-      style={{ contain: "content" }}
-    >
-      {/* Контейнер темной темы */}
-      <div className="relative rounded-2xl border overflow-hidden transition-all duration-300 bg-black/30 border-cyan-400/20 group-hover:border-cyan-400/40">
-        {/* Sci-fi углы */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-cyan-400/40" />
-        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-cyan-400/40" />
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-cyan-400/40" />
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-cyan-400/40" />
+  const panelId = useId();
+  const formattedIndex = String(index + 1).padStart(2, "0");
 
-        {/* Заголовок */}
-        <button
-          onClick={() => onToggle?.(index)}
-          className="w-full p-6 flex items-center justify-between text-left relative z-10 group/btn"
-        >
-          <h3 className="text-lg md:text-xl font-semibold pr-6 transition-colors duration-300 text-white group-hover/btn:text-cyan-400">
+  return (
+    <div
+      data-faq-item={formattedIndex}
+      data-faq-open={isOpen ? "true" : "false"}
+      className={`group border-b border-white/[0.09] first:border-t transition-colors duration-200 ${
+        isOpen ? "bg-white/[0.02]" : "hover:bg-white/[0.012]"
+      }`}
+    >
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        onClick={() => onToggle?.(index)}
+        className="w-full py-5 sm:py-6 px-3 sm:px-4 flex items-center justify-between gap-4 sm:gap-6 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-400/65"
+      >
+        <div className="flex items-baseline gap-4 sm:gap-5 min-w-0">
+          <span
+            aria-hidden="true"
+            className={`typography-mono text-xs tabular-nums flex-shrink-0 transition-colors duration-200 ${
+              isOpen ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300"
+            }`}
+          >
+            {formattedIndex}
+          </span>
+          <h3
+            className={`font-heading text-base sm:text-lg md:text-[19px] font-medium leading-snug transition-colors duration-200 text-balance ${
+              isOpen ? "text-white" : "text-slate-200 group-hover:text-white"
+            }`}
+          >
             {question}
           </h3>
+        </div>
 
-          {/* Иконка ромбика */}
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center"
-          >
-            <div className="relative w-5 h-5">
-              <div className="absolute inset-0 border transform rotate-45 border-cyan-400/60" />
-              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 bg-cyan-400/80" />
-              <div className="absolute top-0 left-1/2 w-px h-1 -translate-x-1/2 bg-cyan-400/60" />
-              <div className="absolute bottom-0 left-1/2 w-px h-1 -translate-x-1/2 bg-cyan-400/60" />
-            </div>
-          </motion.div>
-        </button>
+        {/* Unmistakable Swiss + / × GPU-rotated affordance */}
+        <span
+          aria-hidden="true"
+          className={`w-8 h-8 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
+            isOpen
+              ? "border-cyan-400/50 bg-white/[0.07] text-cyan-300"
+              : "border-white/[0.12] bg-white/[0.02] text-slate-400 group-hover:border-white/30 group-hover:text-white"
+          }`}
+        >
+          <Icons.Plus
+            className={`w-3.5 h-3.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+              isOpen ? "rotate-45" : "rotate-0"
+            }`}
+          />
+        </span>
+      </button>
 
-        {/* Контент */}
-        <AnimatePresence initial={false}>
-          {isOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{
-                height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.3, delay: isOpen ? 0.1 : 0 },
-              }}
-              className="overflow-hidden"
-            >
-              <motion.div
-                initial={{ y: -10 }}
-                animate={{ y: 0 }}
-                exit={{ y: -10 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="px-6 pb-6"
+      {/* Pure CSS Grid smooth expand — zero Framer Motion height:auto layout jitter */}
+      <div
+        id={panelId}
+        role="region"
+        aria-hidden={!isOpen}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="pl-11 sm:pl-[52px] pr-4 sm:pr-12 pb-6 pt-0.5 space-y-3">
+            <p className="selectable-text text-sm sm:text-[15px] text-slate-300 leading-relaxed text-pretty">
+              {answer}
+            </p>
+            {actionLink && (
+              <Link
+                to={actionLink.to}
+                tabIndex={isOpen ? 0 : -1}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-cyan-300 hover:text-cyan-200 transition-colors"
               >
-                {/* Разделитель */}
-                <div className="w-full h-px mb-4 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
-
-                <p className="leading-relaxed text-base text-white/80">
-                  {answer}
-                </p>
-
-                {/* Нижний акцент */}
-                <div className="mt-4 w-16 h-px bg-gradient-to-r from-cyan-400/60 to-transparent" />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Эффект наведения */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-cyan-400/3" />
+                <span>{actionLink.label}</span>
+                <Icons.ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,12 +1,3 @@
-/**
- * @module components/ui/SectionHeading
- * @description Компонент для создания стандартизированных и анимированных заголовков секций.
- * Полностью адаптирован под темный Clinical Obsidian дизайн: удалены светлые fallback-цвета (text-primary-blue, text-gray-600) [1].
- * Использует Slate-400 (#94a3b8) для описаний и Neon Cyan для подзаголовков [1].
- * @author Kort
- * @version 1.1.0
- */
-
 import { motion } from "framer-motion";
 import React from "react";
 
@@ -24,7 +15,7 @@ export interface SectionHeadingProps {
   subtitleClassName?: string;
   descriptionClassName?: string;
   animated?: boolean;
-  centered?: boolean; // Для обратной совместимости
+  centered?: boolean;
 }
 
 const SectionHeading: React.FC<SectionHeadingProps> = ({
@@ -43,7 +34,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
   animated = true,
   centered = false,
 }) => {
-  // Классы для выравнивания
   const alignClasses = {
     left: "text-left",
     center: "text-center mx-auto",
@@ -54,7 +44,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     align = "center";
   }
 
-  // Классы для размеров заголовка
   const titleSizeClasses = {
     sm: "text-2xl md:text-3xl",
     md: "text-3xl md:text-4xl",
@@ -62,7 +51,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     xl: "text-5xl md:text-6xl",
   };
 
-  // Классы для размеров подзаголовка
   const subtitleSizeClasses = {
     sm: "text-sm",
     md: "text-base",
@@ -70,7 +58,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     xl: "text-xl",
   };
 
-  // Классы для размеров описания
   const descriptionSizeClasses = {
     sm: "text-base max-w-xl",
     md: "text-lg max-w-2xl",
@@ -78,7 +65,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     xl: "text-2xl max-w-4xl",
   };
 
-  // Цвета для линии
   const lineColors = {
     blue: "bg-gradient-to-r from-blue-400 to-blue-600",
     green: "bg-gradient-to-r from-green-400 to-green-600",
@@ -87,7 +73,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
     pink: "bg-gradient-to-r from-pink-400 to-pink-600",
   };
 
-  // Анимации для элементов
   const containerAnimation = animated
     ? {
         initial: { opacity: 0 },
@@ -117,8 +102,8 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
   const lineAnimation = animated
     ? {
-        initial: { width: 0 },
-        whileInView: { width: "100%" },
+        initial: { scaleX: 0 },
+        whileInView: { scaleX: 1 },
         viewport: { once: true },
         transition: { duration: 0.7, delay: 0.3 },
       }
@@ -164,9 +149,9 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
           }}
         >
           <motion.div
-            className={`absolute h-full ${lineColors[lineColor as keyof typeof lineColors] || lineColors.blue}`}
+            className={`absolute inset-0 origin-left ${lineColors[lineColor as keyof typeof lineColors] || lineColors.blue}`}
             {...lineAnimation}
-          ></motion.div>
+          />
         </div>
       )}
 

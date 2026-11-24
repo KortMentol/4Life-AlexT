@@ -400,8 +400,6 @@ class Shaders {
         float decay = 1.0 + dissipation * dt;
         vec4 advected = result / decay;
 
-        // Зануляем velocity/dye за пределами bounds — убираем давление в мёртвой зоне
-        // Это предотвращает кипение у кастомных стенок
         float inBounds = step(uBounds.x, vUv.x) * step(vUv.x, uBounds.z)
                        * step(uBounds.y, vUv.y) * step(vUv.y, uBounds.w);
         gl_FragColor = advected * inBounds;

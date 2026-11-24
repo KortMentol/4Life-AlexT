@@ -20,7 +20,6 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { rafLoop } from "@/lib/rafLoop";
 import WebGLFluidEnhanced from "@/lib/webgl-fluid/index";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 const TRANSITION_START = "menu-transition-start";
 
@@ -360,25 +359,25 @@ const SectionFluidEffect: React.FC<SectionFluidEffectProps> = ({ sectionRef }) =
 
   if (isTouchDevice || !isFluidEnabled) return null;
 
-  return createPortal(
+  // Rendered directly inside the section's shared Backdrop Root (zIndex: 1, clipped via WebGL setScissor)
+  // so Firefox Gecko WebRender & Blink backdrop-filter genuinely refract and blur the fluid behind glass cards.
+  return (
     <div
       ref={outerWrapperRef}
+      data-testid="section-fluid-layer"
       className="fixed inset-0 w-full pointer-events-none"
       style={{
-        zIndex: -11,
+        zIndex: 1,
         height: "100lvh",
         maxHeight: "100vh",
         backgroundColor: "transparent",
         opacity: isVisible ? 1 : 0,
         transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-        transform: "translate3d(0, 0, 0)",
-        willChange: "opacity",
       }}
       aria-hidden="true"
     >
       <div ref={containerRef} className="w-full h-full" />
-    </div>,
-    document.body,
+    </div>
   );
 };
 

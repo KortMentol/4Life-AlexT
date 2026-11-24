@@ -1,14 +1,3 @@
-/**
- * @module hooks/usePerformanceTier
- * @description Хук для получения текущего тира производительности.
- * Теперь полностью реактивен: подписывается на изменения в effectsDebugStore [1],
- * благодаря чему любое переключение режимов (включая "Restore Last Preset") мгновенно
- * обновляет все зависимые слои (включая фоновые зеленые фонари и CustomScrollbar).
- *
- * @author Kort
- * @version 5.2.0
- */
-
 import {
   PerformanceTier,
   calculatePerformanceScore,
@@ -33,7 +22,6 @@ if (typeof window !== "undefined") {
 export const usePerformanceTier = (): PerformanceTier => {
   const [tier, setTier] = useState<PerformanceTier>(globalTier || "medium");
 
-  // Локальный стейт для синхронизации в DEV режиме
   const [devTier, setDevTier] = useState<PerformanceTier>(() => {
     if (import.meta.env.DEV && typeof window !== "undefined") {
       return effectsDebugStore.activeTier;
@@ -45,10 +33,8 @@ export const usePerformanceTier = (): PerformanceTier => {
     if (globalTier && tier !== globalTier) {
       setTier(globalTier);
     }
-  }, []);
+  }, [tier]);
 
-  // КРИТИЧЕСКИЙ ФИКС: Подписываемся на обновления стора в DEV режиме.
-  // Это гарантирует реактивность тира во всех компонентах, которые его используют.
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     const unsub = effectsDebugStore.subscribe(() => {

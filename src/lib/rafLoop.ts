@@ -1,14 +1,3 @@
-/**
- * Глобальный RAF синглтон.
- * Вместо N отдельных requestAnimationFrame — один loop на всё приложение.
- * Каждый подписчик получает текущий scrollY и вызывается раз в кадр.
- *
- * Использование:
- *   const unsub = rafLoop.subscribe((scrollY) => { ... });
- *   // при размонтировании:
- *   unsub();
- */
-
 type Subscriber = (scrollY: number) => void;
 
 class RAFLoop {
@@ -17,7 +6,6 @@ class RAFLoop {
   private running = false;
 
   private tick = () => {
-    // Проверяем ПЕРЕД перезапуском — если подписчиков нет, останавливаемся
     if (this.subscribers.size === 0) {
       this.running = false;
       return;

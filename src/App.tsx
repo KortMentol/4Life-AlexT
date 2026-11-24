@@ -7,6 +7,7 @@ import Layout from "@/components/layout/Layout";
 import TheodoreMenu from "@/components/layout/TheodoreMenu";
 import RouteChangeHandler from "@/components/RouteChangeHandler";
 import PopTransitionOverlay from "@/components/transitions/PopTransitionOverlay";
+import ProductListModal from "@/components/ui/ProductListModal";
 import { ProductListProvider } from "@/context/ProductListProvider";
 import { useEffectsDebug } from "@/hooks/useEffectsDebug"; // <--- Импорт хука флагов
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -131,6 +132,7 @@ function App() {
           {/* ИСПРАВЛЕНИЕ: Хедер рендерится физически только если включен тумблер renderHeader */}
           {efxFlags.renderHeader && <Header isMenuOpen={isMenuOpen} setIsMenuOpen={toggleMenu} />}
           <TheodoreMenu isOpen={isMenuOpen} onClose={closeMenu} />
+          <ProductListModal />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />

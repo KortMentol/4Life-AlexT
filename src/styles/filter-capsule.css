@@ -1,21 +1,10 @@
-/**
- * @module src/styles/filter-capsule.css
- * @description Premium 3D капсула фильтров с glassmorphism эффектом
- * @author Kort
- * @version 1.0.0
- * @usage ProductsFilters.tsx - фиксированная панель фильтров внизу экрана
- * @features Темная/светлая темы, backdrop-filter blur, 3D градиенты, адаптивность
- */
-
 :root {
-  /* Dark Theme - Ultra Modern Capsule */
   --filter-dark-bg: #0a0f1c;
   --filter-dark-surface: #1a1f2e;
   --filter-dark-accent: #2a3441;
   --filter-dark-highlight: #3a4553;
   --filter-dark-glow: #00d4ff;
   --filter-dark-glow-rgb: 0, 212, 255;
-
 }
 
 .filter-capsule {
@@ -34,48 +23,45 @@
   will-change: transform;
   contain: layout style paint;
   isolation: isolate;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
-
-
 .filter-capsule--dark {
-  background: 
-    /* Top spotlight creating depth */
+  background:
     radial-gradient(ellipse 150% 60% at 50% -10%, rgba(var(--filter-dark-glow-rgb), 0.2) 0%, transparent 70%),
-    /* Side highlights for 3D effect */
-      linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(var(--filter-dark-glow-rgb), 0.05) 20%,
-        transparent 40%,
-        transparent 60%,
-        rgba(var(--filter-dark-glow-rgb), 0.05) 80%,
-        transparent 100%
-      ),
-    /* Main capsule gradient with extreme depth */
-      linear-gradient(
-        135deg,
-        var(--filter-dark-bg) 0%,
-        var(--filter-dark-surface) 15%,
-        var(--filter-dark-accent) 35%,
-        var(--filter-dark-highlight) 50%,
-        var(--filter-dark-accent) 65%,
-        var(--filter-dark-surface) 85%,
-        var(--filter-dark-bg) 100%
-      );
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(var(--filter-dark-glow-rgb), 0.05) 20%,
+      transparent 40%,
+      transparent 60%,
+      rgba(var(--filter-dark-glow-rgb), 0.05) 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      var(--filter-dark-bg) 0%,
+      var(--filter-dark-surface) 15%,
+      var(--filter-dark-accent) 35%,
+      var(--filter-dark-highlight) 50%,
+      var(--filter-dark-accent) 65%,
+      var(--filter-dark-surface) 85%,
+      var(--filter-dark-bg) 100%
+    );
 
   box-shadow:
-    /* Inner 3D structure */
     inset 0 2px 4px rgba(var(--filter-dark-glow-rgb), 0.3),
     inset 0 -2px 4px rgba(0, 0, 0, 0.8),
     inset 2px 0 4px rgba(var(--filter-dark-glow-rgb), 0.1),
     inset -2px 0 4px rgba(var(--filter-dark-glow-rgb), 0.1),
-    /* Deep drop shadow */ 0 25px 80px rgba(0, 0, 0, 0.6);
+    0 25px 80px rgba(0, 0, 0, 0.6);
 
   border: 1px solid rgba(var(--filter-dark-glow-rgb), 0.4);
 }
 
-/* 3D Capsule Enhancement */
 .filter-capsule::before {
   content: "";
   position: absolute;
@@ -93,21 +79,12 @@
   z-index: 10;
 }
 
-/* Performance optimizations */
-.filter-capsule {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .filter-capsule {
     transition: none !important;
   }
 }
 
-/* Mobile optimizations */
 @media (max-width: 768px) {
   .filter-capsule {
     padding: 1.25rem 1.75rem;
@@ -118,7 +95,6 @@
   }
 }
 
-/* Tablet optimizations */
 @media (min-width: 769px) and (max-width: 1024px) {
   .filter-capsule {
     padding: 1.5rem 2rem;
@@ -126,7 +102,6 @@
   }
 }
 
-/* Адаптивный тиринг для капсулы фильтров */
 .filter-capsule[data-tier="low"] {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
